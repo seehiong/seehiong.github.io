@@ -28260,7 +28260,7 @@ n=J
 s=3
 return A.N(A.iy(),$async$xj)
 case 3:p=o.d1(n.az(b.a,"baseUrl"))
-q=p==null?"https://api.openai.com/v1/":p
+q=p==null?"http://localhost:8000/v1/":p
 s=1
 break
 case 1:return A.S(q,r)}})
