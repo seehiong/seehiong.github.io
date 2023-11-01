@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Kubernetes Cluster on Pi | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="With Kubernetes Cluster on Raspberry Pi, you may orchestrate and manage your Docker containers with full control
+Kubernetes Cluster (Total Setup Time: 70 mins)
+Similar to the previous MicroK8s cluster setup, I am using Ubuntu Server 20.04 LTS (64-bit) as my OS. Having a Kubernetes Cluster on Raspberry Pi, you will have more control over how the cluster configured.
+After burning the image onto my 64GB SD card, an empty file named ssh is created at d:/boot for a headless setup.">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Kubernetes Cluster on Pi" />
+<meta property="og:description" content="With Kubernetes Cluster on Raspberry Pi, you may orchestrate and manage your Docker containers with full control
+Kubernetes Cluster (Total Setup Time: 70 mins)
+Similar to the previous MicroK8s cluster setup, I am using Ubuntu Server 20.04 LTS (64-bit) as my OS. Having a Kubernetes Cluster on Raspberry Pi, you will have more control over how the cluster configured.
+After burning the image onto my 64GB SD card, an empty file named ssh is created at d:/boot for a headless setup." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2020/kubernetes-cluster-on-raspberry-pi/" /><meta property="article:section" content="2020" />
+<meta property="article:published_time" content="2020-07-04T20:00:00+08:00" />
+<meta property="article:modified_time" content="2020-07-04T20:00:00+08:00" />
+<meta itemprop="name" content="Kubernetes Cluster on Pi">
+<meta itemprop="description" content="With Kubernetes Cluster on Raspberry Pi, you may orchestrate and manage your Docker containers with full control
+Kubernetes Cluster (Total Setup Time: 70 mins)
+Similar to the previous MicroK8s cluster setup, I am using Ubuntu Server 20.04 LTS (64-bit) as my OS. Having a Kubernetes Cluster on Raspberry Pi, you will have more control over how the cluster configured.
+After burning the image onto my 64GB SD card, an empty file named ssh is created at d:/boot for a headless setup."><meta itemprop="datePublished" content="2020-07-04T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-07-04T20:00:00+08:00" />
+<meta itemprop="wordCount" content="1298">
+<meta itemprop="keywords" content="Raspberry,Cluster,Docker,Kubeadm," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Kubernetes Cluster on Pi"/>
+<meta name="twitter:description" content="With Kubernetes Cluster on Raspberry Pi, you may orchestrate and manage your Docker containers with full control
+Kubernetes Cluster (Total Setup Time: 70 mins)
+Similar to the previous MicroK8s cluster setup, I am using Ubuntu Server 20.04 LTS (64-bit) as my OS. Having a Kubernetes Cluster on Raspberry Pi, you will have more control over how the cluster configured.
+After burning the image onto my 64GB SD card, an empty file named ssh is created at d:/boot for a headless setup."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2020
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Kubernetes Cluster on Pi</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2020-07-04T20:00:00+08:00">July 4, 2020</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 7 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 1298 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><img src="/images/kubernetes/kubernetes-cluster-on-raspberry-pi.png" alt="kubernetes-cluster-on-raspberry-pi"></p>
+<p>With Kubernetes Cluster on Raspberry Pi, you may orchestrate and manage your Docker containers with full control</p>
+<hr>
+<h1 id="kubernetes-cluster">Kubernetes Cluster</h1>
+<p><em>(Total Setup Time: 70 mins)</em></p>
+<p>Similar to the previous <a href="https://dojocube.com/2020/microk8s-cluster-on-raspberry-pi-8gb-part-1/">MicroK8s cluster</a> setup, I am using <a href="https://ubuntu.com/download/raspberry-pi">Ubuntu Server 20.04 LTS (64-bit)</a> as my OS. Having a Kubernetes Cluster on Raspberry Pi, you will have more control over how the cluster configured.</p>
+<p>After burning the image onto my 64GB SD card, an empty file named <strong>ssh</strong> is created at d:/boot for a headless setup.</p>
+<h2 id="powering-up">Powering Up</h2>
+<p><em>(5 mins)</em></p>
+<p>After powering up the Pi, update the OS to the latest by:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>sudo apt upgrade
+</span></span></code></pre></div><p>Change its hostname by running:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo nano /etc/hostname
+</span></span><span style="display:flex;"><span>sudo nano /etc/hosts
+</span></span></code></pre></div><p>Enable memory cgroup, by opening the file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo nano /boot/firmware/cmdline.txt
+</span></span></code></pre></div><p>Next, add the following at the end of the line:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">cgroup</span>=<span style="color:#a6e22e">cpuset</span> <span style="color:#a6e22e">cgroup_enable</span>=<span style="color:#a6e22e">memory</span> <span style="color:#a6e22e">cgroup_memory</span>=<span style="color:#ae81ff">1</span> <span style="color:#a6e22e">swapaccount</span>=<span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Add the following <em>/boot/firmware/usercfg.txt</em> to <a href="https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README">disable WiFi and Bluetooth</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>dtoverlay<span style="color:#f92672">=</span>disable-wifi
+</span></span><span style="display:flex;"><span>dtoverlay<span style="color:#f92672">=</span>disable-bt
+</span></span></code></pre></div><p>For iptables to see bridged traffic, perform these:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cat <span style="color:#e6db74">&lt;&lt;EOF | sudo tee /etc/sysctl.d/k8s.conf
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">net.bridge.bridge-nf-call-ip6tables = 1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">net.bridge.bridge-nf-call-iptables = 1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sudo sysctl --system
+</span></span></code></pre></div><p>Perform a reboot:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo reboot
+</span></span></code></pre></div><h2 id="installing-docker">Installing Docker</h2>
+<p><em>(5 mins)</em></p>
+<p>First, referencing the previous post on <a href="https://dojocube.com/2020/external-storage-for-raspberry-pi-cluster/">external storage</a>, storage setup are summarized in these steps:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Get UUID of external HDD</span>
+</span></span><span style="display:flex;"><span>sudo blkid
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create the required folder</span>
+</span></span><span style="display:flex;"><span>sudo mkdir /mnt/hdd
+</span></span><span style="display:flex;"><span>sudo nano /etc/fstab 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add line to /etc/fstab</span>
+</span></span><span style="display:flex;"><span>UUID<span style="color:#f92672">=</span>b89ca96d-5ff9-403e-8c7c-82a1a49e5f0d /mnt/hdd ext4 defaults <span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Test mount without reboot</span>
+</span></span><span style="display:flex;"><span>sudo mount -a
+</span></span></code></pre></div><p>Second, from the previous preparation section on <a href="https://dojocube.com/2020/docker-on-raspberry-pi-cluster/">docker</a> and <a href="https://dojocube.com/2020/gitea-for-raspberry-pi-cluster/">gitea</a>, these commands set docker up:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Install docker-compose</span>
+</span></span><span style="display:flex;"><span>sudo apt install docker-compose
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check version</span>
+</span></span><span style="display:flex;"><span>docker-compose version
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add ubuntu user to docker group</span>
+</span></span><span style="display:flex;"><span>sudo usermod -aG docker ubuntu
+</span></span><span style="display:flex;"><span>sudo mkdir -p /mnt/hdd/master1k8s/docker/images
+</span></span></code></pre></div><p>Third, add the <em>&ndash;data-root</em> option to the ExecStart:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo nano /lib/systemd/system/docker.service
+</span></span></code></pre></div><p>Fourth, add the <em>&ndash;data-root</em> option to the ExecStart, similar to this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">ExecStart</span>=<span style="color:#e6db74">/usr/</span><span style="color:#a6e22e">bin</span><span style="color:#e6db74">/dockerd -H fd:// --containerd=/</span><span style="color:#a6e22e">run</span><span style="color:#e6db74">/containerd/</span><span style="color:#a6e22e">containerd</span>.<span style="color:#a6e22e">sock</span> --<span style="color:#a6e22e">data</span>-<span style="color:#a6e22e">root</span>=<span style="color:#e6db74">/mnt/</span><span style="color:#a6e22e">hdd</span><span style="color:#e6db74">/master1k8s/</span><span style="color:#a6e22e">docker</span>/<span style="color:#a6e22e">images</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Last, to setup <a href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">docker daemon</a>, run this command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Run su commnad as root</span>
+</span></span><span style="display:flex;"><span>sudo su -
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set up the Docker daemon</span>
+</span></span><span style="display:flex;"><span>cat &gt; /etc/docker/daemon.json <span style="color:#e6db74">&lt;&lt;EOF
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;exec-opts&#34;: [&#34;native.cgroupdriver=systemd&#34;],
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;log-driver&#34;: &#34;json-file&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;log-opts&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;max-size&#34;: &#34;100m&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  },
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;storage-driver&#34;: &#34;overlay2&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Restart Docker</span>
+</span></span><span style="display:flex;"><span>systemctl daemon-reload
+</span></span><span style="display:flex;"><span>systemctl restart docker
+</span></span><span style="display:flex;"><span>systemctl enable docker
+</span></span></code></pre></div><h2 id="installing-kudeadm">Installing kudeadm</h2>
+<p><em>(25 mins)</em></p>
+<p>Add Kubernetes repository:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt-get update <span style="color:#f92672">&amp;&amp;</span> sudo apt-get install -y apt-transport-https curl
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cat <span style="color:#e6db74">&lt;&lt;EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">deb https://apt.kubernetes.io/ kubernetes-xenial main
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span></code></pre></div><p>Next, <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm">install kubeadm</a> and perform a reboot:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get install -y kubelet kubeadm kubectl
+</span></span><span style="display:flex;"><span>sudo apt-mark hold kubelet kubeadm kubectl
+</span></span><span style="display:flex;"><span>sudo reboot
+</span></span></code></pre></div><h2 id="creating-kubernetes-cluster">Creating Kubernetes Cluster</h2>
+<p><em>(20 mins)</em></p>
+<p>Create the kubernetes cluster by running:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Pass the container runtime sockets:</span>
+</span></span><span style="display:flex;"><span>sudo kubeadm init --control-plane-endpoint master1k8s --service-cidr 10.96.0.0/12
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Reset the cluster creation when things went wrong and try init again</span>
+</span></span><span style="display:flex;"><span>sudo kubeadm reset
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#f92672">[</span>init<span style="color:#f92672">]</span> Using Kubernetes version: v1.18.5
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>preflight<span style="color:#f92672">]</span> Running pre-flight checks
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>preflight<span style="color:#f92672">]</span> Pulling images required <span style="color:#66d9ef">for</span> setting up a Kubernetes cluster
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>preflight<span style="color:#f92672">]</span> This might take a minute or two, depending on the speed of your internet connection
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>preflight<span style="color:#f92672">]</span> You can also perform this action in beforehand using <span style="color:#e6db74">&#39;kubeadm config images pull&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>kubelet-start<span style="color:#f92672">]</span> Writing kubelet environment file with flags to file <span style="color:#e6db74">&#34;/var/lib/kubelet/kubeadm-flags.env&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>kubelet-start<span style="color:#f92672">]</span> Writing kubelet configuration to file <span style="color:#e6db74">&#34;/var/lib/kubelet/config.yaml&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>kubelet-start<span style="color:#f92672">]</span> Starting the kubelet
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Using certificateDir folder <span style="color:#e6db74">&#34;/etc/kubernetes/pki&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;ca&#34;</span> certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;apiserver&#34;</span> certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> apiserver serving cert is signed <span style="color:#66d9ef">for</span> DNS names <span style="color:#f92672">[</span>master1k8s kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local master1k8s<span style="color:#f92672">]</span> and IPs <span style="color:#f92672">[</span>10.96.0.1 192.168.100.51<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;apiserver-kubelet-client&#34;</span> certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;front-proxy-ca&#34;</span> certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;front-proxy-client&#34;</span> certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;etcd/ca&#34;</span> certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;etcd/server&#34;</span> certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> etcd/server serving cert is signed <span style="color:#66d9ef">for</span> DNS names <span style="color:#f92672">[</span>master1k8s localhost<span style="color:#f92672">]</span> and IPs <span style="color:#f92672">[</span>192.168.100.51 127.0.0.1 ::1<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;etcd/peer&#34;</span> certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> etcd/peer serving cert is signed <span style="color:#66d9ef">for</span> DNS names <span style="color:#f92672">[</span>master1k8s localhost<span style="color:#f92672">]</span> and IPs <span style="color:#f92672">[</span>192.168.100.51 127.0.0.1 ::1<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;etcd/healthcheck-client&#34;</span> certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;apiserver-etcd-client&#34;</span> certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>certs<span style="color:#f92672">]</span> Generating <span style="color:#e6db74">&#34;sa&#34;</span> key and public key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>kubeconfig<span style="color:#f92672">]</span> Using kubeconfig folder <span style="color:#e6db74">&#34;/etc/kubernetes&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>kubeconfig<span style="color:#f92672">]</span> Writing <span style="color:#e6db74">&#34;admin.conf&#34;</span> kubeconfig file
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>kubeconfig<span style="color:#f92672">]</span> Writing <span style="color:#e6db74">&#34;kubelet.conf&#34;</span> kubeconfig file
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>kubeconfig<span style="color:#f92672">]</span> Writing <span style="color:#e6db74">&#34;controller-manager.conf&#34;</span> kubeconfig file
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>kubeconfig<span style="color:#f92672">]</span> Writing <span style="color:#e6db74">&#34;scheduler.conf&#34;</span> kubeconfig file
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>control-plane<span style="color:#f92672">]</span> Using manifest folder <span style="color:#e6db74">&#34;/etc/kubernetes/manifests&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>control-plane<span style="color:#f92672">]</span> Creating static Pod manifest <span style="color:#66d9ef">for</span> <span style="color:#e6db74">&#34;kube-apiserver&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>control-plane<span style="color:#f92672">]</span> Creating static Pod manifest <span style="color:#66d9ef">for</span> <span style="color:#e6db74">&#34;kube-controller-manager&#34;</span>
+</span></span><span style="display:flex;"><span>W0710 11:09:46.065710   <span style="color:#ae81ff">24688</span> manifests.go:225<span style="color:#f92672">]</span> the default kube-apiserver authorization-mode is <span style="color:#e6db74">&#34;Node,RBAC&#34;</span>; using <span style="color:#e6db74">&#34;Node,RBAC&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>control-plane<span style="color:#f92672">]</span> Creating static Pod manifest <span style="color:#66d9ef">for</span> <span style="color:#e6db74">&#34;kube-scheduler&#34;</span>
+</span></span><span style="display:flex;"><span>W0710 11:09:46.069293   <span style="color:#ae81ff">24688</span> manifests.go:225<span style="color:#f92672">]</span> the default kube-apiserver authorization-mode is <span style="color:#e6db74">&#34;Node,RBAC&#34;</span>; using <span style="color:#e6db74">&#34;Node,RBAC&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>etcd<span style="color:#f92672">]</span> Creating static Pod manifest <span style="color:#66d9ef">for</span> local etcd in <span style="color:#e6db74">&#34;/etc/kubernetes/manifests&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>wait-control-plane<span style="color:#f92672">]</span> Waiting <span style="color:#66d9ef">for</span> the kubelet to boot up the control plane as static Pods from directory <span style="color:#e6db74">&#34;/etc/kubernetes/manifests&#34;</span>. This can take up to 4m0s
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>apiclient<span style="color:#f92672">]</span> All control plane components are healthy after 31.009879 seconds
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>upload-config<span style="color:#f92672">]</span> Storing the configuration used in ConfigMap <span style="color:#e6db74">&#34;kubeadm-config&#34;</span> in the <span style="color:#e6db74">&#34;kube-system&#34;</span> Namespace
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>kubelet<span style="color:#f92672">]</span> Creating a ConfigMap <span style="color:#e6db74">&#34;kubelet-config-1.18&#34;</span> in namespace kube-system with the configuration <span style="color:#66d9ef">for</span> the kubelets in the cluster
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>upload-certs<span style="color:#f92672">]</span> Skipping phase. Please see --upload-certs
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>mark-control-plane<span style="color:#f92672">]</span> Marking the node master1k8s as control-plane by adding the label <span style="color:#e6db74">&#34;node-role.kubernetes.io/master=&#39;&#39;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>mark-control-plane<span style="color:#f92672">]</span> Marking the node master1k8s as control-plane by adding the taints <span style="color:#f92672">[</span>node-role.kubernetes.io/master:NoSchedule<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>bootstrap-token<span style="color:#f92672">]</span> Using token: cnifgh.ptp6is3fyb60to81
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>bootstrap-token<span style="color:#f92672">]</span> Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>bootstrap-token<span style="color:#f92672">]</span> configured RBAC rules to allow Node Bootstrap tokens to get nodes
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>bootstrap-token<span style="color:#f92672">]</span> configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order <span style="color:#66d9ef">for</span> nodes to get long term certificate credentials
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>bootstrap-token<span style="color:#f92672">]</span> configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>bootstrap-token<span style="color:#f92672">]</span> configured RBAC rules to allow certificate rotation <span style="color:#66d9ef">for</span> all node client certificates in the cluster
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>bootstrap-token<span style="color:#f92672">]</span> Creating the <span style="color:#e6db74">&#34;cluster-info&#34;</span> ConfigMap in the <span style="color:#e6db74">&#34;kube-public&#34;</span> namespace
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>kubelet-finalize<span style="color:#f92672">]</span> Updating <span style="color:#e6db74">&#34;/etc/kubernetes/kubelet.conf&#34;</span> to point to a rotatable kubelet client certificate and key
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>addons<span style="color:#f92672">]</span> Applied essential addon: CoreDNS
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>addons<span style="color:#f92672">]</span> Applied essential addon: kube-proxy
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Your Kubernetes control-plane has initialized successfully!
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>To start using your cluster, you need to run the following as a regular user:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  mkdir -p $HOME/.kube
+</span></span><span style="display:flex;"><span>  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+</span></span><span style="display:flex;"><span>  sudo chown <span style="color:#66d9ef">$(</span>id -u<span style="color:#66d9ef">)</span>:<span style="color:#66d9ef">$(</span>id -g<span style="color:#66d9ef">)</span> $HOME/.kube/config
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>You should now deploy a pod network to the cluster.
+</span></span><span style="display:flex;"><span>Run <span style="color:#e6db74">&#34;kubectl apply -f [podnetwork].yaml&#34;</span> with one of the options listed at:
+</span></span><span style="display:flex;"><span>  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>You can now join any number of control-plane nodes by copying certificate authorities
+</span></span><span style="display:flex;"><span>and service account keys on each node and <span style="color:#66d9ef">then</span> running the following as root:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  kubeadm join master1k8s:6443 --token sxddbo.ouonf7ehvkkso3b2 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --discovery-token-ca-cert-hash sha256:130451a73b3d4ff65fc4dbbfba4e78b648c7b75e90621ebc1fdba789135957b5 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --control-plane
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Then you can join any number of worker nodes by running the following on each as root:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kubeadm join master1k8s:6443 --token sxddbo.ouonf7ehvkkso3b2 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --discovery-token-ca-cert-hash sha256:130451a73b3d4ff65fc4dbbfba4e78b648c7b75e90621ebc1fdba789135957b5
+</span></span></code></pre></div><p>If you plan to add nodes as in my case, please keep a copy of the above <em>kubeadm init</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mkdir -p $HOME/.kube
+</span></span><span style="display:flex;"><span>sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+</span></span><span style="display:flex;"><span>sudo chown <span style="color:#66d9ef">$(</span>id -u<span style="color:#66d9ef">)</span>:<span style="color:#66d9ef">$(</span>id -g<span style="color:#66d9ef">)</span> $HOME/.kube/config
+</span></span></code></pre></div><p>The Kubernetes Cluster on Raspberry Pi status is verified with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl cluster-info
+</span></span></code></pre></div><p><img src="/images/kubernetes/kubernetes-cluster-info.png" alt="kubernetes-cluster-info"></p>
+<hr>
+<p>To allow the control-plane node to schedule pods, this command can be run (by default, for security reasons the kubernetes cluster will not schedule pods on the control-plane node):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl taint nodes --all node-role.kubernetes.io/master-
+</span></span></code></pre></div><h2 id="installing-networking-addons">Installing Networking Addons</h2>
+<p><em>(5 mins)</em></p>
+<p>You may choose from any of the networking <a href="https://kubernetes.io/docs/concepts/cluster-administration/addons/">addons</a> listing. For me, I use <a href="https://docs.projectcalico.org/getting-started/kubernetes/self-managed-onprem/onpremises">Calio</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl https://docs.projectcalico.org/manifests/calico.yaml -O
+</span></span><span style="display:flex;"><span>kubectl apply -f calico.yaml
+</span></span><span style="display:flex;"><span>watch kubectl get pods --all-namespaces
+</span></span><span style="display:flex;"><span>kubectl get nodes -o wide
+</span></span></code></pre></div><p>Without installing the networking addons, the nodes status will be <em>NotReady</em> and pods status will be <em>Pending</em>.</p>
+<h2 id="adding-leaf-nodes">Adding Leaf Nodes</h2>
+<p><em>(10 mins)</em></p>
+<p>Firstly, install kubectl, kubelet and kubeadm, following the same steps as the above section for the master node.</p>
+<p>Secondly, install docker:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt install docker.io
+</span></span><span style="display:flex;"><span>sudo usermod -aG docker ubuntu
+</span></span><span style="display:flex;"><span>su - ubuntu
+</span></span><span style="display:flex;"><span>sudo systemctl enable docker.service
+</span></span></code></pre></div><p>Thirdly, add hostname of the master to <em>/etc/hosts</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">51</span> <span style="color:#a6e22e">master1k8s</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Lastly, join to the newly created kubernetes cluster:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo kubeadm join master1k8s:6443 --token sxddbo.ouonf7ehvkkso3b2 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --discovery-token-ca-cert-hash sha256:130451a73b3d4ff65fc4dbbfba4e78b648c7b75e90621ebc1fdba789135957b5
+</span></span></code></pre></div><h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="error-fileexisting-conntrack-conntrack-not-found-in-system-path">[ERROR FileExisting-conntrack]: conntrack not found in system path</h3>
+<p>From the <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/troubleshooting-kubeadm/">troubeshooting guide</a>, install conntrack by:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt -y install conntrack
+</span></span></code></pre></div><h3 id="warning-fileexisting-socat-socat-not-found-in-system-path">[WARNING FileExisting-socat]: socat not found in system path</h3>
+<p>Install socat by:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt -y install socat
+</span></span></code></pre></div><ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/raspberry/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Raspberry</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cluster/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Cluster</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/docker/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Docker</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/kubeadm/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Kubeadm</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://dojocube.com/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a>
+    
+    
+    <a href="https://dojocube.com/2020/gitea-on-kubernetes-pi-cluster/">Gitea for K8s Cluster</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2020/docker-on-raspberry-pi-cluster/">Docker for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/external-storage-for-raspberry-pi-cluster/">External Storage</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-2/">MicroK8s on Pi 4 8GB (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-1/">MicroK8s on Pi 4 8GB (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gnu-health-embedded-on-raspberry-pi-3/">GNU Health</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/plasma-bigscreen-on-pi-8gb/">Plasma Bigscreen</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/openmediavault-on-raspberry-pi/">NAS Server</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>

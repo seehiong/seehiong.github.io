@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Gitea for K8s Cluster | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="Having Gitea on Kubernetes Pi cluster, you will have full control over your personal Git repositories
+Gitea for Kubernetes Cluster on Pi (Total Setup Time: 40 mins)
+Similar to the previous post on Gitea for MicroK8s Cluster, I will be setting up Git in the newly created Kubernetes Cluster.
+Setup MySQL (15 mins)
+First, I download the mysql-server docker image:
+docker pull mysql/mysql-server:latest docker images Second, with reference from here, I created the required path on my external HDD:">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Gitea for K8s Cluster" />
+<meta property="og:description" content="Having Gitea on Kubernetes Pi cluster, you will have full control over your personal Git repositories
+Gitea for Kubernetes Cluster on Pi (Total Setup Time: 40 mins)
+Similar to the previous post on Gitea for MicroK8s Cluster, I will be setting up Git in the newly created Kubernetes Cluster.
+Setup MySQL (15 mins)
+First, I download the mysql-server docker image:
+docker pull mysql/mysql-server:latest docker images Second, with reference from here, I created the required path on my external HDD:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2020/gitea-on-kubernetes-pi-cluster/" /><meta property="article:section" content="2020" />
+<meta property="article:published_time" content="2020-07-10T20:00:00+08:00" />
+<meta property="article:modified_time" content="2020-07-10T20:00:00+08:00" />
+<meta itemprop="name" content="Gitea for K8s Cluster">
+<meta itemprop="description" content="Having Gitea on Kubernetes Pi cluster, you will have full control over your personal Git repositories
+Gitea for Kubernetes Cluster on Pi (Total Setup Time: 40 mins)
+Similar to the previous post on Gitea for MicroK8s Cluster, I will be setting up Git in the newly created Kubernetes Cluster.
+Setup MySQL (15 mins)
+First, I download the mysql-server docker image:
+docker pull mysql/mysql-server:latest docker images Second, with reference from here, I created the required path on my external HDD:"><meta itemprop="datePublished" content="2020-07-10T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-07-10T20:00:00+08:00" />
+<meta itemprop="wordCount" content="784">
+<meta itemprop="keywords" content="Raspberry,Cluster,MicroK8s,Gitea," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Gitea for K8s Cluster"/>
+<meta name="twitter:description" content="Having Gitea on Kubernetes Pi cluster, you will have full control over your personal Git repositories
+Gitea for Kubernetes Cluster on Pi (Total Setup Time: 40 mins)
+Similar to the previous post on Gitea for MicroK8s Cluster, I will be setting up Git in the newly created Kubernetes Cluster.
+Setup MySQL (15 mins)
+First, I download the mysql-server docker image:
+docker pull mysql/mysql-server:latest docker images Second, with reference from here, I created the required path on my external HDD:"/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2020
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Gitea for K8s Cluster</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2020-07-10T20:00:00+08:00">July 10, 2020</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 784 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><img src="/images/gitea-k8s/gitea-on-raspberry-pi-cluster.png" alt="gitea-on-kubernetes-pi-cluster"></p>
+<p>Having Gitea on Kubernetes Pi cluster, you will have full control over your personal Git repositories</p>
+<hr>
+<h1 id="gitea-for-kubernetes-cluster-on-pi">Gitea for Kubernetes Cluster on Pi</h1>
+<p><em>(Total Setup Time: 40 mins)</em></p>
+<p>Similar to the previous post on <a href="https://dojocube.com/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a><!-- raw HTML omitted -->, I will be setting up Git in the newly created <a href="https://dojocube.com/2020/kubernetes-cluster-on-raspberry-pi/">Kubernetes Cluster</a>.</p>
+<h2 id="setup-mysql">Setup MySQL</h2>
+<p><em>(15 mins)</em></p>
+<p>First, I download the <a href="https://dev.mysql.com/doc/mysql-installation-excerpt/8.0/en/docker-mysql-getting-started.html">mysql-server docker</a> image:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker pull mysql/mysql-server:latest
+</span></span><span style="display:flex;"><span>docker images
+</span></span></code></pre></div><p>Second, with reference from <a href="https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/">here</a>, I created the required path on my external HDD:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo mkdir -p /mnt/hdd/master1k8s/app/mysql/data
+</span></span><span style="display:flex;"><span>sudo vi /mnt/hdd/master1k8s/app/mysql/mysql-pv.yaml
+</span></span></code></pre></div><p>Add the following to <em>mysql-pv.yaml</em> file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolume</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql-pv</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">type</span>: <span style="color:#ae81ff">local</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">storageClassName</span>: <span style="color:#ae81ff">manual</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">capacity</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">20Gi</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">accessModes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">ReadWriteOnce</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">hostPath</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">path</span>: <span style="color:#e6db74">&#34;/mnt/hdd/master1k8s/app/mysql/data&#34;</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolumeClaim</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql-pvc</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">storageClassName</span>: <span style="color:#ae81ff">manual</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">accessModes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">ReadWriteOnce</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">resources</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">requests</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">20Gi</span>
+</span></span></code></pre></div><p>Next, apply the above yaml file to create mysql <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">persistent volumes</a> with this command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f /mnt/hdd/master1k8s/app/mysql/mysql-pv.yaml
+</span></span></code></pre></div><p>Third, add the following to <em>/mnt/hdd/master1k8s/app/mysql/mysql-deployment.yaml</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">port</span>: <span style="color:#ae81ff">3306</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">clusterIP</span>: <span style="color:#ae81ff">None</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span> <span style="color:#75715e"># for versions before 1.9.0 use apps/v1beta2</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">strategy</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">type</span>: <span style="color:#ae81ff">Recreate</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mysql/mysql-server:latest</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">imagePullPolicy</span>: <span style="color:#ae81ff">IfNotPresent</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e"># Use secret in real usage</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">MYSQL_ROOT_PASSWORD</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">password</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">3306</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql-persistent-storage</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/var/lib/mysql</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql-persistent-storage</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">mysql-pvc</span>
+</span></span></code></pre></div><p>Next, apply the above yaml file to create mysql service and deployment:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f /mnt/hdd/master1k8s/app/mysql/mysql-deployment.yaml
+</span></span></code></pre></div><p>Lastly, you may use the following to check on your deployment:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl describe deployment mysql
+</span></span><span style="display:flex;"><span>kubectl get pods
+</span></span><span style="display:flex;"><span>kubectl logs mysql-56c7cb9d76-w4snt
+</span></span></code></pre></div><h2 id="preparing-mysql">Preparing MySQL</h2>
+<p><em>(5 mins)</em></p>
+<p>To prepare mysql for Gitea, I need to get the pod name:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl get pods
+</span></span></code></pre></div><p>First, ssh into mysql pod:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl exec -it  mysql-56c7cb9d76-w4snt -- /bin/bash
+</span></span></code></pre></div><p>Second, connect to mysql (default is password):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mysql -u root -p
+</span></span></code></pre></div><p>Last, prepare the <a href="https://docs.gitea.io/en-us/database-prep/">database</a> (user=<em>gitea</em>, password=<em>gitea</em>, database=<em>giteadb</em>):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">USER</span> <span style="color:#e6db74">&#39;gitea&#39;</span><span style="color:#f92672">@</span><span style="color:#e6db74">&#39;%&#39;</span> IDENTIFIED <span style="color:#66d9ef">BY</span> <span style="color:#e6db74">&#39;gitea&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DATABASE</span> giteadb;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GRANT</span> <span style="color:#66d9ef">ALL</span> <span style="color:#66d9ef">PRIVILEGES</span> <span style="color:#66d9ef">ON</span> giteadb.<span style="color:#f92672">*</span> <span style="color:#66d9ef">TO</span> <span style="color:#e6db74">&#39;gitea&#39;</span>;
+</span></span><span style="display:flex;"><span>FLUSH <span style="color:#66d9ef">PRIVILEGES</span>;
+</span></span></code></pre></div><h2 id="preparing-gitea-with-docker">Preparing Gitea with Docker</h2>
+<p><em>(15 mins)</em></p>
+<p>You may start to install Gitea with docker by preparing the docker-compose.yml:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mkdir -p /mnt/hdd/master1k8s/docker
+</span></span><span style="display:flex;"><span>sudo vi /mnt/hdd/master1k8s/docker/docker-compose.yml
+</span></span></code></pre></div><p>Next, with reference from <a href="https://docs.gitea.io/en-us/install-with-docker/">here</a>, add the following to docker-compose.yml:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#34;2&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">gitea</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">external</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">services</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">server</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">gitea/gitea:latest</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">USER_UID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">USER_GID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">DB_TYPE=mysql</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">DB_HOST=mysql:3306</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">DB_NAME=giteadb</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">DB_USER=gitea</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">DB_PASSWD=gitea</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">always</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">./gitea:/data</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/etc/timezone:/etc/timezone:ro</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/etc/localtime:/etc/localtime:ro</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;3000:3000&#34;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;222:22&#34;</span>
+</span></span></code></pre></div><p>You will get Gitea running with these <a href="https://docs.docker.com/compose/reference/">docker-compose</a> commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Builds, creates, starts containers</span>
+</span></span><span style="display:flex;"><span>docker-compose up -d
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Lists containers</span>
+</span></span><span style="display:flex;"><span>docker-compose ps
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Displays log output</span>
+</span></span><span style="display:flex;"><span>docker-compose logs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Stops, removes containers</span>
+</span></span><span style="display:flex;"><span>docker-compose down
+</span></span></code></pre></div><p><img src="/images/gitea-k8s/docker-compose-gitea.png" alt="docker-compose-gitea"></p>
+<hr>
+<h2 id="serving-gitea">Serving Gitea</h2>
+<p><em>(5 mins)</em></p>
+<p>To access Gitea on Kubernetes Pi Cluster from my laptop, I need to expose it to external using <a href="https://kubernetes.io/docs/concepts/services-networking/service/">NodePort</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo mkdir -p /mnt/hdd/master1k8s/app/gitea/data
+</span></span><span style="display:flex;"><span>sudo vi /mnt/hdd/master1k8s/app/gitea/gitea-deployment.yaml
+</span></span></code></pre></div><p>Next, insert the following into <em>gitea-deployment.yaml</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">port</span>: <span style="color:#ae81ff">3000</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">3000</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nodePort</span>: <span style="color:#ae81ff">30000</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-http</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">port</span>: <span style="color:#ae81ff">2222</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">2222</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nodePort</span>: <span style="color:#ae81ff">32222</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-ssh</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">NodePort</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span> <span style="color:#75715e"># for versions before 1.9.0 use apps/v1beta2</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">replicas</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">strategy</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">type</span>: <span style="color:#ae81ff">Recreate</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">gitea/gitea:latest</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">imagePullPolicy</span>: <span style="color:#ae81ff">IfNotPresent</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">3000</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-http</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">22</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-ssh</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-data</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/data</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-data</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">hostPath</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">path</span>: <span style="color:#ae81ff">/mnt/hdd/master1k8s/app/gitea</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">type</span>: <span style="color:#ae81ff">Directory</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">nodeSelector</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">git-data-storage</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span></code></pre></div><p>Apply the above yaml file to create Gitea service and deployment:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f /mnt/hdd/master1k8s/app/gitea/gitea-deployment.yaml
+</span></span></code></pre></div><p>Since Gitea has a nodeSelector which requires git-data-storage flag, the below label (replace with your node name) is needed for the pod to deploy successfully:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Labels node</span>
+</span></span><span style="display:flex;"><span>kubectl label nodes master1k8s git-data-storage<span style="color:#f92672">=</span>true
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Checks gitea deployment</span>
+</span></span><span style="display:flex;"><span>kubectl describe deployment gitea
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Deletes deployment and service, if needed</span>
+</span></span><span style="display:flex;"><span>kubectl delete deployment,svc gitea
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Another way to delete</span>
+</span></span><span style="display:flex;"><span>kubectl delete -f /mnt/hdd/master1k8s/app/gitea/gitea-deployment.yaml
+</span></span></code></pre></div><p>Get the IP address of mysql server from this command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl get svc -o wide
+</span></span></code></pre></div><p>This is my query results:</p>
+<pre tabindex="0"><code>NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                         AGE    SELECTOR
+gitea        NodePort    10.110.40.142   &lt;none&gt;        3000:30000/TCP,2222:32222/TCP   4m6s   app=gitea
+kubernetes   ClusterIP   10.96.0.1       &lt;none&gt;        443/TCP                         105m   &lt;none&gt;
+mysql        ClusterIP   None            &lt;none&gt;        3306/TCP                        31m    app=mysql
+</code></pre><p>Next, follows the gitea installation (host=<em>mysql:3306</em>, username=<em>gitea</em>, password=<em>gitea</em>, database=<em>giteadb</em>):</p>
+<p><img src="/images/gitea-k8s/gitea-initial-installation.png" alt="gitea-initial-installation"></p>
+<hr>
+<p>Finally, the Gitea on Kubernetes Pi Cluster is properly setup and you may proceed to register new account and login!</p>
+<p><img src="/images/gitea-k8s/dojocube-gitea.png" alt="dojocube-gitea"></p>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="error-1045-28000-access-denied-for-user-rootlocalhost">ERROR 1045 (28000): Access denied for user &lsquo;root&rsquo;@&rsquo;localhost&rsquo;</h3>
+<p>When access mysql from within mysql pod, I encountered this. Afer some troubleshooting, I realized that during the few rounds of mysql setup, the previous folder, <em>/mnt/hdd/master1k8s/app/mysql/data</em>, was not properly cleaned up.</p>
+<ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/raspberry/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Raspberry</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cluster/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Cluster</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/microk8s/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">MicroK8s</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/gitea/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Gitea</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://dojocube.com/2020/kubernetes-cluster-on-raspberry-pi/">Kubernetes Cluster on Pi</a>
+    
+    
+    <a href="https://dojocube.com/2020/jenkins-for-kubernetes-cluster-part-1/">Jenkins for K8s Cluster (I)</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/external-storage-for-raspberry-pi-cluster/">External Storage</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-2/">MicroK8s on Pi 4 8GB (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-1/">MicroK8s on Pi 4 8GB (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/kubernetes-cluster-on-raspberry-pi/">Kubernetes Cluster on Pi</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/docker-on-raspberry-pi-cluster/">Docker for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gnu-health-embedded-on-raspberry-pi-3/">GNU Health</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/plasma-bigscreen-on-pi-8gb/">Plasma Bigscreen</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/openmediavault-on-raspberry-pi/">NAS Server</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>K8s Pi Cluster with Ansible | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="By provisioning a Kubernetes PI Cluster with Ansible, you can easily spin off a Raspberry PI cluster
+Kubernetes Cluster with Ansible (Total Setup Time: 50 mins)
+In this guide, I will configure a Kubernetes Cluster using Ansible. This guide follows closely to the Raspbernetes Cluster Installation. I will be using 3x Raspberry Pi 4 Model B 8GB as the master nodes and 1x Raspberry Pi 3 Model B as the only worker node.">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="K8s Pi Cluster with Ansible" />
+<meta property="og:description" content="By provisioning a Kubernetes PI Cluster with Ansible, you can easily spin off a Raspberry PI cluster
+Kubernetes Cluster with Ansible (Total Setup Time: 50 mins)
+In this guide, I will configure a Kubernetes Cluster using Ansible. This guide follows closely to the Raspbernetes Cluster Installation. I will be using 3x Raspberry Pi 4 Model B 8GB as the master nodes and 1x Raspberry Pi 3 Model B as the only worker node." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2021/kubernetes-pi-cluster-with-ansible/" /><meta property="article:section" content="2021" />
+<meta property="article:published_time" content="2021-05-29T20:00:00+08:00" />
+<meta property="article:modified_time" content="2021-05-29T20:00:00+08:00" />
+<meta itemprop="name" content="K8s Pi Cluster with Ansible">
+<meta itemprop="description" content="By provisioning a Kubernetes PI Cluster with Ansible, you can easily spin off a Raspberry PI cluster
+Kubernetes Cluster with Ansible (Total Setup Time: 50 mins)
+In this guide, I will configure a Kubernetes Cluster using Ansible. This guide follows closely to the Raspbernetes Cluster Installation. I will be using 3x Raspberry Pi 4 Model B 8GB as the master nodes and 1x Raspberry Pi 3 Model B as the only worker node."><meta itemprop="datePublished" content="2021-05-29T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2021-05-29T20:00:00+08:00" />
+<meta itemprop="wordCount" content="633">
+<meta itemprop="keywords" content="Raspberry,Cluster,K8s,Ansible," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="K8s Pi Cluster with Ansible"/>
+<meta name="twitter:description" content="By provisioning a Kubernetes PI Cluster with Ansible, you can easily spin off a Raspberry PI cluster
+Kubernetes Cluster with Ansible (Total Setup Time: 50 mins)
+In this guide, I will configure a Kubernetes Cluster using Ansible. This guide follows closely to the Raspbernetes Cluster Installation. I will be using 3x Raspberry Pi 4 Model B 8GB as the master nodes and 1x Raspberry Pi 3 Model B as the only worker node."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2021
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">K8s Pi Cluster with Ansible</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2021-05-29T20:00:00+08:00">May 29, 2021</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 633 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><img src="/images/ansible/highly-available-kubernetes-pi-cluster.png" alt="highly-available-kubernetes-pi-cluster"></p>
+<p>By provisioning a Kubernetes PI Cluster with Ansible, you can easily spin off a Raspberry PI cluster</p>
+<hr>
+<h1 id="kubernetes-cluster-with-ansible">Kubernetes Cluster with Ansible</h1>
+<p><em>(Total Setup Time: 50 mins)</em></p>
+<p>In this guide, I will configure a Kubernetes Cluster using <a href="https://www.ansible.com/">Ansible</a>. This guide follows closely to the <a href="https://github.com/raspbernetes/k8s-cluster-installation">Raspbernetes Cluster Installation</a>. I will be using 3x Raspberry Pi 4 Model B 8GB as the master nodes and 1x Raspberry Pi 3 Model B as the only worker node.</p>
+<p>You need to install <a href="https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-on-ubuntu">ansible</a>, <a href="https://github.com/hypriot/flash">flash</a> and <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/">kubectl</a>. I installed both Ansible and Flash onto my <a href="https://elementary.io/">elementary OS</a> host by:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e">#Installing Ansible</span>
+</span></span><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>sudo apt install software-properties-common
+</span></span><span style="display:flex;"><span>sudo add-apt-repository --yes --update ppa:ansible/ansible
+</span></span><span style="display:flex;"><span>sudo apt install ansible
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#Installing Flash</span>
+</span></span><span style="display:flex;"><span>curl -LO https://github.com/hypriot/flash/releases/download/2.7.0/flash
+</span></span><span style="display:flex;"><span>cdmod +x flash
+</span></span><span style="display:flex;"><span>sudo mv flash /usr/local/bin/flash
+</span></span><span style="display:flex;"><span>sudo apt-get install -y pv curl python-pip unzip hdparm
+</span></span><span style="display:flex;"><span>sudo pip install awscli
+</span></span></code></pre></div><h2 id="preparation">Preparation</h2>
+<p><em>(20 mins)</em></p>
+<p>Firstly, downloads the Ubuntu 20.04 image and unzips it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl -L <span style="color:#e6db74">&#34;http://cdimage.ubuntu.com/releases/20.04.2/release/ubuntu-20.04.2-preinstalled-server-arm64+raspi.img.xz&#34;</span> -o ~/Downloads/ubuntu-20.04.2-preinstalled-server-arm64+raspi.img.xz
+</span></span><span style="display:flex;"><span>unxz -T <span style="color:#ae81ff">0</span> ~/Downloads/ubuntu-20.04.2-preinstalled-server-arm64+raspi.img.xz
+</span></span></code></pre></div><p>Secondly, clones the <a href="https://github.com/raspbernetes/k8s-cluster-installation">Raspbernetes repository</a> and makes the necessary changes (hostname, users.name, ssh_authorized_keys, etho0.addresses and gateway4) to the cloud-init file. I have created 4x cloud-config.yml for each of the 64GB SD card:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git clone https://github.com/raspbernetes/k8s-cluster-installation.git
+</span></span><span style="display:flex;"><span>cd k8s-cluster-installation
+</span></span><span style="display:flex;"><span>vi setup/cloud-config.yml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#Create the 4x SD cards ubuntu image using Flash</span>
+</span></span><span style="display:flex;"><span>sudo flash --userdata cloud-config.yml ~/Downloads/ubuntu-20.04.2-preinstalled-server-arm64+raspi.img
+</span></span></code></pre></div><p>Thirdly, ensures that Ansible inventory is changed according to hostname, username and IP addresses for each SD card.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vi ansible/inventory
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>#<span style="color:#a6e22e">My</span> <span style="color:#a6e22e">setup</span> <span style="color:#a6e22e">as</span> <span style="color:#a6e22e">reference</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">masters</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">master1</span> <span style="color:#a6e22e">hostname</span>=<span style="color:#a6e22e">master1</span> <span style="color:#a6e22e">ansible_host</span>=<span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">180</span> <span style="color:#a6e22e">ansible_user</span>=<span style="color:#a6e22e">ubuntu</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">master2</span> <span style="color:#a6e22e">hostname</span>=<span style="color:#a6e22e">master2</span> <span style="color:#a6e22e">ansible_host</span>=<span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">181</span> <span style="color:#a6e22e">ansible_user</span>=<span style="color:#a6e22e">ubuntu</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">master3</span> <span style="color:#a6e22e">hostname</span>=<span style="color:#a6e22e">master3</span> <span style="color:#a6e22e">ansible_host</span>=<span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">182</span> <span style="color:#a6e22e">ansible_user</span>=<span style="color:#a6e22e">ubuntu</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">workers</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">worker1</span> <span style="color:#a6e22e">hostname</span>=<span style="color:#a6e22e">worker1</span> <span style="color:#a6e22e">ansible_host</span>=<span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">188</span> <span style="color:#a6e22e">ansible_user</span>=<span style="color:#a6e22e">ubuntu</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>#<span style="color:#a6e22e">Ensures</span> <span style="color:#a6e22e">that</span> <span style="color:#a6e22e">you</span> <span style="color:#a6e22e">are</span> <span style="color:#a6e22e">able</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">ping</span> <span style="color:#a6e22e">all</span> <span style="color:#a6e22e">nodes</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">env</span> <span style="color:#a6e22e">ANSIBLE_CONFIG</span>=<span style="color:#a6e22e">ansible</span>/<span style="color:#a6e22e">ansible</span>.<span style="color:#a6e22e">cfg</span> <span style="color:#a6e22e">ansible</span> <span style="color:#a6e22e">all</span> -<span style="color:#a6e22e">m</span> <span style="color:#a6e22e">ping</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Fourthly, prior to the cluster setup, I ssh into each of the nodes and run the following.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>ssh ubuntu@master1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sudo -i
+</span></span><span style="display:flex;"><span>systemctl stop apt-daily.timer
+</span></span><span style="display:flex;"><span>systemctl disable apt-daily.timer
+</span></span><span style="display:flex;"><span>systemctl mask apt-daily.service
+</span></span><span style="display:flex;"><span>systemctl daemon-reload
+</span></span><span style="display:flex;"><span>reboot
+</span></span></code></pre></div><p>These are some of my customizations:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#a6e22e">group_vars</span>/<span style="color:#a6e22e">all</span>.<span style="color:#a6e22e">yml</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">26</span>: <span style="color:#a6e22e">keepalived_vip</span>: <span style="color:#e6db74">&#39;192.168.100.200&#39;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">32</span>: <span style="color:#a6e22e">cri_plugin</span>: <span style="color:#a6e22e">docker</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">38</span>: <span style="color:#a6e22e">cni_plugin</span>: <span style="color:#e6db74">&#39;calico&#39;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">group_var</span>/<span style="color:#a6e22e">masters</span>.<span style="color:#a6e22e">yml</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">16</span>: <span style="color:#a6e22e">cluster_kube_proxy_enabled</span>:<span style="color:#a6e22e">true</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">23</span>: <span style="color:#a6e22e">cni_plugin</span>: <span style="color:#e6db74">&#39;calico&#39;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/cluster/</span><span style="color:#a6e22e">defaults</span><span style="color:#e6db74">/main/</span><span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">yml</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">101</span>: <span style="color:#a6e22e">docker</span>: <span style="color:#e6db74">&#39;unix:///run/containerd/containerd.sock&#39;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/clusters/</span><span style="color:#a6e22e">templates</span>/<span style="color:#a6e22e">kubeadm</span>-<span style="color:#a6e22e">config</span>.<span style="color:#a6e22e">yaml</span>.<span style="color:#a6e22e">j2</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">25</span>: <span style="color:#a6e22e">criSocket</span>: <span style="color:#a6e22e">unix</span>:<span style="color:#e6db74">///run/</span><span style="color:#a6e22e">containerd</span>/<span style="color:#a6e22e">containerd</span>.<span style="color:#a6e22e">sock</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/clusters/</span><span style="color:#a6e22e">templates</span>/<span style="color:#a6e22e">kubeadm</span>-<span style="color:#a6e22e">join</span>.<span style="color:#a6e22e">yaml</span>.<span style="color:#a6e22e">j2</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">26</span>: <span style="color:#a6e22e">criSocket</span>: <span style="color:#a6e22e">unix</span>:<span style="color:#e6db74">///run/</span><span style="color:#a6e22e">containerd</span>/<span style="color:#a6e22e">containerd</span>.<span style="color:#a6e22e">sock</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/cni/</span><span style="color:#a6e22e">defaults</span>/<span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">yml</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">3</span>: <span style="color:#a6e22e">cni_bgp_peer_address</span>: <span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/common/</span><span style="color:#a6e22e">tasks</span>/<span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">yml</span> (<span style="color:#a6e22e">added</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">line</span> <span style="color:#ae81ff">1</span>)<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>- <span style="color:#a6e22e">name</span>: <span style="color:#a6e22e">Bugfix</span> <span style="color:#a6e22e">for</span> <span style="color:#a6e22e">Ubuntu</span> <span style="color:#ae81ff">20</span>.<span style="color:#ae81ff">04</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#a6e22e">set_fact</span>:<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#a6e22e">ansible_os_family</span>: <span style="color:#e6db74">&#34;debian&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/container-runtime/</span><span style="color:#a6e22e">containerd</span><span style="color:#e6db74">/defaults/</span><span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">yml</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">9</span>: <span style="color:#a6e22e">containerd_use_docker_repo</span>: <span style="color:#a6e22e">true</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/container-runtime/</span><span style="color:#a6e22e">containerd</span><span style="color:#e6db74">/defaults/</span><span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">yml</span> (<span style="color:#a6e22e">added</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">line</span> <span style="color:#ae81ff">1</span>)<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Instructions</span>: <span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">docs</span>.<span style="color:#a6e22e">docker</span>.<span style="color:#a6e22e">com</span><span style="color:#e6db74">/engine/</span><span style="color:#a6e22e">install</span><span style="color:#e6db74">/ubuntu/</span>#<span style="color:#a6e22e">install</span>-<span style="color:#a6e22e">using</span>-<span style="color:#a6e22e">the</span>-<span style="color:#a6e22e">repository</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>- <span style="color:#a6e22e">name</span>: <span style="color:#a6e22e">Add</span> <span style="color:#a6e22e">Docker</span>’<span style="color:#a6e22e">s</span> <span style="color:#a6e22e">official</span> <span style="color:#a6e22e">GPG</span> <span style="color:#a6e22e">key</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#a6e22e">apt_key</span>:<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#a6e22e">url</span>: <span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">download</span>.<span style="color:#a6e22e">docker</span>.<span style="color:#a6e22e">com</span><span style="color:#e6db74">/linux/</span><span style="color:#a6e22e">ubuntu</span>/<span style="color:#a6e22e">gpg</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	<span style="color:#a6e22e">state</span>: <span style="color:#a6e22e">present</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>- <span style="color:#a6e22e">name</span>: <span style="color:#a6e22e">Add</span> <span style="color:#a6e22e">apt</span> <span style="color:#a6e22e">repository</span> <span style="color:#a6e22e">for</span> <span style="color:#a6e22e">Docker</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#a6e22e">apt_repository</span>:<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#a6e22e">repo</span>: <span style="color:#a6e22e">deb</span> [<span style="color:#a6e22e">arch</span>=<span style="color:#a6e22e">amd64</span> <span style="color:#a6e22e">signed</span>-<span style="color:#a6e22e">by</span>=<span style="color:#e6db74">/usr/</span><span style="color:#a6e22e">share</span><span style="color:#e6db74">/keyrings/</span><span style="color:#a6e22e">docker</span>-<span style="color:#a6e22e">archive</span>-<span style="color:#a6e22e">keyring</span>.<span style="color:#a6e22e">gpg</span>] <span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">download</span>.<span style="color:#a6e22e">docker</span>.<span style="color:#a6e22e">com</span><span style="color:#e6db74">/linux/</span><span style="color:#a6e22e">ubuntu</span> <span style="color:#a6e22e">focal</span> <span style="color:#a6e22e">stable</span>  <span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	<span style="color:#a6e22e">state</span>: <span style="color:#a6e22e">present</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#a6e22e">regiser</span>: <span style="color:#a6e22e">docker_repository</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#a6e22e">until</span>: <span style="color:#a6e22e">docker_repository</span> <span style="color:#a6e22e">is</span> <span style="color:#a6e22e">success</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/container-runtime/</span><span style="color:#a6e22e">defaults</span>/<span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">yml</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">2</span>: <span style="color:#a6e22e">cri_plugin</span>: <span style="color:#e6db74">&#39;docker&#39;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/container-runtime/</span><span style="color:#a6e22e">docker</span><span style="color:#e6db74">/defaults/</span><span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">yml</span> <span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">12</span>: #- <span style="color:#a6e22e">docker</span>-<span style="color:#a6e22e">ce</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">13</span>: #- <span style="color:#a6e22e">docker</span>-<span style="color:#a6e22e">ce</span>-<span style="color:#a6e22e">cli</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">14</span>: #- <span style="color:#a6e22e">containerd</span>.<span style="color:#a6e22e">io</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">15</span>: - <span style="color:#a6e22e">docker</span>.<span style="color:#a6e22e">io</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/container-runtime/</span><span style="color:#a6e22e">vars</span>/<span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">yml</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">23</span>: <span style="color:#a6e22e">docker</span>: <span style="color:#e6db74">&#39;unix:///run/containerd/containerd.sock&#39;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">roles</span><span style="color:#e6db74">/haproxy/</span><span style="color:#a6e22e">templates</span>/<span style="color:#a6e22e">haproxy</span>.<span style="color:#a6e22e">cfg</span>.<span style="color:#a6e22e">j2</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">22</span>: <span style="color:#a6e22e">server</span> {{<span style="color:#a6e22e">hostvars</span>[<span style="color:#a6e22e">host</span>][<span style="color:#e6db74">&#39;hostname&#39;</span>] }} {{<span style="color:#a6e22e">hostvars</span>[<span style="color:#a6e22e">host</span>][<span style="color:#e6db74">&#39;ansible_host&#39;</span>] }}:<span style="color:#ae81ff">6433</span> <span style="color:#a6e22e">check</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><h2 id="installation">Installation</h2>
+<p><em>(30 mins)</em></p>
+<p>First, you may start the Kubernetes cluster setup by running <a href="https://docs.ansible.com/ansible/latest/user_guide/playbooks.html">Ansible playbook</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>env ANSIBLE_CONFIG<span style="color:#f92672">=</span>ansible/ansible.cfg ansible-playbook ansible/playbooks/all.yml
+</span></span></code></pre></div><p>Second, when installation completes, you may copy contents of <em>ansible/playbooks/output/k8s-config.yaml</em> to your local machine:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Create a kube folder in host machine</span>
+</span></span><span style="display:flex;"><span>mkdir ~/.kube
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Paste copied content into config file</span>
+</span></span><span style="display:flex;"><span>vi ~/.kube/config
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kubectl get nodes
+</span></span></code></pre></div><p><img src="/images/ansible/kubectl-get-nodes.png" alt="kubectl-get-nodes"></p>
+<hr>
+<p>Finally, the Kubernetes PI Cluster with Ansible is ready for play! If you are interested in creating a HA cluster, you may refer to <a href="https://dojocube.com/2020/highly-available-kubernetes-pi-cluster-part-1/">my previous post</a></p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="if-blkrrpart-failed-device-or-resource-busy">if BLKRRPART failed: Device or resource busy</h3>
+<p>If you face similar error as above, you may comment out line 410 in flash script:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vi /usr/local/bin/flash
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>#<span style="color:#a6e22e">sudo</span> <span style="color:#a6e22e">hdparm</span> -<span style="color:#a6e22e">z</span> <span style="color:#e6db74">&#34;$1&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">sleep</span> <span style="color:#ae81ff">1</span>m<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><h3 id="msg-only-python3-is-supported-youre-running-2717-locally">msg: Only python3 is supported, you&rsquo;re running 2.7.17 locally</h3>
+<p>If you encouter this issue, you may install <a href="https://docs.python-guide.org/starting/install3/linux/">Python 3</a> and try re-running the playbook with the interpreter setting:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>env ANSIBLE_CONFIG<span style="color:#f92672">=</span>ansible/ansible.cfg ansible-playbook ansible/playbooks/all.yml -e ansible_python_interpreter<span style="color:#f92672">=</span>/usr/bin/python3
+</span></span></code></pre></div><h3 id="please-ensure-thatbr-the-cluster-has-a-stable-controlplaneendpoint-addressbr-the-certificates-that-must-be-shared-among-control-plane-instances-are-provided">Please ensure that:<!-- raw HTML omitted -->* The cluster has a stable controlPlaneEndpoint address.<!-- raw HTML omitted -->* The certificates that must be shared among control plane instances are provided.</h3>
+<p>If you face this issue during ansible setup, you may need to ssh ubuntu@master1:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo -i
+</span></span><span style="display:flex;"><span>vi /etc/kubernetes/kubeadm-join.yaml
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>#<span style="color:#a6e22e">modify</span> <span style="color:#a6e22e">apiServerEndpoint</span> <span style="color:#a6e22e">to</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">180</span>:<span style="color:#ae81ff">6443</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/raspberry/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Raspberry</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cluster/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Cluster</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/k8s/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">K8s</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/ansible/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Ansible</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    
+    <a href="https://dojocube.com/2021/raspberry-pi-cluster-with-longhorn/">Pi Cluster with Longhorn</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-2/">Jenkins for K8s Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-1/">Jenkins for K8s Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/highly-available-kubernetes-pi-cluster-part-2/">HA K8s Pi Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/highly-available-kubernetes-pi-cluster-part-1/">HA K8s Pi Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/private-registry-for-kubernetes-cluster/">Private Registry for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-maven-agent-for-kubernetes/">Jenkins Maven Agent</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-pipeline-for-kubernetes-cluster/">Jenkins Pipeline for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/integrating-jenkins-and-gitea/">Integrating Jenkins and Gitea</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/helm-for-kubernetes-cluster/">Helm for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-on-kubernetes-pi-cluster/">Gitea for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/kubernetes-cluster-on-raspberry-pi/">Kubernetes Cluster on Pi</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/docker-on-raspberry-pi-cluster/">Docker for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/external-storage-for-raspberry-pi-cluster/">External Storage</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-2/">MicroK8s on Pi 4 8GB (II)</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>CI/CD Pipeline on Pi Cluster (I) | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="Building a CI/CD pipeline on a Raspberry PI Cluster, with 3 master and 1 worker nodes, enclosed in a custom-made LEGO structure
+Building a CI/CD pipeline on a Raspberry PI Cluster (Part I) (Total Setup Time: 40 mins)
+In this series, I will build my own CI/CD pipeline, with tools that are configured to run on Raspberry PI Cluster and Longhorn, a HA Raspberry PI Cluster. By end of this guide, you will have a self-hosted Git service, working hand-in-hand with Jenkins.">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="CI/CD Pipeline on Pi Cluster (I)" />
+<meta property="og:description" content="Building a CI/CD pipeline on a Raspberry PI Cluster, with 3 master and 1 worker nodes, enclosed in a custom-made LEGO structure
+Building a CI/CD pipeline on a Raspberry PI Cluster (Part I) (Total Setup Time: 40 mins)
+In this series, I will build my own CI/CD pipeline, with tools that are configured to run on Raspberry PI Cluster and Longhorn, a HA Raspberry PI Cluster. By end of this guide, you will have a self-hosted Git service, working hand-in-hand with Jenkins." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-1/" /><meta property="article:section" content="2021" />
+<meta property="article:published_time" content="2021-06-13T20:00:00+08:00" />
+<meta property="article:modified_time" content="2021-06-13T20:00:00+08:00" />
+<meta itemprop="name" content="CI/CD Pipeline on Pi Cluster (I)">
+<meta itemprop="description" content="Building a CI/CD pipeline on a Raspberry PI Cluster, with 3 master and 1 worker nodes, enclosed in a custom-made LEGO structure
+Building a CI/CD pipeline on a Raspberry PI Cluster (Part I) (Total Setup Time: 40 mins)
+In this series, I will build my own CI/CD pipeline, with tools that are configured to run on Raspberry PI Cluster and Longhorn, a HA Raspberry PI Cluster. By end of this guide, you will have a self-hosted Git service, working hand-in-hand with Jenkins."><meta itemprop="datePublished" content="2021-06-13T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2021-06-13T20:00:00+08:00" />
+<meta itemprop="wordCount" content="1372">
+<meta itemprop="keywords" content="Raspberry,Cluster,CI/CD,Pipeline," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CI/CD Pipeline on Pi Cluster (I)"/>
+<meta name="twitter:description" content="Building a CI/CD pipeline on a Raspberry PI Cluster, with 3 master and 1 worker nodes, enclosed in a custom-made LEGO structure
+Building a CI/CD pipeline on a Raspberry PI Cluster (Part I) (Total Setup Time: 40 mins)
+In this series, I will build my own CI/CD pipeline, with tools that are configured to run on Raspberry PI Cluster and Longhorn, a HA Raspberry PI Cluster. By end of this guide, you will have a self-hosted Git service, working hand-in-hand with Jenkins."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2021
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">CI/CD Pipeline on Pi Cluster (I)</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2021-06-13T20:00:00+08:00">June 13, 2021</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 7 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 1372 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><img src="/images/pipeline1/raspberry-pi-enclosed-in-lego-structure.jpeg" alt="raspberry-pi-enclosed-in-lego-structure"></p>
+<p>Building a CI/CD pipeline on a Raspberry PI Cluster, with 3 master and 1 worker nodes, enclosed in a custom-made LEGO structure</p>
+<hr>
+<h1 id="building-a-cicd-pipeline-on-a-raspberry-pi-cluster-part-i">Building a CI/CD pipeline on a Raspberry PI Cluster (Part I)</h1>
+<p><em>(Total Setup Time: 40 mins)</em></p>
+<p>In this series, I will build my own CI/CD pipeline, with tools that are configured to run on <a href="https://dojocube.com/2021/raspberry-pi-cluster-with-longhorn/">Raspberry PI Cluster and Longhorn</a>, a HA Raspberry PI Cluster. By end of this guide, you will have a <a href="https://gitea.io/en-us/">self-hosted Git service</a>, working hand-in-hand with <a href="https://www.jenkins.io/">Jenkins</a>.</p>
+<h2 id="preparation">Preparation</h2>
+<p><em>(5 mins)</em></p>
+<p><a href="https://metallb.universe.tf/">Metallb</a> is a load-balancer implementation for bare metal Kubernetes clusters. You may refer to the <a href="https://dojocube.com/2020/helm-for-kubernetes-cluster/">previous guide</a> on Metallb. Let&rsquo;s install it by with these commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mkdir ~/metallb
+</span></span><span style="display:flex;"><span>cd ~/metallb
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>wget https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml -O metallb-namespace.yaml
+</span></span><span style="display:flex;"><span>kubectl apply -f metallb-namespace.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>wget https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/metallb.yaml -O metallb.yaml
+</span></span><span style="display:flex;"><span>kubectl apply -f metallb.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kubectl create secret generic -n metallb-system memberlist --from-literal<span style="color:#f92672">=</span>secretkey<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>openssl rand -base64 128<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><p>This is my layer2 configuration, in <em>metallb-config.yaml</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">ConfigMap</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">metallb-system</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">config</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">data</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">config</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    address-pools:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - name: default
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      protocol: layer2
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      addresses:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      - 192.168.100.200-192.168.100.250</span>    
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">kubectl apply -f metallb-config.yaml</span>
+</span></span></code></pre></div><p>I create 4 volumes, namely <em>mysql, gitea, jenkins and maven-agent</em>, specific to each of the tools.</p>
+<p><img src="/images/pipeline1/longhorn-volumes.png" alt="longhorn-volumes"></p>
+<hr>
+<h2 id="installing-mysql">Installing Mysql</h2>
+<p><em>(5 mins)</em></p>
+<p>Referencing <a href="https://dojocube.com/2020/gitea-on-kubernetes-pi-cluster/">Gitea for Kubernetes Cluster</a>, these are the steps for installing Mysql.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create namespace dojocube
+</span></span><span style="display:flex;"><span>docker pull mysql/mysql-server:latest
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mkdir ~/mysql
+</span></span><span style="display:flex;"><span>cd ~/mysql
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>vi mysql-deployment.yaml
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Insert below into mysql-deployment.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">namespace:dojocube</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">port</span>: <span style="color:#ae81ff">3306</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">clusterIP</span>: <span style="color:#ae81ff">None</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">namespace:dojocube</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">strategy</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">type</span>: <span style="color:#ae81ff">Recreate</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">hostname</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mysql/mysql-server:latest</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">imagePullPolicy</span>: <span style="color:#ae81ff">IfNotPresent</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e"># Use secret in real usage</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">MYSQL_ROOT_PASSWORD</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">password</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">3306</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql-persistent-storage</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/var/lib/mysql</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mysql-persistent-storage</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">mysql-pvc</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f mysql-deployment.yaml
+</span></span></code></pre></div><p>You may check on the pod ID and run the following scripts:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl get pods -n dojocube
+</span></span><span style="display:flex;"><span>kubectl exec --namespace<span style="color:#f92672">=</span>dojocube -it mysql-6587f996b5-qrcr6 -- /bin/bash
+</span></span><span style="display:flex;"><span>mysql -u root -p
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#f92672">#</span> <span style="color:#66d9ef">Execute</span> these within the docker prompt, <span style="color:#66d9ef">with</span> username<span style="color:#f92672">=</span>gitea, password<span style="color:#f92672">=</span>gitea, <span style="color:#66d9ef">database</span><span style="color:#f92672">=</span>gitedb
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">USER</span> <span style="color:#e6db74">&#39;gitea&#39;</span><span style="color:#f92672">@</span><span style="color:#e6db74">&#39;%&#39;</span> IDENTIFIED <span style="color:#66d9ef">BY</span> <span style="color:#e6db74">&#39;gitea&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DATABASE</span> giteadb;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GRANT</span> <span style="color:#66d9ef">ALL</span> <span style="color:#66d9ef">PRIVILEGES</span> <span style="color:#66d9ef">ON</span> giteadb.<span style="color:#f92672">*</span> <span style="color:#66d9ef">TO</span> <span style="color:#e6db74">&#39;gitea&#39;</span>;
+</span></span><span style="display:flex;"><span>FLUSH <span style="color:#66d9ef">PRIVILEGES</span>;
+</span></span></code></pre></div><h2 id="installing-gitea">Installing Gitea</h2>
+<p><em>(5 mins)</em></p>
+<p>First, installs Gitea by running thse commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>apt install docker-compose
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mkdir ~/gitea
+</span></span><span style="display:flex;"><span>cd ~/gitea
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>vi docker-compose.yml
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Insert below into docker-compose.yml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#34;2&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">gitea</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">external</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">services</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">server</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">gitea/gitea:latest</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">USER_UID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">USER_GID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">DB_TYPE=mysql</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">DB_HOST=mysql:3306</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">DB_NAME=giteadb</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">DB_USER=gitea</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">DB_PASSWD=gitea</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">always</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">./gitea:/data</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/etc/timezone:/etc/timezone:ro</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/etc/localtime:/etc/localtime:ro</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;3000:3000&#34;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;222:22&#34;</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Builds, starts and stops container</span>
+</span></span><span style="display:flex;"><span>docker-compose up -d
+</span></span><span style="display:flex;"><span>docker-compose down
+</span></span></code></pre></div><p>Second, creates the deployment file for Gitea:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vi gitea-deployment.yaml
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Insert below into gitea-deployment.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">dojocube</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">annotations</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metallb.universe.tf/allow-shared-ip</span>: <span style="color:#ae81ff">home-net</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">port</span>: <span style="color:#ae81ff">3000</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">3000</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nodePort</span>: <span style="color:#ae81ff">30000</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-http</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">port</span>: <span style="color:#ae81ff">2222</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">2222</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nodePort</span>: <span style="color:#ae81ff">32222</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-ssh</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">LoadBalancer</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">loadBalancerIP</span>: <span style="color:#ae81ff">192.168.100.250</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">dojocube</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">replicas</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">strategy</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">type</span>: <span style="color:#ae81ff">Recreate</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">hostname</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">gitea/gitea:latest</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">imagePullPolicy</span>: <span style="color:#ae81ff">IfNotPresent</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">3000</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-http</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">22</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-ssh</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-persistent-storage</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/data</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">gitea-persistent-storage</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">gitea-pvc</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f gitea-deployment.yaml
+</span></span><span style="display:flex;"><span>kubectl get svc -n dojocube
+</span></span></code></pre></div><p>Third, access to the configured url, i.e. <em>192.168.100.250:3000</em> and follows the gitea installation. For my case, the parameters are:</p>
+<pre tabindex="0"><code>username: gitea
+password: gitea
+database: giteadb
+</code></pre><h2 id="installing-jenkins">Installing Jenkins</h2>
+<p><em>(5 mins)</em></p>
+<p>By referencing <a href="https://dojocube.com/2020/jenkins-for-kubernetes-cluster-part-1/">Jenkins for Kuberenetes Cluster</a>, the installation steps are:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mkdir ~/jenkins
+</span></span><span style="display:flex;"><span>cd ~/jenkins
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>vi Dockerfile
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-docker" data-lang="docker"><span style="display:flex;"><span><span style="color:#75715e"># Insert below into Dockerfile</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> balenalib/raspberrypi4-64-debian-openjdk:11-bullseye</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> JENKINS_HOME /var/jenkins_home<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> JENKINS_SLAVE_AGENT_PORT <span style="color:#ae81ff">50000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> apt-get update <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> apt-get install -y --no-install-recommends curl git<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> curl -fL -o /opt/jenkins.war http://updates.jenkins-ci.org/download/war/2.295/jenkins.war<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">VOLUME</span><span style="color:#e6db74"> ${JENKINS_HOME}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> ${JENKINS_HOME}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8080 ${JENKINS_SLAVE_AGENT_PORT}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;/bin/bash&#34;</span>,<span style="color:#e6db74">&#34;-c&#34;</span>,<span style="color:#e6db74">&#34;java -jar /opt/jenkins.war&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Builds, tags the image</span>
+</span></span><span style="display:flex;"><span>docker build -t dojocube/jenkins:1.0 .
+</span></span></code></pre></div><p>Next, creates the Jenkins deployment file and deploys it to the cluster.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vi jenkins-deployment.yaml
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Insert below into jenkins-deployment.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">jenkins</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">dojocube</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">annotations</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metallb.universe.tf/allow-shared-ip</span>: <span style="color:#ae81ff">home-net</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">port</span>: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">name</span>: <span style="color:#ae81ff">jenkins-http</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">nodePort</span>: <span style="color:#ae81ff">30080</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">port</span>: <span style="color:#ae81ff">50000</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">name</span>: <span style="color:#ae81ff">jenkins-slave</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">50000</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">jenkins</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">LoadBalancer</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">loadBalancerIP</span>: <span style="color:#ae81ff">192.168.100.250</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">jenkins</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">dojocube</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">jenkins</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">strategy</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">type</span>: <span style="color:#ae81ff">Recreate</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">jenkins</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">hostname</span>: <span style="color:#ae81ff">jenkins</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">jenkins</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">dojocube/jenkins:1.0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>          - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">jenkins-persistent-storage</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/var/jenkins_home</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">jenkins-persistent-storage</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">jenkins-pvc</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f jenkins-deployment.yaml
+</span></span><span style="display:flex;"><span>kubectl get po -n dojocube
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Gets the pod ID, replace the following accordingly and retrieves the password</span>
+</span></span><span style="display:flex;"><span>kubectl logs -n dojocube jenkins-6c6cb7d48c-pnnr5
+</span></span></code></pre></div><h2 id="installing-maven-agent">Installing Maven-agent</h2>
+<p><em>(5 mins)</em></p>
+<p>By referencing <a href="https://dojocube.com/2020/jenkins-maven-agent-for-kubernetes/">Jenkins Agent on Kubernetes Cluster</a>, the steps to create a maven-agent are:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Source</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># https://hub.docker.com/r/jenkins/slave/dockerfile</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> balenalib/raspberrypi4-64-debian-openjdk:11-bullseye</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ARG</span> VERSION<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>.7<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ARG</span> user<span style="color:#f92672">=</span>jenkins
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ARG</span> group<span style="color:#f92672">=</span>jenkins
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ARG</span> uid<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ARG</span> gid<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Modified for debian-bullseye</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> groupadd -g <span style="color:#e6db74">${</span>gid<span style="color:#e6db74">}</span> <span style="color:#e6db74">${</span>group<span style="color:#e6db74">}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> useradd -d /home/<span style="color:#e6db74">${</span>user<span style="color:#e6db74">}</span> -u <span style="color:#e6db74">${</span>uid<span style="color:#e6db74">}</span> -g <span style="color:#e6db74">${</span>group<span style="color:#e6db74">}</span> -m <span style="color:#e6db74">${</span>user<span style="color:#e6db74">}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">LABEL</span> Description<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;This is a base image, which provides the Jenkins agent executable (slave.jar)&#34;</span> Vendor<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Jenkins project&#34;</span> Version<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>VERSION<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ARG</span> AGENT_WORKDIR<span style="color:#f92672">=</span>/home/<span style="color:#e6db74">${</span>user<span style="color:#e6db74">}</span>/agent<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Modified for debian-bullseye</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get install -y curl bash git git-lfs openssh-client openssl procps <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> curl --create-dirs -fsSLo /usr/share/jenkins/agent.jar https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/<span style="color:#e6db74">${</span>VERSION<span style="color:#e6db74">}</span>/remoting-<span style="color:#e6db74">${</span>VERSION<span style="color:#e6db74">}</span>.jar <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> chmod <span style="color:#ae81ff">755</span> /usr/share/jenkins <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> chmod <span style="color:#ae81ff">644</span> /usr/share/jenkins/agent.jar <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> ln -sf /usr/share/jenkins/agent.jar /usr/share/jenkins/slave.jar <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> apt-get remove -y curl<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">USER</span><span style="color:#e6db74"> ${user}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> AGENT_WORKDIR<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>AGENT_WORKDIR<span style="color:#e6db74">}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mkdir /home/<span style="color:#e6db74">${</span>user<span style="color:#e6db74">}</span>/.jenkins <span style="color:#f92672">&amp;&amp;</span> mkdir -p <span style="color:#e6db74">${</span>AGENT_WORKDIR<span style="color:#e6db74">}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">VOLUME</span><span style="color:#e6db74"> /home/${user}/.jenkins</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">VOLUME</span><span style="color:#e6db74"> ${AGENT_WORKDIR}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /home/${user}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Source</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># https://hub.docker.com/r/jenkins/inbound-agent/dockerfile</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">USER</span><span style="color:#e6db74"> ${user}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> jenkins-agent /usr/share/jenkins/jenkins-agent<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">USER</span><span style="color:#e6db74"> root</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> jenkins-agent /usr/local/bin/jenkins-agent<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> chmod +x /usr/local/bin/jenkins-agent <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> ln -s /usr/local/bin/jenkins-agent /usr/local/bin/jenkins-slave<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">USER</span><span style="color:#e6db74"> ${user}</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [<span style="color:#e6db74">&#34;jenkins-agent&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Next, copies the content of <a href="https://raw.githubusercontent.com/jenkinsci/docker-inbound-agent/master/jenkins-agent">jenkins-agent</a> and pastes it into a file (COPY command will copy this file into the docker image).</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker build -t dojocube/jenkins-agent:1.0 .
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Checks Java version</span>
+</span></span><span style="display:flex;"><span>docker run -it dojocube/jenkins-agent:1.0 /bin/bash
+</span></span><span style="display:flex;"><span>java -version
+</span></span></code></pre></div><h2 id="configuring-jenkins---kubernetes">Configuring Jenkins - Kubernetes</h2>
+<p><em>(5 mins)</em></p>
+<p>First, navigates to the configured url, i.e. <em>192.168.100.250:8080</em>. Installs the recommended commonly used plugins.</p>
+<p><img src="/images/pipeline1/installing-common-plugins.png" alt="installing-common-plugins"></p>
+<hr>
+<p>Second, installs Kuberenetes and Gitea plugin:</p>
+<p><img src="/images/pipeline1/install-kubernetes-plugin.png" alt="install-kubernetes-plugin"></p>
+<hr>
+<p>Third, navigates to Manage Jenkins &gt; Manage Nodes and Cloud &gt; Configure Clouds. Selects Kuberenetes, clicks on the Kuberenetes Cloud Details and tests the connection. Enters Jenkins url:</p>
+<p><img src="/images/pipeline1/test-kubernetes-cloud-connection.png" alt="test-kubernetes-cloud-connection"></p>
+<hr>
+<p>You may setup the Jenkins URL with:</p>
+<pre tabindex="0"><code>Jenkins URL: http://jenkins:8080
+jenkins tunnel: jenkins:50000
+</code></pre><p><img src="/images/pipeline1/configure-cloud-jenkins-url.png" alt="configure-cloud-jenkins-url"></p>
+<hr>
+<p>Fourth, configures the pod template:</p>
+<p><img src="/images/pipeline1/configure-pod-template.png" alt="configure-pod-template"></p>
+<hr>
+<p>Lastly, navigates to Manage Jenkins -&gt; Configure Global Security. Enters the Agent values:</p>
+<p><img src="/images/pipeline1/configure-global-security-agent.png" alt="configure-global-security-agent"></p>
+<hr>
+<h2 id="configuring-jenkins---gitea">Configuring Jenkins - Gitea</h2>
+<p><em>(5 mins)</em></p>
+<p>First, navigates to Manage Jenkins &gt; Configure System. Adds Gitea erver:</p>
+<p><img src="/images/pipeline1/configure-system-gitea-server.png" alt="configure-system-gitea-server"></p>
+<hr>
+<p>Second, creates a new Dojocube Gitea Organization. Configures the Jenkins Credentials and Projects under the General tab.</p>
+<p><img src="/images/pipeline1/create-jenkin-gitea-organization.png" alt="create-jenkin-gitea-organization"></p>
+<hr>
+<p><img src="/images/pipeline1/add-jenkins-credentials.png" alt="add-jenkins-credentials"></p>
+<hr>
+<p><img src="/images/pipeline1/jenkins-project-setup-for-gitea.png" alt="jenkins-project-setup-for-gitea"></p>
+<hr>
+<h2 id="integrating-jenkins-and-gitea">Integrating Jenkins and Gitea</h2>
+<p><em>(5 mins)</em></p>
+<p>By referencing <a href="https://dojocube.com/2020/integrating-jenkins-and-gitea/">Integration between Jenkins and Gitea</a>, adds a new Dojocube organization. Then, creates a Jenkins user in Gitea and adds as collaborators.</p>
+<p><img src="/images/pipeline1/add-jenkins-user-gitea-collaborators.png" alt="add-jenkins-user-gitea-collaborators"></p>
+<hr>
+<p>Next, adds Gitea webhooks to Jenkins and tests the delivery.</p>
+<p><img src="/images/pipeline1/add-gitea-webhook.png" alt="add-gitea-webhook"></p>
+<hr>
+<p><img src="/images/pipeline1/test-webhook-delivery.png" alt="test-webhook-delivery"></p>
+<hr>
+<h2 id="in-action">In Action</h2>
+<p>Finally, if you followed through the steps diligently, building a CI/CD pipeline on a Raspberry PI Cluster is completed. When you commit any code, it triggers the CI pipeline. Maven-agent will build and compile your code.</p>
+<p><img src="/images/pipeline1/jenkins-built-success.png" alt="jenkins-built-success"></p>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="error-testing-connection--failure-executing-get-at-https109601apiv1namespacesdefaultpods-message-forbiddenconfigured-service-account-doesnt-have-access-service-account-may-have-been-revoked">Error testing connection : Failure executing: GET at: https://10.96.0.1/api/v1/namespaces/default/pods. Message: Forbidden!Configured service account doesn&rsquo;t have access. Service account may have been revoked.</h3>
+<p>When testing connection at Kuberenetes Cloud setting, the above error appears. You may fix by:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cd ~/jenkins
+</span></span><span style="display:flex;"><span>vi jenkins-rbac.yaml
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Insert below into jenkins-rbac.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">rbac.authorization.k8s.io/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">ClusterRoleBinding</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">jenkins-rbac</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">dojocube</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">subjects</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">kind</span>: <span style="color:#ae81ff">ServiceAccount</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">default</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">dojocube</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">roleRef</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">kind</span>: <span style="color:#ae81ff">ClusterRole</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">cluster-admin</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">apiGroup</span>: <span style="color:#ae81ff">rbac.authorization.k8s.io</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f jenkins-rbac.yaml
+</span></span></code></pre></div><h3 id="cannot-find-jenkins-password-in-varjenkinshomesecretsinitialadminpassword">Cannot find Jenkins password in /var/jenkins/home/secrets/initialAdminPassword</h3>
+<p>Depending on your configuration, you may find the initialAdminPassword</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker ps
+</span></span><span style="display:flex;"><span>docker logs 90494de7c46d <span style="color:#75715e">#Container ID</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kubectl get po -n dojocube
+</span></span><span style="display:flex;"><span>kubectl logs -n dojocube jenkins-57fd4d8dd4-mwbpr <span style="color:#75715e">#Pod Name</span>
+</span></span></code></pre></div><h3 id="upgrading-jenkins-version">Upgrading Jenkins version</h3>
+<p>For upgrading Jenkins version, the permanent fix is to modify jenkins/Dockerfile</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Find the jenkins.war file and modify the version to the latest</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> curl -fL -o /opt/jenkins.war http://updates.jenkins-ci.org/download/war/2.297/jenkins.war<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker build -t dojocube/jenkins:1.0 .
+</span></span></code></pre></div><h3 id="homejenkinsagentworkspacedojocube_hello-world_mastertmpdurable-5d2c75eascriptsh-1-mvnw-permission-denied">/home/jenkins/agent/workspace/dojocube_hello-world_master@tmp/durable-5d2c75ea/script.sh: 1: ./mvnw: Permission denied</h3>
+<p>You may check the mvnw file in your project and changes the file permission accordingly.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>chmod +x mvnw
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Adds and pushes change to gitea</span>
+</span></span><span style="display:flex;"><span>git update-index --chmod<span style="color:#f92672">=</span>+x mvnw
+</span></span></code></pre></div><ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/raspberry/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Raspberry</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cluster/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Cluster</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/ci/cd/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">CI/CD</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/pipeline/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Pipeline</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://dojocube.com/2021/raspberry-pi-cluster-with-longhorn/">Pi Cluster with Longhorn</a>
+    
+    
+    <a href="https://dojocube.com/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-2/">CI/CD Pipeline on Pi Cluster (II)</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2021/raspberry-pi-cluster-with-longhorn/">Pi Cluster with Longhorn</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2021/kubernetes-pi-cluster-with-ansible/">K8s Pi Cluster with Ansible</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/highly-available-kubernetes-pi-cluster-part-2/">HA K8s Pi Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/highly-available-kubernetes-pi-cluster-part-1/">HA K8s Pi Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-maven-agent-for-kubernetes/">Jenkins Maven Agent</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-pipeline-for-kubernetes-cluster/">Jenkins Pipeline for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/integrating-jenkins-and-gitea/">Integrating Jenkins and Gitea</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/helm-for-kubernetes-cluster/">Helm for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-2/">Jenkins for K8s Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-1/">Jenkins for K8s Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-on-kubernetes-pi-cluster/">Gitea for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/kubernetes-cluster-on-raspberry-pi/">Kubernetes Cluster on Pi</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/docker-on-raspberry-pi-cluster/">Docker for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/external-storage-for-raspberry-pi-cluster/">External Storage</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>

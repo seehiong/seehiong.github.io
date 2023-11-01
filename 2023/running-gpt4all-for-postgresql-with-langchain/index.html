@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Running GPT4All for your PostgreSQL with LangChain | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="In this post, I will walk you through the process of setting up Python GPT4All on my Windows PC. Additionally, I will demonstrate how to utilize the power of GPT4All along with SQL Chain for querying a postgreSQL database.
+Prerequisites Before we proceed with the installation process, it is important to have the necessary prerequisites in place.
+To follow along with this guide, make sure you have the following:
+Jupyter Notebook installed using Anaconda PostgreSQL setup and ready to use Having these prerequisites fulfilled is crucial for the successful execution of the upcoming steps.">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Running GPT4All for your PostgreSQL with LangChain" />
+<meta property="og:description" content="In this post, I will walk you through the process of setting up Python GPT4All on my Windows PC. Additionally, I will demonstrate how to utilize the power of GPT4All along with SQL Chain for querying a postgreSQL database.
+Prerequisites Before we proceed with the installation process, it is important to have the necessary prerequisites in place.
+To follow along with this guide, make sure you have the following:
+Jupyter Notebook installed using Anaconda PostgreSQL setup and ready to use Having these prerequisites fulfilled is crucial for the successful execution of the upcoming steps." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2023/running-gpt4all-for-postgresql-with-langchain/" /><meta property="article:section" content="2023" />
+<meta property="article:published_time" content="2023-05-21T20:00:00+08:00" />
+<meta property="article:modified_time" content="2023-05-21T20:00:00+08:00" />
+<meta itemprop="name" content="Running GPT4All for your PostgreSQL with LangChain">
+<meta itemprop="description" content="In this post, I will walk you through the process of setting up Python GPT4All on my Windows PC. Additionally, I will demonstrate how to utilize the power of GPT4All along with SQL Chain for querying a postgreSQL database.
+Prerequisites Before we proceed with the installation process, it is important to have the necessary prerequisites in place.
+To follow along with this guide, make sure you have the following:
+Jupyter Notebook installed using Anaconda PostgreSQL setup and ready to use Having these prerequisites fulfilled is crucial for the successful execution of the upcoming steps."><meta itemprop="datePublished" content="2023-05-21T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-05-21T20:00:00+08:00" />
+<meta itemprop="wordCount" content="698">
+<meta itemprop="keywords" content="GPT4All,OpenAI,LangChain,PostgreSQL," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Running GPT4All for your PostgreSQL with LangChain"/>
+<meta name="twitter:description" content="In this post, I will walk you through the process of setting up Python GPT4All on my Windows PC. Additionally, I will demonstrate how to utilize the power of GPT4All along with SQL Chain for querying a postgreSQL database.
+Prerequisites Before we proceed with the installation process, it is important to have the necessary prerequisites in place.
+To follow along with this guide, make sure you have the following:
+Jupyter Notebook installed using Anaconda PostgreSQL setup and ready to use Having these prerequisites fulfilled is crucial for the successful execution of the upcoming steps."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2023
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Running GPT4All for your PostgreSQL with LangChain</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2023-05-21T20:00:00+08:00">May 21, 2023</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 698 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p>In this post, I will walk you through the process of setting up <a href="https://github.com/nomic-ai/gpt4all/blob/main/gpt4all-bindings/python/README.md">Python GPT4All</a> on my Windows PC. Additionally, I will demonstrate how to utilize the power of GPT4All along with <a href="https://python.langchain.com/en/latest/modules/chains/examples/sqlite.html">SQL Chain</a> for querying a postgreSQL database.</p>
+<h1 id="prerequisites">Prerequisites</h1>
+<p>Before we proceed with the installation process, it is important to have the necessary prerequisites in place.</p>
+<p>To follow along with this guide, make sure you have the following:</p>
+<ul>
+<li><a href="https://www.geeksforgeeks.org/how-to-install-jupyter-notebook-in-windows/">Jupyter Notebook</a> installed using Anaconda</li>
+<li><a href="https://www.postgresql.org/download/windows/">PostgreSQL</a> setup and ready to use</li>
+</ul>
+<p>Having these prerequisites fulfilled is crucial for the successful execution of the upcoming steps.</p>
+<p>Furthermore, for this demonstration, I have downloaded the <a href="https://huggingface.co/nomic-ai/gpt4all-j">GPT4All-J v1.3-groovy</a> model.</p>
+<h1 id="preparations">Preparations</h1>
+<p>To begin, open Jupyter Notebook and install the necessary dependencies by running the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>pip install langchain azure<span style="color:#f92672">.</span>core gpt4all psycopg2
+</span></span></code></pre></div><p>Once the dependencies are installed, proceed with setting up LangChain and loading the model. Use the following code snippet:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain <span style="color:#f92672">import</span> PromptTemplate, LLMChain
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.llms <span style="color:#f92672">import</span> GPT4All
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.callbacks.streaming_stdout <span style="color:#f92672">import</span> StreamingStdOutCallbackHandler
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>local_path<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;X:/ggml-gpt4all-j-v1.3-groovy.bin&#39;</span>
+</span></span><span style="display:flex;"><span>callbacks <span style="color:#f92672">=</span> [StreamingStdOutCallbackHandler()]
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> GPT4All(model<span style="color:#f92672">=</span>local_path, callbacks<span style="color:#f92672">=</span>callbacks, verbose<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><p>Here&rsquo;s an image showcasing the Jupyter Notebook setup with LangChain and GPT4All model:</p>
+<p><img src="/images/sql/jupyter-langchain-gpt4all-model.png" alt="jupyter-langchain-gpt4all-model"></p>
+<p>For the purposes of this demonstration, I utilized the <a href="https://github.com/catherinedevlin/opensourceshakespeare">PostgreSQL version of Open Source Shakespeare site</a> as the sample database. We will be performing queries against this Shakespearean data throughout the guide.</p>
+<p>To visualize the structure of the database, an Entity-Relationship (ER) diagram can be immensely helpful. Here is the ER diagram as viewed in <a href="https://dbeaver.io/download/">DBeaver</a>:</p>
+<p><img src="/images/sql/dbeaver-open-source-shakespeare-er-diagram.png" alt="dbeaver-open-source-shakespeare-er-diagram"></p>
+<p>The diagram provides a comprehensive overview of the entities and their relationships within the database, aiding in understanding the data model and facilitating the execution of queries.</p>
+<h1 id="querying-gpt4all">Querying GPT4All</h1>
+<p>Now that we have set up the prompt template and LangChain, we can proceed with querying GPT4All:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>template <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;Question: </span><span style="color:#e6db74">{question}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Answer: Let&#39;s think step by step.&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>prompt <span style="color:#f92672">=</span> PromptTemplate(template<span style="color:#f92672">=</span>template, input_variables<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;question&#34;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>llm_chain <span style="color:#f92672">=</span> LLMChain(prompt<span style="color:#f92672">=</span>prompt, llm<span style="color:#f92672">=</span>llm)
+</span></span><span style="display:flex;"><span>question <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;How does Shakespeare present the love between Romeo and Juliet?&#34;</span>
+</span></span><span style="display:flex;"><span>llm_chain<span style="color:#f92672">.</span>run(question)
+</span></span></code></pre></div><p><img src="/images/sql/langchain-gpt4all-query.png" alt="langchain-gpt4all-query"></p>
+<h1 id="querying-gpt4all-with-postgresql">Querying GPT4All with PostgreSQL</h1>
+<p>To enable querying from PostgreSQL using SQLChain, we need to set up the SQLDatabase and SQLDatabaseChain. Here&rsquo;s an example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain <span style="color:#f92672">import</span> SQLDatabase, SQLDatabaseChain
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set up the SQLDatabase by providing the PostgreSQL connection URI and specifying the tables to include</span>
+</span></span><span style="display:flex;"><span>db <span style="color:#f92672">=</span> SQLDatabase<span style="color:#f92672">.</span>from_uri(<span style="color:#e6db74">&#34;postgresql://postgres:postgres@192.168.68.132:5432/postgres&#34;</span>, include_tables<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;paragraph&#39;</span>,<span style="color:#e6db74">&#39;chapter&#39;</span>,<span style="color:#e6db74">&#39;character&#39;</span>,<span style="color:#e6db74">&#39;work&#39;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Define the prompt template</span>
+</span></span><span style="display:flex;"><span>_DEFAULT_TEMPLATE <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;Given an input question, first create a syntactically correct </span><span style="color:#e6db74">{dialect}</span><span style="color:#e6db74"> query to run, then look at the results of the query and return the answer.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Use the following format:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Question: &#34;Question here&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">SQLQuery: &#34;SQL Query to run&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">SQLResult: &#34;Result of the SQLQuery&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Answer: &#34;Final answer here&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Only use the following tables:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"></span><span style="color:#e6db74">{table_info}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">If someone asks for the book written, they really mean the work table.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Question: </span><span style="color:#e6db74">{input}</span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>PROMPT <span style="color:#f92672">=</span> PromptTemplate(
+</span></span><span style="display:flex;"><span>    input_variables<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;input&#34;</span>, <span style="color:#e6db74">&#34;table_info&#34;</span>, <span style="color:#e6db74">&#34;dialect&#34;</span>], template<span style="color:#f92672">=</span>_DEFAULT_TEMPLATE
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create an instance of SQLDatabaseChain</span>
+</span></span><span style="display:flex;"><span>db_chain <span style="color:#f92672">=</span> SQLDatabaseChain<span style="color:#f92672">.</span>from_llm(llm, db, prompt<span style="color:#f92672">=</span>PROMPT, verbose<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><p>With these setups in place, you can proceed to query PostgreSQL using SQLChain and prompt GPT4All with the obtained results:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>response <span style="color:#f92672">=</span> db_chain(<span style="color:#e6db74">&#34;How many books are there in the work table&#34;</span>)
+</span></span></code></pre></div><p><img src="/images/sql/langchain-gpt4all-db-chain.png" alt="langchain-gpt4all-db-chain"></p>
+<p>Please note that generating the response may take some time, especially on a Windows PC. The process involves interacting with the database, running queries, and generating a response using GPT4All, which can be computationally intensive.</p>
+<h1 id="querying-openai-with-postgresql">Querying OpenAI with PostgreSQL</h1>
+<p>As a comparison, you can also utilize OpenAI for querying PostgreSQL using SQLChain. Here&rsquo;s an example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.llms <span style="color:#f92672">import</span> OpenAI
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span>OpenAI<span style="color:#f92672">.</span>api_key <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;OPENAI_API_KEY&#39;</span>)
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> OpenAI()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>_DEFAULT_TEMPLATE <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;Given an input question, first create a syntactically correct </span><span style="color:#e6db74">{dialect}</span><span style="color:#e6db74"> query to run, then look at the results of the query and return the answer.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Use the following format:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Question: &#34;Question here&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">SQLQuery: &#34;SQL Query to run&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">SQLResult: &#34;Result of the SQLQuery&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Answer: &#34;Final answer here&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Only use the following tables:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"></span><span style="color:#e6db74">{table_info}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">If someone asks for the book written, they really mean the work table.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Question: </span><span style="color:#e6db74">{input}</span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain <span style="color:#f92672">import</span> PromptTemplate
+</span></span><span style="display:flex;"><span>PROMPT <span style="color:#f92672">=</span> PromptTemplate(
+</span></span><span style="display:flex;"><span>    input_variables<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;input&#34;</span>, <span style="color:#e6db74">&#34;table_info&#34;</span>, <span style="color:#e6db74">&#34;dialect&#34;</span>], template<span style="color:#f92672">=</span>_DEFAULT_TEMPLATE
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain <span style="color:#f92672">import</span> SQLDatabase, SQLDatabaseChain
+</span></span><span style="display:flex;"><span>db <span style="color:#f92672">=</span> SQLDatabase<span style="color:#f92672">.</span>from_uri(<span style="color:#e6db74">&#34;postgresql://postgres:postgres@192.168.68.132:5432/postgres&#34;</span>, include_tables<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;paragraph&#39;</span>,<span style="color:#e6db74">&#39;chapter&#39;</span>,<span style="color:#e6db74">&#39;character&#39;</span>,<span style="color:#e6db74">&#39;work&#39;</span>])
+</span></span><span style="display:flex;"><span>db_chain <span style="color:#f92672">=</span> SQLDatabaseChain<span style="color:#f92672">.</span>from_llm(llm, db, prompt<span style="color:#f92672">=</span>PROMPT, verbose<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>db_chain(<span style="color:#e6db74">&#34;How many books are there in the work table&#34;</span>)
+</span></span></code></pre></div><p>With this setup, you can query PostgreSQL using SQLChain and OpenAI. The response from OpenAI is generally faster compared to GPT4All:</p>
+<p><img src="/images/sql/langchain-openai-db-chain.png" alt="langchain-openai-db-chain"></p>
+<p>Please note that you need to provide your OpenAI API key in the OpenAI.api_key variable for authentication.</p>
+<ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/gpt4all/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">GPT4All</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/openai/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">OpenAI</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/langchain/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">LangChain</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/postgresql/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">PostgreSQL</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://dojocube.com/2023/running-llama-server-in-local-machine/">Running LLaMA server in local machine</a>
+    
+    
+    <a href="https://dojocube.com/2023/auto-fill-pdf-with-langchain-and-langflow/">Autofill PDF with LangChain and LangFlow</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2023/building-chatbot-for-your-pdf-files/">Building ChatBot for your PDF files with LangChain</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/building-a-basic-chain-with-langchain/">Building a basic Chain with LangChain</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>

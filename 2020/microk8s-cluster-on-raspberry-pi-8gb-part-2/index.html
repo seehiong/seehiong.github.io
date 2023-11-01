@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>MicroK8s on Pi 4 8GB (II) | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="Adding few low-cost Raspberry Pi nodes to improve your MicroK8s performance
+MicroK8s Cluster on Raspberry Pi 4 Model B 8GB (Part II) (Total Setup Time: 45 mins)
+Following up from the previous post, for this second part, I will be adding new Raspberry Pi nodes to the MicroK8s Cluster. However, other than Raspberry Pi, you can also re-purpose some of your older unused laptop or PC and add them to your MicroK8s cluster.">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="MicroK8s on Pi 4 8GB (II)" />
+<meta property="og:description" content="Adding few low-cost Raspberry Pi nodes to improve your MicroK8s performance
+MicroK8s Cluster on Raspberry Pi 4 Model B 8GB (Part II) (Total Setup Time: 45 mins)
+Following up from the previous post, for this second part, I will be adding new Raspberry Pi nodes to the MicroK8s Cluster. However, other than Raspberry Pi, you can also re-purpose some of your older unused laptop or PC and add them to your MicroK8s cluster." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2020/microk8s-cluster-on-raspberry-pi-8gb-part-2/" /><meta property="article:section" content="2020" />
+<meta property="article:published_time" content="2020-06-09T20:00:00+08:00" />
+<meta property="article:modified_time" content="2020-06-09T20:00:00+08:00" />
+<meta itemprop="name" content="MicroK8s on Pi 4 8GB (II)">
+<meta itemprop="description" content="Adding few low-cost Raspberry Pi nodes to improve your MicroK8s performance
+MicroK8s Cluster on Raspberry Pi 4 Model B 8GB (Part II) (Total Setup Time: 45 mins)
+Following up from the previous post, for this second part, I will be adding new Raspberry Pi nodes to the MicroK8s Cluster. However, other than Raspberry Pi, you can also re-purpose some of your older unused laptop or PC and add them to your MicroK8s cluster."><meta itemprop="datePublished" content="2020-06-09T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-06-09T20:00:00+08:00" />
+<meta itemprop="wordCount" content="383">
+<meta itemprop="keywords" content="Raspberry,Cluster,MicroK8s," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="MicroK8s on Pi 4 8GB (II)"/>
+<meta name="twitter:description" content="Adding few low-cost Raspberry Pi nodes to improve your MicroK8s performance
+MicroK8s Cluster on Raspberry Pi 4 Model B 8GB (Part II) (Total Setup Time: 45 mins)
+Following up from the previous post, for this second part, I will be adding new Raspberry Pi nodes to the MicroK8s Cluster. However, other than Raspberry Pi, you can also re-purpose some of your older unused laptop or PC and add them to your MicroK8s cluster."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2020
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">MicroK8s on Pi 4 8GB (II)</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2020-06-09T20:00:00+08:00">June 9, 2020</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 2 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 383 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><img src="/images/microk8s2/leaf_nodes.png" alt="raspberry-pi-leaf-nodes-for-microk8s-cluster"></p>
+<p>Adding few low-cost Raspberry Pi nodes to improve your MicroK8s performance</p>
+<hr>
+<h1 id="microk8s-cluster-on-raspberry-pi-4-model-b-8gb-part-ii">MicroK8s Cluster on Raspberry Pi 4 Model B 8GB (Part II)</h1>
+<p><em>(Total Setup Time: 45 mins)</em></p>
+<p>Following up from the <a href="../microk8s-cluster-on-raspberry-pi-8gb-part-1">previous post</a>, for this second part, I will be adding new Raspberry Pi nodes to the MicroK8s Cluster. However, other than Raspberry Pi, you can also re-purpose some of your older unused laptop or PC and add them to your MicroK8s cluster.</p>
+<h2 id="creating-new-pi-nodes">Creating new Pi nodes</h2>
+<p><em>(40 mins)</em></p>
+<p>I will be using 2 of my older Pi 3B and using the same <a href="https://ubuntu.com/download/raspberry-pi">Ubuntu Server (64-bit)</a> as my OS.</p>
+<p>The default username is <strong>ubuntu</strong> and password is <strong>ubuntu</strong>. Update the OS to the latest and perform all of the following steps:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>sudo apt upgrade
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sudo snap install microk8s --classic
+</span></span><span style="display:flex;"><span>sudo usermod -a -G microk8s ubuntu
+</span></span><span style="display:flex;"><span>sudo chown -f -R ubuntu ~/.kube
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sudo sed -i <span style="color:#e6db74">&#39;$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 swapaccount=1/&#39;</span> /boot/firmware/cmdline.txt
+</span></span></code></pre></div><p>Finally, change its hostname by running:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo nano /etc/hostname
+</span></span><span style="display:flex;"><span>sudo nano /etc/hosts
+</span></span></code></pre></div><p>For now, I will repeat the above process for the 2nd raspberry pi. Will plan to use <a href="https://sourceforge.net/projects/clusterssh/">Cluster SSH</a> when I am ready to grow my cluster.</p>
+<h2 id="master-and-leaf-nodes-for-your-microk8s-cluster">Master and Leaf nodes for your MicroK8s cluster</h2>
+<p><em>(5 mins)</em></p>
+<p>On the appointed master node (typically the one which is more powerful in terms of processing power), run the following command for each node to be added:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo microk8s add-node
+</span></span></code></pre></div><p>For each of the 2 newly created nodes, copy the output from the master node. The command will be similar to this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>microk8s join 192.168.xx.xx:25000/HWvrBvNWjIcOYAoSMfpxpwSbMkNHIfAX
+</span></span></code></pre></div><p>To check if the nodes are joined successfully, from the master node run this command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>microk8s kubectl get node
+</span></span></code></pre></div><p>That&rsquo;s it! With this MicroK8s Cluster on Raspberry Pi 4 Model B 8GB in place, I am able to try out some of the cool things Kubernetes has to offer, and at the same time, to slowly offload our CI/CP pipelines to the cluster. Stay tuned on the next few topics on the different use cases of this lightweight cluster!</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="joining-as-a-node-on-the-master-node-itself">Joining as a node on the master node itself</h3>
+<p>If you have accidentally added as a node on the master node itself, simply leave the cluster:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo microk8s add-node
+</span></span><span style="display:flex;"><span>microk8s join 192.168.xx.xx:25000/HWvrBvNWjIcOYAoSMfpxpwSbMkNHIfAX <span style="color:#75715e"># joining as a leaf node to ownself</span>
+</span></span><span style="display:flex;"><span>microk8s leave <span style="color:#75715e"># just leave!</span>
+</span></span></code></pre></div><ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/raspberry/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Raspberry</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cluster/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Cluster</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/microk8s/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">MicroK8s</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://dojocube.com/2020/microk8s-cluster-on-raspberry-pi-8gb-part-1/">MicroK8s on Pi 4 8GB (I)</a>
+    
+    
+    <a href="https://dojocube.com/2020/plasma-bigscreen-on-pi-8gb/">Plasma Bigscreen</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-1/">MicroK8s on Pi 4 8GB (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/openmediavault-on-raspberry-pi/">NAS Server</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>

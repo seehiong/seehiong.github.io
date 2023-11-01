@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>HA K8s Pi Cluster (I) | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise
+HA Kubernetes Pi Cluster (Part I) (Total Setup Time: 25 mins)
+On this special day, I will like to wish all Singaporeans and Singapore a Happy 55th National Day!
+With the newly purchase 2x Raspberry Pi Model B 8GB and 64GB SD card to my collection, I will setup a Highly Available Kubernetes Pi Cluster.">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="HA K8s Pi Cluster (I)" />
+<meta property="og:description" content="By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise
+HA Kubernetes Pi Cluster (Part I) (Total Setup Time: 25 mins)
+On this special day, I will like to wish all Singaporeans and Singapore a Happy 55th National Day!
+With the newly purchase 2x Raspberry Pi Model B 8GB and 64GB SD card to my collection, I will setup a Highly Available Kubernetes Pi Cluster." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2020/highly-available-kubernetes-pi-cluster-part-1/" /><meta property="article:section" content="2020" />
+<meta property="article:published_time" content="2020-08-09T20:00:00+08:00" />
+<meta property="article:modified_time" content="2020-08-09T20:00:00+08:00" />
+<meta itemprop="name" content="HA K8s Pi Cluster (I)">
+<meta itemprop="description" content="By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise
+HA Kubernetes Pi Cluster (Part I) (Total Setup Time: 25 mins)
+On this special day, I will like to wish all Singaporeans and Singapore a Happy 55th National Day!
+With the newly purchase 2x Raspberry Pi Model B 8GB and 64GB SD card to my collection, I will setup a Highly Available Kubernetes Pi Cluster."><meta itemprop="datePublished" content="2020-08-09T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-08-09T20:00:00+08:00" />
+<meta itemprop="wordCount" content="1333">
+<meta itemprop="keywords" content="Raspberry,Cluster,HA,KeepedAlive,Etcd," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="HA K8s Pi Cluster (I)"/>
+<meta name="twitter:description" content="By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise
+HA Kubernetes Pi Cluster (Part I) (Total Setup Time: 25 mins)
+On this special day, I will like to wish all Singaporeans and Singapore a Happy 55th National Day!
+With the newly purchase 2x Raspberry Pi Model B 8GB and 64GB SD card to my collection, I will setup a Highly Available Kubernetes Pi Cluster."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2020
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">HA K8s Pi Cluster (I)</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2020-08-09T20:00:00+08:00">August 9, 2020</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 7 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 1333 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><img src="/images/ha-k8s1/highly-available-kubernetes-pi-cluster.png" alt="highly-available-kubernetes-pi-cluster"></p>
+<p>By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise</p>
+<hr>
+<h1 id="ha-kubernetes-pi-cluster-part-i">HA Kubernetes Pi Cluster (Part I)</h1>
+<p><em>(Total Setup Time: 25 mins)</em></p>
+<p>On this special day, I will like to wish all Singaporeans and Singapore a Happy 55th <a href="https://www.ndp.gov.sg/">National Day</a>!</p>
+<p>With the newly purchase 2x Raspberry Pi Model B 8GB and 64GB SD card to my collection, I will setup a Highly Available Kubernetes Pi Cluster. In this guide, I will setup an <a href="https://etcd.io/">external etcd</a> key-value store. In the <a href="../highly-available-kubernetes-pi-cluster-part-2">next article</a>, I will continue with the HA configuration.</p>
+<h2 id="preparing-os">Preparing OS</h2>
+<p><em>(10 mins)</em></p>
+<p>First, I am using <a href="https://ubuntu.com/download/raspberry-pi">Ubuntu Server (64-bit)</a> as my OS. After burning the image onto my 64GB SD card, create an empty file <strong>ssh</strong> in d:/boot. This section is required for each master nodes.</p>
+<p>Second, change the default password <em>ubuntu</em> for the default ubuntu user. Upgrade the OS:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>sudo apt upgrade
+</span></span></code></pre></div><p>Third, change the hostname by running:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/hostname
+</span></span><span style="display:flex;"><span>sudo vi /etc/hosts
+</span></span></code></pre></div><p>Fourth, letting iptables to see <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/">bridged traffic</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Checks if br_netfilter is loaded</span>
+</span></span><span style="display:flex;"><span>lsmod | grep br_netfilter
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Loads its explicitly</span>
+</span></span><span style="display:flex;"><span>sudo modprobe br_netfilter
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Sees bridged traffic</span>
+</span></span><span style="display:flex;"><span>cat <span style="color:#e6db74">&lt;&lt;EOF | sudo tee /etc/sysctl.d/k8s.conf
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">net.bridge.bridge-nf-call-ip6tables = 1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">net.bridge.bridge-nf-call-iptables = 1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sudo sysctl --system
+</span></span></code></pre></div><p>Fifth, enable memory cgroup, by adding the following to <em>/boot/firmware/cmdline.txt</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">cgroup</span>=<span style="color:#a6e22e">cpuset</span> <span style="color:#a6e22e">cgroup_enable</span>=<span style="color:#a6e22e">memory</span> <span style="color:#a6e22e">cgroup_memory</span>=<span style="color:#ae81ff">1</span> <span style="color:#a6e22e">swapaccount</span>=<span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Finally, add the following to <em>/boot/firmware/usercfg.txt</em> for <a href="https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README">disabling WiFi and Bluetooth</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">dtoverlay</span>=<span style="color:#a6e22e">disable</span>-<span style="color:#a6e22e">wifi</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">dtoverlay</span>=<span style="color:#a6e22e">disable</span>-<span style="color:#a6e22e">bt</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Memory</span> <span style="color:#a6e22e">group</span> <span style="color:#a6e22e">should</span> <span style="color:#a6e22e">be</span> <span style="color:#ae81ff">1</span> <span style="color:#a6e22e">after</span> <span style="color:#a6e22e">reboot</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">sudo</span> <span style="color:#a6e22e">reboot</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">grep</span> <span style="color:#a6e22e">mem</span> <span style="color:#e6db74">/proc/</span><span style="color:#a6e22e">cgroups</span> | <span style="color:#a6e22e">awk</span> <span style="color:#e6db74">&#39;{ print $4 }&#39;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><h2 id="creating-virtual-ip">Creating Virtual IP</h2>
+<p><em>(5 mins)</em></p>
+<p>First, install <a href="https://www.keepalived.org/manpage.html">keepalived</a> referencing from <a href="https://keepalived.org/LVS-NAT-Keepalived-HOWTO.html">LVS-NAT-Keepalived</a> for all master nodes.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e">#Installs keepalived</span>
+</span></span><span style="display:flex;"><span>sudo apt install keepalived
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Configures keepalived</span>
+</span></span><span style="display:flex;"><span>sudo vi /etc/keepalived/keepalived.conf
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>#<span style="color:#a6e22e">VRRP</span> <span style="color:#a6e22e">Instances</span> <span style="color:#a6e22e">definitions</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>#<span style="color:#a6e22e">state</span> <span style="color:#a6e22e">MASTER</span> <span style="color:#a6e22e">for</span> <span style="color:#a6e22e">first</span> <span style="color:#a6e22e">master</span>, <span style="color:#a6e22e">BACKUP</span> <span style="color:#a6e22e">for</span> <span style="color:#a6e22e">other</span> <span style="color:#a6e22e">master</span> <span style="color:#a6e22e">nodes</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">vrrp_instance</span> <span style="color:#a6e22e">VI_1</span> {<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#a6e22e">state</span> <span style="color:#a6e22e">MASTER</span> <span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#a6e22e">interface</span> <span style="color:#a6e22e">eth0</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#a6e22e">virtual_router_id</span> <span style="color:#ae81ff">51</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#a6e22e">priority</span> <span style="color:#ae81ff">150</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#a6e22e">authentication</span> {<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>        <span style="color:#a6e22e">auth_type</span> <span style="color:#a6e22e">PASS</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>        <span style="color:#a6e22e">auth_pass</span> <span style="color:#a6e22e">DOJOCUBE</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    }<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#a6e22e">virtual_ipaddress</span> {<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>        <span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">200</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    }<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Virtual</span> <span style="color:#a6e22e">Servers</span> <span style="color:#a6e22e">definitions</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">virtual_server</span> <span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">200</span> <span style="color:#ae81ff">6443</span> {<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	<span style="color:#a6e22e">delay_loop</span> <span style="color:#ae81ff">6</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	<span style="color:#a6e22e">lb_algo</span> <span style="color:#a6e22e">rr</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	<span style="color:#a6e22e">lb_kind</span> <span style="color:#a6e22e">NAT</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	<span style="color:#a6e22e">protocol</span> <span style="color:#a6e22e">TCP</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	<span style="color:#a6e22e">real_server</span> <span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span> <span style="color:#ae81ff">6443</span> {<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>		<span style="color:#a6e22e">weight</span> <span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>		<span style="color:#a6e22e">TCP_CHECK</span> {<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>			<span style="color:#a6e22e">connect_timeout</span> <span style="color:#ae81ff">3</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>			<span style="color:#a6e22e">connect_port</span> <span style="color:#ae81ff">6443</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>		}<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	}<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	<span style="color:#a6e22e">real_server</span> <span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">173</span> <span style="color:#ae81ff">6443</span> {<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>		<span style="color:#a6e22e">weight</span> <span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>		<span style="color:#a6e22e">TCP_CHECK</span> {<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>			<span style="color:#a6e22e">connect_timeout</span> <span style="color:#ae81ff">3</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>			<span style="color:#a6e22e">connect_port</span> <span style="color:#ae81ff">6443</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>		}<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	}<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	<span style="color:#a6e22e">real_server</span> <span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">100</span> <span style="color:#ae81ff">6443</span> {<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>		<span style="color:#a6e22e">weight</span> <span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>		<span style="color:#a6e22e">TCP_CHECK</span> {<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>			<span style="color:#a6e22e">connect_timeout</span> <span style="color:#ae81ff">3</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>			<span style="color:#a6e22e">connect_port</span> <span style="color:#ae81ff">6443</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>		}<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>	}<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Restarts keepalived</span>
+</span></span><span style="display:flex;"><span>sudo systemctl restart keepalived
+</span></span></code></pre></div><p>Second, test the connection, which will fail at this point in time:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>nc -v 192.168.100.200 <span style="color:#ae81ff">6443</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Expected result</span>
+</span></span><span style="display:flex;"><span>nc: connect to 192.168.100.200 port <span style="color:#ae81ff">6443</span> <span style="color:#f92672">(</span>tcp<span style="color:#f92672">)</span> failed: Connection refused
+</span></span></code></pre></div><h2 id="preparing-certs-for-etcd">Preparing certs for etcd</h2>
+<p><em>(5 mins)</em></p>
+<p>First, by following <a href="https://networklessons.com/uncategorized/openssl-certification-authority-ca-ubuntu-server">openssl CA</a>, configure openssl and create root cert:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo su
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Openssl configuration</span>
+</span></span><span style="display:flex;"><span>vi /usr/lib/ssl/openssl.cnf
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>[ <span style="color:#a6e22e">CA_default</span> ]                                                                                                                                                                                <span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">dir</span>             = <span style="color:#e6db74">/root/</span><span style="color:#a6e22e">ca</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">mkdir</span> <span style="color:#e6db74">/root/</span><span style="color:#a6e22e">ca</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">cd</span> <span style="color:#e6db74">/root/</span><span style="color:#a6e22e">ca</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">mkdir</span> <span style="color:#a6e22e">newcerts</span> <span style="color:#a6e22e">certs</span> <span style="color:#a6e22e">crl</span> <span style="color:#a6e22e">private</span> <span style="color:#a6e22e">requests</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">touch</span> <span style="color:#a6e22e">index</span>.<span style="color:#a6e22e">txt</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#39;1234&#39;</span> &gt; <span style="color:#a6e22e">serial</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Root</span> <span style="color:#a6e22e">certificate</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">openssl</span> <span style="color:#a6e22e">genrsa</span> -<span style="color:#a6e22e">aes256</span> -<span style="color:#a6e22e">out</span> <span style="color:#a6e22e">private</span>/<span style="color:#a6e22e">cakey</span>.<span style="color:#a6e22e">pem</span> <span style="color:#ae81ff">4096</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">openssl</span> <span style="color:#a6e22e">req</span> -<span style="color:#a6e22e">new</span> -<span style="color:#a6e22e">x509</span> -<span style="color:#a6e22e">key</span> <span style="color:#a6e22e">private</span><span style="color:#e6db74">/cakey.pem -out cacert.pem -days 3650 -set_serial 0 -subj &#39;/</span><span style="color:#a6e22e">C</span>=<span style="color:#a6e22e">SG</span><span style="color:#e6db74">/ST=SG/</span><span style="color:#a6e22e">O</span>=<span style="color:#a6e22e">Dojocube</span>/<span style="color:#a6e22e">CN</span>=<span style="color:#a6e22e">master1</span>&#39;<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Second, create certs for all master nodes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Create master nodes&#39; certificate</span>
+</span></span><span style="display:flex;"><span>cd /root/ca/requests/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>openssl genrsa -out etcd-key.pem
+</span></span><span style="display:flex;"><span>openssl req -new -key etcd-key.pem -out etcd.csr -subj <span style="color:#e6db74">&#39;/C=SG/ST=SG/O=Dojocube/CN=master1,master2,master3,localhost,cluster-endpoint&#39;</span>
+</span></span><span style="display:flex;"><span>openssl ca -in etcd.csr -out etcd.pem <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -extfile &lt;<span style="color:#f92672">(</span>printf <span style="color:#e6db74">&#34;subjectAltName=IP:192.168.100.119,IP:192.168.100.173,IP:192.168.100.100,IP:192.168.100.200,IP:127.0.0.1,\
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  DNS:master1,DNS:master2,DNS:master3,DNS:localhost,DNS:cluster-endpoint&#34;</span><span style="color:#f92672">)</span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>openssl genrsa -out peer-etcd-key.pem
+</span></span><span style="display:flex;"><span>openssl req -new -key peer-etcd-key.pem -out peer-etcd.csr -subj <span style="color:#e6db74">&#39;/C=SG/ST=SG/O=Dojocube/CN=192.168.100.119,192.168.100.173,192.168.100.100,192.168.100.200&#39;</span>
+</span></span><span style="display:flex;"><span>openssl ca -in peer-etcd.csr -out peer-etcd.pem <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -extfile &lt;<span style="color:#f92672">(</span>printf <span style="color:#e6db74">&#34;subjectAltName=IP:192.168.100.119,IP:192.168.100.173,IP:192.168.100.100,IP:192.168.100.200,IP:127.0.0.1,\
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  DNS:master1,DNS:master2,DNS:master3,DNS:localhost,DNS:cluster-endpoint&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>rm etcd.csr peer-etcd.csr
+</span></span><span style="display:flex;"><span>mv etcd-key.pem peer-etcd-key.pem /root/ca/private/
+</span></span><span style="display:flex;"><span>mv etcd.pem peer-etcd.pem /root/ca/certs/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Protects /root/ca folder</span>
+</span></span><span style="display:flex;"><span>chmod -R <span style="color:#ae81ff">600</span> /root/ca
+</span></span></code></pre></div><p>Third, copies all certs to <em>/srv/etcd-certs/</em> for all master nodes.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Copies certs to master1  </span>
+</span></span><span style="display:flex;"><span>cp /root/ca/cacert.pem /root/ca/private/etcd-key.pem /root/ca/private/peer-etcd-key.pem <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  /root/ca/certs/etcd.pem /root/ca/certs/peer-etcd.pem /srv/etcd-certs/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Copies certs to other master nodes</span>
+</span></span><span style="display:flex;"><span>scp /root/ca/cacert.pem /root/ca/private/etcd-key.pem /root/ca/private/peer-etcd-key.pem <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  /root/ca/certs/etcd.pem /root/ca/certs/peer-etcd.pem ubuntu@master2:/tmp
+</span></span><span style="display:flex;"><span>scp /root/ca/cacert.pem /root/ca/private/etcd-key.pem /root/ca/private/peer-etcd-key.pem <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  /root/ca/certs/etcd.pem /root/ca/certs/peer-etcd.pem ubuntu@master3:/tmp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ssh into other master nodes, perform these</span>
+</span></span><span style="display:flex;"><span>sudo mv /tmp/*.pem  /srv/etcd-certs/
+</span></span><span style="display:flex;"><span>sudo chown -R etcd:etcd /srv/etcd-certs/
+</span></span></code></pre></div><p>Lastly, update ca-certificate on all nodes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo cp /srv/etcd-certs/cacert.pem /usr/local/share/ca-certificates
+</span></span><span style="display:flex;"><span>sudo update-ca-certificates --fresh
+</span></span></code></pre></div><h2 id="setting-up-etcd">Setting up etcd</h2>
+<p><em>(5 mins)</em></p>
+<p>First, by following <a href="https://github.com/etcd-io/etcd/releases">v3.4.10 release</a>, setup etcd on each master as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>ETCD_VER<span style="color:#f92672">=</span>v3.4.10
+</span></span><span style="display:flex;"><span>GITHUB_URL<span style="color:#f92672">=</span>https://github.com/etcd-io/etcd/releases/download
+</span></span><span style="display:flex;"><span>DOWNLOAD_URL<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>GITHUB_URL<span style="color:#e6db74">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Downloads the arm64 architecture for Raspberry Pi</span>
+</span></span><span style="display:flex;"><span>rm -f /tmp/etcd-<span style="color:#e6db74">${</span>ETCD_VER<span style="color:#e6db74">}</span>-linux-arm64.tar.gz
+</span></span><span style="display:flex;"><span>rm -rf /tmp/etcd-download-test <span style="color:#f92672">&amp;&amp;</span> mkdir -p /tmp/etcd-download-test
+</span></span><span style="display:flex;"><span>curl -L <span style="color:#e6db74">${</span>DOWNLOAD_URL<span style="color:#e6db74">}</span>/<span style="color:#e6db74">${</span>ETCD_VER<span style="color:#e6db74">}</span>/etcd-<span style="color:#e6db74">${</span>ETCD_VER<span style="color:#e6db74">}</span>-linux-arm64.tar.gz -o /tmp/etcd-<span style="color:#e6db74">${</span>ETCD_VER<span style="color:#e6db74">}</span>-linux-arm64.tar.gz
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Extracts etcd</span>
+</span></span><span style="display:flex;"><span>tar xzvf /tmp/etcd-<span style="color:#e6db74">${</span>ETCD_VER<span style="color:#e6db74">}</span>-linux-arm64.tar.gz -C /tmp/etcd-download-test --strip-components<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>rm -f /tmp/etcd-<span style="color:#e6db74">${</span>ETCD_VER<span style="color:#e6db74">}</span>-linux-arm64.tar.gz
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Checks version</span>
+</span></span><span style="display:flex;"><span>/tmp/etcd-download-test/etcd --version <span style="color:#f92672">(</span>Error: etcd on unsupported platform without ETCD_UNSUPPORTED_ARCH<span style="color:#f92672">=</span>arm64 set<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>/tmp/etcd-download-test/etcdctl version <span style="color:#f92672">(</span>Success: etcdctl version: 3.4.10, API version: 3.4<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Moves to /usr/local/bin</span>
+</span></span><span style="display:flex;"><span>sudo cp /tmp/etcd-download-test/etcd /usr/local/bin/
+</span></span><span style="display:flex;"><span>sudo cp /tmp/etcd-download-test/etcdctl /usr/local/bin/
+</span></span><span style="display:flex;"><span>export ETCD_UNSUPPORTED_ARCH<span style="color:#f92672">=</span>arm64
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Checks version again</span>
+</span></span><span style="display:flex;"><span>etcd --version <span style="color:#f92672">(</span>Sccuess: running etcd on unsupported architecture <span style="color:#e6db74">&#34;arm64&#34;</span> since ETCD_UNSUPPORTED_ARCH is set<span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>Second, prepares etcd as a service on <strong>master1</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /lib/systemd/system/etcd.service
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#a6e22e">Inserts</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">following</span> <span style="color:#a6e22e">into</span> <span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">service</span> <span style="color:#a6e22e">for</span> <span style="color:#a6e22e">master1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">Unit</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Description</span>=<span style="color:#a6e22e">etcd</span> <span style="color:#a6e22e">key</span>-<span style="color:#a6e22e">value</span> <span style="color:#a6e22e">store</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Documentation</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">io</span><span style="color:#e6db74">/docs/</span><span style="color:#a6e22e">v3</span>.<span style="color:#ae81ff">4</span>.<span style="color:#ae81ff">0</span>/<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">Service</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">User</span>=<span style="color:#a6e22e">etcd</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Type</span>=<span style="color:#a6e22e">notify</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_UNSUPPORTED_ARCH</span>=<span style="color:#a6e22e">arm64</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>#<span style="color:#a6e22e">Loggingg</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_LOGGER</span>=<span style="color:#a6e22e">zap</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Member</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_NAME</span>=<span style="color:#a6e22e">infra1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_DATA_DIR</span>=<span style="color:#e6db74">/var/</span><span style="color:#a6e22e">lib</span>/<span style="color:#a6e22e">etcd</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_LISTEN_PEER_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span>:<span style="color:#ae81ff">2380</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_LISTEN_CLIENT_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span>:<span style="color:#ae81ff">2379</span>,<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">127</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span>:<span style="color:#ae81ff">2379</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_HEARTBEAT_INTERVAL</span>=<span style="color:#ae81ff">1000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_ELECTION_TIMEOUT</span>=<span style="color:#ae81ff">5000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Clustering</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_ADVERTISE_PEER_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span>:<span style="color:#ae81ff">2380</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER_TOKEN</span>=<span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">cluster</span><span style="color:#ae81ff">-1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER</span>=<span style="color:#a6e22e">infra1</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span>:<span style="color:#ae81ff">2380</span>,<span style="color:#a6e22e">infra2</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">173</span>:<span style="color:#ae81ff">2380</span>,<span style="color:#a6e22e">infra3</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">100</span>:<span style="color:#ae81ff">2380</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER_STATE</span>=<span style="color:#a6e22e">new</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_ADVERTISE_CLIENT_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span>:<span style="color:#ae81ff">2379</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Security</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_CLIENT_CERT_AUTH</span>=<span style="color:#a6e22e">true</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_TRUSTED_CA_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">cacert</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_CERT_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_KEY_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">key</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_CLIENT_CERT_AUTH</span>=<span style="color:#a6e22e">true</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_TRUSTED_CA_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">cacert</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_CERT_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">peer</span>-<span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_KEY_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">peer</span>-<span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">key</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">ExecStart</span>=<span style="color:#e6db74">/usr/</span><span style="color:#a6e22e">local</span><span style="color:#e6db74">/bin/</span><span style="color:#a6e22e">etcd</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Restart</span>=<span style="color:#a6e22e">always</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">RestartSec</span>=<span style="color:#ae81ff">10</span>s<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">LimitNOFILE</span>=<span style="color:#ae81ff">40000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">Install</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">WantedBy</span>=<span style="color:#a6e22e">multi</span>-<span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">target</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Third, creates etcd data folder and system account on master1:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo mkdir -p /var/lib/etcd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># etcd fails if file permissions are not set correctly</span>
+</span></span><span style="display:flex;"><span>sudo chmod -R <span style="color:#ae81ff">700</span> /var/lib/etcd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Creates system user</span>
+</span></span><span style="display:flex;"><span>sudo adduser --system etcd
+</span></span><span style="display:flex;"><span>sudo addgroup etcd
+</span></span><span style="display:flex;"><span>sudo usermod -aG etcd etcd
+</span></span></code></pre></div><p>Fourth, install etcd as a service:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo systemctl daemon-reload
+</span></span><span style="display:flex;"><span>sudo systemctl enable etcd
+</span></span><span style="display:flex;"><span>sudo systemctl stop etcd
+</span></span><span style="display:flex;"><span>sudo systemctl start etcd.service
+</span></span><span style="display:flex;"><span>systemctl status etcd.service
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check for logs</span>
+</span></span><span style="display:flex;"><span>journalctl -xeu etcd
+</span></span></code></pre></div><p>Fifth, ssh into other master nodes (verify that step 1 is done by <em>etcd &ndash;version</em>) and perform the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>ssh ubuntu@master2
+</span></span><span style="display:flex;"><span>sudo vi /lib/systemd/system/etcd.service
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#a6e22e">Variations</span> <span style="color:#a6e22e">for</span> <span style="color:#a6e22e">step</span> <span style="color:#ae81ff">2</span> <span style="color:#a6e22e">for</span> <span style="color:#a6e22e">master2</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Inserts</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">following</span> <span style="color:#a6e22e">into</span> <span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">service</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">Unit</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Description</span>=<span style="color:#a6e22e">etcd</span> <span style="color:#a6e22e">key</span>-<span style="color:#a6e22e">value</span> <span style="color:#a6e22e">store</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Documentation</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">io</span><span style="color:#e6db74">/docs/</span><span style="color:#a6e22e">v3</span>.<span style="color:#ae81ff">4</span>.<span style="color:#ae81ff">0</span>/<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">Service</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">User</span>=<span style="color:#a6e22e">etcd</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Type</span>=<span style="color:#a6e22e">notify</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_UNSUPPORTED_ARCH</span>=<span style="color:#a6e22e">arm64</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>#<span style="color:#a6e22e">Loggingg</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_LOGGER</span>=<span style="color:#a6e22e">zap</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Member</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_NAME</span>=<span style="color:#a6e22e">infra2</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_DATA_DIR</span>=<span style="color:#e6db74">/var/</span><span style="color:#a6e22e">lib</span>/<span style="color:#a6e22e">etcd</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_LISTEN_PEER_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">173</span>:<span style="color:#ae81ff">2380</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_LISTEN_CLIENT_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">173</span>:<span style="color:#ae81ff">2379</span>,<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">127</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span>:<span style="color:#ae81ff">2379</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_HEARTBEAT_INTERVAL</span>=<span style="color:#ae81ff">1000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_ELECTION_TIMEOUT</span>=<span style="color:#ae81ff">5000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Clustering</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_ADVERTISE_PEER_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">173</span>:<span style="color:#ae81ff">2380</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER_TOKEN</span>=<span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">cluster</span><span style="color:#ae81ff">-1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER</span>=<span style="color:#a6e22e">infra1</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span>:<span style="color:#ae81ff">2380</span>,<span style="color:#a6e22e">infra2</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">173</span>:<span style="color:#ae81ff">2380</span>,<span style="color:#a6e22e">infra3</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">100</span>:<span style="color:#ae81ff">2380</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER_STATE</span>=<span style="color:#a6e22e">new</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_ADVERTISE_CLIENT_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">173</span>:<span style="color:#ae81ff">2379</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Security</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_CLIENT_CERT_AUTH</span>=<span style="color:#a6e22e">true</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_TRUSTED_CA_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">cacert</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_CERT_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_KEY_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">key</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_CLIENT_CERT_AUTH</span>=<span style="color:#a6e22e">true</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_TRUSTED_CA_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">cacert</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_CERT_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">peer</span>-<span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_KEY_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">peer</span>-<span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">key</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">ExecStart</span>=<span style="color:#e6db74">/usr/</span><span style="color:#a6e22e">local</span><span style="color:#e6db74">/bin/</span><span style="color:#a6e22e">etcd</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Restart</span>=<span style="color:#a6e22e">always</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">RestartSec</span>=<span style="color:#ae81ff">10</span>s<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">LimitNOFILE</span>=<span style="color:#ae81ff">40000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">Install</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">WantedBy</span>=<span style="color:#a6e22e">multi</span>-<span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">target</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>ssh ubuntu@master3
+</span></span><span style="display:flex;"><span>sudo vi /lib/systemd/system/etcd.service
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#a6e22e">Variations</span> <span style="color:#a6e22e">for</span> <span style="color:#a6e22e">step</span> <span style="color:#ae81ff">2</span> <span style="color:#a6e22e">for</span> <span style="color:#a6e22e">master3</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Inserts</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">following</span> <span style="color:#a6e22e">into</span> <span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">service</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">Unit</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Description</span>=<span style="color:#a6e22e">etcd</span> <span style="color:#a6e22e">key</span>-<span style="color:#a6e22e">value</span> <span style="color:#a6e22e">store</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Documentation</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">io</span><span style="color:#e6db74">/docs/</span><span style="color:#a6e22e">v3</span>.<span style="color:#ae81ff">4</span>.<span style="color:#ae81ff">0</span>/<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">Service</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">User</span>=<span style="color:#a6e22e">etcd</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Type</span>=<span style="color:#a6e22e">notify</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_UNSUPPORTED_ARCH</span>=<span style="color:#a6e22e">arm64</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>#<span style="color:#a6e22e">Loggingg</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_LOGGER</span>=<span style="color:#a6e22e">zap</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Member</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_NAME</span>=<span style="color:#a6e22e">infra3</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_DATA_DIR</span>=<span style="color:#e6db74">/var/</span><span style="color:#a6e22e">lib</span>/<span style="color:#a6e22e">etcd</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_LISTEN_PEER_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">100</span>:<span style="color:#ae81ff">2380</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_LISTEN_CLIENT_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">100</span>:<span style="color:#ae81ff">2379</span>,<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">127</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span>:<span style="color:#ae81ff">2379</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_HEARTBEAT_INTERVAL</span>=<span style="color:#ae81ff">1000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_ELECTION_TIMEOUT</span>=<span style="color:#ae81ff">5000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Clustering</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_ADVERTISE_PEER_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">100</span>:<span style="color:#ae81ff">2380</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER_TOKEN</span>=<span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">cluster</span><span style="color:#ae81ff">-1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER</span>=<span style="color:#a6e22e">infra1</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span>:<span style="color:#ae81ff">2380</span>,<span style="color:#a6e22e">infra2</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">173</span>:<span style="color:#ae81ff">2380</span>,<span style="color:#a6e22e">infra3</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">100</span>:<span style="color:#ae81ff">2380</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER_STATE</span>=<span style="color:#a6e22e">new</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_ADVERTISE_CLIENT_URLS</span>=<span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">100</span>:<span style="color:#ae81ff">2379</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Security</span> <span style="color:#a6e22e">flags</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_CLIENT_CERT_AUTH</span>=<span style="color:#a6e22e">true</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_TRUSTED_CA_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">cacert</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_CERT_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_KEY_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">key</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_CLIENT_CERT_AUTH</span>=<span style="color:#a6e22e">true</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_TRUSTED_CA_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">cacert</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_CERT_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">peer</span>-<span style="color:#a6e22e">etcd</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_PEER_KEY_FILE</span>=<span style="color:#e6db74">/srv/</span><span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">certs</span>/<span style="color:#a6e22e">peer</span>-<span style="color:#a6e22e">etcd</span>-<span style="color:#a6e22e">key</span>.<span style="color:#a6e22e">pem</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">ExecStart</span>=<span style="color:#e6db74">/usr/</span><span style="color:#a6e22e">local</span><span style="color:#e6db74">/bin/</span><span style="color:#a6e22e">etcd</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Restart</span>=<span style="color:#a6e22e">always</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">RestartSec</span>=<span style="color:#ae81ff">10</span>s<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">LimitNOFILE</span>=<span style="color:#ae81ff">40000</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>[<span style="color:#a6e22e">Install</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">WantedBy</span>=<span style="color:#a6e22e">multi</span>-<span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">target</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Follows step 3</span>
+</span></span><span style="display:flex;"><span>sudo mkdir -p /var/lib/etcd
+</span></span><span style="display:flex;"><span>sudo chmod -R <span style="color:#ae81ff">700</span> /var/lib/etcd
+</span></span><span style="display:flex;"><span>sudo adduser --system etcd
+</span></span><span style="display:flex;"><span>sudo addgroup etcd
+</span></span><span style="display:flex;"><span>sudo usermod -aG etcd etcd
+</span></span><span style="display:flex;"><span>sudo mkdir -p /srv/etcd-certs/
+</span></span><span style="display:flex;"><span>sudo mv ~/*.csr ~/*.pem /srv/etcd-certs/
+</span></span><span style="display:flex;"><span>sudo chown -R etcd:etcd /srv/etcd-certs/ /var/lib/etcd /usr/local/bin/etcd /usr/local/bin/etcdctl
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Follows step 4</span>
+</span></span><span style="display:flex;"><span>sudo systemctl daemon-reload
+</span></span><span style="display:flex;"><span>sudo systemctl enable etcd
+</span></span><span style="display:flex;"><span>sudo systemctl start etcd
+</span></span><span style="display:flex;"><span>sudo systemctl stop etcd
+</span></span><span style="display:flex;"><span>systemctl status etcd
+</span></span></code></pre></div><p>Finally, by following etcd [security]https://etcd.io/docs/v3.4.0/op-guide/security/) guide, I test my etcd setup using:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo curl -k -L https://localhost:2379/metrics --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem | grep -v debugging
+</span></span><span style="display:flex;"><span>sudo etcdctl --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem member list
+</span></span></code></pre></div><h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="request-sent-was-ignored-by-remote-peer-due-to-cluster-id-mismatch">Request sent was ignored by remote peer due to cluster ID mismatch</h3>
+<p>I solved mine by changing ETCD_INITIAL_CLUSTER_TOKEN=[something else]. You can check the end point health.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo etcdctl --endpoints<span style="color:#f92672">=</span>https://cluster-endpoint:2379 --cacert<span style="color:#f92672">=</span>/srv/etcd-certs/cacert.pem --cert<span style="color:#f92672">=</span>/srv/etcd-certs/etcd.pem --key<span style="color:#f92672">=</span>/srv/etcd-certs/etcd-key.pem endpoint health
+</span></span></code></pre></div><p>If it still fails, you may try to re-create the folder by:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo rm -rf /var/lib/etcd <span style="color:#f92672">&amp;&amp;</span> sudo mkdir -p /var/lib/etcd
+</span></span><span style="display:flex;"><span>sudo chown -R etcd:etcd /var/lib/etcd <span style="color:#f92672">&amp;&amp;</span> sudo chmod -R <span style="color:#ae81ff">700</span> /var/lib/etcd
+</span></span></code></pre></div><h3 id="errorthere-is-already-a-certificate-for-csgstsgodojocubecn192168100119">ERROR:There is already a certificate for /C=SG/ST=SG/O=Dojocube/CN=192.168.100.119</h3>
+<p>You may try to revoke the old certificate and sign the CSR again:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>openssl ca -revoke /root/ca/newcerts/1240.pem
+</span></span></code></pre></div><h3 id="replacing-a-faulty-member">Replacing a faulty member</h3>
+<p>You may have to re-configure your etcd cluster when your SD card failed</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Get member list</span>
+</span></span><span style="display:flex;"><span>sudo etcdctl --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem member list
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Delete the member based on the ID</span>
+</span></span><span style="display:flex;"><span>sudo etcdctl --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem member remove 34ef554257cff34e
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add the previous member (previous settings remain the same, e.g. IP address)</span>
+</span></span><span style="display:flex;"><span>sudo etcdctl --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem member add infra3 --peer-urls<span style="color:#f92672">=</span>https://192.168.100.182:2380
+</span></span></code></pre></div><p>Similar message as this will appear:</p>
+<p><img src="/images/ha-k8s1/add-new-etcd-member.png" alt="add-new-etcd-member"></p>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /lib/systemd/system/etcd.service
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#a6e22e">Make</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">following</span> <span style="color:#a6e22e">changes</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER_STATE</span>=<span style="color:#a6e22e">existing</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span># <span style="color:#a6e22e">Add</span> <span style="color:#a6e22e">new</span> <span style="color:#a6e22e">configuration</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">Environment</span>=<span style="color:#a6e22e">ETCD_INITIAL_CLUSTER</span>=<span style="color:#e6db74">&#34;infra2=https://192.168.100.181:2380,infra3=https://192.168.100.182:2380,infra1=https://192.168.100.180:2380&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Restart etcd</span>
+</span></span><span style="display:flex;"><span>sudo systemctl daemon-reload
+</span></span><span style="display:flex;"><span>sudo systemctl start etcd
+</span></span></code></pre></div><ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/raspberry/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Raspberry</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cluster/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Cluster</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/ha/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">HA</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/keepedalive/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">KeepedAlive</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/etcd/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Etcd</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://dojocube.com/2020/private-registry-for-kubernetes-cluster/">Private Registry for K8s Cluster</a>
+    
+    
+    <a href="https://dojocube.com/2020/highly-available-kubernetes-pi-cluster-part-2/">HA K8s Pi Cluster (II)</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2020/jenkins-maven-agent-for-kubernetes/">Jenkins Maven Agent</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-pipeline-for-kubernetes-cluster/">Jenkins Pipeline for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/integrating-jenkins-and-gitea/">Integrating Jenkins and Gitea</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/helm-for-kubernetes-cluster/">Helm for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-2/">Jenkins for K8s Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-1/">Jenkins for K8s Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-on-kubernetes-pi-cluster/">Gitea for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/kubernetes-cluster-on-raspberry-pi/">Kubernetes Cluster on Pi</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/docker-on-raspberry-pi-cluster/">Docker for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/external-storage-for-raspberry-pi-cluster/">External Storage</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-2/">MicroK8s on Pi 4 8GB (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-1/">MicroK8s on Pi 4 8GB (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/private-registry-for-kubernetes-cluster/">Private Registry for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/openwrt-as-router-on-raspberry-pi-3/">OpenWrt Router on Pi 3</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>

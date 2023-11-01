@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Pi Cluster with Longhorn | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="By running Raspberry PI Cluster with Longhorn, you will have a simplified, easy to deploy cloud-native persistent block storage
+Raspberry Pi Cluster and Longhorn (Total Setup Time: 30 mins)
+In this section, I will install Longhorn, a highly available persistance storage for Kubernetes. This guide assumes that you have a working Raspberry PI Cluster. If you do not have, please follow Kubernetes Cluster with Ansible or HA Kubernetes Pi Cluster (Part I).">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Pi Cluster with Longhorn" />
+<meta property="og:description" content="By running Raspberry PI Cluster with Longhorn, you will have a simplified, easy to deploy cloud-native persistent block storage
+Raspberry Pi Cluster and Longhorn (Total Setup Time: 30 mins)
+In this section, I will install Longhorn, a highly available persistance storage for Kubernetes. This guide assumes that you have a working Raspberry PI Cluster. If you do not have, please follow Kubernetes Cluster with Ansible or HA Kubernetes Pi Cluster (Part I)." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2021/raspberry-pi-cluster-with-longhorn/" /><meta property="article:section" content="2021" />
+<meta property="article:published_time" content="2021-06-06T20:00:00+08:00" />
+<meta property="article:modified_time" content="2021-06-06T20:00:00+08:00" />
+<meta itemprop="name" content="Pi Cluster with Longhorn">
+<meta itemprop="description" content="By running Raspberry PI Cluster with Longhorn, you will have a simplified, easy to deploy cloud-native persistent block storage
+Raspberry Pi Cluster and Longhorn (Total Setup Time: 30 mins)
+In this section, I will install Longhorn, a highly available persistance storage for Kubernetes. This guide assumes that you have a working Raspberry PI Cluster. If you do not have, please follow Kubernetes Cluster with Ansible or HA Kubernetes Pi Cluster (Part I)."><meta itemprop="datePublished" content="2021-06-06T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2021-06-06T20:00:00+08:00" />
+<meta itemprop="wordCount" content="548">
+<meta itemprop="keywords" content="Raspberry,Cluster,Storage,Longhorn," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Pi Cluster with Longhorn"/>
+<meta name="twitter:description" content="By running Raspberry PI Cluster with Longhorn, you will have a simplified, easy to deploy cloud-native persistent block storage
+Raspberry Pi Cluster and Longhorn (Total Setup Time: 30 mins)
+In this section, I will install Longhorn, a highly available persistance storage for Kubernetes. This guide assumes that you have a working Raspberry PI Cluster. If you do not have, please follow Kubernetes Cluster with Ansible or HA Kubernetes Pi Cluster (Part I)."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2021
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Pi Cluster with Longhorn</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2021-06-06T20:00:00+08:00">June 6, 2021</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 548 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><img src="/images/longhorn/highly-available-kubernetes-pi-cluster.png" alt="highly-available-kubernetes-pi-cluster"></p>
+<p>By running Raspberry PI Cluster with Longhorn, you will have a simplified, easy to deploy cloud-native persistent block storage</p>
+<hr>
+<h1 id="raspberry-pi-cluster-and-longhorn">Raspberry Pi Cluster and Longhorn</h1>
+<p><em>(Total Setup Time: 30 mins)</em></p>
+<p>In this section, I will install <a href="https://longhorn.io/">Longhorn</a>, a highly available persistance storage for Kubernetes. This guide assumes that you have a working Raspberry PI Cluster. If you do not have, please  follow <a href="https://dojocube.com/2021/kubernetes-pi-cluster-with-ansible/">Kubernetes Cluster with Ansible</a> or <a href="https://dojocube.com/2020/highly-available-kubernetes-pi-cluster-part-1/">HA Kubernetes Pi Cluster (Part I)</a>.</p>
+<h2 id="preparation">Preparation</h2>
+<p><em>(10 mins)</em></p>
+<p>First, you need to <a href="https://helm.sh/docs/intro/install/">install helm</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
+</span></span><span style="display:flex;"><span>sudo apt-get install apt-transport-https --yes
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;deb https://baltocdn.com/helm/stable/debian/ all main&#34;</span> | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get install helm
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check helm version</span>
+</span></span><span style="display:flex;"><span>helm version
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Helm version result</span>
+</span></span><span style="display:flex;"><span>version.BuildInfo<span style="color:#f92672">{</span>Version:<span style="color:#e6db74">&#34;v3.6.0&#34;</span>, GitCommit:<span style="color:#e6db74">&#34;7f2df6467771a75f5646b7f12afb408590ed1755&#34;</span>, GitTreeState:<span style="color:#e6db74">&#34;clean&#34;</span>, GoVersion:<span style="color:#e6db74">&#34;go1.16.3&#34;</span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>Second, for the managing of <a href="https://docs.projectcalico.org/about/about-calico">Calico</a> resources, I installed the <a href="https://github.com/projectcalico/calico">command line interface</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl -o calicoctl -O -L https://github.com/projectcalico/calicoctl/releases/download/v3.18.4/calicoctl-linux-arm64
+</span></span><span style="display:flex;"><span>chmod +x calicoctl
+</span></span><span style="display:flex;"><span>./calicoctl version
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Export configuration</span>
+</span></span><span style="display:flex;"><span>export KUBECONFIG<span style="color:#f92672">=</span>~/.kube/config
+</span></span><span style="display:flex;"><span>export DATASTORE_TYPE<span style="color:#f92672">=</span>kubernetes
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check the configuration</span>
+</span></span><span style="display:flex;"><span>calicoctl get workloadendpoints
+</span></span><span style="display:flex;"><span>calicoctl get nodes
+</span></span></code></pre></div><p>Third, if you wish to, you may install <a href="https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/">kubernetes-dashboard</a> with these commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Installs Web UI</span>
+</span></span><span style="display:flex;"><span>curl  https://raw.githubusercontent.com/kubernetes/dashboard/v2.2.0/aio/deploy/recommended.yaml -o kubernetes-dashboard.yaml
+</span></span><span style="display:flex;"><span>kubectl apply -f kubernetes-dashboard.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Creates cluster-admin role</span>
+</span></span><span style="display:flex;"><span>kubectl create serviceaccount dashboard
+</span></span><span style="display:flex;"><span>kubectl create clusterrolebinding dashboard --clusterrole<span style="color:#f92672">=</span>cluster-admin --serviceaccount<span style="color:#f92672">=</span>default:dashboard
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Gets login token</span>
+</span></span><span style="display:flex;"><span>kubectl get secrets
+</span></span><span style="display:flex;"><span>kubectl describe secret dashboard-token-7xmhx
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Runs proxy on your host machine</span>
+</span></span><span style="display:flex;"><span>kubectl proxy
+</span></span></code></pre></div><p>Finally, you may access the Kubernetes Web UI by pointing to:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+</span></span></span></code></pre></div><p><img src="/images/longhorn/kubernetes-dashboard.png" alt="kubernetes-dashboard"></p>
+<hr>
+<h2 id="installing-longhorn">Installing Longhorn</h2>
+<p><em>(20 mins)</em></p>
+<p>First, following the <a href="https://longhorn.io/docs/1.1.1/deploy/install/install-with-helm/">official guide</a>, please run <em>environment_check.sh</em> and verify that all is good to go.</p>
+<p>Second, install Longhorn with Helm 3 with these commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl create namespace longhorn-system
+</span></span><span style="display:flex;"><span>helm install longhorn longhorn/longhorn --namespace longhorn-system
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Confirm that deployment is successful (this might take quite a while)</span>
+</span></span><span style="display:flex;"><span>watch kubectl get pod -n longhorn-system
+</span></span></code></pre></div><p><img src="/images/longhorn/longhorn-installation-success.png" alt="longhorn-installation-success"></p>
+<hr>
+<p>Third, you may access the Longhorn using these commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Get name of longhorn-frontend</span>
+</span></span><span style="display:flex;"><span>kubectl get svc -n longhorn-system
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Runs port-forward on your host machine</span>
+</span></span><span style="display:flex;"><span>kubectl port-forward services/longhorn-frontend 8080:http -n longhorn-system
+</span></span></code></pre></div><p><img src="/images/longhorn/longhorn-service.png" alt="longhorn-service"></p>
+<hr>
+<p>That&rsquo;s it! The Raspberry PI Cluster with Longhorn is ready! Now, you have a highly availale persistance storage.</p>
+<p><img src="/images/longhorn/longhorn-dashboard.png" alt="longhorn-dashboard"></p>
+<hr>
+<p><img src="/images/longhorn/longhorn-storage-class.png" alt="longhorn-storage-class"></p>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="calico-node-running-but-show-up-as-01">Calico node running but show up as 0/1</h3>
+<p>With the CLI command, <em>calicoctl node status</em>, I realized that the peer address are in different range.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Check IP address</span>
+</span></span><span style="display:flex;"><span>ip addr
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Re-configure to using same interface</span>
+</span></span><span style="display:flex;"><span>kubectl set env daemonset/calico-node -n kube-system IP_AUTODETECTION_METHOD<span style="color:#f92672">=</span>interface<span style="color:#f92672">=</span>eth0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Re-apply Kubernetes setting</span>
+</span></span><span style="display:flex;"><span>kubectl apply -f ~/calico-etcd.yaml
+</span></span></code></pre></div><p><img src="/images/longhorn/calico-bgp-status.png" alt="calico-bgp-status"></p>
+<hr>
+<h3 id="longhorn-system-namespace-deletion-stuck-in-terminating">longhorn-system namespace deletion stuck in terminating</h3>
+<p>While uninstalling Longhorn, I faced this issue.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>helm uninstall longhorn -n longhorn-system
+</span></span><span style="display:flex;"><span>kubectl delete namespace longhorn-system
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Run this command when namespace deletion takes forever</span>
+</span></span><span style="display:flex;"><span>kubectl get namespace longhorn-system -o json <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  | tr -d <span style="color:#e6db74">&#34;\n&#34;</span> | sed <span style="color:#e6db74">&#34;s/\&#34;finalizers\&#34;: \[[^]]\+\]/\&#34;finalizers\&#34;: []/&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  | kubectl replace --raw /api/v1/namespaces/longhorn-system/finalize -f -
+</span></span></code></pre></div><h3 id="error-rendered-manifests-contain-a-resource-that-already-exists">Error: rendered manifests contain a resource that already exists.</h3>
+<p>During re-installing of Longhorn, I realized some of the custom resources definition were not removed.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Check if there are any crd ending with longhorn.io</span>
+</span></span><span style="display:flex;"><span>kubectl get crd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Delete each of those</span>
+</span></span><span style="display:flex;"><span>kubectl patch crd/engineimages.longhorn.io -p <span style="color:#e6db74">&#39;{&#34;metadata&#34;:{&#34;finalizers&#34;:[]}}&#39;</span> --type<span style="color:#f92672">=</span>merge
+</span></span><span style="display:flex;"><span>kubectl patch crd/instancemanagers.longhorn.io -p <span style="color:#e6db74">&#39;{&#34;metadata&#34;:{&#34;finalizers&#34;:[]}}&#39;</span> --type<span style="color:#f92672">=</span>merge
+</span></span></code></pre></div><h3 id="node-does-not-appear-in-longhorn">Node does not appear in Longhorn</h3>
+<p>You may check on the taint value if any of the master nodes are not in Longhorn.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl describe node master3
+</span></span></code></pre></div><pre tabindex="0"><code># Sample result
+...
+Taints: node-role.kubernetes.io/master:NoSchedule
+...
+
+# Remove the taintness from master3
+kubectl taint node master3 node-role.kubernetes.io/master:NoSchedule-
+</code></pre><ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/raspberry/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Raspberry</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cluster/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Cluster</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/storage/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Storage</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/longhorn/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Longhorn</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://dojocube.com/2021/kubernetes-pi-cluster-with-ansible/">K8s Pi Cluster with Ansible</a>
+    
+    
+    <a href="https://dojocube.com/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-1/">CI/CD Pipeline on Pi Cluster (I)</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2020/external-storage-for-raspberry-pi-cluster/">External Storage</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2021/kubernetes-pi-cluster-with-ansible/">K8s Pi Cluster with Ansible</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/highly-available-kubernetes-pi-cluster-part-2/">HA K8s Pi Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/highly-available-kubernetes-pi-cluster-part-1/">HA K8s Pi Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-maven-agent-for-kubernetes/">Jenkins Maven Agent</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-pipeline-for-kubernetes-cluster/">Jenkins Pipeline for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/integrating-jenkins-and-gitea/">Integrating Jenkins and Gitea</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/helm-for-kubernetes-cluster/">Helm for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-2/">Jenkins for K8s Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-1/">Jenkins for K8s Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-on-kubernetes-pi-cluster/">Gitea for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/kubernetes-cluster-on-raspberry-pi/">Kubernetes Cluster on Pi</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/docker-on-raspberry-pi-cluster/">Docker for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-2/">MicroK8s on Pi 4 8GB (II)</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>

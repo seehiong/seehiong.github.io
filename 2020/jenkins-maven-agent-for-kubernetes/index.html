@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Jenkins Maven Agent | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="By creating Jenkins Maven Agent for Kubernetes Cluster, you can improve build time of your maven builds
+Jenkins Maven Agent on Kubernetes (Total Setup Time: 15 mins)
+Following up on the previous post, I will create a Jenkins Maven Agent for Kubernetes. By configuring a local maven m2 repository, you can save previous time on your builds.
+Configuring Jenkins (1 min)
+First, navigate to Jenkins &gt; Configure Clouds, and click on the Add Pod Template.">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Jenkins Maven Agent" />
+<meta property="og:description" content="By creating Jenkins Maven Agent for Kubernetes Cluster, you can improve build time of your maven builds
+Jenkins Maven Agent on Kubernetes (Total Setup Time: 15 mins)
+Following up on the previous post, I will create a Jenkins Maven Agent for Kubernetes. By configuring a local maven m2 repository, you can save previous time on your builds.
+Configuring Jenkins (1 min)
+First, navigate to Jenkins &gt; Configure Clouds, and click on the Add Pod Template." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2020/jenkins-maven-agent-for-kubernetes/" /><meta property="article:section" content="2020" />
+<meta property="article:published_time" content="2020-07-31T20:00:00+08:00" />
+<meta property="article:modified_time" content="2020-07-31T20:00:00+08:00" />
+<meta itemprop="name" content="Jenkins Maven Agent">
+<meta itemprop="description" content="By creating Jenkins Maven Agent for Kubernetes Cluster, you can improve build time of your maven builds
+Jenkins Maven Agent on Kubernetes (Total Setup Time: 15 mins)
+Following up on the previous post, I will create a Jenkins Maven Agent for Kubernetes. By configuring a local maven m2 repository, you can save previous time on your builds.
+Configuring Jenkins (1 min)
+First, navigate to Jenkins &gt; Configure Clouds, and click on the Add Pod Template."><meta itemprop="datePublished" content="2020-07-31T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-07-31T20:00:00+08:00" />
+<meta itemprop="wordCount" content="426">
+<meta itemprop="keywords" content="Raspberry,Cluster,Jenkins,Maven," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Jenkins Maven Agent"/>
+<meta name="twitter:description" content="By creating Jenkins Maven Agent for Kubernetes Cluster, you can improve build time of your maven builds
+Jenkins Maven Agent on Kubernetes (Total Setup Time: 15 mins)
+Following up on the previous post, I will create a Jenkins Maven Agent for Kubernetes. By configuring a local maven m2 repository, you can save previous time on your builds.
+Configuring Jenkins (1 min)
+First, navigate to Jenkins &gt; Configure Clouds, and click on the Add Pod Template."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2020
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Jenkins Maven Agent</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2020-07-31T20:00:00+08:00">July 31, 2020</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 2 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 426 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><img src="/images/jenkins-agent/jenkins-on-kubernetes.png" alt="jenkins-maven-agent-on-kubernetes"></p>
+<p>By creating Jenkins Maven Agent for Kubernetes Cluster, you can improve build time of your maven builds</p>
+<hr>
+<h1 id="jenkins-maven-agent-on-kubernetes">Jenkins Maven Agent on Kubernetes</h1>
+<p><em>(Total Setup Time: 15 mins)</em></p>
+<p>Following up on the <a href="../jenkins-pipeline-for-kubernetes-cluster">previous post</a>, I will create a Jenkins Maven Agent for Kubernetes. By configuring a local maven m2 repository, you can save previous time on your builds.</p>
+<h2 id="configuring-jenkins">Configuring Jenkins</h2>
+<p><em>(1 min)</em></p>
+<p>First, navigate to Jenkins &gt; Configure Clouds, and click on the <em>Add Pod Template</em>. I named the pod template as <em>maven</em>, with its usage set as:</p>
+<blockquote>
+<p>Only build jobs with label expressions matching this node</p>
+</blockquote>
+<p>Second, add a container with the following settings:</p>
+<pre tabindex="0"><code>Name: jnlp
+Dcoker image: docjoube/jenkins-agent:1.0
+working directory: /home/jenkins/agent
+</code></pre><p><img src="/images/jenkins-agent/jenkins-maven-agent-pod-template.png" alt="jenkins-maven-agent-pod-template"></p>
+<hr>
+<p>Third, add a volume, with the following persistent volume claim:</p>
+<pre tabindex="0"><code>Claim Name: maven-agent-pvc
+Mount path: /home/jenkins/.m2
+</code></pre><p><img src="/images/jenkins-agent/jenkins-add-new-volume.png" alt="jenkins-add-new-volume"></p>
+<hr>
+<p>Fourth, insert the maven volume claims to the <em>maven-pv.yaml</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolume</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">maven-agent-pv</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">type</span>: <span style="color:#ae81ff">local</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">storageClassName</span>: <span style="color:#ae81ff">manual</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">capacity</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">2Gi</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">accessModes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">ReadWriteOnce</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">hostPath</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">path</span>: <span style="color:#e6db74">&#34;/mnt/hdd/master1k8s/app/maven/data&#34;</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">PersistentVolumeClaim</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">maven-agent-pvc</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">storageClassName</span>: <span style="color:#ae81ff">manual</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">accessModes</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">ReadWriteOnce</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">resources</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">requests</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">storage</span>: <span style="color:#ae81ff">2Gi</span>
+</span></span></code></pre></div><p>Lastly, apply the maven-agent persistent volume and claims:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Create the persistent volume and claim</span>
+</span></span><span style="display:flex;"><span>kubectl apply -f maven-pv.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create the data folder and change ownership</span>
+</span></span><span style="display:flex;"><span>sudo mkdir -p /mnt/hdd/master1k8s/app/maven/data
+</span></span><span style="display:flex;"><span>sudo chown -R 1000:1000 /mnt/hdd/master1k8s/app/maven/data
+</span></span></code></pre></div><h2 id="testing-jenkins-maven-agent">Testing Jenkins Maven Agent</h2>
+<p><em>(14 mins)</em></p>
+<p>First, modify Jenkinsfile to use <em>maven</em> agent and commit the change. You may refer to <a href="https://github.com/jenkinsci/kubernetes-plugin/tree/master/examples">kubernetes plugin</a> for more examples.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-groovy" data-lang="groovy"><span style="display:flex;"><span>pipeline <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  agent none
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>  stages <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    stage<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;Build&#39;</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      agent <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        label <span style="color:#e6db74">&#39;maven&#39;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>      steps <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        checkout scm
+</span></span><span style="display:flex;"><span>        sh <span style="color:#e6db74">&#39;./mvnw -DskipTests clean package&#39;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>Second, Jenkins automatically triggers a build.</p>
+<p><img src="/images/jenkins-agent/jenkins-console-output.png" alt="jenkins-console-output"></p>
+<hr>
+<p>You may notice that Jenkins master provisions a new maven-agent for this build.</p>
+<p>Last, this is the build console output:</p>
+<p><img src="/images/jenkins-agent/jenkins-maven-agent-finished-success.png" alt="jenkins-maven-agent-finished-success"></p>
+<hr>
+<p><img src="/images/jenkins-agent/jenkins-maven-agent-build-success.png" alt="jenkins-maven-agent-build-success"></p>
+<hr>
+<p>For subsequent builds, maven-agent uses the local maven m2 repository and hence significantly reducing the build time.</p>
+<p><img src="/images/jenkins-agent/jenkins-maven-agent-built-time-reduced.png" alt="jenkins-maven-agent-built-time-reduced"></p>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="persistentvolumeclaim-maven-agent-pvc-not-found">persistentvolumeclaim &ldquo;maven-agent-pvc&rdquo; not found</h3>
+<p>When the maven persistent volume is not created before any maven build, this error will occur. You can clear this error by creating the claim first.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Shell" data-lang="Shell"><span style="display:flex;"><span>Events:
+</span></span><span style="display:flex;"><span>  Type     Reason            Age        From               Message
+</span></span><span style="display:flex;"><span>  ----     ------            ----       ----               -------
+</span></span><span style="display:flex;"><span>  Warning  FailedScheduling  &lt;unknown&gt;  default-scheduler  persistentvolumeclaim <span style="color:#e6db74">&#34;maven-agent-pvc&#34;</span> not found
+</span></span><span style="display:flex;"><span>  Warning  FailedScheduling  &lt;unknown&gt;  default-scheduler  persistentvolumeclaim <span style="color:#e6db74">&#34;maven-agent-pvc&#34;</span> not found
+</span></span></code></pre></div><h3 id="no-such-file-or-directory">No such file or directory</h3>
+<p>Because Jenkins user needs access rights to the maven persistent volume mount path, remember to change the folder ownership.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo chown -R 1000:1000 /mnt/hdd/master1k8s/app/maven/data
+</span></span></code></pre></div><p><img src="/images/jenkins-agent/maven-agent-no-such-file-or-directory.png" alt="maven-agent-no-such-file-or-directory"></p>
+<hr>
+<h3 id="waiting-for-next-available-executor">Waiting for next available executor</h3>
+<p><img src="/images/jenkins-agent/jenkins-waiting-for-next-available-executor.png" alt="jenkins-waiting-for-next-available-executor"></p>
+<hr>
+<p>You can fix this error by following closely to this console output and removing the default values (<em>/bin/sh -c</em> and <em>cat</em>) from Jenkins &gt; Configure Clouds.</p>
+<ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/raspberry/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Raspberry</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cluster/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Cluster</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/jenkins/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Jenkins</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/maven/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Maven</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://dojocube.com/2020/jenkins-pipeline-for-kubernetes-cluster/">Jenkins Pipeline for K8s Cluster</a>
+    
+    
+    <a href="https://dojocube.com/2020/openwrt-as-router-on-raspberry-pi-3/">OpenWrt Router on Pi 3</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2020/jenkins-pipeline-for-kubernetes-cluster/">Jenkins Pipeline for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/integrating-jenkins-and-gitea/">Integrating Jenkins and Gitea</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-2/">Jenkins for K8s Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-1/">Jenkins for K8s Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/helm-for-kubernetes-cluster/">Helm for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-on-kubernetes-pi-cluster/">Gitea for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/kubernetes-cluster-on-raspberry-pi/">Kubernetes Cluster on Pi</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/docker-on-raspberry-pi-cluster/">Docker for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/external-storage-for-raspberry-pi-cluster/">External Storage</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-2/">MicroK8s on Pi 4 8GB (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-1/">MicroK8s on Pi 4 8GB (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gnu-health-embedded-on-raspberry-pi-3/">GNU Health</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/plasma-bigscreen-on-pi-8gb/">Plasma Bigscreen</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/openmediavault-on-raspberry-pi/">NAS Server</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>

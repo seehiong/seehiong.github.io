@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>CI/CD Pipeline on Pi Cluster (II) | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="Building a CI/CD pipeline part 2 on a Raspberry PI Cluster, with JFrog Artifactory as the repository manager
+Building a CI/CD pipeline on a Raspberry PI Cluster (Part II) (Total Setup Time: 40 mins)
+Continuing from part I of this guide, I will add JFrog Artifactory to my CI/CD pipeline.
+Preparation (1 min)
+Referencing from my previous post on maven agent, let&rsquo;s configure maven-agent to mount Longhorn volume. Navigate to Manage Jenkins &gt; Manage Nodes and Clouds &gt; Configure Clouds.">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="CI/CD Pipeline on Pi Cluster (II)" />
+<meta property="og:description" content="Building a CI/CD pipeline part 2 on a Raspberry PI Cluster, with JFrog Artifactory as the repository manager
+Building a CI/CD pipeline on a Raspberry PI Cluster (Part II) (Total Setup Time: 40 mins)
+Continuing from part I of this guide, I will add JFrog Artifactory to my CI/CD pipeline.
+Preparation (1 min)
+Referencing from my previous post on maven agent, let&rsquo;s configure maven-agent to mount Longhorn volume. Navigate to Manage Jenkins &gt; Manage Nodes and Clouds &gt; Configure Clouds." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-2/" /><meta property="article:section" content="2021" />
+<meta property="article:published_time" content="2021-06-21T20:00:00+08:00" />
+<meta property="article:modified_time" content="2021-06-21T20:00:00+08:00" />
+<meta itemprop="name" content="CI/CD Pipeline on Pi Cluster (II)">
+<meta itemprop="description" content="Building a CI/CD pipeline part 2 on a Raspberry PI Cluster, with JFrog Artifactory as the repository manager
+Building a CI/CD pipeline on a Raspberry PI Cluster (Part II) (Total Setup Time: 40 mins)
+Continuing from part I of this guide, I will add JFrog Artifactory to my CI/CD pipeline.
+Preparation (1 min)
+Referencing from my previous post on maven agent, let&rsquo;s configure maven-agent to mount Longhorn volume. Navigate to Manage Jenkins &gt; Manage Nodes and Clouds &gt; Configure Clouds."><meta itemprop="datePublished" content="2021-06-21T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2021-06-21T20:00:00+08:00" />
+<meta itemprop="wordCount" content="795">
+<meta itemprop="keywords" content="Raspberry,Cluster,CI/CD,Pipeline," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CI/CD Pipeline on Pi Cluster (II)"/>
+<meta name="twitter:description" content="Building a CI/CD pipeline part 2 on a Raspberry PI Cluster, with JFrog Artifactory as the repository manager
+Building a CI/CD pipeline on a Raspberry PI Cluster (Part II) (Total Setup Time: 40 mins)
+Continuing from part I of this guide, I will add JFrog Artifactory to my CI/CD pipeline.
+Preparation (1 min)
+Referencing from my previous post on maven agent, let&rsquo;s configure maven-agent to mount Longhorn volume. Navigate to Manage Jenkins &gt; Manage Nodes and Clouds &gt; Configure Clouds."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2021
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">CI/CD Pipeline on Pi Cluster (II)</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2021-06-21T20:00:00+08:00">June 21, 2021</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 795 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><img src="/images/pipeline2/raspberry-pi-enclosed-in-lego-structure.jpeg" alt="raspberry-pi-enclosed-in-lego-structure"></p>
+<p>Building a CI/CD pipeline part 2 on a Raspberry PI Cluster, with JFrog Artifactory as the repository manager</p>
+<hr>
+<h1 id="building-a-cicd-pipeline-on-a-raspberry-pi-cluster-part-ii">Building a CI/CD pipeline on a Raspberry PI Cluster (Part II)</h1>
+<p><em>(Total Setup Time: 40 mins)</em></p>
+<p>Continuing from <a href="https://dojocube.com/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-1/">part I</a> of this guide, I will add <a href="https://jfrog.com/artifactory/">JFrog Artifactory</a> to my CI/CD pipeline.</p>
+<h2 id="preparation">Preparation</h2>
+<p><em>(1 min)</em></p>
+<p>Referencing from my previous post on <a href="https://dojocube.com/2020/jenkins-maven-agent-for-kubernetes/">maven agent</a>, let&rsquo;s configure maven-agent to mount Longhorn volume. Navigate to <em>Manage Jenkins &gt; Manage Nodes and Clouds &gt; Configure Clouds</em>. Expand on Pod Template details and add a volume:</p>
+<pre tabindex="0"><code>Claim Name: maven-agent-pvc
+Mount Path: /home/jenkins/.m2
+</code></pre><p><img src="/images/pipeline2/jenkins-add-maven-agent-volume.png" alt="jenkins-add-maven-agent-volume"></p>
+<hr>
+<h2 id="installing-artifactory">Installing Artifactory</h2>
+<p><em>(13 mins)</em></p>
+<p>First, download the <a href="https://jfrog.com/open-source/">JFrog Artifactory OSS</a> edition. Due to some <a href="https://github.com/mikefarah/yq">yq</a> issues on Raspberry PI, I download the older version instead:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mkdir ~/artifactory
+</span></span><span style="display:flex;"><span>cd ~/artifactory
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>curl https://releases.jfrog.io/artifactory/bintray-artifactory/org/artifactory/oss/jfrog-artifactory-oss/6.23.21/jfrog-artifactory-oss-6.23.21.zip -o jfrog-artifactory-oss-6.23.21.zip
+</span></span></code></pre></div><p>Second, prepare the Dockerfile for Raspberry PI:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Copy and paste below into Dockerfile</span>
+</span></span><span style="display:flex;"><span>vi Dockerfile
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> balenalib/raspberrypi4-64-debian-openjdk:11-bullseye</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8081</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> apt-get update <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>   <span style="color:#f92672">&amp;&amp;</span> apt-get install wget unzip -y<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /opt</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> jfrog-artifactory-oss-6.23.21.zip /opt<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mkdir jfrog <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> mv jfrog-artifactory-oss-6.23.21.zip jfrog<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /opt/jfrog</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> export JFROG_HOME<span style="color:#f92672">=</span>/opt/jfrog<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> unzip jfrog-artifactory-oss-6.23.21.zip <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> mv artifactory-oss-6.23.21 artifactory <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> cd artifactory/bin<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /opt/jfrog/artifactory/bin</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> ./artifactoryctl<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Third, build and tag the docker image:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker build -t dojocube/artifactory:1.0 .
+</span></span></code></pre></div><p>Last, create the required Longhorn volumes and prepare the Kubernetes deployment file. NOTE: I add delay in the init-container in order for Longhorn to stabilize. Also note that this directory structure is different from the latest Artifactory versions.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Copy and paste below into artifactory-deployment.yaml</span>
+</span></span><span style="display:flex;"><span>vi artifactory-deployment.yaml
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">artifactory</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">dojocube</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">annotations</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metallb.universe.tf/allow-shared-ip</span>: <span style="color:#ae81ff">home-net</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">port</span>: <span style="color:#ae81ff">8081</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">8081</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nodePort</span>: <span style="color:#ae81ff">30081</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">artifact-http</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">artifactory</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">LoadBalancer</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">loadBalancerIP</span>: <span style="color:#ae81ff">192.168.100.250</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">artifactory</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">dojocube</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">artifactory</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">artifactory</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">artifactory</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">dojocube/artifactory:1.0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">imagePullPolicy</span>: <span style="color:#ae81ff">Never</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">8081</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">artifact-http</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">artifactory-data-persistent-storage</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/opt/jfrog/artifactory/data</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">artifactory-etc-persistent-storage</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/opt/jfrog/artifactory/etc</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">initContainers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">init-volume</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">arm64v8/busybox</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">command</span>: [<span style="color:#e6db74">&#39;sh&#39;</span>, <span style="color:#e6db74">&#39;-c&#39;</span>, <span style="color:#e6db74">&#34;sleep 30&#34;</span>]
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">artifactory-data-persistent-storage</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">artifactory-data-pvc</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">artifactory-etc-persistent-storage</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">artifactory-etc-pvc</span>
+</span></span></code></pre></div><h2 id="configuring-artifactory">Configuring Artifactory</h2>
+<p><em>(10 mins)</em></p>
+<p>It takes a while for Artifactory to setup. In my case, I add maven during startup. You may peek at the progress by:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl get po -n dojocube
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get logs (remember to replace with your pod name)</span>
+</span></span><span style="display:flex;"><span>kubectl logs -n dojocube artifactory-99b667d47-jqxkv -f
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get inside the container</span>
+</span></span><span style="display:flex;"><span>kubectl exec -n dojocube -it artifactory-99b667d47-jqxkv -- bash
+</span></span></code></pre></div><p>First, log into Artifactory using the default <strong>admin</strong> user and <strong>password</strong>. Creates your own account. From <em>Admin &gt; Security &gt; Permission</em> menu, adds a permission:</p>
+<p><img src="/images/pipeline2/artifactory-permission-users.png" alt="artifactory-permission-users"></p>
+<hr>
+<p>Second, from <em>Artifacts</em> menu, click on <strong>Set Me Up</strong> button. Select the maven, enter password and click on <strong>Generate Maven Settings</strong> button.</p>
+<p><img src="/images/pipeline2/artifactory-set-me-up.png" alt="artifactory-set-me-up"></p>
+<hr>
+<p>Third, click on <strong>Generate Settings</strong> button and scroll down to the settings file. Click on <strong>Download Snippet</strong> link and copy this <em>settings.xml</em> file to the .m2 folder of the maven-agent-pvc volume. NOTE: Please remember to modify the user and password of your newly created account, which has deploy permission.</p>
+<p><img src="/images/pipeline2/artifactory-download-snippet.png" alt="artifactory-download-snippet"></p>
+<hr>
+<p>Lastly, copy the contents of the distribution management and paste into your project&rsquo;s pom.xml file. NOTE: Depending on your setting, enter either libs-snapshot or libs-release, such as:</p>
+<pre tabindex="0"><code>&lt;distributionManagement&gt;
+  &lt;repository&gt;
+    &lt;id&gt;central&lt;/id&gt;
+    &lt;name&gt;artifactory-99b667d47-gzcwk-releases&lt;/name&gt;
+    &lt;url&gt;http://192.168.100.250:8081/artifactory/libs-snapshot&lt;/url&gt;
+  &lt;/repository&gt;
+&lt;/distributionManagement&gt;
+</code></pre><h2 id="configuring-jenkins">Configuring Jenkins</h2>
+<p><em>(1 min)</em></p>
+<p>First, from <em>Manage Jenkins &gt; Manage Plugins</em>, click on Available tab and search for Artifactory. Installs Artifactory plugin.</p>
+<p><img src="/images/pipeline2/jenkins-artifactory-plugin.png" alt="jenkins-artifactory-plugin"></p>
+<hr>
+<p>Second, from <em>Manage Jenkins &gt; Configure System</em>, scroll to JFrog section. Enters Artifactory URL and the deployer credential.</p>
+<p><img src="/images/pipeline2/jenkins-jfrog-settings.png" alt="jenkins-jfrog-settings"></p>
+<hr>
+<h2 id="deploy-jar-to-artifactory">Deploy JAR to Artifactory</h2>
+<p><em>(5 mins)</em></p>
+<p>First, configure your project&rsquo;s Jenkinsfile to include a deploy command. This is my sample file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-groovy" data-lang="groovy"><span style="display:flex;"><span>pipeline <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  agent none
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>  stages <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    stage<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;Build &amp; Deploy&#39;</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      agent <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        label <span style="color:#e6db74">&#39;maven&#39;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>      steps <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        checkout scm
+</span></span><span style="display:flex;"><span>        sh <span style="color:#e6db74">&#39;./mvnw -DskipTests clean package deploy&#39;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>Second, when you commit the changes, Jenkins triggers a pipeline. It builds the code and pushes the package to the Artifactory.</p>
+<p><img src="/images/pipeline2/jenkins-upload-to-artifactory.png" alt="jenkins-upload-to-artifactory"></p>
+<hr>
+<p>Finally! With this setup, you build a CI/CD pipeline on a Raspberry PI Cluster (Part 2), integrating Jenkins and Artifactory.</p>
+<p><img src="/images/pipeline2/artifactory-repo-browser.png" alt="artifactory-repo-browser"></p>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="unstable-longhorn-volumes">Unstable Longhorn Volumes</h3>
+<p>Perhaps due to my setup, my cluster node reboots by itself and the entire cluster becomes unstable. To resolve this issue, I create few scripts to delete existing Kubernetes deployments. When Longhorn is finally up and running without issues, my deployments are then deployed, one at a time.</p>
+<h3 id="jenkins-wrong-volume-permissions">Jenkins wrong volume permissions</h3>
+<p>This happens when user in the container does not have the same userid:groupid as the user on the host, which has access to the volume. To fix this, under the template/spec of deployment.yaml, I create an init container to change the ownership of the volume.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span><span style="color:#f92672">initContainers</span>:
+</span></span><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">init</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">image</span>: <span style="color:#ae81ff">arm64v8/busybox:latest</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">command</span>: [<span style="color:#e6db74">&#34;sh&#34;</span>, <span style="color:#e6db74">&#34;-c&#34;</span>, <span style="color:#e6db74">&#34;chown -R 1000:1000 /.m2&#34;</span>]
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">maven-agent-pvc</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/.m2</span>
+</span></span><span style="display:flex;"><span>...
+</span></span></code></pre></div><ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/raspberry/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Raspberry</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cluster/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Cluster</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/ci/cd/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">CI/CD</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/pipeline/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Pipeline</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://dojocube.com/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-1/">CI/CD Pipeline on Pi Cluster (I)</a>
+    
+    
+    <a href="https://dojocube.com/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-3/">CI/CD Pipeline on Pi Cluster (III)</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-1/">CI/CD Pipeline on Pi Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2021/raspberry-pi-cluster-with-longhorn/">Pi Cluster with Longhorn</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2021/kubernetes-pi-cluster-with-ansible/">K8s Pi Cluster with Ansible</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/highly-available-kubernetes-pi-cluster-part-2/">HA K8s Pi Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/highly-available-kubernetes-pi-cluster-part-1/">HA K8s Pi Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-maven-agent-for-kubernetes/">Jenkins Maven Agent</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-pipeline-for-kubernetes-cluster/">Jenkins Pipeline for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/integrating-jenkins-and-gitea/">Integrating Jenkins and Gitea</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/helm-for-kubernetes-cluster/">Helm for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-2/">Jenkins for K8s Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-1/">Jenkins for K8s Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-on-kubernetes-pi-cluster/">Gitea for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/kubernetes-cluster-on-raspberry-pi/">Kubernetes Cluster on Pi</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/docker-on-raspberry-pi-cluster/">Docker for MicroK8s Cluster</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>

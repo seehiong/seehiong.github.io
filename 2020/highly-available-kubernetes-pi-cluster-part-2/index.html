@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>HA K8s Pi Cluster (II) | Dojocube</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise
+HA Kubernetes Pi Cluster (Part II) (Total Setup Time: 20 mins)
+In this follow up guide, I will configure the HA Kubernetes Cluster onto the previous external etcd setup.
+Installing Docker (5 mins)
+Firstly, installs docker container runtimes to all master nodes:
+sudo apt install docker.io sudo usermod -aG docker ubuntu su - ubuntu sudo systemctl enable docker.">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="HA K8s Pi Cluster (II)" />
+<meta property="og:description" content="By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise
+HA Kubernetes Pi Cluster (Part II) (Total Setup Time: 20 mins)
+In this follow up guide, I will configure the HA Kubernetes Cluster onto the previous external etcd setup.
+Installing Docker (5 mins)
+Firstly, installs docker container runtimes to all master nodes:
+sudo apt install docker.io sudo usermod -aG docker ubuntu su - ubuntu sudo systemctl enable docker." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://dojocube.com/2020/highly-available-kubernetes-pi-cluster-part-2/" /><meta property="article:section" content="2020" />
+<meta property="article:published_time" content="2020-08-17T20:00:00+08:00" />
+<meta property="article:modified_time" content="2020-08-17T20:00:00+08:00" />
+<meta itemprop="name" content="HA K8s Pi Cluster (II)">
+<meta itemprop="description" content="By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise
+HA Kubernetes Pi Cluster (Part II) (Total Setup Time: 20 mins)
+In this follow up guide, I will configure the HA Kubernetes Cluster onto the previous external etcd setup.
+Installing Docker (5 mins)
+Firstly, installs docker container runtimes to all master nodes:
+sudo apt install docker.io sudo usermod -aG docker ubuntu su - ubuntu sudo systemctl enable docker."><meta itemprop="datePublished" content="2020-08-17T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-08-17T20:00:00+08:00" />
+<meta itemprop="wordCount" content="819">
+<meta itemprop="keywords" content="Raspberry,Cluster,HA,Kubeadm,Calio," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="HA K8s Pi Cluster (II)"/>
+<meta name="twitter:description" content="By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise
+HA Kubernetes Pi Cluster (Part II) (Total Setup Time: 20 mins)
+In this follow up guide, I will configure the HA Kubernetes Cluster onto the previous external etcd setup.
+Installing Docker (5 mins)
+Firstly, installs docker container runtimes to all master nodes:
+sudo apt install docker.io sudo usermod -aG docker ubuntu su - ubuntu sudo systemctl enable docker."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Dojocube
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://seehiong.github.io" title="byogpt">BYO-GPT</a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2020
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">HA K8s Pi Cluster (II)</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2020-08-17T20:00:00+08:00">August 17, 2020</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 819 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><img src="/images/ha-k8s2/highly-available-kubernetes-pi-cluster.png" alt="highly-available-kubernetes-pi-cluster"></p>
+<p>By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise</p>
+<hr>
+<h1 id="ha-kubernetes-pi-cluster-part-ii">HA Kubernetes Pi Cluster (Part II)</h1>
+<p><em>(Total Setup Time: 20 mins)</em></p>
+<p>In this follow up guide, I will configure the HA Kubernetes Cluster onto the previous <a href="../highly-available-kubernetes-pi-cluster-part-1">external etcd setup</a>.</p>
+<h2 id="installing-docker">Installing Docker</h2>
+<p><em>(5 mins)</em></p>
+<p>Firstly, installs docker <a href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">container runtimes</a> to all master nodes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt install docker.io
+</span></span><span style="display:flex;"><span>sudo usermod -aG docker ubuntu
+</span></span><span style="display:flex;"><span>su - ubuntu
+</span></span><span style="display:flex;"><span>sudo systemctl enable docker.service
+</span></span></code></pre></div><p>Secondly, sets up the docker daemon:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Run su commnad as root</span>
+</span></span><span style="display:flex;"><span>sudo su -
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set up the Docker daemon</span>
+</span></span><span style="display:flex;"><span>cat &gt; /etc/docker/daemon.json <span style="color:#e6db74">&lt;&lt;EOF
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;exec-opts&#34;: [&#34;native.cgroupdriver=systemd&#34;],
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;log-driver&#34;: &#34;json-file&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;log-opts&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;max-size&#34;: &#34;100m&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  },
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;storage-driver&#34;: &#34;overlay2&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span></code></pre></div><p>Thirdly, enables and restarts Docker:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>systemctl daemon-reload
+</span></span><span style="display:flex;"><span>systemctl enable docker
+</span></span><span style="display:flex;"><span>systemctl restart docker
+</span></span></code></pre></div><h2 id="installing-kudeadm">Installing kudeadm</h2>
+<p><em>(10 mins)</em></p>
+<p>Starts by adding Kubernetes repository to all master nodes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt-get update <span style="color:#f92672">&amp;&amp;</span> sudo apt-get install -y apt-transport-https curl
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cat <span style="color:#e6db74">&lt;&lt;EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">deb https://apt.kubernetes.io/ kubernetes-xenial main
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span></code></pre></div><p>Next, <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm">installs kubeadm</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get install -y kubelet kubeadm kubectl
+</span></span><span style="display:flex;"><span>sudo apt-mark hold kubelet kubeadm kubectl
+</span></span><span style="display:flex;"><span>sudo reboot
+</span></span></code></pre></div><h2 id="initializing-kubernetes-master-nodes">Initializing Kubernetes Master Nodes</h2>
+<p><em>(5 mins)</em></p>
+<p>First, prepares the certs by following <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/">kubeadm HA setup</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo mkdir -p /etc/kubernetes/pki/etcd/
+</span></span><span style="display:flex;"><span>sudo cp /srv/etcd-certs/cacert.pem /etc/kubernetes/pki/etcd/
+</span></span><span style="display:flex;"><span>sudo cp /srv/etcd-certs/etcd.pem /etc/kubernetes/pki
+</span></span><span style="display:flex;"><span>sudo cp /srv/etcd-certs/etcd-key.pem /etc/kubernetes/pki
+</span></span></code></pre></div><p>Second, inserts the following into <em>kubeadm-config.yaml</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">kubeadm.k8s.io/v1beta2</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">ClusterConfiguration</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kubernetesVersion</span>: <span style="color:#ae81ff">stable</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">controlPlaneEndpoint</span>: <span style="color:#e6db74">&#34;cluster-endpoint:6443&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">etcd</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">external</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">endpoints</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">https://192.168.100.119:2379</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">https://192.168.100.173:2379</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">https://192.168.100.100:2379</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">caFile</span>: <span style="color:#ae81ff">/etc/kubernetes/pki/etcd/cacert.pem</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">certFile</span>: <span style="color:#ae81ff">/etc/kubernetes/pki/etcd.pem</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">keyFile</span>: <span style="color:#ae81ff">/etc/kubernetes/pki/etcd-key.pem</span>
+</span></span></code></pre></div><p>This is my <em>/etc/hosts</em> for all master nodes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#a6e22e">cluster</span>-<span style="color:#a6e22e">endpoint</span> <span style="color:#a6e22e">points</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">first</span> <span style="color:#a6e22e">master</span> <span style="color:#a6e22e">node</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">127</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span> <span style="color:#a6e22e">localhost</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span> <span style="color:#a6e22e">master1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">173</span> <span style="color:#a6e22e">master2</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">100</span> <span style="color:#a6e22e">master3</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span> <span style="color:#a6e22e">cluster</span>-<span style="color:#a6e22e">endpoint</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Third, initializes the master node by:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo kubeadm init --config kubeadm-config.yaml --upload-certs
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mkdir -p $HOME/.kube
+</span></span><span style="display:flex;"><span>sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+</span></span><span style="display:flex;"><span>sudo chown <span style="color:#66d9ef">$(</span>id -u<span style="color:#66d9ef">)</span>:<span style="color:#66d9ef">$(</span>id -g<span style="color:#66d9ef">)</span> $HOME/.kube/config
+</span></span></code></pre></div><p>Fourth, installs <a href="https://docs.projectcalico.org/getting-started/kubernetes/self-managed-onprem/onpremises">Calio</a> from the list of <a href="https://kubernetes.io/docs/concepts/cluster-administration/addons/">networking addons</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl https://docs.projectcalico.org/manifests/calico-etcd.yaml -o calico-etcd.yaml
+</span></span></code></pre></div><p>Fifth, prepares TLS for calico by following <a href="https://docs.projectcalico.org/getting-started/kubernetes/installation/config-options">config options</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cat /srv/etcd-certs/cacert.pem | base64 -w <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>cat /srv/etcd-certs/etcd.pem | base64 -w <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>sudo cat /srv/etcd-certs/etcd-key.pem | base64 -w <span style="color:#ae81ff">0</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Searches for the Secret section in calico.yaml and paste cat output from the cacert.pem, etcd.pem and etcd-key.pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Secret</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">type</span>: <span style="color:#ae81ff">Opaque</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">calico-etcd-secrets</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">kube-system</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">data</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># Populate the following files with etcd TLS configuration if desired, but leave blank if</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># not using TLS for etcd.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># This self-hosted install expects three files with the following names.  The values</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># should be base64 encoded strings of the entire contents of each file.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">etcd-key</span>: <span style="color:#ae81ff">LS0tLS1CRUdJTiB...VZBVEUgS0VZLS0tLS0=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">etcd-cert</span>: <span style="color:#ae81ff">LS0tLS1...ElGSUNBVEUtLS0tLQ==</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">etcd-ca</span>: <span style="color:#ae81ff">LS0tLS1CRUdJTiBD...JRklDQVRFLS0tLS0=</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Source: calico/templates/calico-config.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># This ConfigMap is used to configure a self-hosted Calico installation.</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">ConfigMap</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">calico-config</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">kube-system</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">data</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># Configure this with the location of your etcd cluster.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">etcd_endpoints</span>: <span style="color:#e6db74">&#34;https://cluster-endpoint:2379&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># If you&#39;re using TLS enabled etcd uncomment the following.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># You must also populate the Secret below with these files.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">etcd_ca</span>: <span style="color:#e6db74">&#34;/calico-secrets/etcd-ca&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">etcd_cert</span>: <span style="color:#e6db74">&#34;/calico-secrets/etcd-cert&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">etcd_key</span>: <span style="color:#e6db74">&#34;/calico-secrets/etcd-key&#34;</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f calico.yaml
+</span></span><span style="display:flex;"><span>watch kubectl get pods --all-namespaces
+</span></span><span style="display:flex;"><span>kubectl get nodes -o wide
+</span></span></code></pre></div><p>Lastly, runs this on the other 2 master nodes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo kubeadm join cluster-endpoint:6443 --token puuck4.kjgqjif1xyy2397f <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --discovery-token-ca-cert-hash sha256:50bb31b6f26ee6e98228f098fb9f50eaf7f1db67a011c90d6c764f7331cb90e1 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --control-plane --certificate-key 28ad20c49a7c6b8d06b2faa305fdf0c98d9763b932b929deb4704d57ec8ff959
+</span></span></code></pre></div><p>This is my modified <em>/etc/hosts</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#a6e22e">cluster</span>-<span style="color:#a6e22e">endpoint</span> <span style="color:#a6e22e">points</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">loadbalancer</span> <span style="color:#a6e22e">IP</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">127</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span> <span style="color:#a6e22e">localhost</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">119</span> <span style="color:#a6e22e">master1</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">173</span> <span style="color:#a6e22e">master2</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">100</span> <span style="color:#a6e22e">master3</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">200</span> <span style="color:#a6e22e">cluster</span>-<span style="color:#a6e22e">endpoint</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>And that&rsquo;s all to it! You now own a Highly Available Kubernetes Pi Cluster!</p>
+<p><img src="/images/ha-k8s2/highly-available-kubernetes-pi-cluster-up-and-running.png" alt="highly-available-kubernetes-pi-cluster-up-and-running"></p>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="the-connection-to-the-server-localhost8080-was-refused---did-you-specify-the-right-host-or-port">The connection to the server localhost:8080 was refused - did you specify the right host or port?</h3>
+<p>After <em>kubeadm init</em>, you need to run these commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mkdir -p $HOME/.kube
+</span></span><span style="display:flex;"><span>sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+</span></span><span style="display:flex;"><span>sudo chown <span style="color:#66d9ef">$(</span>id -u<span style="color:#66d9ef">)</span>:<span style="color:#66d9ef">$(</span>id -g<span style="color:#66d9ef">)</span> $HOME/.kube/config
+</span></span></code></pre></div><h3 id="secret-kubeadm-certs-was-not-found-in-the-kube-system-namespace-this-secret-might-have-expired">Secret &ldquo;kubeadm-certs&rdquo; was not found in the &ldquo;kube-system&rdquo; Namespace. This Secret might have expired</h3>
+<p>If the certificate-key expires, generates a new one as below:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo kubeadm init phase upload-certs --upload-certs --config kubeadm-config.yaml
+</span></span></code></pre></div><h3 id="network-stat-varlibcaliconodename-no-such-file-or-directory">network: stat /var/lib/calico/nodename: no such file or directory</h3>
+<p>After resetting kubeadm, my kubernetes cluster runs successfully:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo kubeadm reset
+</span></span><span style="display:flex;"><span>sudo rm -rf /etc/cni/net.d
+</span></span><span style="display:flex;"><span>sudo iptables --flush
+</span></span><span style="display:flex;"><span>sudo ipvsadm --clear
+</span></span><span style="display:flex;"><span>rm $HOME/.kube/config
+</span></span><span style="display:flex;"><span>sudo rm -rf /var/lib/cni
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># External etcd clean up</span>
+</span></span><span style="display:flex;"><span>sudo etcdctl del <span style="color:#e6db74">&#34;&#34;</span> --prefix --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem
+</span></span></code></pre></div><h3 id="re-joining-cluster">Re-joining cluster</h3>
+<p>When your SD failed and you wish to re-configure the faulty PI, you need to perform:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Cordon the faulty node</span>
+</span></span><span style="display:flex;"><span>kubectl cordon master3
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Drain the faulty one</span>
+</span></span><span style="display:flex;"><span>kubectl drain master3 -delete-emptydir-data --ignore-daemonsets
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># if it hungs, you may have to open a separate terminal and to delete the relevant pod</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Delete the node</span>
+</span></span><span style="display:flex;"><span>kubectl delete node master3 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Retrieve bootstrap token</span>
+</span></span><span style="display:flex;"><span>kubeadm token list
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Retrieve token cacert hash (sha256)</span>
+</span></span><span style="display:flex;"><span>openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    | openssl rsa -pubin -outform der 2&gt;/dev/null <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    | openssl dgst -sha256 -hex <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    | sed <span style="color:#e6db74">&#39;s/^.* //&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate new key</span>
+</span></span><span style="display:flex;"><span>kubeadm init phase upload-certs --upload-certs --config kubeadm-config.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Forms the join as master command based on above results</span>
+</span></span><span style="display:flex;"><span>kubeadm join 192.168.100.180:6443 --token 0abut7.guksf3dfp1k67osq --discovery-token-ca-cert-hash sha256:a263dfc32ddd3d16cc72f2f91a0786e869f9310646614dbdf6a103be5d42b9c7 --v<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span> --control-plane --certificate-key 97e86ed12f1e1b4f97d51d1a1ff92485d678d5fb8725c3c73e66b17a660c68af
+</span></span></code></pre></div><ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/raspberry/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Raspberry</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cluster/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Cluster</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/ha/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">HA</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/kubeadm/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Kubeadm</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/calio/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Calio</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://dojocube.com/2020/highly-available-kubernetes-pi-cluster-part-1/">HA K8s Pi Cluster (I)</a>
+    
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2020/highly-available-kubernetes-pi-cluster-part-1/">HA K8s Pi Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/kubernetes-cluster-on-raspberry-pi/">Kubernetes Cluster on Pi</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-maven-agent-for-kubernetes/">Jenkins Maven Agent</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-pipeline-for-kubernetes-cluster/">Jenkins Pipeline for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/integrating-jenkins-and-gitea/">Integrating Jenkins and Gitea</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/helm-for-kubernetes-cluster/">Helm for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-2/">Jenkins for K8s Cluster (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/jenkins-for-kubernetes-cluster-part-1/">Jenkins for K8s Cluster (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-on-kubernetes-pi-cluster/">Gitea for K8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/gitea-for-raspberry-pi-cluster/">Gitea for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/docker-on-raspberry-pi-cluster/">Docker for MicroK8s Cluster</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/external-storage-for-raspberry-pi-cluster/">External Storage</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-2/">MicroK8s on Pi 4 8GB (II)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/microk8s-cluster-on-raspberry-pi-8gb-part-1/">MicroK8s on Pi 4 8GB (I)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/private-registry-for-kubernetes-cluster/">Private Registry for K8s Cluster</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://dojocube.com/" >
+    &copy;  Dojocube 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
