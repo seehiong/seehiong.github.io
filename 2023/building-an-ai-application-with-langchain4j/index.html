@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Building an AI Application with Langchain4j | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of langchain4j to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.
+Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Development Environment (IDE) and opted for Java 17 as my programming language. Leveraging Postman as my API platform and Spring Boot as the framework of choice, let&rsquo;s delve into the process.">
+    <meta name="generator" content="Hugo 0.111.3">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Building an AI Application with Langchain4j" />
+<meta property="og:description" content="In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of langchain4j to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.
+Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Development Environment (IDE) and opted for Java 17 as my programming language. Leveraging Postman as my API platform and Spring Boot as the framework of choice, let&rsquo;s delve into the process." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2023/building-an-ai-application-with-langchain4j/" /><meta property="article:section" content="2023" />
+<meta property="article:published_time" content="2023-11-07T20:00:00+08:00" />
+<meta property="article:modified_time" content="2023-11-07T20:00:00+08:00" />
+<meta itemprop="name" content="Building an AI Application with Langchain4j">
+<meta itemprop="description" content="In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of langchain4j to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.
+Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Development Environment (IDE) and opted for Java 17 as my programming language. Leveraging Postman as my API platform and Spring Boot as the framework of choice, let&rsquo;s delve into the process."><meta itemprop="datePublished" content="2023-11-07T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-11-07T20:00:00+08:00" />
+<meta itemprop="wordCount" content="2118">
+<meta itemprop="keywords" content="langchain4j,LocalAI,Spring Boot,Java,Chroma," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Building an AI Application with Langchain4j"/>
+<meta name="twitter:description" content="In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of langchain4j to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.
+Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Development Environment (IDE) and opted for Java 17 as my programming language. Leveraging Postman as my API platform and Spring Boot as the framework of choice, let&rsquo;s delve into the process."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2023
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Building an AI Application with Langchain4j</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2023-11-07T20:00:00+08:00">November 7, 2023</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 10 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 2118 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p>In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of <a href="https://github.com/langchain4j/langchain4j/">langchain4j</a> to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>To kick things off, I&rsquo;ve chosen <a href="https://spring.io/tools">STS4</a> as my Integrated Development Environment (IDE) and opted for <a href="https://adoptium.net/temurin/archive/?version=17">Java 17</a> as my programming language. Leveraging <a href="https://www.postman.com/">Postman</a> as my API platform and <a href="https://spring.io/projects/spring-boot">Spring Boot</a> as the framework of choice, let&rsquo;s delve into the process.</p>
+<h2 id="setting-up-a-spring-boot-application">Setting up a Spring Boot Application</h2>
+<p>To initiate the project, I began by creating a Spring Starter Project and selecting the Spring Web option. Here&rsquo;s a snippet of the setup:</p>
+<p><img src="/images/langchain4j/spring-starter-project.png" alt="spring-starter-project"></p>
+<h3 id="spring-boot-application">Spring Boot Application</h3>
+<p>Here&rsquo;s my sprint boot application:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.boot.SpringApplication<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.boot.autoconfigure.SpringBootApplication<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@SpringBootApplication</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiApplication</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		SpringApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>AiApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span> args<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h3 id="gradle-build-configuration">Gradle Build Configuration</h3>
+<p>My <strong>build.gradle</strong> file outlines the dependencies, including Langchain4j components:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-groovy" data-lang="groovy"><span style="display:flex;"><span>plugins <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	id <span style="color:#e6db74">&#39;java&#39;</span>
+</span></span><span style="display:flex;"><span>	id <span style="color:#e6db74">&#39;org.springframework.boot&#39;</span> version <span style="color:#e6db74">&#39;3.1.5&#39;</span>
+</span></span><span style="display:flex;"><span>	id <span style="color:#e6db74">&#39;io.spring.dependency-management&#39;</span> version <span style="color:#e6db74">&#39;1.1.3&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>group <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;com.seehiong&#39;</span>
+</span></span><span style="display:flex;"><span>version <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;0.0.1-SNAPSHOT&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>java <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	sourceCompatibility <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;17&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>repositories <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	mavenCentral<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>dependencies <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;org.springframework.boot:spring-boot-starter-web&#39;</span>
+</span></span><span style="display:flex;"><span>	testImplementation <span style="color:#e6db74">&#39;org.springframework.boot:spring-boot-starter-test&#39;</span>
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#f92672">(</span><span style="color:#e6db74">&#39;dev.langchain4j:langchain4j:0.23.0&#39;</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		exclude group: <span style="color:#e6db74">&#34;commons-logging&#34;</span><span style="color:#f92672">,</span> module: <span style="color:#e6db74">&#34;commons-logging&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;dev.langchain4j:langchain4j-core:0.23.0&#39;</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;dev.langchain4j:langchain4j-chroma:0.23.0&#39;</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;dev.langchain4j:langchain4j-open-ai:0.23.0&#39;</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;dev.langchain4j:langchain4j-local-ai:0.23.0&#39;</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:0.23.0&#39;</span>	
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;org.mapdb:mapdb:3.0.10&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>tasks<span style="color:#f92672">.</span><span style="color:#a6e22e">named</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;test&#39;</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	useJUnitPlatform<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h3 id="application-configuration">Application Configuration</h3>
+<p>As a standard practice, I&rsquo;ve created an application.properties file in the src/main/resources directory to specify server configurations:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">server.port</span><span style="color:#f92672">:</span> <span style="color:#e6db74">8888</span>
+</span></span></code></pre></div><h2 id="setting-up-the-controller-and-service">Setting Up the Controller and Service</h2>
+<p>Let&rsquo;s continue our journey by establishing the controller and service components of our Java application, seamlessly integrating the power of Langchain4j.</p>
+<h3 id="controller-setup">Controller Setup</h3>
+<p>Begin by setting up your controller. Below is the skeleton of an empty controller ready to be infused with the capabilities of Langchain4j.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.controller<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.web.bind.annotation.RequestMapping<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.web.bind.annotation.RestController<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@RestController</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/ai&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// We will add the services along the way
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h3 id="service-setup">Service Setup</h3>
+<p>In the service layer, let&rsquo;s explore the heart of our application. As highlight in the official langchain4j, we can now try out OpenAI&rsquo;s gpt-3.5-turbo and text-embedding-ada-002 models with LangChain4j for free by simply using the API key &ldquo;demo&rdquo;. Here&rsquo;s the sample model service for providing the demo model.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.openai.OpenAiChatModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ModelService</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> ChatLanguageModel demoModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ChatLanguageModel <span style="color:#a6e22e">getDemoModel</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>demoModel <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			demoModel <span style="color:#f92672">=</span> OpenAiChatModel<span style="color:#f92672">.</span><span style="color:#a6e22e">withApiKey</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;demo&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> demoModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// We will be adding more models here in the subsequent sections
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h3 id="1-implementing-chat-functionality">1) Implementing Chat Functionality</h3>
+<p>Building on the previous implementation, we&rsquo;ve now introduced a dedicated ChatService to handle the generation of chat responses. Here is the updated code:</p>
+<h4 id="chatservice-implementation">ChatService implementation:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ChatService</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">generate</span><span style="color:#f92672">(</span>ChatLanguageModel model<span style="color:#f92672">,</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> model<span style="color:#f92672">.</span><span style="color:#a6e22e">generate</span><span style="color:#f92672">(</span>text<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="updated-aicontroller">Updated AiController:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> ModelService modelSvc<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> ChatService chatSvc<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/chat&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">chat</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@RequestParam</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;text&#34;</span><span style="color:#f92672">)</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> chatSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">generate</span><span style="color:#f92672">(</span>modelSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">getDemoModel</span><span style="color:#f92672">(),</span> text<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;(</span>response<span style="color:#f92672">,</span> HttpStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">OK</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>The <em>ChatService</em> is responsible for the generation of chat responses using the provided model. We&rsquo;ve introduced the <em>/chat</em> endpoint that accepts a query parameter <em>text</em> which represents the input for chat. For simplicity, <a href="https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html">input validation</a> has been omitted in the example.</p>
+<h4 id="postman-result">Postman Result:</h4>
+<p><img src="/images/langchain4j/langchain4j-chat.png" alt="langchain4j-chat"></p>
+<h4 id="spring-boot-output">Spring Boot Output:</h4>
+<p><img src="/images/langchain4j/langchain4j-spring-boot.png" alt="langchain4j-spring-boot"></p>
+<h3 id="2-introducing-custom-tools-in-the-controller">2) Introducing Custom Tools in the Controller</h3>
+<p>In this section, we&rsquo;re taking our AI application a step further by incorporating a custom tool through the CalculatorService. Here&rsquo;s the detailed code:</p>
+<h4 id="calculatorservice-implementation">CalculatorService implementation:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.agent.tool.Tool<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.memory.chat.MessageWindowChatMemory<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.AiServices<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CalculatorService</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Calculator</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Tool</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Calculates the length of a string&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">stringLength</span><span style="color:#f92672">(</span>String s<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> s<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Tool</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Calculates the sum of two numbers&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> a<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> b<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Tool</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Calculates the square root of a number&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">double</span> <span style="color:#a6e22e">sqrt</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> x<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">sqrt</span><span style="color:#f92672">(</span>x<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Assistant</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		String <span style="color:#a6e22e">chat</span><span style="color:#f92672">(</span>String userMessage<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">calculate</span><span style="color:#f92672">(</span>ChatLanguageModel model<span style="color:#f92672">,</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		Assistant assistant <span style="color:#f92672">=</span> AiServices<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">(</span>Assistant<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">).</span><span style="color:#a6e22e">chatLanguageModel</span><span style="color:#f92672">(</span>model<span style="color:#f92672">).</span><span style="color:#a6e22e">tools</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Calculator<span style="color:#f92672">())</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">.</span><span style="color:#a6e22e">chatMemory</span><span style="color:#f92672">(</span>MessageWindowChatMemory<span style="color:#f92672">.</span><span style="color:#a6e22e">withMaxMessages</span><span style="color:#f92672">(</span><span style="color:#ae81ff">10</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> assistant<span style="color:#f92672">.</span><span style="color:#a6e22e">chat</span><span style="color:#f92672">(</span>text<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="updated-aicontroller-1">Updated AiController:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> CalculatorService calculatorSvc<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/calculate&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">calculate</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@RequestParam</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;text&#34;</span><span style="color:#f92672">)</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> calculatorSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">calculate</span><span style="color:#f92672">(</span>modelSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">getDemoModel</span><span style="color:#f92672">(),</span> text<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;(</span>response<span style="color:#f92672">,</span> HttpStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">OK</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>The <em>CalculatorService</em> introduces the <em>Calculator</em> class with custom Tool annotation to calculate the length of a string, sum of two numbers, and the square root of a number. The <em>Assistant</em> interface facilitates the chat interation.</p>
+<h4 id="postman-result-1">Postman Result:</h4>
+<p><img src="/images/langchain4j/langchain4j-calculator.png" alt="langchain4j-calculator"></p>
+<h3 id="3-integrating-embedding-functionality-with-chroma">3) Integrating Embedding Functionality with Chroma</h3>
+<p>To enhance our AI application, we&rsquo;ve introduced embedding functionality using Chroma, following the <a href="https://github.com/langchain4j/langchain4j-examples/blob/main/chroma-example/src/main/java/ChromaEmbeddingStoreExample.java">Chroma embedding store example</a>. Prior to running spring boot, make sure to pull the Chroma image and run it with <a href="https://docs.docker.com/desktop/install/windows-install/">Docker Desktop</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker pull ghcr.io/chroma-core/chroma:0.4.6
+</span></span><span style="display:flex;"><span>docker run -d -p 8000:8000 ghcr.io/chroma-core/chroma:0.4.6
+</span></span></code></pre></div><h4 id="embeddingservice-implementation">EmbeddingService Implementation:</h4>
+<p>This service demonstrates the embedding functionality:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> dev.langchain4j.internal.Utils.randomUUID<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.embedding.Embedding<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.segment.TextSegment<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.embedding.EmbeddingModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.EmbeddingMatch<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.EmbeddingStore<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">EmbeddingService</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> EmbeddingStore<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;</span> embeddingStore<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">embed</span><span style="color:#f92672">(</span>EmbeddingModel embeddingModel<span style="color:#f92672">,</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		StringBuilder sb <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StringBuilder<span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		Embedding inProcessEmbedding <span style="color:#f92672">=</span> embeddingModel<span style="color:#f92672">.</span><span style="color:#a6e22e">embed</span><span style="color:#f92672">(</span>text<span style="color:#f92672">).</span><span style="color:#a6e22e">content</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		sb<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>String<span style="color:#f92672">.</span><span style="color:#a6e22e">valueOf</span><span style="color:#f92672">(</span>inProcessEmbedding<span style="color:#f92672">)).</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">lineSeparator</span><span style="color:#f92672">());</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		TextSegment segment1 <span style="color:#f92672">=</span> TextSegment<span style="color:#f92672">.</span><span style="color:#a6e22e">from</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;I like football.&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		Embedding embedding1 <span style="color:#f92672">=</span> embeddingModel<span style="color:#f92672">.</span><span style="color:#a6e22e">embed</span><span style="color:#f92672">(</span>segment1<span style="color:#f92672">).</span><span style="color:#a6e22e">content</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		getEmbeddingStore<span style="color:#f92672">().</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>embedding1<span style="color:#f92672">,</span> segment1<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		TextSegment segment2 <span style="color:#f92672">=</span> TextSegment<span style="color:#f92672">.</span><span style="color:#a6e22e">from</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;The weather is good today.&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		Embedding embedding2 <span style="color:#f92672">=</span> embeddingModel<span style="color:#f92672">.</span><span style="color:#a6e22e">embed</span><span style="color:#f92672">(</span>segment2<span style="color:#f92672">).</span><span style="color:#a6e22e">content</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		getEmbeddingStore<span style="color:#f92672">().</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>embedding2<span style="color:#f92672">,</span> segment2<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		Embedding queryEmbedding <span style="color:#f92672">=</span> embeddingModel<span style="color:#f92672">.</span><span style="color:#a6e22e">embed</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;What is your favourite sport?&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">content</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		List<span style="color:#f92672">&lt;</span>EmbeddingMatch<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;&gt;</span> relevant <span style="color:#f92672">=</span> getEmbeddingStore<span style="color:#f92672">().</span><span style="color:#a6e22e">findRelevant</span><span style="color:#f92672">(</span>queryEmbedding<span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		EmbeddingMatch<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;</span> embeddingMatch <span style="color:#f92672">=</span> relevant<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span><span style="color:#ae81ff">0</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		sb<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>String<span style="color:#f92672">.</span><span style="color:#a6e22e">valueOf</span><span style="color:#f92672">(</span>embeddingMatch<span style="color:#f92672">.</span><span style="color:#a6e22e">score</span><span style="color:#f92672">())).</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">lineSeparator</span><span style="color:#f92672">());</span> <span style="color:#75715e">// 0.8144288493114709
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		sb<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>embeddingMatch<span style="color:#f92672">.</span><span style="color:#a6e22e">embedded</span><span style="color:#f92672">().</span><span style="color:#a6e22e">text</span><span style="color:#f92672">());</span> <span style="color:#75715e">// I like football.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> sb<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> EmbeddingStore<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getEmbeddingStore</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>embeddingStore <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			embeddingStore <span style="color:#f92672">=</span> ChromaEmbeddingStore<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">().</span><span style="color:#a6e22e">baseUrl</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;http://localhost:8000&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#f92672">.</span><span style="color:#a6e22e">collectionName</span><span style="color:#f92672">(</span>randomUUID<span style="color:#f92672">()).</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> embeddingStore<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="updated-aicontroller-2">Updated AiController:</h4>
+<p>The AiController now includes the <em>/embed</em> endpoint to showcase the embedding functionality:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> EmbeddingService embeddingSvc<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/embed&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">embed</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@RequestParam</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;text&#34;</span><span style="color:#f92672">)</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> embeddingSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">embed</span><span style="color:#f92672">(</span>modelSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">getEmbeddingModel</span><span style="color:#f92672">(),</span> text<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;(</span>response<span style="color:#f92672">,</span> HttpStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">OK</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="postman-result-2">Postman Result:</h4>
+<p><img src="/images/langchain4j/langchain4j-embedding.png" alt="langchain4j-embedding"></p>
+<h3 id="4-integrating-translate-service">4) Integrating Translate Service</h3>
+<p>In this section, we&rsquo;ve integrated the Translate Service into our AI application. Below are the relevant implementations:</p>
+<h4 id="translateservice-implementation">TranslateService Implementation:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.AiServices<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.SystemMessage<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.UserMessage<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.V<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TranslatorService</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Translator</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@SystemMessage</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;You are a professional translator into {{language}}&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@UserMessage</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Translate the following text: {{text}}&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>		String <span style="color:#a6e22e">translate</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@V</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;text&#34;</span><span style="color:#f92672">)</span> String text<span style="color:#f92672">,</span> <span style="color:#a6e22e">@V</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;language&#34;</span><span style="color:#f92672">)</span> String language<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">translate</span><span style="color:#f92672">(</span>ChatLanguageModel model<span style="color:#f92672">,</span> String text<span style="color:#f92672">,</span> String language<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		Translator translator <span style="color:#f92672">=</span> AiServices<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span>Translator<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span> model<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> translator<span style="color:#f92672">.</span><span style="color:#a6e22e">translate</span><span style="color:#f92672">(</span>text<span style="color:#f92672">,</span> language<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="updated-aicontroller-3">Updated AiController:</h4>
+<p>In the updated AiController, we have set the default language to Chinese, but users can override it and set it to any other language:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> TranslatorService translatorSvc<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/translate&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">translate</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@RequestParam</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;text&#34;</span><span style="color:#f92672">)</span> String text<span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">@RequestParam</span><span style="color:#f92672">(</span>defaultValue <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;chinese&#34;</span><span style="color:#f92672">)</span> String language<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> translatorSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">translate</span><span style="color:#f92672">(</span>modelSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">getDemoModel</span><span style="color:#f92672">(),</span> text<span style="color:#f92672">,</span> language<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;(</span>response<span style="color:#f92672">,</span> HttpStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">OK</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="postman-result-3">Postman Result:</h4>
+<p><img src="/images/langchain4j/langchain4j-translate-to-chinese.png" alt="langchain4j-translate-to-chinese"></p>
+<h3 id="5-introducing-persistence-service">5) Introducing Persistence Service</h3>
+<p>In this section, we&rsquo;ve introduced a Persistence Service to add a persistence layer to our AI application. Below are the relevant implementations:</p>
+<h4 id="persistenceservice-implementation">PersistenceService Implementation:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> dev.langchain4j.data.message.ChatMessageDeserializer.messagesFromJson<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> dev.langchain4j.data.message.ChatMessageSerializer.messagesToJson<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> org.mapdb.Serializer.INTEGER<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> org.mapdb.Serializer.STRING<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.Map<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.mapdb.DB<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.mapdb.DBMaker<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.message.ChatMessage<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.memory.chat.ChatMemoryProvider<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.memory.chat.MessageWindowChatMemory<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.AiServices<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.MemoryId<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.UserMessage<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.memory.chat.ChatMemoryStore<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PersistenceService</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> PersistentChatMemoryStore store <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PersistentChatMemoryStore<span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Assistant</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		String <span style="color:#a6e22e">chat</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@MemoryId</span> <span style="color:#66d9ef">int</span> memoryId<span style="color:#f92672">,</span> <span style="color:#a6e22e">@UserMessage</span> String userMessage<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PersistentChatMemoryStore</span> <span style="color:#66d9ef">implements</span> ChatMemoryStore <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> DB db <span style="color:#f92672">=</span> DBMaker<span style="color:#f92672">.</span><span style="color:#a6e22e">fileDB</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;multi-user-chat-memory.db&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">closeOnJvmShutdown</span><span style="color:#f92672">().</span><span style="color:#a6e22e">transactionEnable</span><span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">.</span><span style="color:#a6e22e">make</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Map<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> db<span style="color:#f92672">.</span><span style="color:#a6e22e">hashMap</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;messages&#34;</span><span style="color:#f92672">,</span> INTEGER<span style="color:#f92672">,</span> STRING<span style="color:#f92672">).</span><span style="color:#a6e22e">createOrOpen</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">public</span> List<span style="color:#f92672">&lt;</span>ChatMessage<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getMessages</span><span style="color:#f92672">(</span>Object memoryId<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			String json <span style="color:#f92672">=</span> map<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">((</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)</span> memoryId<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> messagesFromJson<span style="color:#f92672">(</span>json<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">updateMessages</span><span style="color:#f92672">(</span>Object memoryId<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>ChatMessage<span style="color:#f92672">&gt;</span> messages<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			String json <span style="color:#f92672">=</span> messagesToJson<span style="color:#f92672">(</span>messages<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>			map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">((</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)</span> memoryId<span style="color:#f92672">,</span> json<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>			db<span style="color:#f92672">.</span><span style="color:#a6e22e">commit</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">deleteMessages</span><span style="color:#f92672">(</span>Object memoryId<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			map<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">((</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)</span> memoryId<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>			db<span style="color:#f92672">.</span><span style="color:#a6e22e">commit</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">demo</span><span style="color:#f92672">(</span>ChatLanguageModel model<span style="color:#f92672">,</span> <span style="color:#66d9ef">boolean</span> showName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		StringBuilder sb <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StringBuilder<span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		ChatMemoryProvider chatMemoryProvider <span style="color:#f92672">=</span> memoryId <span style="color:#f92672">-&gt;</span> MessageWindowChatMemory<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">().</span><span style="color:#a6e22e">id</span><span style="color:#f92672">(</span>memoryId<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">.</span><span style="color:#a6e22e">maxMessages</span><span style="color:#f92672">(</span><span style="color:#ae81ff">10</span><span style="color:#f92672">).</span><span style="color:#a6e22e">chatMemoryStore</span><span style="color:#f92672">(</span>store<span style="color:#f92672">).</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		Assistant assistant <span style="color:#f92672">=</span> AiServices<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">(</span>Assistant<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">).</span><span style="color:#a6e22e">chatLanguageModel</span><span style="color:#f92672">(</span>model<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">.</span><span style="color:#a6e22e">chatMemoryProvider</span><span style="color:#f92672">(</span>chatMemoryProvider<span style="color:#f92672">).</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>showName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			sb<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>assistant<span style="color:#f92672">.</span><span style="color:#a6e22e">chat</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Hello, my name is Klaus&#34;</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">lineSeparator</span><span style="color:#f92672">());</span>
+</span></span><span style="display:flex;"><span>			sb<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>assistant<span style="color:#f92672">.</span><span style="color:#a6e22e">chat</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Hi, my name is Francine&#34;</span><span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			sb<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>assistant<span style="color:#f92672">.</span><span style="color:#a6e22e">chat</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;What is my name?&#34;</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">lineSeparator</span><span style="color:#f92672">());</span>
+</span></span><span style="display:flex;"><span>			sb<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>assistant<span style="color:#f92672">.</span><span style="color:#a6e22e">chat</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;What is my name?&#34;</span><span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> sb<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="updated-aicontroller-4">Updated AiController:</h4>
+<p>Here, we adapted from <a href="https://github.com/langchain4j/langchain4j-examples/blob/main/other-examples/src/main/java/ServiceWithPersistentMemoryForEachUserExample.java">persistent ChatMemory</a>. The AiController now includes an endpoint <em>/persistDemo</em> to showcase the Persistence Service. Users can set the showName parameter to true on the first run and false on the second run:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> PersistenceService persistenceSvc<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/persistDemo&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">persistDemo</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@RequestParam</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;showName&#34;</span><span style="color:#f92672">)</span> String showName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> persistenceSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">demo</span><span style="color:#f92672">(</span>modelSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">getDemoModel</span><span style="color:#f92672">(),</span> Boolean<span style="color:#f92672">.</span><span style="color:#a6e22e">valueOf</span><span style="color:#f92672">(</span>showName<span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;(</span>response<span style="color:#f92672">,</span> HttpStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">OK</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="postman-result-1-shownametrue">Postman Result 1 (showName=true):</h4>
+<p><img src="/images/langchain4j/langchain4j-persistence-show-name.png" alt="langchain4j-persistence-show-name"></p>
+<h4 id="postman-result-2-shownamefalse">Postman Result 2 (showName=false):</h4>
+<p><img src="/images/langchain4j/langchain4j-persistence-hide-name.png" alt="langchain4j-persistence-hide-name"></p>
+<h3 id="6-introducing-retrieval-service-via-local-llm">6) Introducing Retrieval Service via Local LLM</h3>
+<p>In this section, we&rsquo;ve introduced a Retrieval Service utilizing a local Language Model (LLM) through <a href="https://localai.io/">LocalAI</a>. Here are the key components and implementations:</p>
+<h3 id="setting-up-local-ai">Setting up Local AI</h3>
+<p>Before running the Spring Boot application, set up Local AI using the following commands within <a href="https://learn.microsoft.com/en-us/windows/wsl/install">WSL</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker pull quay.io/go-skynet/local-ai
+</span></span><span style="display:flex;"><span>docker run -p 8080:8080 -v $PWD/models:/models -ti --rm quay.io/go-skynet/local-ai:latest --models-path /models --context-size <span style="color:#ae81ff">2000</span> --threads <span style="color:#ae81ff">8</span> --debug<span style="color:#f92672">=</span>true
+</span></span></code></pre></div><p>By setting to debug on, you should be seeing something like this:
+<img src="/images/langchain4j/langchain4j-local-ai.png" alt="langchain4j-local-ai"></p>
+<p>Next, try to download a model with the command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://localhost:8080/models/apply -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> -d <span style="color:#e6db74">&#39;{&#34;url&#34;: &#34;github:go-skynet/model-gallery/gpt4all-j.yaml&#34;}&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Using the similar curl command, replacing the actual job ID to check if the model has been downloaded successfully</span>
+</span></span><span style="display:flex;"><span>curl http://localhost:8080/models/jobs/b5141f97-7bb8-11ee-aa82-0242ac110003
+</span></span></code></pre></div><p>You may verify the list of downloaded models with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://localhost:8080/models/ | jq
+</span></span></code></pre></div><p>Make sure Local AI is running successfully, and models are downloaded.
+<img src="/images/langchain4j/langchain4j-local-ai-models.png" alt="langchain4j-local-ai-models"></p>
+<h4 id="modelservice-modification">ModelService Modification</h4>
+<p>In the <em>ModelService</em> class, we added the configuration for the local model and an embedding model for retrieval augmented generation. Additionally, the timeout was extended to 5 minutes to account for the expected longer referencing time.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ModelService</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String MODEL_NAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;gpt4all-j&#34;</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String LOCAL_AI_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://localhost:8080&#34;</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> ChatLanguageModel localModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> AllMiniLmL6V2EmbeddingModel embeddingModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ChatLanguageModel <span style="color:#a6e22e">getLocalModel</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>localModel <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			localModel <span style="color:#f92672">=</span> LocalAiChatModel<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">().</span><span style="color:#a6e22e">baseUrl</span><span style="color:#f92672">(</span>LOCAL_AI_URL<span style="color:#f92672">).</span><span style="color:#a6e22e">timeout</span><span style="color:#f92672">(</span>Duration<span style="color:#f92672">.</span><span style="color:#a6e22e">ofMinutes</span><span style="color:#f92672">(</span><span style="color:#ae81ff">5</span><span style="color:#f92672">))</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#f92672">.</span><span style="color:#a6e22e">modelName</span><span style="color:#f92672">(</span>MODEL_NAME<span style="color:#f92672">).</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> localModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> EmbeddingModel <span style="color:#a6e22e">getEmbeddingModel</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>embeddingModel <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			embeddingModel <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AllMiniLmL6V2EmbeddingModel<span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> embeddingModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>	
+</span></span></code></pre></div><h4 id="retrievalservice-implementation">RetrievalService Implementation:</h4>
+<p>Following <a href="https://github.com/langchain4j/langchain4j-examples/blob/main/other-examples/src/main/java/ChatWithDocumentsExamples.java">Chat with Documents</a>, the <em>RetrievalService</em> now includes functionality for retrieving information based on a given question and a document:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> dev.langchain4j.data.document.FileSystemDocumentLoader.loadDocument<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.net.URISyntaxException<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.net.URL<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.nio.file.Path<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.nio.file.Paths<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> com.seehiong.ai.AiApplication<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.chain.ConversationalRetrievalChain<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.document.Document<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.document.splitter.DocumentSplitters<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.segment.TextSegment<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.embedding.EmbeddingModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.retriever.EmbeddingStoreRetriever<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.EmbeddingStore<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.EmbeddingStoreIngestor<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RetrievalService</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> EmbeddingStore<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;</span> embeddingStore <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> InMemoryEmbeddingStore<span style="color:#f92672">&lt;&gt;();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> Path <span style="color:#a6e22e">toPath</span><span style="color:#f92672">(</span>String fileName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			URL fileUrl <span style="color:#f92672">=</span> AiApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getResource</span><span style="color:#f92672">(</span>fileName<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> Paths<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>fileUrl<span style="color:#f92672">.</span><span style="color:#a6e22e">toURI</span><span style="color:#f92672">());</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>URISyntaxException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> RuntimeException<span style="color:#f92672">(</span>e<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">retrieve</span><span style="color:#f92672">(</span>ChatLanguageModel model<span style="color:#f92672">,</span> EmbeddingModel embeddingModel<span style="color:#f92672">,</span> String fileName<span style="color:#f92672">,</span> String question<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		EmbeddingStoreIngestor ingestor <span style="color:#f92672">=</span> EmbeddingStoreIngestor<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">.</span><span style="color:#a6e22e">documentSplitter</span><span style="color:#f92672">(</span>DocumentSplitters<span style="color:#f92672">.</span><span style="color:#a6e22e">recursive</span><span style="color:#f92672">(</span><span style="color:#ae81ff">500</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">embeddingModel</span><span style="color:#f92672">(</span>embeddingModel<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">.</span><span style="color:#a6e22e">embeddingStore</span><span style="color:#f92672">(</span>embeddingStore<span style="color:#f92672">).</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		Document document <span style="color:#f92672">=</span> loadDocument<span style="color:#f92672">(</span>toPath<span style="color:#f92672">(</span>fileName<span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>		ingestor<span style="color:#f92672">.</span><span style="color:#a6e22e">ingest</span><span style="color:#f92672">(</span>document<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		ConversationalRetrievalChain chain <span style="color:#f92672">=</span> ConversationalRetrievalChain<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">().</span><span style="color:#a6e22e">chatLanguageModel</span><span style="color:#f92672">(</span>model<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">.</span><span style="color:#a6e22e">retriever</span><span style="color:#f92672">(</span>EmbeddingStoreRetriever<span style="color:#f92672">.</span><span style="color:#a6e22e">from</span><span style="color:#f92672">(</span>embeddingStore<span style="color:#f92672">,</span> embeddingModel<span style="color:#f92672">)).</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> chain<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>question<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="updated-aicontroller-5">Updated AiController:</h4>
+<p>In the AiController class, the components are brought together to create the <em>/retrieve</em> endpoint. Users can utilize this endpoint to interact with the Retrieval Service, providing a file (document) and a text (question) to retrieve relevant information:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> RetrievalService retrievalSvc<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/retrieve&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">retrieve</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@RequestParam</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;file&#34;</span><span style="color:#f92672">)</span> String file<span style="color:#f92672">,</span> <span style="color:#a6e22e">@RequestParam</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;text&#34;</span><span style="color:#f92672">)</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> retrievalSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">retrieve</span><span style="color:#f92672">(</span>modelSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">getLocalModel</span><span style="color:#f92672">(),</span> modelSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">getEmbeddingModel</span><span style="color:#f92672">(),</span> file<span style="color:#f92672">,</span> text<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;(</span>response<span style="color:#f92672">,</span> HttpStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">OK</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>To ensure the code and sample work seamlessly, the document (story-about-happy-carrot.txt) is placed in the same package as AiApplication.txt.</p>
+<p><img src="/images/langchain4j/langchain4j-directory-structure.png" alt="langchain4j-directory-structure"></p>
+<p>This is the sample result (notice that it takes about 1 min):</p>
+<p><img src="/images/langchain4j/langchain4j-retrieval.png" alt="langchain4j-retrieval"></p>
+<h3 id="7-integrating-streaming-service-through-local-llm">7) Integrating Streaming Service through local LLM</h3>
+<p>In this final section, we explored the integration of a streaming service via a local Language Model (LLM). The Streaming Service implementation allows for the generation of responses in a streaming fashion, providing flexibility for handling large responses or real-time interactions.</p>
+<h4 id="streamingservice-implementation">StreamingService Implementation:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> java.util.concurrent.TimeUnit.SECONDS<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.concurrent.CompletableFuture<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.concurrent.ExecutionException<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.concurrent.TimeoutException<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.StreamingResponseHandler<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.language.StreamingLanguageModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.output.Response<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">StreamingService</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">generate</span><span style="color:#f92672">(</span>StreamingLanguageModel model<span style="color:#f92672">,</span> String message<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		StringBuilder answerBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StringBuilder<span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		CompletableFuture<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> futureAnswer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CompletableFuture<span style="color:#f92672">&lt;&gt;();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		model<span style="color:#f92672">.</span><span style="color:#a6e22e">generate</span><span style="color:#f92672">(</span>message<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> StreamingResponseHandler<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onNext</span><span style="color:#f92672">(</span>String token<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>				answerBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>token<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onComplete</span><span style="color:#f92672">(</span>Response<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>				futureAnswer<span style="color:#f92672">.</span><span style="color:#a6e22e">complete</span><span style="color:#f92672">(</span>answerBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onError</span><span style="color:#f92672">(</span>Throwable error<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>				futureAnswer<span style="color:#f92672">.</span><span style="color:#a6e22e">completeExceptionally</span><span style="color:#f92672">(</span>error<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> futureAnswer<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span><span style="color:#ae81ff">30</span><span style="color:#f92672">,</span> SECONDS<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException <span style="color:#f92672">|</span> ExecutionException <span style="color:#f92672">|</span> TimeoutException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Unable to generate response: &#34;</span> <span style="color:#f92672">+</span> message<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="modelservice-modification-1">ModelService Modification</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ModelService</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> StreamingLanguageModel streamingModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> StreamingLanguageModel <span style="color:#a6e22e">getStreamingModel</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>streamingModel <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			streamingModel <span style="color:#f92672">=</span> LocalAiStreamingLanguageModel<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">().</span><span style="color:#a6e22e">baseUrl</span><span style="color:#f92672">(</span>LOCAL_AI_URL<span style="color:#f92672">).</span><span style="color:#a6e22e">modelName</span><span style="color:#f92672">(</span>MODEL_NAME<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> streamingModel<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>	
+</span></span></code></pre></div><h4 id="updated-aicontroller-6">Updated AiController:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> StreamingService streamingsvc<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/streaming&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">streaming</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@RequestParam</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;text&#34;</span><span style="color:#f92672">)</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> streamingsvc<span style="color:#f92672">.</span><span style="color:#a6e22e">generate</span><span style="color:#f92672">(</span>modelSvc<span style="color:#f92672">.</span><span style="color:#a6e22e">getStreamingModel</span><span style="color:#f92672">(),</span> text<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;(</span>response<span style="color:#f92672">,</span> HttpStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">OK</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h4 id="postman-result-4">Postman Result:</h4>
+<p><img src="/images/langchain4j/langchain4j-streaming.png" alt="langchain4j-streaming"></p>
+<p>With the addition of the streaming service, this comprehensive blog post has covered various aspects of integrating LangChain4j into a Java-based AI application. It serves as a starting point for creating personalized AI applications, and I hope it has been a helpful guide for your exploration in this field.</p>
+<p>Feel free to experiment further and build upon these foundations to create even more sophisticated AI applications!</p>
+<ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/langchain4j/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">langchain4j</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/localai/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">LocalAI</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/spring-boot/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Spring Boot</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/java/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Java</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/chroma/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Chroma</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2023/unlocking-the-power-of-machine-learning-with-mlc-llm/">Unlocking the Power of Machine Learning with MLC LLM</a>
+    
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2023/building-chatbot-for-your-pdf-files/">Building ChatBot for your PDF files with LangChain</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
