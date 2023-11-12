@@ -10,7 +10,7 @@
 Kubernetes Cluster (Total Setup Time: 70 mins)
 Similar to the previous MicroK8s cluster setup, I am using Ubuntu Server 20.04 LTS (64-bit) as my OS. Having a Kubernetes Cluster on Raspberry Pi, you will have more control over how the cluster configured.
 After burning the image onto my 64GB SD card, an empty file named ssh is created at d:/boot for a headless setup.">
-    <meta name="generator" content="Hugo 0.111.3">
+    <meta name="generator" content="Hugo 0.120.4">
     
     
     
@@ -43,6 +43,7 @@ After burning the image onto my 64GB SD card, an empty file named ssh is created
 <meta property="og:url" content="https://seehiong.github.io/2020/kubernetes-cluster-on-raspberry-pi/" /><meta property="article:section" content="2020" />
 <meta property="article:published_time" content="2020-07-04T20:00:00+08:00" />
 <meta property="article:modified_time" content="2020-07-04T20:00:00+08:00" />
+
 <meta itemprop="name" content="Kubernetes Cluster on Pi">
 <meta itemprop="description" content="With Kubernetes Cluster on Raspberry Pi, you may orchestrate and manage your Docker containers with full control
 Kubernetes Cluster (Total Setup Time: 70 mins)
@@ -173,8 +174,8 @@ After burning the image onto my 64GB SD card, an empty file named ssh is created
 </span></span></code></pre></div><p>Enable memory cgroup, by opening the file:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo nano /boot/firmware/cmdline.txt
 </span></span></code></pre></div><p>Next, add the following at the end of the line:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">cgroup</span>=<span style="color:#a6e22e">cpuset</span> <span style="color:#a6e22e">cgroup_enable</span>=<span style="color:#a6e22e">memory</span> <span style="color:#a6e22e">cgroup_memory</span>=<span style="color:#ae81ff">1</span> <span style="color:#a6e22e">swapaccount</span>=<span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span></code></pre></div><p>Add the following <em>/boot/firmware/usercfg.txt</em> to <a href="https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README">disable WiFi and Bluetooth</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">cgroup</span>=<span style="color:#a6e22e">cpuset</span> <span style="color:#a6e22e">cgroup_enable</span>=<span style="color:#a6e22e">memory</span> <span style="color:#a6e22e">cgroup_memory</span>=<span style="color:#ae81ff">1</span> <span style="color:#a6e22e">swapaccount</span>=<span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><p>Add the following <em>/boot/firmware/usercfg.txt</em> to <a href="https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README">disable WiFi and Bluetooth</a>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>dtoverlay<span style="color:#f92672">=</span>disable-wifi
 </span></span><span style="display:flex;"><span>dtoverlay<span style="color:#f92672">=</span>disable-bt
 </span></span></code></pre></div><p>For iptables to see bridged traffic, perform these:</p>
@@ -214,8 +215,8 @@ After burning the image onto my 64GB SD card, an empty file named ssh is created
 </span></span></code></pre></div><p>Third, add the <em>&ndash;data-root</em> option to the ExecStart:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo nano /lib/systemd/system/docker.service
 </span></span></code></pre></div><p>Fourth, add the <em>&ndash;data-root</em> option to the ExecStart, similar to this:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">ExecStart</span>=<span style="color:#e6db74">/usr/</span><span style="color:#a6e22e">bin</span><span style="color:#e6db74">/dockerd -H fd:// --containerd=/</span><span style="color:#a6e22e">run</span><span style="color:#e6db74">/containerd/</span><span style="color:#a6e22e">containerd</span>.<span style="color:#a6e22e">sock</span> --<span style="color:#a6e22e">data</span>-<span style="color:#a6e22e">root</span>=<span style="color:#e6db74">/mnt/</span><span style="color:#a6e22e">hdd</span><span style="color:#e6db74">/master1k8s/</span><span style="color:#a6e22e">docker</span>/<span style="color:#a6e22e">images</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span></code></pre></div><p>Last, to setup <a href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">docker daemon</a>, run this command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">ExecStart</span>=<span style="color:#e6db74">/usr/</span><span style="color:#a6e22e">bin</span><span style="color:#e6db74">/dockerd -H fd:// --containerd=/</span><span style="color:#a6e22e">run</span><span style="color:#e6db74">/containerd/</span><span style="color:#a6e22e">containerd</span>.<span style="color:#a6e22e">sock</span> --<span style="color:#a6e22e">data</span>-<span style="color:#a6e22e">root</span>=<span style="color:#e6db74">/mnt/</span><span style="color:#a6e22e">hdd</span><span style="color:#e6db74">/master1k8s/</span><span style="color:#a6e22e">docker</span>/<span style="color:#a6e22e">images</span>
+</span></span></code></pre></div><p>Last, to setup <a href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">docker daemon</a>, run this command:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Run su commnad as root</span>
 </span></span><span style="display:flex;"><span>sudo su -
 </span></span><span style="display:flex;"><span>
@@ -361,8 +362,8 @@ After burning the image onto my 64GB SD card, an empty file named ssh is created
 </span></span><span style="display:flex;"><span>su - ubuntu
 </span></span><span style="display:flex;"><span>sudo systemctl enable docker.service
 </span></span></code></pre></div><p>Thirdly, add hostname of the master to <em>/etc/hosts</em>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">51</span> <span style="color:#a6e22e">master1k8s</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span></code></pre></div><p>Lastly, join to the newly created kubernetes cluster:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">51</span> <span style="color:#a6e22e">master1k8s</span>
+</span></span></code></pre></div><p>Lastly, join to the newly created kubernetes cluster:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo kubeadm join master1k8s:6443 --token sxddbo.ouonf7ehvkkso3b2 <span style="color:#ae81ff">\
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --discovery-token-ca-cert-hash sha256:130451a73b3d4ff65fc4dbbfba4e78b648c7b75e90621ebc1fdba789135957b5
 </span></span></code></pre></div><h2 id="troubleshooting">Troubleshooting</h2>

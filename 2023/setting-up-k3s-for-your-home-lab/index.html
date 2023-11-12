@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1">
     <meta name="description" content="K3S is a lightweight and easy-to-install Kubernetes distribution, making it an ideal choice for running a Kubernetes cluster in your home lab. In this blog post, we will walk you through the step-by-step process of setting up K3s on an Ubuntu Server 22.04.2 LTS.
 1 Setting up K3S 1.1 Installing Ubuntu Server 22.04.2 LTS To start, we&rsquo;ll install Ubuntu server 22.04.2 LTS on our laptop. You can verify the Linux distribution using the following command:">
-    <meta name="generator" content="Hugo 0.111.3">
+    <meta name="generator" content="Hugo 0.120.4">
     
     
     
@@ -39,6 +39,7 @@
 <meta property="og:url" content="https://seehiong.github.io/2023/setting-up-k3s-for-your-home-lab/" /><meta property="article:section" content="2023" />
 <meta property="article:published_time" content="2023-07-30T20:00:00+08:00" />
 <meta property="article:modified_time" content="2023-07-30T20:00:00+08:00" />
+
 <meta itemprop="name" content="Setting up K3s for Your Home Lab">
 <meta itemprop="description" content="K3S is a lightweight and easy-to-install Kubernetes distribution, making it an ideal choice for running a Kubernetes cluster in your home lab. In this blog post, we will walk you through the step-by-step process of setting up K3s on an Ubuntu Server 22.04.2 LTS.
 1 Setting up K3S 1.1 Installing Ubuntu Server 22.04.2 LTS To start, we&rsquo;ll install Ubuntu server 22.04.2 LTS on our laptop. You can verify the Linux distribution using the following command:"><meta itemprop="datePublished" content="2023-07-30T20:00:00+08:00" />
@@ -160,9 +161,9 @@
 <p>To simplify interactions with K3s, we&rsquo;ll set up some convenient aliases. Open the bash configuration file:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vi ~/.bashrc
 </span></span></code></pre></div><p>Add the following aliases to the file:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">alias</span> <span style="color:#a6e22e">kc</span>=<span style="color:#e6db74">&#39;sudo kubectl&#39;</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#a6e22e">alias</span> <span style="color:#a6e22e">kca</span>=<span style="color:#e6db74">&#39;kc apply -f&#39;</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span></code></pre></div><p>Save and apply the changes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">alias</span> <span style="color:#a6e22e">kc</span>=<span style="color:#e6db74">&#39;sudo kubectl&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">alias</span> <span style="color:#a6e22e">kca</span>=<span style="color:#e6db74">&#39;kc apply -f&#39;</span>
+</span></span></code></pre></div><p>Save and apply the changes:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>source ~/.bashrc
 </span></span></code></pre></div><h2 id="14-verifying-the-installation">1.4 Verifying the Installation</h2>
 <p>Congratulations! Your K3s cluster is up and running. You can verify its status and start using Kubernetes:</p>
@@ -218,16 +219,16 @@
 <p>Next, we will configure Docker to use our local registry. Open the Docker daemon configuration file:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/docker/daemon.json
 </span></span></code></pre></div><p>Copy and paste the following content into <em>daemon.json</em>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>{<span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">  &#34;insecure-registries&#34;: [</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">    &#34;192.168.68.132:30500&#34;</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>  ]<span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>}<span style="color:#960050;background-color:#1e0010">
-</span></span></span></code></pre></div><p>Save and close the file. Now, edit the Docker default configuration file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span><span style="color:#75715e">  &#34;insecure-registries&#34;: [</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">    &#34;192.168.68.132:30500&#34;</span>
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Save and close the file. Now, edit the Docker default configuration file:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/default/docker
 </span></span></code></pre></div><p>Add the following line to set the Docker options:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">DOCKER_OPTS</span>=<span style="color:#e6db74">&#34;--config-file=/etc/docker/daemon.json&#34;</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span></code></pre></div><p>Afterward, restart Docker to apply the changes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">DOCKER_OPTS</span>=<span style="color:#e6db74">&#34;--config-file=/etc/docker/daemon.json&#34;</span>
+</span></span></code></pre></div><p>Afterward, restart Docker to apply the changes:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo systemctl restart docker
 </span></span></code></pre></div><h2 id="33-create-the-registry-namespace-and-deployment">3.3 Create the Registry Namespace and Deployment</h2>
 <p>Now, let&rsquo;s create the necessary resources for the local registry on the K3s cluster. First, create the <em>registry</em> namespace:</p>
@@ -304,11 +305,11 @@
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo mkdir -p /etc/rancher/k3s
 </span></span><span style="display:flex;"><span>sudo vi /etc/rancher/k3s/registries.yaml
 </span></span></code></pre></div><p>Add the following content to the file:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">mirrors</span>:<span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">  &#34;192.168.68.132:30500&#34;:</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#a6e22e">endpoint</span>:<span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>      - <span style="color:#e6db74">&#34;http://192.168.68.132:30500&#34;</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span></code></pre></div><p>Finally, restart K3s and K3s agent to apply the changes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">mirrors</span>:
+</span></span><span style="display:flex;"><span><span style="color:#75715e">  &#34;192.168.68.132:30500&#34;:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">endpoint</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;http://192.168.68.132:30500&#34;</span>
+</span></span></code></pre></div><p>Finally, restart K3s and K3s agent to apply the changes:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Creates the specified hostPath</span>
 </span></span><span style="display:flex;"><span>sudo mkdir /var/lib/registry-store
 </span></span><span style="display:flex;"><span>
@@ -322,10 +323,10 @@
 <p>In this optional section, we will learn how to push a Docker image from our local machine to the K3s cluster&rsquo;s local registry, allowing us to deploy the image in the Kubernetes environment.</p>
 <h2 id="step-1-configure-docker-engine-for-the-k3s-cluster">Step 1: Configure Docker Engine for the K3s Cluster</h2>
 <p>Before pushing the image to the K3s cluster, ensure that our Docker Desktop for Windows is configured to allow insecure registry access to our local registry. To do this, open the Docker Desktop settings on your local machine and add the IP address of your K3s cluster and the port (30500) to the list of insecure registries:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#75715e">  &#34;insecure-registries&#34;: [</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">    &#34;192.168.68.132:30500&#34;</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>  ]<span style="color:#960050;background-color:#1e0010">
-</span></span></span></code></pre></div><p><img src="/images/k3s/docker-engine-settings-for-docker-desktop.png" alt="docker-engine-settings-for-docker-desktop"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#75715e">  &#34;insecure-registries&#34;: [</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">    &#34;192.168.68.132:30500&#34;</span>
+</span></span><span style="display:flex;"><span>  ]
+</span></span></code></pre></div><p><img src="/images/k3s/docker-engine-settings-for-docker-desktop.png" alt="docker-engine-settings-for-docker-desktop"></p>
 <h2 id="step-2-tag-and-push-the-docker-image">Step 2: Tag and Push the Docker Image</h2>
 <p>From our <a href="https://seehiong.github.io/2023/unleashing-the-power-of-llama-server-in-docker-container/">previous post</a>, verify that the available Docker image exists on your local machine:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker image ls
