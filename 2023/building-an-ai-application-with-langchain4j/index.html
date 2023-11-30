@@ -44,7 +44,7 @@ Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Deve
 <meta itemprop="description" content="In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of langchain4j to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.
 Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Development Environment (IDE) and opted for Java 17 as my programming language. Leveraging Postman as my API platform and Spring Boot as the framework of choice, let&rsquo;s delve into the process."><meta itemprop="datePublished" content="2023-11-07T20:00:00+08:00" />
 <meta itemprop="dateModified" content="2023-11-07T20:00:00+08:00" />
-<meta itemprop="wordCount" content="2118">
+<meta itemprop="wordCount" content="2137">
 <meta itemprop="keywords" content="langchain4j,LocalAI,Spring Boot,Java,Chroma,GPT4All," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Building an AI Application with Langchain4j"/>
 <meta name="twitter:description" content="In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of langchain4j to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.
@@ -144,8 +144,8 @@ Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Deve
 
       
       
-        <span class="f6 mv4 dib tracked"> - 10 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 2118 words </span>
+        <span class="f6 mv4 dib tracked"> - 11 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 2137 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p>In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of <a href="https://github.com/langchain4j/langchain4j/">langchain4j</a> to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.</p>
@@ -393,7 +393,7 @@ Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Deve
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> EmbeddingStore<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getEmbeddingStore</span>() {
 </span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (embeddingStore <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
-</span></span><span style="display:flex;"><span>			embeddingStore <span style="color:#f92672">=</span> ChromaEmbeddingStore.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">baseUrl</span>(<span style="color:#e6db74">&#34;http://localhost:8000&#34;</span>)
+</span></span><span style="display:flex;"><span>			embeddingStore <span style="color:#f92672">=</span> ChromaEmbeddingStore.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">baseUrl</span>(<span style="color:#e6db74">&#34;http://127.0.0.1:8000&#34;</span>)
 </span></span><span style="display:flex;"><span>					.<span style="color:#a6e22e">collectionName</span>(randomUUID()).<span style="color:#a6e22e">build</span>();
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> embeddingStore;
@@ -558,18 +558,18 @@ Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Deve
 <h3 id="6-introducing-retrieval-service-via-local-llm">6) Introducing Retrieval Service via Local LLM</h3>
 <p>In this section, we&rsquo;ve introduced a Retrieval Service utilizing a local Language Model (LLM) through <a href="https://localai.io/">LocalAI</a>. Here are the key components and implementations:</p>
 <h3 id="setting-up-local-ai">Setting up Local AI</h3>
-<p>Before running the Spring Boot application, set up Local AI using the following commands within <a href="https://learn.microsoft.com/en-us/windows/wsl/install">WSL</a>.</p>
+<p>Before running the Spring Boot application, set up Local AI using the following commands within <a href="https://learn.microsoft.com/en-us/windows/wsl/install">WSL</a>. Please <em>note</em> that for below example, the docker container will download or use the models under the models folder:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker pull quay.io/go-skynet/local-ai
 </span></span><span style="display:flex;"><span>docker run -p 8080:8080 -v $PWD/models:/models -ti --rm quay.io/go-skynet/local-ai:latest --models-path /models --context-size <span style="color:#ae81ff">2000</span> --threads <span style="color:#ae81ff">8</span> --debug<span style="color:#f92672">=</span>true
 </span></span></code></pre></div><p>By setting to debug on, you should be seeing something like this:
 <img src="/images/langchain4j/langchain4j-local-ai.png" alt="langchain4j-local-ai"></p>
 <p>Next, try to download a model with the command:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://localhost:8080/models/apply -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> -d <span style="color:#e6db74">&#39;{&#34;url&#34;: &#34;github:go-skynet/model-gallery/gpt4all-j.yaml&#34;}&#39;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://127.0.0.1:8080/models/apply -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> -d <span style="color:#e6db74">&#39;{&#34;url&#34;: &#34;github:go-skynet/model-gallery/gpt4all-j.yaml&#34;}&#39;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Using the similar curl command, replacing the actual job ID to check if the model has been downloaded successfully</span>
-</span></span><span style="display:flex;"><span>curl http://localhost:8080/models/jobs/b5141f97-7bb8-11ee-aa82-0242ac110003
+</span></span><span style="display:flex;"><span>curl http://127.0.0.1:8080/models/jobs/b5141f97-7bb8-11ee-aa82-0242ac110003
 </span></span></code></pre></div><p>You may verify the list of downloaded models with:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://localhost:8080/models/ | jq
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://127.0.0.1:8080/models/ | jq
 </span></span></code></pre></div><p>Make sure Local AI is running successfully, and models are downloaded.
 <img src="/images/langchain4j/langchain4j-local-ai-models.png" alt="langchain4j-local-ai-models"></p>
 <h4 id="modelservice-modification">ModelService Modification</h4>
@@ -578,7 +578,7 @@ Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Deve
 </span></span><span style="display:flex;"><span>	...
 </span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String MODEL_NAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;gpt4all-j&#34;</span>;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String LOCAL_AI_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://localhost:8080&#34;</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String LOCAL_AI_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://127.0.0.1:8080&#34;</span>;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> ChatLanguageModel localModel;
 </span></span><span style="display:flex;"><span>

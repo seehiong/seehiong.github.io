@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Boosting Inference Speed: SSD and GPU Acceleration | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="In the relentless pursuit of optimal disk space and lightning-fast inference speeds, I embarked on an exciting upgrade journey by integrating the formidable Lexar NM790 M.2 2280 PCIe SSD. This blog post unfolds in two parts: the first chronicles the meticulous migration of my Windows 11 to this powerhouse SSD, while the second unveils the secrets behind the enhanced inferencing speed for the Langchain4j application.
+Part 1: Seamless OS Migration with Clonezilla Amidst a sea of software promising seamless disk cloning, I found solace in the reliability of Clonezilla, a robust open-source tool for disk imaging and cloning.">
+    <meta name="generator" content="Hugo 0.120.4">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Boosting Inference Speed: SSD and GPU Acceleration" />
+<meta property="og:description" content="In the relentless pursuit of optimal disk space and lightning-fast inference speeds, I embarked on an exciting upgrade journey by integrating the formidable Lexar NM790 M.2 2280 PCIe SSD. This blog post unfolds in two parts: the first chronicles the meticulous migration of my Windows 11 to this powerhouse SSD, while the second unveils the secrets behind the enhanced inferencing speed for the Langchain4j application.
+Part 1: Seamless OS Migration with Clonezilla Amidst a sea of software promising seamless disk cloning, I found solace in the reliability of Clonezilla, a robust open-source tool for disk imaging and cloning." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2023/boosting-inference-speed-ssd-and-gpu-acceleration/" /><meta property="article:section" content="2023" />
+<meta property="article:published_time" content="2023-11-30T20:00:00+08:00" />
+<meta property="article:modified_time" content="2023-11-30T20:00:00+08:00" />
+
+<meta itemprop="name" content="Boosting Inference Speed: SSD and GPU Acceleration">
+<meta itemprop="description" content="In the relentless pursuit of optimal disk space and lightning-fast inference speeds, I embarked on an exciting upgrade journey by integrating the formidable Lexar NM790 M.2 2280 PCIe SSD. This blog post unfolds in two parts: the first chronicles the meticulous migration of my Windows 11 to this powerhouse SSD, while the second unveils the secrets behind the enhanced inferencing speed for the Langchain4j application.
+Part 1: Seamless OS Migration with Clonezilla Amidst a sea of software promising seamless disk cloning, I found solace in the reliability of Clonezilla, a robust open-source tool for disk imaging and cloning."><meta itemprop="datePublished" content="2023-11-30T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-11-30T20:00:00+08:00" />
+<meta itemprop="wordCount" content="549">
+<meta itemprop="keywords" content="langchain4j,LocalAI,Clonezilla,CUDA,WizardLM," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Boosting Inference Speed: SSD and GPU Acceleration"/>
+<meta name="twitter:description" content="In the relentless pursuit of optimal disk space and lightning-fast inference speeds, I embarked on an exciting upgrade journey by integrating the formidable Lexar NM790 M.2 2280 PCIe SSD. This blog post unfolds in two parts: the first chronicles the meticulous migration of my Windows 11 to this powerhouse SSD, while the second unveils the secrets behind the enhanced inferencing speed for the Langchain4j application.
+Part 1: Seamless OS Migration with Clonezilla Amidst a sea of software promising seamless disk cloning, I found solace in the reliability of Clonezilla, a robust open-source tool for disk imaging and cloning."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2023
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Boosting Inference Speed: SSD and GPU Acceleration</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2023-11-30T20:00:00+08:00">November 30, 2023</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 549 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p>In the relentless pursuit of optimal disk space and lightning-fast inference speeds, I embarked on an exciting upgrade journey by integrating the formidable <a href="https://www.lexar.com/product/lexar-nm790-m-2-2280-pcie-gen-4x4-nvme-ssd/">Lexar NM790 M.2 2280 PCIe SSD</a>. This blog post unfolds in two parts: the first chronicles the meticulous migration of my Windows 11 to this powerhouse SSD, while the second unveils the secrets behind the enhanced inferencing speed for the <a href="https://seehiong.github.io/2023/rag-over-java-code-with-langchain4j/">Langchain4j application</a>.</p>
+<h2 id="part-1-seamless-os-migration-with-clonezilla">Part 1: Seamless OS Migration with Clonezilla</h2>
+<p>Amidst a sea of software promising seamless disk cloning, I found solace in the reliability of <a href="https://clonezilla.org/">Clonezilla</a>, a robust open-source tool for disk imaging and cloning.</p>
+<p>After securely installing the Lexar SSD into slot 2 of my PC, I tapped into the power of Clonezilla. Following the <a href="https://www.tomshardware.com/how-to/clone-your-ssd-or-hard-drive">Clone your SSD or Hard Drive</a> guide, I navigated through the process, opting for the -k1 option to create a proportional partition table.</p>
+<p>The result? A seamlessly cloned SSD, now the master boot, offering a tangible boost in inferencing speed as all my LLM models found their new home on this high-performance SSD.</p>
+<h2 id="part-2-gpu-acceleration-unleashed">Part 2: GPU Acceleration Unleashed</h2>
+<h3 id="step-1-installing-cuda-for-windows">Step 1: Installing CUDA for Windows</h3>
+<p>My journey continued with the installation of <a href="https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html">CUDA for Microsoft Windows</a>. Armed with the NVIDIA CUDA Toolkit, I confirmed the successful installation using two simple PowerShell commands: <strong>nvcc &ndash;version</strong> and <strong>nvidia-smi</strong>.</p>
+<p><img src="/images/inference-speed/nvidia-cuda-compiler.png" alt="nvidia-cuda-compiler"></p>
+<p><img src="/images/inference-speed/nvidia-smi.png" alt="nvidia-smi"></p>
+<h3 id="step-2-nvidia-container-toolkit-magic">Step 2: NVIDIA Container Toolkit Magic</h3>
+<p>The next leg of this GPU odyssey involved the installation of the <a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html">NVIDIA Container Toolkit</a>. Delving into the realm of Windows Subsystem for Linux (WSL), I executed a series of commands to seamlessly integrate this toolkit into my environment.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Setting up the APT repository and configuring it</span>
+</span></span><span style="display:flex;"><span>curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    sed <span style="color:#e6db74">&#39;s#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g&#39;</span> | <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    sudo apt-get update
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># install the NVIDIA container toolkit package</span>
+</span></span><span style="display:flex;"><span>sudo apt-get install -y nvidia-container-toolkit
+</span></span></code></pre></div><p>Configuring Docker for this newfound power involved a few more commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Configuring containter runtime</span>
+</span></span><span style="display:flex;"><span>sudo nvidia-ctk runtime configure --runtime<span style="color:#f92672">=</span>docker
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Restarting docker daemon</span>
+</span></span><span style="display:flex;"><span>sudo systemctl restart docker
+</span></span></code></pre></div><p>From the Docker Desktop settings, I ventured into extra configurations, applied the changes, and restarted:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;default-runtime&#34;</span><span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#e6db74">&#34;nvidia&#34;</span><span style="color:#960050;background-color:#1e0010">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;runtimes&#34;</span><span style="color:#960050;background-color:#1e0010">:</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;nvidia&#34;</span>: {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;path&#34;</span>: <span style="color:#e6db74">&#34;/usr/bin/nvidia-container-runtime&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;runtimeArgs&#34;</span>: []
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p><img src="/images/inference-speed/docker-engine-settings.png" alt="docker-engine-settings"></p>
+<p>The grand test unfolded with a sample workload command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo docker run --rm --runtime<span style="color:#f92672">=</span>nvidia --gpus all nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi
+</span></span></code></pre></div><p><img src="/images/inference-speed/sample-workload-with-docker.png" alt="sample-workload-with-docker"></p>
+<p><strong>NOTE</strong>: Be vigilant! Without the Docker Desktop setting, you might encounter the ominous error depicted below:</p>
+<p><img src="/images/inference-speed/invalid-runtime-name-nvidia.png" alt="invalid-runtime-name-nvidia"></p>
+<h2 id="the-grand-finale">The Grand Finale</h2>
+<p>Bringing it all together, the magic command to launch the LocalAI image in a GPU Docker container was unveiled:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker run -p 8080:8080 -v c:/local-ai-models:/models -ti --rm quay.io/go-skynet/local-ai:v1.40.0-cublas-cuda12 --models-path /models --context-size <span style="color:#ae81ff">2000</span> --threads <span style="color:#ae81ff">8</span> --debug<span style="color:#f92672">=</span>true
+</span></span></code></pre></div><p><img src="/images/inference-speed/local-ai-gpu-docker-container.png" alt="local-ai-gpu-docker-container"></p>
+<p>And behold, as we queried using the WizardLM model, the GPU acceleration became apparent, turning our tech realm into a high-speed universe.</p>
+<p><img src="/images/inference-speed/local-ai-gpu-docker-model-loaded.png" alt="local-ai-gpu-docker-model-loaded"></p>
+<p>Comparing it to the past, the results spoke for themselves—our inference speed had ascended to new heights!</p>
+<p><img src="/images/inference-speed/local-ai-gpu-docker-inference-speed-improved.png" alt="local-ai-gpu-docker-inference-speed-improved"></p>
+<h2 id="parting-thoughts">Parting Thoughts</h2>
+<p>In this journey, we&rsquo;ve showcased the synergy of SSD storage and GPU acceleration, breathing life into the WizardLM model and witnessing a remarkable surge in inference speed. A testament to the relentless pursuit of tech optimization, this transformation opens new doors for Langchain4j enthusiasts, inviting you to explore the boundless possibilities of elevated performance. Elevate your tech game; dive into the future with Langchain4j and redefine what&rsquo;s possible!</p>
+<ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/langchain4j/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">langchain4j</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/localai/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">LocalAI</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/clonezilla/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Clonezilla</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/cuda/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">CUDA</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/wizardlm/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">WizardLM</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2023/rag-over-java-code-with-langchain4j/">RAG over Java code with Langchain4j</a>
+    
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2023/rag-over-java-code-with-langchain4j/">RAG over Java code with Langchain4j</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/building-an-ai-application-with-langchain4j/">Building an AI Application with Langchain4j</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
