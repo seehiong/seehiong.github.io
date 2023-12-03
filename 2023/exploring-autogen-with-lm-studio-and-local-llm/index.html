@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Exploring AutoGen with LM Studio and Local LLM | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="AutoGen, an innovative framework available on GitHub, empowers the development of LLM (Large Language Model) applications. These applications utilize multiple agents that engage in conversation to collaboratively solve tasks.
+In conjunction with AutoGen, LM Studio provides a platform to discover, download, and run local LLMs. In this blog post, we&rsquo;ll delve into the integration of AutoGen with LM Studio, showcasing a step-by-step guide on setting up a local LLM application served through LM Studio.">
+    <meta name="generator" content="Hugo 0.120.4">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Exploring AutoGen with LM Studio and Local LLM" />
+<meta property="og:description" content="AutoGen, an innovative framework available on GitHub, empowers the development of LLM (Large Language Model) applications. These applications utilize multiple agents that engage in conversation to collaboratively solve tasks.
+In conjunction with AutoGen, LM Studio provides a platform to discover, download, and run local LLMs. In this blog post, we&rsquo;ll delve into the integration of AutoGen with LM Studio, showcasing a step-by-step guide on setting up a local LLM application served through LM Studio." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2023/exploring-autogen-with-lm-studio-and-local-llm/" /><meta property="article:section" content="2023" />
+<meta property="article:published_time" content="2023-12-02T20:00:00+08:00" />
+<meta property="article:modified_time" content="2023-12-02T20:00:00+08:00" />
+
+<meta itemprop="name" content="Exploring AutoGen with LM Studio and Local LLM">
+<meta itemprop="description" content="AutoGen, an innovative framework available on GitHub, empowers the development of LLM (Large Language Model) applications. These applications utilize multiple agents that engage in conversation to collaboratively solve tasks.
+In conjunction with AutoGen, LM Studio provides a platform to discover, download, and run local LLMs. In this blog post, we&rsquo;ll delve into the integration of AutoGen with LM Studio, showcasing a step-by-step guide on setting up a local LLM application served through LM Studio."><meta itemprop="datePublished" content="2023-12-02T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-12-02T20:00:00+08:00" />
+<meta itemprop="wordCount" content="437">
+<meta itemprop="keywords" content="Autogen,LM Studio,LLM," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Exploring AutoGen with LM Studio and Local LLM"/>
+<meta name="twitter:description" content="AutoGen, an innovative framework available on GitHub, empowers the development of LLM (Large Language Model) applications. These applications utilize multiple agents that engage in conversation to collaboratively solve tasks.
+In conjunction with AutoGen, LM Studio provides a platform to discover, download, and run local LLMs. In this blog post, we&rsquo;ll delve into the integration of AutoGen with LM Studio, showcasing a step-by-step guide on setting up a local LLM application served through LM Studio."/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2023
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Exploring AutoGen with LM Studio and Local LLM</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2023-12-02T20:00:00+08:00">December 2, 2023</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 437 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p>AutoGen, an innovative framework available on <a href="https://github.com/microsoft/autogen">GitHub</a>, empowers the development of LLM (Large Language Model) applications. These applications utilize multiple agents that engage in conversation to collaboratively solve tasks.</p>
+<p>In conjunction with AutoGen, <a href="https://lmstudio.ai/">LM Studio</a> provides a platform to discover, download, and run local LLMs. In this blog post, we&rsquo;ll delve into the integration of AutoGen with LM Studio, showcasing a step-by-step guide on setting up a local LLM application served through LM Studio.</p>
+<h2 id="installing-lm-studio">Installing LM Studio</h2>
+<p>Begin by installing LM Studio and downloading the Dolphin 2.2.1 Mistral 7B model. Customize your setup by configuring the context length to 8192, enabling GPU acceleration with GPU layers set to 9, and setting CPU threads to 8.</p>
+<p><img src="/images/autogen/lm-studio-mistral-dolphin-download.png" alt="lm-studio-mistral-dolphin-download"></p>
+<p>Once the download is complete, start the server. The default port will be <strong>http://localhost:1234/v1</strong>.</p>
+<p><img src="/images/autogen/lm-studio-start-server.png" alt="lm-studio-start-server"></p>
+<p>If you plan to execute Python code within the Windows Subsystem for Linux (WSL), access port 1234 through the local IP address. Test the connection with the provided curl command.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://192.168.68.118:1234/v1/chat/completions <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>-H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>-d <span style="color:#e6db74">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;messages&#34;: [
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    { &#34;role&#34;: &#34;system&#34;, &#34;content&#34;: &#34;Always answer in rhymes.&#34; },
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    { &#34;role&#34;: &#34;user&#34;, &#34;content&#34;: &#34;Introduce yourself.&#34; }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  ],
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;temperature&#34;: 0.7,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;max_tokens&#34;: -1,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;stream&#34;: false
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}&#39;</span>
+</span></span></code></pre></div><p><img src="/images/autogen/lm-studio-run-example.png" alt="lm-studio-run-example"></p>
+<h2 id="installing-anaconda">Installing Anaconda</h2>
+<p>Proceed to install <a href="https://docs.anaconda.com/free/anaconda/install/linux/">Anaconda</a> using the following commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Install necessary packages for GUI with Linux</span>
+</span></span><span style="display:flex;"><span>apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Download the installer</span>
+</span></span><span style="display:flex;"><span>curl -O https://repo.anaconda.com/archive/Anaconda3-2023.09-0-Linux-x86_64.sh
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Install Anaconda</span>
+</span></span><span style="display:flex;"><span>./Anaconda3-2023.09-0-Linux-x86_64.sh
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Initialise conda</span>
+</span></span><span style="display:flex;"><span>source /home/pi/anaconda3/bin/activate
+</span></span><span style="display:flex;"><span>conda init
+</span></span></code></pre></div><h1 id="autogen-at-work">AutoGen at work</h1>
+<p>In Visual Studio Code, open a terminal within WSL, and create a virtual environment:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>conda create -n pyautogen python<span style="color:#f92672">=</span>3.10
+</span></span></code></pre></div><p>Define your requirements.txt file with essential libraries:</p>
+<pre tabindex="0"><code>pyautogen==0.2.0
+docker==6.1.3
+beautifulsoup4
+yFinance
+pandas
+matplotlib
+sympy
+</code></pre><p><img src="/images/autogen/autogen-requirements.png" alt="autogen-requirements"></p>
+<p>Activate the environment with conda activate pyautogen and install the requirements:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip install -r requirements.txt
+</span></span></code></pre></div><p>Following the guidelines outlined in the <a href="https://microsoft.github.io/autogen/docs/Getting-Started">Getting Started</a> documentation, create your app.py script:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> autogen
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>config_list <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;api_key&#39;</span>: <span style="color:#e6db74">&#39;NULL&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;base_url&#39;</span>: <span style="color:#e6db74">&#39;http://192.168.68.118:1234/v1&#39;</span>
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>llm_config <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;seed&#34;</span>: <span style="color:#ae81ff">42</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;temperature&#34;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;config_list&#34;</span>: config_list
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>assistant <span style="color:#f92672">=</span> autogen<span style="color:#f92672">.</span>AssistantAgent(
+</span></span><span style="display:flex;"><span>    name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;assistant&#34;</span>,
+</span></span><span style="display:flex;"><span>    llm_config<span style="color:#f92672">=</span>llm_config,
+</span></span><span style="display:flex;"><span>    is_termination_msg<span style="color:#f92672">=</span><span style="color:#66d9ef">lambda</span> x: x<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;content&#34;</span>,<span style="color:#e6db74">&#34;&#34;</span>)<span style="color:#f92672">.</span>rstrip()<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;TERMINATE&#34;</span>),
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>user_proxy <span style="color:#f92672">=</span> autogen<span style="color:#f92672">.</span>UserProxyAgent(
+</span></span><span style="display:flex;"><span>    name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;user_proxy&#34;</span>, 
+</span></span><span style="display:flex;"><span>    human_input_mode<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;NEVER&#34;</span>,
+</span></span><span style="display:flex;"><span>    max_consecutive_auto_reply<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>,
+</span></span><span style="display:flex;"><span>    llm_config<span style="color:#f92672">=</span>llm_config,
+</span></span><span style="display:flex;"><span>    code_execution_config<span style="color:#f92672">=</span>{
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;work_dir&#34;</span>: <span style="color:#e6db74">&#34;coding&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;use_docker&#34;</span>: <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    system_message<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;&#34;&#34;Reply TERMINATE if the task has been solved at full satisfaction or the code executed without issue.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Otherwise, reply CONTINUE, or the reason why the task is not solved yet.&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>user_proxy<span style="color:#f92672">.</span>initiate_chat(assistant, message<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Plot a chart of NVDA and TESLA stock price change YTD.&#34;</span>)
+</span></span></code></pre></div><p>Execute the script with <strong>python app.py</strong> to generate the stock price comparison chart:</p>
+<p><img src="/images/autogen/autogen-nvda-tesla-stock-comparison.png" alt="autogen-nvda-tesla-stock-comparison"></p>
+<p><img src="/images/autogen/autogen-stock-comparison-output.png" alt="autogen-stock-comparison-output"></p>
+<p>Despite experimenting with various local models, it&rsquo;s worth noting that certain models, including the Dolphin-Mistral model, may not terminate automatically. For this instance, termination may only occur after 10 consecutive auto-replies!</p>
+<p><img src="/images/autogen/autogen-stock-comparison-infinite-looping.png" alt="autogen-stock-comparison-infinite-looping"></p>
+<ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/autogen/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Autogen</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/lm-studio/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">LM Studio</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/llm/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">LLM</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2023/boosting-inference-speed-ssd-and-gpu-acceleration/">Boosting Inference Speed: SSD and GPU Acceleration</a>
+    
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2023/unlocking-the-power-of-machine-learning-with-mlc-llm/">Unlocking the Power of Machine Learning with MLC LLM</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/serving-with-vllm/">Utilizing vLLM for Efficient Language Model Serving</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
