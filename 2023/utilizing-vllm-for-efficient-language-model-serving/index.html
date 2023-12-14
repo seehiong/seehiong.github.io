@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>[AI] Utilizing vLLM for Efficient Language Model Serving | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="vLLM is an open-source library designed for rapid LLM (Large Language Model) inference and deployment. It leverages their novel algorithm called PagedAttention, which optimizes the management of attention keys and values.
+Preparation In this blog post, I will share my experience of utilizing vLLM on a WSL (Windows Subsystem for Linux) instance running Ubuntu 22.04. Let&rsquo;s start by setting up the environment:
+Installing WSL and Configuring Ubuntu Begin by installing WSL and configuring it to use Ubuntu as the default distribution:">
+    <meta name="generator" content="Hugo 0.120.4">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="[AI] Utilizing vLLM for Efficient Language Model Serving" />
+<meta property="og:description" content="vLLM is an open-source library designed for rapid LLM (Large Language Model) inference and deployment. It leverages their novel algorithm called PagedAttention, which optimizes the management of attention keys and values.
+Preparation In this blog post, I will share my experience of utilizing vLLM on a WSL (Windows Subsystem for Linux) instance running Ubuntu 22.04. Let&rsquo;s start by setting up the environment:
+Installing WSL and Configuring Ubuntu Begin by installing WSL and configuring it to use Ubuntu as the default distribution:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2023/utilizing-vllm-for-efficient-language-model-serving/" /><meta property="article:section" content="2023" />
+<meta property="article:published_time" content="2023-08-20T20:00:00+08:00" />
+<meta property="article:modified_time" content="2023-08-20T20:00:00+08:00" />
+
+<meta itemprop="name" content="[AI] Utilizing vLLM for Efficient Language Model Serving">
+<meta itemprop="description" content="vLLM is an open-source library designed for rapid LLM (Large Language Model) inference and deployment. It leverages their novel algorithm called PagedAttention, which optimizes the management of attention keys and values.
+Preparation In this blog post, I will share my experience of utilizing vLLM on a WSL (Windows Subsystem for Linux) instance running Ubuntu 22.04. Let&rsquo;s start by setting up the environment:
+Installing WSL and Configuring Ubuntu Begin by installing WSL and configuring it to use Ubuntu as the default distribution:"><meta itemprop="datePublished" content="2023-08-20T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-08-20T20:00:00+08:00" />
+<meta itemprop="wordCount" content="601">
+<meta itemprop="keywords" content="vLLM,LLM,Uvicorn,Docker,AI," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[AI] Utilizing vLLM for Efficient Language Model Serving"/>
+<meta name="twitter:description" content="vLLM is an open-source library designed for rapid LLM (Large Language Model) inference and deployment. It leverages their novel algorithm called PagedAttention, which optimizes the management of attention keys and values.
+Preparation In this blog post, I will share my experience of utilizing vLLM on a WSL (Windows Subsystem for Linux) instance running Ubuntu 22.04. Let&rsquo;s start by setting up the environment:
+Installing WSL and Configuring Ubuntu Begin by installing WSL and configuring it to use Ubuntu as the default distribution:"/>
+
+      
+    
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2023
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">[AI] Utilizing vLLM for Efficient Language Model Serving</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2023-08-20T20:00:00+08:00">August 20, 2023</time>
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 601 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-one-thirds-l"><p><a href="https://vllm.ai/">vLLM</a> is an open-source library designed for rapid LLM (Large Language Model) inference and deployment. It leverages their novel algorithm called <strong>PagedAttention</strong>, which optimizes the management of attention keys and values.</p>
+<h2 id="preparation">Preparation</h2>
+<p>In this blog post, I will share my experience of utilizing vLLM on a WSL (Windows Subsystem for Linux) instance running Ubuntu 22.04. Let&rsquo;s start by setting up the environment:</p>
+<h3 id="installing-wsl-and-configuring-ubuntu">Installing WSL and Configuring Ubuntu</h3>
+<p>Begin by installing WSL and configuring it to use Ubuntu as the default distribution:</p>
+<pre tabindex="0"><code>wsl --install
+wsl --update
+
+# Sets ubuntu as the default 
+ wsl --set-default ubuntu
+</code></pre><p><img src="/images/vllm/vllm-wsl-install.png" alt="vllm-wsl-install"></p>
+<h3 id="installing-nvidia-gpu-drivers-for-wsl">Installing NVIDIA GPU Drivers for WSL</h3>
+<p>For efficient vLLM utilization, you need the latest NVIDIA Windows GPU Driver that fully supports WSL 2. Do not install any NVIDIA GPU Linux driver within WSL 2. Visit <a href="https://docs.nvidia.com/cuda/wsl-user-guide/index.html#getting-started-with-cuda-on-wsl">NVIDIA CUDA on WSL</a> and download the <a href="https://www.nvidia.com/Download/index.aspx">appropriate driver</a>. For example:</p>
+<pre tabindex="0"><code>536.96-quadro-rtx-desktop-notebook-win10-win11-64bit-international-dch-whql.exe
+</code></pre><h3 id="installing-the-cuda-toolkit">Installing the CUDA Toolkit</h3>
+<p>Inside Ubuntu 22.04, install the CUDA Toolkit by following these steps:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-wsl-ubuntu.pin
+</span></span><span style="display:flex;"><span>sudo mv cuda-wsl-ubuntu.pin /etc/apt/preferences.d/cuda-repository-pin-600
+</span></span><span style="display:flex;"><span>wget https://developer.download.nvidia.com/compute/cuda/12.2.1/local_installers/cuda-repo-wsl-ubuntu-12-2-local_12.2.1-1_amd64.deb
+</span></span><span style="display:flex;"><span>sudo dpkg -i cuda-repo-wsl-ubuntu-12-2-local_12.2.1-1_amd64.deb
+</span></span><span style="display:flex;"><span>sudo cp /var/cuda-repo-wsl-ubuntu-12-2-local/cuda-*-keyring.gpg /usr/share/keyrings/
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get -y install cuda
+</span></span></code></pre></div><h3 id="installing-docker">Installing Docker</h3>
+<p>To manage containers effectively, install Docker using these commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt install docker.io
+</span></span><span style="display:flex;"><span>sudo usermod -aG docker pi
+</span></span></code></pre></div><h2 id="setting-up">Setting Up</h2>
+<p>Let&rsquo;s dive into the process of setting up vLLM for efficient language model serving. This section outlines the steps to follow within the NVIDIA PyTorch Docker image.</p>
+<h3 id="using-the-nvidia-pytorch-docker-image">Using the NVIDIA PyTorch Docker Image</h3>
+<p>Before we proceed, please ensure that you have Docker Desktop for Windows installed and running on your system. This step is essential to leverage the power of containerization. Once you have Docker Desktop ready, we can move on to the next step.</p>
+<p>To streamline the setup, we&rsquo;ll use the recommended NVIDIA PyTorch Docker image. Be prepared for this step to take some time due to the image&rsquo;s size and complexity. Run the following command to initiate the container:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker run --gpus all -it --rm --shm-size<span style="color:#f92672">=</span>8g nvcr.io/nvidia/pytorch:22.12-py3 
+</span></span></code></pre></div><h3 id="uninstalling-existing-torch-package">Uninstalling Existing Torch Package</h3>
+<p>Once inside the container, start by uninstalling the existing Torch package, as recommended by the <a href="https://vllm.readthedocs.io/en/latest/getting_started/installation.html">vLLM documentation</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip uninstall torch
+</span></span></code></pre></div><p><img src="/images/vllm/vllm-uninstall-torch.png" alt="vllm-uninstall-torch"></p>
+<h3 id="installing-vllm">Installing vLLM</h3>
+<p>With the existing Torch package removed, proceed to install vLLM using pip within the container. Please note that this installation might also take a significant amount of time:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip install vllm
+</span></span></code></pre></div><p><img src="/images/vllm/vllm-pip-install-vllm.png" alt="vllm-pip-install-vllm"></p>
+<h2 id="launching-the-api-server">Launching the API Server</h2>
+<p>Now, it&rsquo;s time to deploy vLLM as an API server. Follow these steps to start the server using the default OPT-125M model:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>python -m vllm.entrypoints.api_server --host 0.0.0.0 --port <span style="color:#ae81ff">8000</span>
+</span></span></code></pre></div><p><img src="/images/vllm/vllm-api-server-with-uvicorn.png" alt="vllm-api-server-with-uvicorn"></p>
+<p>Please note that when running from within a Docker container, accessing the API server from the Windows host system may require additional configuration due to networking differences.</p>
+<h2 id="creating-a-docker-image-snapshot">Creating a Docker Image Snapshot</h2>
+<p>Begin by identifying the current container ID from a WSL shell:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker ps
+</span></span></code></pre></div><p>Create a snapshot of the current container state and give it a name, such as &ldquo;vLLM&rdquo;:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker commit &lt;container_id&gt; vllm:v1
+</span></span></code></pre></div><p>With the snapshot configured, expose the Docker container&rsquo;s port for external access:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker run -p 192.168.68.123:8000:8000 --gpus all -it --rm --shm-size<span style="color:#f92672">=</span>8g vllm:v1
+</span></span></code></pre></div><p>Once inside the Docker container, initiate the API server using the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>python -m vllm.entrypoints.api_server --host 0.0.0.0 --port <span style="color:#ae81ff">8000</span>
+</span></span></code></pre></div><p>As per sample official example, the following query demonstrates how to interact with the model using the API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://192.168.68.123:8000/generate <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -d <span style="color:#e6db74">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;prompt&#34;: &#34;San Francisco is a&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;use_beam_search&#34;: true,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;n&#34;: 4,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;temperature&#34;: 0
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    }&#39;</span>
+</span></span></code></pre></div><p><img src="/images/vllm/vllm-query-model-in-shell.png" alt="vllm-query-model-in-shell"></p>
+<p>These steps conclude the process of launching the API server and creating a Docker image snapshot. Your vLLM setup is now ready for serving language models efficiently. The blog post has covered the essential aspects of setting up and deploying vLLM, empowering you to leverage its capabilities effectively.</p>
+<ul class="pa0">
+  
+   <li class="list di">
+     <a href="/tags/vllm/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">vLLM</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/llm/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">LLM</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/uvicorn/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Uvicorn</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/docker/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Docker</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/ai/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">AI</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div><div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2023/setting-up-k3s-for-your-home-lab/">[HomeLab] Setting up K3s for Your Home Lab</a>
+    
+    
+    <a href="https://seehiong.github.io/2023/unlocking-the-power-of-machine-learning-with-mlc-llm/">[AI] Unlocking the Power of Machine Learning with MLC LLM</a>
+    
+</div></div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2023/unleashing-the-power-of-llama-server-in-docker-container/">[AI] Unleashing the Power of LLaMA Server in Docker Container</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/setting-up-k3s-for-your-home-lab/">[HomeLab] Setting up K3s for Your Home Lab</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/unlocking-the-power-of-gpt4all-summarizing-youtube-videos-in-minutes-2/">[AI] Unlocking the Power of GPT4All: How to summarize YouTube Videos in Minutes (Part 2)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/unlocking-the-power-of-gpt4all-summarizing-youtube-videos-in-minutes/">[AI] Unlocking the Power of GPT4All: How to summarize YouTube Videos in Minutes (Part 1)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/receipt-ocr-with-langchain-and-openai/">[AI] Receipt OCR with LangChain, OpenAI and PyTesseract</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/auto-fill-pdf-with-langchain-and-langflow/">[AI] Autofill PDF with LangChain and LangFlow</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/running-gpt4all-for-postgresql-with-langchain/">[AI] Running GPT4All for your PostgreSQL with LangChain</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/running-llama-server-in-local-machine/">[AI] Running LLaMA server in local machine</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/building-chatbot-for-your-pdf-files-with-langchain/">[AI] Building ChatBot for your PDF files with LangChain</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/building-a-basic-chain-with-langchain/">[AI] Building a basic Chain with LangChain</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/running-llma-model-locally/">[AI] Running LLaMA model locally</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/kubernetes-cluster-on-raspberry-pi/">[Raspberry Pi] Kubernetes Cluster on Pi</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2020/docker-on-raspberry-pi-cluster/">[Raspberry Pi] Docker for MicroK8s Cluster</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2023 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
