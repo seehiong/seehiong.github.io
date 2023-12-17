@@ -38,13 +38,13 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seehiong.github.io/2023/setting-up-k3s-for-your-home-lab/" /><meta property="article:section" content="2023" />
 <meta property="article:published_time" content="2023-07-30T20:00:00+08:00" />
-<meta property="article:modified_time" content="2023-07-30T20:00:00+08:00" />
+<meta property="article:modified_time" content="2023-12-17T00:00:00+00:00" />
 
 <meta itemprop="name" content="[Home Lab] Setting up K3s for Your Home Lab">
 <meta itemprop="description" content="K3S is a lightweight and easy-to-install Kubernetes distribution, making it an ideal choice for running a Kubernetes cluster in your home lab. In this blog post, we will walk you through the step-by-step process of setting up K3s on an Ubuntu Server 22.04.2 LTS.
 1 Setting up K3S 1.1 Installing Ubuntu Server 22.04.2 LTS To start, we&rsquo;ll install Ubuntu server 22.04.2 LTS on our laptop. You can verify the Linux distribution using the following command:"><meta itemprop="datePublished" content="2023-07-30T20:00:00+08:00" />
-<meta itemprop="dateModified" content="2023-07-30T20:00:00+08:00" />
-<meta itemprop="wordCount" content="1427">
+<meta itemprop="dateModified" content="2023-12-17T00:00:00+00:00" />
+<meta itemprop="wordCount" content="1429">
 <meta itemprop="keywords" content="K3s,Cluster,FastAPI,Docker,HomeLab," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Home Lab] Setting up K3s for Your Home Lab"/>
 <meta name="twitter:description" content="K3S is a lightweight and easy-to-install Kubernetes distribution, making it an ideal choice for running a Kubernetes cluster in your home lab. In this blog post, we will walk you through the step-by-step process of setting up K3s on an Ubuntu Server 22.04.2 LTS.
@@ -147,9 +147,14 @@
       
 
       
+        <time class="f6 mv4 dib tracked" ddatetime="2023-07-30T20:00:00+08:00">
+          (Updated:&nbsp;December 17, 2023)
+        </time>
+
+      
       
         <span class="f6 mv4 dib tracked"> - 7 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 1427 words </span>
+        <span class="f6 mv4 dib tracked"> - 1429 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p><a href="https://docs.k3s.io/">K3S</a> is a lightweight and easy-to-install Kubernetes distribution, making it an ideal choice for running a Kubernetes cluster in your home lab. In this blog post, we will walk you through the step-by-step process of setting up K3s on an Ubuntu Server 22.04.2 LTS.</p>
@@ -167,7 +172,8 @@
 
 sudo apt-get install iptables
 sudo apt-get install iptables-persistent
-</code></pre><h2 id="13-creating-useful-aliases">1.3 Creating Useful Aliases</h2>
+</code></pre><p><img src="/images/k3s/k3s-install.png" alt="k3s-install"></p>
+<h2 id="13-creating-useful-aliases">1.3 Creating Useful Aliases</h2>
 <p>To simplify interactions with K3s, we&rsquo;ll set up some convenient aliases. Open the bash configuration file:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vi ~/.bashrc
 </span></span></code></pre></div><p>Add the following aliases to the file:</p>
@@ -176,7 +182,7 @@ sudo apt-get install iptables-persistent
 </span></span></code></pre></div><p>Save and apply the changes:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>source ~/.bashrc
 </span></span></code></pre></div><h2 id="14-verifying-the-installation">1.4 Verifying the Installation</h2>
-<p>Congratulations! Your K3s cluster is up and running. You can verify its status and start using Kubernetes:</p>
+<p>Congratulations! Your K3s cluster is up and running. You can verify its status with <strong>kc get nodes</strong>:</p>
 <p><img src="/images/k3s/k3s-running-on-ubuntu-22-04-2.png" alt="k3s-running-on-ubuntu-22-04-2"></p>
 <h1 id="2-setting-up-portainer">2 Setting up Portainer</h1>
 <p>In addition to K3s, we will use <a href="https://www.portainer.io/">Portainer</a>, an efficient and user-friendly Docker and Kubernetes management system, to streamline the management of our home lab. Portainer is a lightweight, free, and open-source tool that will help us keep our containerized applications in check.</p>
@@ -302,14 +308,15 @@ sudo apt-get install iptables-persistent
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kca svc.yaml
 </span></span></code></pre></div><h2 id="35-create-docker-registry-credentials">3.5 Create Docker Registry Credentials</h2>
 <p>To allow the K3s cluster to pull images from the local registry, we need to create Docker registry credentials with the llm namespace defined:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kc create secret docker-registry regcred <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kc create ns llm
+</span></span><span style="display:flex;"><span>kc create secret docker-registry regcred <span style="color:#ae81ff">\
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --docker-server<span style="color:#f92672">=</span>192.168.68.132:30500 <span style="color:#ae81ff">\
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --docker-username<span style="color:#f92672">=[</span>YOUR DOCKER USERNAME<span style="color:#f92672">]</span> <span style="color:#ae81ff">\
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --docker-password<span style="color:#f92672">=[</span>YOUR DOCKER PASSWORD<span style="color:#f92672">]</span> <span style="color:#ae81ff">\
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --docker-email<span style="color:#f92672">=[</span>YOUR EMAIL<span style="color:#f92672">]</span> <span style="color:#ae81ff">\
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  -n llm
 </span></span></code></pre></div><p>Verify the secret:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kc get secret regcred --output<span style="color:#f92672">=</span>yaml
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kc get secret regcred --output<span style="color:#f92672">=</span>yaml -n llm
 </span></span></code></pre></div><h2 id="36-configure-k3s-to-use-the-local-registry">3.6 Configure K3s to Use the Local Registry</h2>
 <p>Create the registries.yaml file to configure K3s to use the local registry:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo mkdir -p /etc/rancher/k3s
@@ -371,8 +378,7 @@ sudo apt-get install iptables-persistent
 </span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">regcred</span>
 </span></span></code></pre></div><p>Ensure the imagePullSecrets section specifies the secret previously created, in this example, <em>regcred</em>.</p>
 <p>Next, deploy the application to the K3s cluster using kubectl aliases:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kc create namespace llm
-</span></span><span style="display:flex;"><span>kca llm-server.yaml
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kca llm-server.yaml
 </span></span></code></pre></div><p><img src="/images/k3s/deploy-llm-server-to-k3s-cluster.png" alt="deploy-llm-server-to-k3s-cluster"></p>
 <h2 id="step-4-expose-the-llm-server-service-in-k3s">Step 4: Expose the llm-server Service in K3s</h2>
 <p>To make the llm-server accessible from outside the cluster, you need to expose the service. Below is a sample YAML for a NodePort service:</p>
