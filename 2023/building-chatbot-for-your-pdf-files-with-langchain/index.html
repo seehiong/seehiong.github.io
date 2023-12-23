@@ -6,11 +6,7 @@
     
     <title>[Artificial Intelligence] Building ChatBot for your PDF files with LangChain | Tech Blog</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1">
-    <meta name="description" content="Extending the use case on the previous post, I will demostrate how you could ingest your own PDF file to your own LLaMa model in local machine.
-Preparation (2 mins)
-Let&rsquo;s start off by installing Chroma, the open-source embedding database:
-pip install chromadb pypdf Ingesting your PDF (5 mins)
-For a start, I will ingest this Java-Design-Patterns file: python3 from langchain.document_loaders import PyPDFLoader loader = PyPDFLoader(&#34;/home/pi/java-design-patterns-101.pdf&#34;) document = loader.load() Next, I will split the document into chunks.">
+    <meta name="description" content="In this post, I extend the use case from my previous post to demonstrate building a ChatBot for PDF files using LangChain. In the preparation phase, I install Chroma, an open-source embedding database, and ingest a PDF file using PyPDFLoader. I then split the document into chunks and use Chroma&#39;s default embeddings. Due to a potential issue, I provide an alternative embedding approach. Next, I load a local LLaMA model, prepare for question-answering, and run queries using RetrievalQAWithSourcesChain. I also touch on running with OpenBLAS for optimization. The guide empowers users to explore personalized question-answering over their PDF documents.">
     <meta name="generator" content="Hugo 0.120.4">
     
     
@@ -36,31 +32,19 @@ For a start, I will ingest this Java-Design-Patterns file: python3 from langchai
     
     
     <meta property="og:title" content="[Artificial Intelligence] Building ChatBot for your PDF files with LangChain" />
-<meta property="og:description" content="Extending the use case on the previous post, I will demostrate how you could ingest your own PDF file to your own LLaMa model in local machine.
-Preparation (2 mins)
-Let&rsquo;s start off by installing Chroma, the open-source embedding database:
-pip install chromadb pypdf Ingesting your PDF (5 mins)
-For a start, I will ingest this Java-Design-Patterns file: python3 from langchain.document_loaders import PyPDFLoader loader = PyPDFLoader(&#34;/home/pi/java-design-patterns-101.pdf&#34;) document = loader.load() Next, I will split the document into chunks." />
+<meta property="og:description" content="In this post, I extend the use case from my previous post to demonstrate building a ChatBot for PDF files using LangChain. In the preparation phase, I install Chroma, an open-source embedding database, and ingest a PDF file using PyPDFLoader. I then split the document into chunks and use Chroma&#39;s default embeddings. Due to a potential issue, I provide an alternative embedding approach. Next, I load a local LLaMA model, prepare for question-answering, and run queries using RetrievalQAWithSourcesChain. I also touch on running with OpenBLAS for optimization. The guide empowers users to explore personalized question-answering over their PDF documents." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seehiong.github.io/2023/building-chatbot-for-your-pdf-files-with-langchain/" /><meta property="article:section" content="2023" />
 <meta property="article:published_time" content="2023-05-07T20:00:00+08:00" />
 <meta property="article:modified_time" content="2023-05-07T20:00:00+08:00" />
 
 <meta itemprop="name" content="[Artificial Intelligence] Building ChatBot for your PDF files with LangChain">
-<meta itemprop="description" content="Extending the use case on the previous post, I will demostrate how you could ingest your own PDF file to your own LLaMa model in local machine.
-Preparation (2 mins)
-Let&rsquo;s start off by installing Chroma, the open-source embedding database:
-pip install chromadb pypdf Ingesting your PDF (5 mins)
-For a start, I will ingest this Java-Design-Patterns file: python3 from langchain.document_loaders import PyPDFLoader loader = PyPDFLoader(&#34;/home/pi/java-design-patterns-101.pdf&#34;) document = loader.load() Next, I will split the document into chunks."><meta itemprop="datePublished" content="2023-05-07T20:00:00+08:00" />
+<meta itemprop="description" content="In this post, I extend the use case from my previous post to demonstrate building a ChatBot for PDF files using LangChain. In the preparation phase, I install Chroma, an open-source embedding database, and ingest a PDF file using PyPDFLoader. I then split the document into chunks and use Chroma&#39;s default embeddings. Due to a potential issue, I provide an alternative embedding approach. Next, I load a local LLaMA model, prepare for question-answering, and run queries using RetrievalQAWithSourcesChain. I also touch on running with OpenBLAS for optimization. The guide empowers users to explore personalized question-answering over their PDF documents."><meta itemprop="datePublished" content="2023-05-07T20:00:00+08:00" />
 <meta itemprop="dateModified" content="2023-05-07T20:00:00+08:00" />
 <meta itemprop="wordCount" content="345">
 <meta itemprop="keywords" content="ChatGPT,LLaMA,LangChain,PDF,Chroma,AI," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Artificial Intelligence] Building ChatBot for your PDF files with LangChain"/>
-<meta name="twitter:description" content="Extending the use case on the previous post, I will demostrate how you could ingest your own PDF file to your own LLaMa model in local machine.
-Preparation (2 mins)
-Let&rsquo;s start off by installing Chroma, the open-source embedding database:
-pip install chromadb pypdf Ingesting your PDF (5 mins)
-For a start, I will ingest this Java-Design-Patterns file: python3 from langchain.document_loaders import PyPDFLoader loader = PyPDFLoader(&#34;/home/pi/java-design-patterns-101.pdf&#34;) document = loader.load() Next, I will split the document into chunks."/>
+<meta name="twitter:description" content="In this post, I extend the use case from my previous post to demonstrate building a ChatBot for PDF files using LangChain. In the preparation phase, I install Chroma, an open-source embedding database, and ingest a PDF file using PyPDFLoader. I then split the document into chunks and use Chroma&#39;s default embeddings. Due to a potential issue, I provide an alternative embedding approach. Next, I load a local LLaMA model, prepare for question-answering, and run queries using RetrievalQAWithSourcesChain. I also touch on running with OpenBLAS for optimization. The guide empowers users to explore personalized question-answering over their PDF documents."/>
 
       
     

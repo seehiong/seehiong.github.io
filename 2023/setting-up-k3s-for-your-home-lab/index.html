@@ -6,8 +6,7 @@
     
     <title>[Home Lab] Setting up K3s for Your Home Lab | Tech Blog</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1">
-    <meta name="description" content="K3S is a lightweight and easy-to-install Kubernetes distribution, making it an ideal choice for running a Kubernetes cluster in your home lab. In this blog post, we will walk you through the step-by-step process of setting up K3s on an Ubuntu Server 22.04.2 LTS.
-1 Setting up K3S 1.1 Installing Ubuntu Server 22.04.2 LTS To start, we&rsquo;ll install Ubuntu server 22.04.2 LTS on our laptop. You can verify the Linux distribution using the following command:">
+    <meta name="description" content="In my latest blog post, I share my journey setting up K3S, a lightweight Kubernetes distribution, in my home lab. With a step-by-step guide, I install K3S on an Ubuntu Server 22.04.2 LTS, offering a seamless experience. The post covers creating useful aliases for simplifying interactions with K3S and verifying the installation. Additionally, I introduce Portainer to manage Docker and Kubernetes in my home lab. I walk through setting up Portainer, adding a Kubernetes environment, and connecting it to the K3S cluster. Furthermore, I establish a local Docker registry and demonstrate optional steps for pushing and deploying Docker images within the K3S cluster.">
     <meta name="generator" content="Hugo 0.120.4">
     
     
@@ -33,22 +32,19 @@
     
     
     <meta property="og:title" content="[Home Lab] Setting up K3s for Your Home Lab" />
-<meta property="og:description" content="K3S is a lightweight and easy-to-install Kubernetes distribution, making it an ideal choice for running a Kubernetes cluster in your home lab. In this blog post, we will walk you through the step-by-step process of setting up K3s on an Ubuntu Server 22.04.2 LTS.
-1 Setting up K3S 1.1 Installing Ubuntu Server 22.04.2 LTS To start, we&rsquo;ll install Ubuntu server 22.04.2 LTS on our laptop. You can verify the Linux distribution using the following command:" />
+<meta property="og:description" content="In my latest blog post, I share my journey setting up K3S, a lightweight Kubernetes distribution, in my home lab. With a step-by-step guide, I install K3S on an Ubuntu Server 22.04.2 LTS, offering a seamless experience. The post covers creating useful aliases for simplifying interactions with K3S and verifying the installation. Additionally, I introduce Portainer to manage Docker and Kubernetes in my home lab. I walk through setting up Portainer, adding a Kubernetes environment, and connecting it to the K3S cluster. Furthermore, I establish a local Docker registry and demonstrate optional steps for pushing and deploying Docker images within the K3S cluster." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seehiong.github.io/2023/setting-up-k3s-for-your-home-lab/" /><meta property="article:section" content="2023" />
 <meta property="article:published_time" content="2023-07-30T20:00:00+08:00" />
-<meta property="article:modified_time" content="2023-12-17T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-12-22T00:00:00+00:00" />
 
 <meta itemprop="name" content="[Home Lab] Setting up K3s for Your Home Lab">
-<meta itemprop="description" content="K3S is a lightweight and easy-to-install Kubernetes distribution, making it an ideal choice for running a Kubernetes cluster in your home lab. In this blog post, we will walk you through the step-by-step process of setting up K3s on an Ubuntu Server 22.04.2 LTS.
-1 Setting up K3S 1.1 Installing Ubuntu Server 22.04.2 LTS To start, we&rsquo;ll install Ubuntu server 22.04.2 LTS on our laptop. You can verify the Linux distribution using the following command:"><meta itemprop="datePublished" content="2023-07-30T20:00:00+08:00" />
-<meta itemprop="dateModified" content="2023-12-17T00:00:00+00:00" />
-<meta itemprop="wordCount" content="1429">
+<meta itemprop="description" content="In my latest blog post, I share my journey setting up K3S, a lightweight Kubernetes distribution, in my home lab. With a step-by-step guide, I install K3S on an Ubuntu Server 22.04.2 LTS, offering a seamless experience. The post covers creating useful aliases for simplifying interactions with K3S and verifying the installation. Additionally, I introduce Portainer to manage Docker and Kubernetes in my home lab. I walk through setting up Portainer, adding a Kubernetes environment, and connecting it to the K3S cluster. Furthermore, I establish a local Docker registry and demonstrate optional steps for pushing and deploying Docker images within the K3S cluster."><meta itemprop="datePublished" content="2023-07-30T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-12-22T00:00:00+00:00" />
+<meta itemprop="wordCount" content="1500">
 <meta itemprop="keywords" content="K3s,Cluster,FastAPI,Docker,HomeLab," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Home Lab] Setting up K3s for Your Home Lab"/>
-<meta name="twitter:description" content="K3S is a lightweight and easy-to-install Kubernetes distribution, making it an ideal choice for running a Kubernetes cluster in your home lab. In this blog post, we will walk you through the step-by-step process of setting up K3s on an Ubuntu Server 22.04.2 LTS.
-1 Setting up K3S 1.1 Installing Ubuntu Server 22.04.2 LTS To start, we&rsquo;ll install Ubuntu server 22.04.2 LTS on our laptop. You can verify the Linux distribution using the following command:"/>
+<meta name="twitter:description" content="In my latest blog post, I share my journey setting up K3S, a lightweight Kubernetes distribution, in my home lab. With a step-by-step guide, I install K3S on an Ubuntu Server 22.04.2 LTS, offering a seamless experience. The post covers creating useful aliases for simplifying interactions with K3S and verifying the installation. Additionally, I introduce Portainer to manage Docker and Kubernetes in my home lab. I walk through setting up Portainer, adding a Kubernetes environment, and connecting it to the K3S cluster. Furthermore, I establish a local Docker registry and demonstrate optional steps for pushing and deploying Docker images within the K3S cluster."/>
 
       
     
@@ -148,13 +144,13 @@
 
       
         <time class="f6 mv4 dib tracked" ddatetime="2023-07-30T20:00:00+08:00">
-          (Updated:&nbsp;December 17, 2023)
+          (Updated:&nbsp;December 22, 2023)
         </time>
 
       
       
-        <span class="f6 mv4 dib tracked"> - 7 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 1429 words </span>
+        <span class="f6 mv4 dib tracked"> - 8 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 1500 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p><a href="https://docs.k3s.io/">K3S</a> is a lightweight and easy-to-install Kubernetes distribution, making it an ideal choice for running a Kubernetes cluster in your home lab. In this blog post, we will walk you through the step-by-step process of setting up K3s on an Ubuntu Server 22.04.2 LTS.</p>
@@ -173,7 +169,15 @@
 sudo apt-get install iptables
 sudo apt-get install iptables-persistent
 </code></pre><p><img src="/images/k3s/k3s-install.png" alt="k3s-install"></p>
-<h2 id="13-creating-useful-aliases">1.3 Creating Useful Aliases</h2>
+<h3 id="install-worker-nodes">Install worker nodes</h3>
+<p>After the k3s setup is completed, you may obtain token with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mynodetoken<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>sudo cat /var/lib/rancher/k3s/server/node-token<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Sample format: K10e848701b18977c63d7abfce920cf66c0f19bdd18a40862b2e7a14b89c4eb2742::server:ac92f2b7ccebbb46bf241bdaea3c99bf</span>
+</span></span><span style="display:flex;"><span>echo $mynodetoken
+</span></span></code></pre></div><p>From the client node, execute this command (with k3s server IP and mynodetoken):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl -sfL https://get.k3s.io | K3S_URL<span style="color:#f92672">=</span>https://192.168.68.132:6443 K3S_TOKEN<span style="color:#f92672">=</span>K10e848701b18977c63d7abfce920cf66c0f19bdd18a40862b2e7a14b89c4eb2742::server:ac92f2b7ccebbb46bf241bdaea3c99bf sh -
+</span></span></code></pre></div><h2 id="13-creating-useful-aliases">1.3 Creating Useful Aliases</h2>
 <p>To simplify interactions with K3s, we&rsquo;ll set up some convenient aliases. Open the bash configuration file:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vi ~/.bashrc
 </span></span></code></pre></div><p>Add the following aliases to the file:</p>
@@ -404,7 +408,10 @@ sudo apt-get install iptables-persistent
 </span></span></code></pre></div><p><img src="/images/k3s/run-llm-server-from-k3s-cluster.png" alt="run-llm-server-from-k3s-cluster"></p>
 <p>And this is the application logs from portainer:</p>
 <p><img src="/images/k3s/loaded-llm-model-in-k3s-cluster-portainer-log.png" alt="loaded-llm-model-in-k3s-cluster-portainer-log"></p>
-<p>With the optional step of pushing the Docker image to the K3s cluster&rsquo;s local registry and deploying it in Kubernetes, you have a complete end-to-end workflow of containerizing, pushing, and deploying applications in your home lab&rsquo;s K3s cluster.</p>
+<p>Note: If you realise that you are not utilising the entire HDD, you may wish to extend it by:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo lvresize -l 100%FREE /dev/ubuntu-vg/ubuntu-lv
+</span></span><span style="display:flex;"><span>sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+</span></span></code></pre></div><p>With the optional step of pushing the Docker image to the K3s cluster&rsquo;s local registry and deploying it in Kubernetes, you have a complete end-to-end workflow of containerizing, pushing, and deploying applications in your home lab&rsquo;s K3s cluster.</p>
 <p>This advanced technique allows for smooth and efficient management of your containerized applications, providing a robust platform for development and experimentation. Happy container journey in your K3s home lab!</p>
 <ul class="pa0">
   

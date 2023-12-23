@@ -6,12 +6,7 @@
     
     <title>[Artificial Intelligence] Running LLaMA model locally | Tech Blog</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1">
-    <meta name="description" content="Preparation (30 mins)
-LLaMA is a collection of foundation language models ranging from 7B to 65B parameters.
-In this guide, I will be using and following Georgi Gergano&rsquo;s llama.cpp, a inference of LLaMA model in pure C/C&#43;&#43;.
-I will be setting this up in a Ubuntu machine with 32Gb.
-To prepare for the build system, I installed these:
-sudo apt install git cmake build-essential python3 python3-pip Clone and build the C/C&#43;&#43; codes: git clone https://github.">
+    <meta name="description" content="In this thorough guide, I prepared my Ubuntu machine (32GB) for the LLaMA (Language Model) build. Following Georgi Gergano&#39;s llama.cpp, I executed CMake commands, ensuring the correct tag and building the model successfully. I downloaded Microsoft&#39;s Phi2 model in GGUF format, enabling local execution without exposing prompts or data. Running the Phi2 model showcased its capabilities in a few-shot interaction, providing accurate responses. Additionally, I explored optional OpenBLAS integration for improved speed, offering insights into the installation and rebuild process.">
     <meta name="generator" content="Hugo 0.120.4">
     
     
@@ -37,34 +32,19 @@ sudo apt install git cmake build-essential python3 python3-pip Clone and build t
     
     
     <meta property="og:title" content="[Artificial Intelligence] Running LLaMA model locally" />
-<meta property="og:description" content="Preparation (30 mins)
-LLaMA is a collection of foundation language models ranging from 7B to 65B parameters.
-In this guide, I will be using and following Georgi Gergano&rsquo;s llama.cpp, a inference of LLaMA model in pure C/C&#43;&#43;.
-I will be setting this up in a Ubuntu machine with 32Gb.
-To prepare for the build system, I installed these:
-sudo apt install git cmake build-essential python3 python3-pip Clone and build the C/C&#43;&#43; codes: git clone https://github." />
+<meta property="og:description" content="In this thorough guide, I prepared my Ubuntu machine (32GB) for the LLaMA (Language Model) build. Following Georgi Gergano&#39;s llama.cpp, I executed CMake commands, ensuring the correct tag and building the model successfully. I downloaded Microsoft&#39;s Phi2 model in GGUF format, enabling local execution without exposing prompts or data. Running the Phi2 model showcased its capabilities in a few-shot interaction, providing accurate responses. Additionally, I explored optional OpenBLAS integration for improved speed, offering insights into the installation and rebuild process." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seehiong.github.io/2023/running-llma-model-locally/" /><meta property="article:section" content="2023" />
 <meta property="article:published_time" content="2023-04-30T20:00:00+08:00" />
-<meta property="article:modified_time" content="2023-04-30T20:00:00+08:00" />
+<meta property="article:modified_time" content="2023-12-22T00:00:00+00:00" />
 
 <meta itemprop="name" content="[Artificial Intelligence] Running LLaMA model locally">
-<meta itemprop="description" content="Preparation (30 mins)
-LLaMA is a collection of foundation language models ranging from 7B to 65B parameters.
-In this guide, I will be using and following Georgi Gergano&rsquo;s llama.cpp, a inference of LLaMA model in pure C/C&#43;&#43;.
-I will be setting this up in a Ubuntu machine with 32Gb.
-To prepare for the build system, I installed these:
-sudo apt install git cmake build-essential python3 python3-pip Clone and build the C/C&#43;&#43; codes: git clone https://github."><meta itemprop="datePublished" content="2023-04-30T20:00:00+08:00" />
-<meta itemprop="dateModified" content="2023-04-30T20:00:00+08:00" />
-<meta itemprop="wordCount" content="344">
-<meta itemprop="keywords" content="ChatGPT,LLaMA,AI," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="description" content="In this thorough guide, I prepared my Ubuntu machine (32GB) for the LLaMA (Language Model) build. Following Georgi Gergano&#39;s llama.cpp, I executed CMake commands, ensuring the correct tag and building the model successfully. I downloaded Microsoft&#39;s Phi2 model in GGUF format, enabling local execution without exposing prompts or data. Running the Phi2 model showcased its capabilities in a few-shot interaction, providing accurate responses. Additionally, I explored optional OpenBLAS integration for improved speed, offering insights into the installation and rebuild process."><meta itemprop="datePublished" content="2023-04-30T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-12-22T00:00:00+00:00" />
+<meta itemprop="wordCount" content="285">
+<meta itemprop="keywords" content="ChatGPT,LLaMA,AI,Phi2," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Artificial Intelligence] Running LLaMA model locally"/>
-<meta name="twitter:description" content="Preparation (30 mins)
-LLaMA is a collection of foundation language models ranging from 7B to 65B parameters.
-In this guide, I will be using and following Georgi Gergano&rsquo;s llama.cpp, a inference of LLaMA model in pure C/C&#43;&#43;.
-I will be setting this up in a Ubuntu machine with 32Gb.
-To prepare for the build system, I installed these:
-sudo apt install git cmake build-essential python3 python3-pip Clone and build the C/C&#43;&#43; codes: git clone https://github."/>
+<meta name="twitter:description" content="In this thorough guide, I prepared my Ubuntu machine (32GB) for the LLaMA (Language Model) build. Following Georgi Gergano&#39;s llama.cpp, I executed CMake commands, ensuring the correct tag and building the model successfully. I downloaded Microsoft&#39;s Phi2 model in GGUF format, enabling local execution without exposing prompts or data. Running the Phi2 model showcased its capabilities in a few-shot interaction, providing accurate responses. Additionally, I explored optional OpenBLAS integration for improved speed, offering insights into the installation and rebuild process."/>
 
       
     
@@ -163,11 +143,14 @@ sudo apt install git cmake build-essential python3 python3-pip Clone and build t
       
 
       
+        <time class="f6 mv4 dib tracked" ddatetime="2023-04-30T20:00:00+08:00">
+          (Updated:&nbsp;December 22, 2023)
+        </time>
 
       
       
         <span class="f6 mv4 dib tracked"> - 2 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 344 words </span>
+        <span class="f6 mv4 dib tracked"> - 285 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><h1 id="preparation">Preparation</h1>
@@ -182,8 +165,11 @@ sudo apt install git cmake build-essential python3 python3-pip Clone and build t
 </span></span></code></pre></div><ol>
 <li>Clone and build the C/C++ codes:</li>
 </ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/ggerganov/llama.cpp
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/ggerganov/llama.cpp -b b1680
 </span></span><span style="display:flex;"><span>cd llama.cpp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Checks that b1680 tag is checked out</span>
+</span></span><span style="display:flex;"><span>git describe --tags
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># using CMake</span>
 </span></span><span style="display:flex;"><span>mkdir build
@@ -195,49 +181,40 @@ sudo apt install git cmake build-essential python3 python3-pip Clone and build t
 </span></span></code></pre></div><p><img src="/images/llama/llama-cmake-release.png" alt="llama-cmake-release"></p>
 <hr>
 <ol start="2">
-<li>For the 7B model (which runs faster as compared to the 13B model), I downloaded the ggml format via <a href="https://huggingface.co/Pi3141/alpaca-7B-ggml">here</a>:</li>
+<li>For the <a href="https://huggingface.co/microsoft/phi-2">Micorsoft&rsquo;s Phi2</a> model, I downloaded the GGUF format via <a href="https://huggingface.co/TheBloke/phi-2-GGUF/blob/main/phi-2.Q4_K_M.gguf">here</a>:</li>
 </ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>wget https://huggingface.co/Pi3141/alpaca-7B-ggml/resolve/main/ggml-model-q4_0.bin
-</span></span></code></pre></div><p>For the 13B model, I downloaed from <a href="https://huggingface.co/Pi3141/gpt4-x-alpaca-native-13B-ggml/tree/main">here</a>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>wget https://huggingface.co/Pi3141/gpt4-x-alpaca-native-13B-ggml/resolve/main/ggml-model-q4_0.bin
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>wget https://huggingface.co/TheBloke/phi-2-GGUF/resolve/main/phi-2.Q4_K_M.gguf
 </span></span></code></pre></div><ol start="3">
 <li>That&rsquo;s all! By following the provided setup, you can now comfortably run LLaMA (ChatGPT-like) model on your local machine without any worries about exposing your prompt or data.</li>
 </ol>
 <h1 id="running-llama-model-locally">Running LLaMA model locally</h1>
 <p><em>(5 mins)</em></p>
-<h2 id="7b-model">7B Model</h2>
-<p>For the 7B model (under <em>models/7B</em> folder), using the pre-trained GPT model by:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span> ./build/bin/main -m ./models/7B/ggml-model-q4_0.bin -n <span style="color:#ae81ff">128</span> --repeat_penalty 1.0 --color -i -r <span style="color:#e6db74">&#34;User:&#34;</span> -f prompts/chat-with-bob.txt
-</span></span></code></pre></div><p><img src="/images/llama/llama-7b-inference.png" alt="llama-7b-inference"></p>
+<h2 id="microsofts-phi2-model">Microsoft&rsquo;s Phi2 Model</h2>
+<p>This is an example of a few-shot interaction:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./build/bin/main -m ~/phi-2.Q4_K_M.gguf -n <span style="color:#ae81ff">128</span> --repeat_penalty 1.0 --color -i -r <span style="color:#e6db74">&#34;User:&#34;</span> -f prompts/chat-with-bob.txt
+</span></span></code></pre></div><p><img src="/images/llama/microsoft-phi2-inference.png" alt="microsoft-phi2-inference"></p>
 <hr>
 <p>This is the sample response for my prompt:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">how</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">create</span> <span style="color:#a6e22e">a</span> <span style="color:#a6e22e">chatgpt</span> <span style="color:#a6e22e">like</span> <span style="color:#a6e22e">app</span> <span style="color:#a6e22e">in</span> <span style="color:#a6e22e">flutter</span>, <span style="color:#a6e22e">give</span> <span style="color:#a6e22e">me</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">step</span> <span style="color:#a6e22e">by</span> <span style="color:#a6e22e">step</span> <span style="color:#a6e22e">code</span> <span style="color:#a6e22e">starting</span> <span style="color:#a6e22e">with</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">dart</span>
-</span></span></code></pre></div><p><img src="/images/llama/llama-7b-chatgpt-response.png" alt="llama-7b-chatgpt=response"></p>
-<hr>
-<h2 id="13b-model">13B Model</h2>
-<p>For the 13B model (under <em>models/13B</em> folder), using the pre-trained GPT model by:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./build/bin/main -m ./models/13B/ggml-model-q4_0.bin -n <span style="color:#ae81ff">256</span> --repeat_penalty 1.0 --color -i -r <span style="color:#e6db74">&#34;User:&#34;</span> -f prompts/chat-with-bob.txt
-</span></span></code></pre></div><p><img src="/images/llama/llama-13b-inference.png" alt="llama-13b-inference"></p>
-<hr>
-<p>With the same prompt as above, this is the sample response (the response is noticeably slower):</p>
-<p><img src="/images/llama/llama-13b-chatgpt-response.png" alt="llama-13b-chatgpt-response"></p>
+</span></span></code></pre></div><p><img src="/images/llama/microsoft-phi2-chatgpt-response.png" alt="microsoft-phi2-chatgpt-response"></p>
 <hr>
 <h1 id="running-with-openblas-optional">Running with OpenBLAS (optional)</h1>
 <p><em>(2 mins)</em></p>
 <p><a href="https://www.openblas.net/">OpenBLAS</a> is an optimized Basic Linear Algebra Subprograms (BLAS) library. You may install with:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt-get install libopenblas-dev
 </span></span></code></pre></div><p>Rebuilding llama with OpenBLAS on,</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cmake .. -DLLAMA_OPENBLAS<span style="color:#f92672">=</span>ON
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cmake .. -DLLAMA_BLAS<span style="color:#f92672">=</span>ON -DLLAMA_BLAS_VENDOR<span style="color:#f92672">=</span>OpenBLAS
 </span></span><span style="display:flex;"><span>cmake --build . --config Release
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Rebuild agin after running the below command, if you see similar error:</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># CMake Error at /usr/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:230 #(message):</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE)</span>
+</span></span><span style="display:flex;"><span>sudo apt-get install pkg-config
 </span></span></code></pre></div><p><img src="/images/llama/llama-openblas-cmake.png" alt="llama-openblas-cmake">
 <img src="/images/llama/llama-openblas-cmake-release.png" alt="llama-openblas-cmake-release"></p>
 <hr>
-<p><strong>NOTE:</strong> For the latest version, to work with OpenBLAS, here&rsquo;s the command. You may refer to the <a href="https://seehiong.github.io/2023/auto-fill-pdf-with-langchain-and-langflow/">this</a> for more information of how to run with ggjt v3:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cmake .. -DLLAMA_BLAS<span style="color:#f92672">=</span>ON -DLLAMA_BLAS_VENDOR<span style="color:#f92672">=</span>OpenBLAS
-</span></span><span style="display:flex;"><span>cmake --build . --config Release
-</span></span></code></pre></div><hr>
 <p>With the same prompt, this is the sample response with some speed improvements:</p>
-<p><img src="/images/llama/llama-openblas-13b-chatgpt-response.png" alt="llama-openblas-13b-chatgpt-response"></p>
+<p><img src="/images/llama/llama-openblas-chatgpt-response.png" alt="llama-openblas-chatgpt-response"></p>
 <hr>
 <ul class="pa0">
   
@@ -251,6 +228,10 @@ sudo apt install git cmake build-essential python3 python3-pip Clone and build t
   
    <li class="list di">
      <a href="/tags/ai/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">AI</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/phi2/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Phi2</a>
    </li>
   
 </ul>

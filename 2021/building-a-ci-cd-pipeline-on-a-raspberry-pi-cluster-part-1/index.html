@@ -6,9 +6,7 @@
     
     <title>[Raspberry Pi] CI/CD Pipeline on Pi Cluster (I) | Tech Blog</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1">
-    <meta name="description" content="Building a CI/CD pipeline on a Raspberry PI Cluster, with 3 master and 1 worker nodes, enclosed in a custom-made LEGO structure
-Building a CI/CD pipeline on a Raspberry PI Cluster (Part I) (Total Setup Time: 40 mins)
-In this series, I will build my own CI/CD pipeline, with tools that are configured to run on Raspberry PI Cluster and Longhorn, a HA Raspberry PI Cluster. By end of this guide, you will have a self-hosted Git service, working hand-in-hand with Jenkins.">
+    <meta name="description" content="In this series, I documented my journey building a CI/CD pipeline on a Raspberry Pi Cluster, featuring 3 master and 1 worker nodes, all housed in a custom LEGO structure. The setup includes tools like Metallb for load balancing, along with specific volumes for MySQL, Gitea, Jenkins, and Maven-agent. I detailed the installation processes for MySQL, Gitea, Jenkins, and Maven-agent, complete with YAML deployment files. The configuration steps for Jenkins, both for Kubernetes and Gitea integration, were outlined. The troubleshooting section covers issues related to Kubernetes connection errors and finding the Jenkins initial admin password. The final result showcases a functional CI/CD pipeline: when code is committed, it triggers the CI pipeline, with the Maven-agent building and compiling the code successfully.">
     <meta name="generator" content="Hugo 0.120.4">
     
     
@@ -34,25 +32,19 @@ In this series, I will build my own CI/CD pipeline, with tools that are configur
     
     
     <meta property="og:title" content="[Raspberry Pi] CI/CD Pipeline on Pi Cluster (I)" />
-<meta property="og:description" content="Building a CI/CD pipeline on a Raspberry PI Cluster, with 3 master and 1 worker nodes, enclosed in a custom-made LEGO structure
-Building a CI/CD pipeline on a Raspberry PI Cluster (Part I) (Total Setup Time: 40 mins)
-In this series, I will build my own CI/CD pipeline, with tools that are configured to run on Raspberry PI Cluster and Longhorn, a HA Raspberry PI Cluster. By end of this guide, you will have a self-hosted Git service, working hand-in-hand with Jenkins." />
+<meta property="og:description" content="In this series, I documented my journey building a CI/CD pipeline on a Raspberry Pi Cluster, featuring 3 master and 1 worker nodes, all housed in a custom LEGO structure. The setup includes tools like Metallb for load balancing, along with specific volumes for MySQL, Gitea, Jenkins, and Maven-agent. I detailed the installation processes for MySQL, Gitea, Jenkins, and Maven-agent, complete with YAML deployment files. The configuration steps for Jenkins, both for Kubernetes and Gitea integration, were outlined. The troubleshooting section covers issues related to Kubernetes connection errors and finding the Jenkins initial admin password. The final result showcases a functional CI/CD pipeline: when code is committed, it triggers the CI pipeline, with the Maven-agent building and compiling the code successfully." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seehiong.github.io/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-1/" /><meta property="article:section" content="2021" />
 <meta property="article:published_time" content="2021-06-13T20:00:00+08:00" />
 <meta property="article:modified_time" content="2021-06-13T20:00:00+08:00" />
 
 <meta itemprop="name" content="[Raspberry Pi] CI/CD Pipeline on Pi Cluster (I)">
-<meta itemprop="description" content="Building a CI/CD pipeline on a Raspberry PI Cluster, with 3 master and 1 worker nodes, enclosed in a custom-made LEGO structure
-Building a CI/CD pipeline on a Raspberry PI Cluster (Part I) (Total Setup Time: 40 mins)
-In this series, I will build my own CI/CD pipeline, with tools that are configured to run on Raspberry PI Cluster and Longhorn, a HA Raspberry PI Cluster. By end of this guide, you will have a self-hosted Git service, working hand-in-hand with Jenkins."><meta itemprop="datePublished" content="2021-06-13T20:00:00+08:00" />
+<meta itemprop="description" content="In this series, I documented my journey building a CI/CD pipeline on a Raspberry Pi Cluster, featuring 3 master and 1 worker nodes, all housed in a custom LEGO structure. The setup includes tools like Metallb for load balancing, along with specific volumes for MySQL, Gitea, Jenkins, and Maven-agent. I detailed the installation processes for MySQL, Gitea, Jenkins, and Maven-agent, complete with YAML deployment files. The configuration steps for Jenkins, both for Kubernetes and Gitea integration, were outlined. The troubleshooting section covers issues related to Kubernetes connection errors and finding the Jenkins initial admin password. The final result showcases a functional CI/CD pipeline: when code is committed, it triggers the CI pipeline, with the Maven-agent building and compiling the code successfully."><meta itemprop="datePublished" content="2021-06-13T20:00:00+08:00" />
 <meta itemprop="dateModified" content="2021-06-13T20:00:00+08:00" />
 <meta itemprop="wordCount" content="1372">
 <meta itemprop="keywords" content="Raspberry,Cluster,CI/CD,Pipeline," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Raspberry Pi] CI/CD Pipeline on Pi Cluster (I)"/>
-<meta name="twitter:description" content="Building a CI/CD pipeline on a Raspberry PI Cluster, with 3 master and 1 worker nodes, enclosed in a custom-made LEGO structure
-Building a CI/CD pipeline on a Raspberry PI Cluster (Part I) (Total Setup Time: 40 mins)
-In this series, I will build my own CI/CD pipeline, with tools that are configured to run on Raspberry PI Cluster and Longhorn, a HA Raspberry PI Cluster. By end of this guide, you will have a self-hosted Git service, working hand-in-hand with Jenkins."/>
+<meta name="twitter:description" content="In this series, I documented my journey building a CI/CD pipeline on a Raspberry Pi Cluster, featuring 3 master and 1 worker nodes, all housed in a custom LEGO structure. The setup includes tools like Metallb for load balancing, along with specific volumes for MySQL, Gitea, Jenkins, and Maven-agent. I detailed the installation processes for MySQL, Gitea, Jenkins, and Maven-agent, complete with YAML deployment files. The configuration steps for Jenkins, both for Kubernetes and Gitea integration, were outlined. The troubleshooting section covers issues related to Kubernetes connection errors and finding the Jenkins initial admin password. The final result showcases a functional CI/CD pipeline: when code is committed, it triggers the CI pipeline, with the Maven-agent building and compiling the code successfully."/>
 
       
     

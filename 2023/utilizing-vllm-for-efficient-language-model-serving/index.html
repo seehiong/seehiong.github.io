@@ -6,9 +6,7 @@
     
     <title>[Artificial Intelligence] Utilizing vLLM for Efficient Language Model Serving | Tech Blog</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1">
-    <meta name="description" content="vLLM is an open-source library designed for rapid LLM (Large Language Model) inference and deployment. It leverages their novel algorithm called PagedAttention, which optimizes the management of attention keys and values.
-Preparation In this blog post, I will share my experience of utilizing vLLM on a WSL (Windows Subsystem for Linux) instance running Ubuntu 22.04. Let&rsquo;s start by setting up the environment:
-Installing WSL and Configuring Ubuntu Begin by installing WSL and configuring it to use Ubuntu as the default distribution:">
+    <meta name="description" content="Embarking on my journey with vLLM, I explore its potential for streamlined Large Language Model (LLM) inference and deployment. The blog details my personal experience setting up vLLM on a Windows Subsystem for Linux (WSL) instance running Ubuntu 22.04. I meticulously guide through installing WSL, NVIDIA GPU drivers, CUDA Toolkit, and Docker for efficient utilization. Delving into vLLM setup within the NVIDIA PyTorch Docker image, I navigate through the installation process and launch the API server. The blog provides insights into querying the model and creating a Docker image snapshot, offering a comprehensive guide to efficient language model serving.">
     <meta name="generator" content="Hugo 0.120.4">
     
     
@@ -34,25 +32,19 @@ Installing WSL and Configuring Ubuntu Begin by installing WSL and configuring it
     
     
     <meta property="og:title" content="[Artificial Intelligence] Utilizing vLLM for Efficient Language Model Serving" />
-<meta property="og:description" content="vLLM is an open-source library designed for rapid LLM (Large Language Model) inference and deployment. It leverages their novel algorithm called PagedAttention, which optimizes the management of attention keys and values.
-Preparation In this blog post, I will share my experience of utilizing vLLM on a WSL (Windows Subsystem for Linux) instance running Ubuntu 22.04. Let&rsquo;s start by setting up the environment:
-Installing WSL and Configuring Ubuntu Begin by installing WSL and configuring it to use Ubuntu as the default distribution:" />
+<meta property="og:description" content="Embarking on my journey with vLLM, I explore its potential for streamlined Large Language Model (LLM) inference and deployment. The blog details my personal experience setting up vLLM on a Windows Subsystem for Linux (WSL) instance running Ubuntu 22.04. I meticulously guide through installing WSL, NVIDIA GPU drivers, CUDA Toolkit, and Docker for efficient utilization. Delving into vLLM setup within the NVIDIA PyTorch Docker image, I navigate through the installation process and launch the API server. The blog provides insights into querying the model and creating a Docker image snapshot, offering a comprehensive guide to efficient language model serving." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seehiong.github.io/2023/utilizing-vllm-for-efficient-language-model-serving/" /><meta property="article:section" content="2023" />
 <meta property="article:published_time" content="2023-08-20T20:00:00+08:00" />
-<meta property="article:modified_time" content="2023-08-20T20:00:00+08:00" />
+<meta property="article:modified_time" content="2023-12-22T00:00:00+00:00" />
 
 <meta itemprop="name" content="[Artificial Intelligence] Utilizing vLLM for Efficient Language Model Serving">
-<meta itemprop="description" content="vLLM is an open-source library designed for rapid LLM (Large Language Model) inference and deployment. It leverages their novel algorithm called PagedAttention, which optimizes the management of attention keys and values.
-Preparation In this blog post, I will share my experience of utilizing vLLM on a WSL (Windows Subsystem for Linux) instance running Ubuntu 22.04. Let&rsquo;s start by setting up the environment:
-Installing WSL and Configuring Ubuntu Begin by installing WSL and configuring it to use Ubuntu as the default distribution:"><meta itemprop="datePublished" content="2023-08-20T20:00:00+08:00" />
-<meta itemprop="dateModified" content="2023-08-20T20:00:00+08:00" />
-<meta itemprop="wordCount" content="601">
+<meta itemprop="description" content="Embarking on my journey with vLLM, I explore its potential for streamlined Large Language Model (LLM) inference and deployment. The blog details my personal experience setting up vLLM on a Windows Subsystem for Linux (WSL) instance running Ubuntu 22.04. I meticulously guide through installing WSL, NVIDIA GPU drivers, CUDA Toolkit, and Docker for efficient utilization. Delving into vLLM setup within the NVIDIA PyTorch Docker image, I navigate through the installation process and launch the API server. The blog provides insights into querying the model and creating a Docker image snapshot, offering a comprehensive guide to efficient language model serving."><meta itemprop="datePublished" content="2023-08-20T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-12-22T00:00:00+00:00" />
+<meta itemprop="wordCount" content="630">
 <meta itemprop="keywords" content="vLLM,LLM,Uvicorn,Docker,AI," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Artificial Intelligence] Utilizing vLLM for Efficient Language Model Serving"/>
-<meta name="twitter:description" content="vLLM is an open-source library designed for rapid LLM (Large Language Model) inference and deployment. It leverages their novel algorithm called PagedAttention, which optimizes the management of attention keys and values.
-Preparation In this blog post, I will share my experience of utilizing vLLM on a WSL (Windows Subsystem for Linux) instance running Ubuntu 22.04. Let&rsquo;s start by setting up the environment:
-Installing WSL and Configuring Ubuntu Begin by installing WSL and configuring it to use Ubuntu as the default distribution:"/>
+<meta name="twitter:description" content="Embarking on my journey with vLLM, I explore its potential for streamlined Large Language Model (LLM) inference and deployment. The blog details my personal experience setting up vLLM on a Windows Subsystem for Linux (WSL) instance running Ubuntu 22.04. I meticulously guide through installing WSL, NVIDIA GPU drivers, CUDA Toolkit, and Docker for efficient utilization. Delving into vLLM setup within the NVIDIA PyTorch Docker image, I navigate through the installation process and launch the API server. The blog provides insights into querying the model and creating a Docker image snapshot, offering a comprehensive guide to efficient language model serving."/>
 
       
     
@@ -151,11 +143,14 @@ Installing WSL and Configuring Ubuntu Begin by installing WSL and configuring it
       
 
       
+        <time class="f6 mv4 dib tracked" ddatetime="2023-08-20T20:00:00+08:00">
+          (Updated:&nbsp;December 22, 2023)
+        </time>
 
       
       
         <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 601 words </span>
+        <span class="f6 mv4 dib tracked"> - 630 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p><a href="https://vllm.ai/">vLLM</a> is an open-source library designed for rapid LLM (Large Language Model) inference and deployment. It leverages their novel algorithm called <strong>PagedAttention</strong>, which optimizes the management of attention keys and values.</p>
@@ -190,15 +185,12 @@ wsl --update
 <h3 id="using-the-nvidia-pytorch-docker-image">Using the NVIDIA PyTorch Docker Image</h3>
 <p>Before we proceed, please ensure that you have Docker Desktop for Windows installed and running on your system. This step is essential to leverage the power of containerization. Once you have Docker Desktop ready, we can move on to the next step.</p>
 <p>To streamline the setup, we&rsquo;ll use the recommended NVIDIA PyTorch Docker image. Be prepared for this step to take some time due to the image&rsquo;s size and complexity. Run the following command to initiate the container:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker run --gpus all -it --rm --shm-size<span style="color:#f92672">=</span>8g nvcr.io/nvidia/pytorch:22.12-py3 
-</span></span></code></pre></div><h3 id="uninstalling-existing-torch-package">Uninstalling Existing Torch Package</h3>
-<p>Once inside the container, start by uninstalling the existing Torch package, as recommended by the <a href="https://vllm.readthedocs.io/en/latest/getting_started/installation.html">vLLM documentation</a>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip uninstall torch
-</span></span></code></pre></div><p><img src="/images/vllm/vllm-uninstall-torch.png" alt="vllm-uninstall-torch"></p>
-<h3 id="installing-vllm">Installing vLLM</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker run --gpus all -it --rm --shm-size<span style="color:#f92672">=</span>8g nvcr.io/nvidia/pytorch:23.10-py3
+</span></span></code></pre></div><h3 id="installing-vllm">Installing vLLM</h3>
 <p>With the existing Torch package removed, proceed to install vLLM using pip within the container. Please note that this installation might also take a significant amount of time:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip install vllm
-</span></span></code></pre></div><p><img src="/images/vllm/vllm-pip-install-vllm.png" alt="vllm-pip-install-vllm"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip install vllm<span style="color:#f92672">==</span>0.2.6
+</span></span></code></pre></div><p>Sample output (from previous vllm version):
+<img src="/images/vllm/vllm-pip-install-vllm.png" alt="vllm-pip-install-vllm"></p>
 <h2 id="launching-the-api-server">Launching the API Server</h2>
 <p>Now, it&rsquo;s time to deploy vLLM as an API server. Follow these steps to start the server using the default OPT-125M model:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>python -m vllm.entrypoints.api_server --host 0.0.0.0 --port <span style="color:#ae81ff">8000</span>
@@ -208,9 +200,9 @@ wsl --update
 <p>Begin by identifying the current container ID from a WSL shell:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker ps
 </span></span></code></pre></div><p>Create a snapshot of the current container state and give it a name, such as &ldquo;vLLM&rdquo;:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker commit &lt;container_id&gt; vllm:v1
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker commit &lt;container_id&gt; vllm:0.2.6
 </span></span></code></pre></div><p>With the snapshot configured, expose the Docker container&rsquo;s port for external access:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker run -p 192.168.68.123:8000:8000 --gpus all -it --rm --shm-size<span style="color:#f92672">=</span>8g vllm:v1
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker run -p 192.168.68.123:8000:8000 --gpus all -it --rm --shm-size<span style="color:#f92672">=</span>8g vllm:0.2.6
 </span></span></code></pre></div><p>Once inside the Docker container, initiate the API server using the following command:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>python -m vllm.entrypoints.api_server --host 0.0.0.0 --port <span style="color:#ae81ff">8000</span>
 </span></span></code></pre></div><p>As per sample official example, the following query demonstrates how to interact with the model using the API:</p>
@@ -223,6 +215,12 @@ wsl --update
 </span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    }&#39;</span>
 </span></span></code></pre></div><p><img src="/images/vllm/vllm-query-model-in-shell.png" alt="vllm-query-model-in-shell"></p>
 <p>These steps conclude the process of launching the API server and creating a Docker image snapshot. Your vLLM setup is now ready for serving language models efficiently. The blog post has covered the essential aspects of setting up and deploying vLLM, empowering you to leverage its capabilities effectively.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p>It seems like due to the WSL issue, I am unable to load any models like mistralai/Mistral-7B-v0.1 or mosaicml/mpt-7b on my machine using WSL:</p>
+<p><img src="/images/vllm/vllm-pin-memory-issue-with-wsl.png" alt="vllm-pin-memory-issue-with-wsl"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker run -p 192.168.68.123:8000:8000 --runtime nvidia --gpus all -it --rm --shm-size<span style="color:#f92672">=</span>64g vllm:0.2.6
+</span></span><span style="display:flex;"><span>python -m vllm.entrypoints.api_server --host 0.0.0.0 --port <span style="color:#ae81ff">8000</span>  --model mistralai/Mistral-7B-v0.1 --gpu-memory-utilization<span style="color:#f92672">=</span>0.95
+</span></span></code></pre></div><p><img src="/images/vllm/vllm-no-available-memory-for-the-cache-blocks.png" alt="vllm-no-available-memory-for-the-cache-blocks"></p>
 <ul class="pa0">
   
    <li class="list di">

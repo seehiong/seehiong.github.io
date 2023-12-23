@@ -6,8 +6,7 @@
     
     <title>[Artificial Intelligence] Building an AI Application with Langchain4j | Tech Blog</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1">
-    <meta name="description" content="In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of langchain4j to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.
-Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Development Environment (IDE) and opted for Java 17 as my programming language. Leveraging Postman as my API platform and Spring Boot as the framework of choice, let&rsquo;s delve into the process.">
+    <meta name="description" content="I embarked on a journey to harness the capabilities of Langchain4j, crafting a powerful AI application in Java using the local language model. Utilizing Spring Boot, Postman, and various Langchain4j components, I explored setting up, implementing a chat service, integrating custom tools, embedding functionality with Chroma, translation, persistence, retrieval, and streaming services. The blog post serves as a comprehensive guide for building personalized AI applications, showcasing the versatility and potential of Langchain4j in Java development.">
     <meta name="generator" content="Hugo 0.120.4">
     
     
@@ -33,22 +32,19 @@ Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Deve
     
     
     <meta property="og:title" content="[Artificial Intelligence] Building an AI Application with Langchain4j" />
-<meta property="og:description" content="In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of langchain4j to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.
-Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Development Environment (IDE) and opted for Java 17 as my programming language. Leveraging Postman as my API platform and Spring Boot as the framework of choice, let&rsquo;s delve into the process." />
+<meta property="og:description" content="I embarked on a journey to harness the capabilities of Langchain4j, crafting a powerful AI application in Java using the local language model. Utilizing Spring Boot, Postman, and various Langchain4j components, I explored setting up, implementing a chat service, integrating custom tools, embedding functionality with Chroma, translation, persistence, retrieval, and streaming services. The blog post serves as a comprehensive guide for building personalized AI applications, showcasing the versatility and potential of Langchain4j in Java development." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seehiong.github.io/2023/building-an-ai-application-with-langchain4j/" /><meta property="article:section" content="2023" />
 <meta property="article:published_time" content="2023-11-07T20:00:00+08:00" />
-<meta property="article:modified_time" content="2023-11-07T20:00:00+08:00" />
+<meta property="article:modified_time" content="2023-12-22T00:00:00+00:00" />
 
 <meta itemprop="name" content="[Artificial Intelligence] Building an AI Application with Langchain4j">
-<meta itemprop="description" content="In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of langchain4j to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.
-Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Development Environment (IDE) and opted for Java 17 as my programming language. Leveraging Postman as my API platform and Spring Boot as the framework of choice, let&rsquo;s delve into the process."><meta itemprop="datePublished" content="2023-11-07T20:00:00+08:00" />
-<meta itemprop="dateModified" content="2023-11-07T20:00:00+08:00" />
+<meta itemprop="description" content="I embarked on a journey to harness the capabilities of Langchain4j, crafting a powerful AI application in Java using the local language model. Utilizing Spring Boot, Postman, and various Langchain4j components, I explored setting up, implementing a chat service, integrating custom tools, embedding functionality with Chroma, translation, persistence, retrieval, and streaming services. The blog post serves as a comprehensive guide for building personalized AI applications, showcasing the versatility and potential of Langchain4j in Java development."><meta itemprop="datePublished" content="2023-11-07T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-12-22T00:00:00+00:00" />
 <meta itemprop="wordCount" content="2137">
 <meta itemprop="keywords" content="langchain4j,LocalAI,Spring Boot,Java,Chroma,GPT4All,AI," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Artificial Intelligence] Building an AI Application with Langchain4j"/>
-<meta name="twitter:description" content="In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of langchain4j to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.
-Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Development Environment (IDE) and opted for Java 17 as my programming language. Leveraging Postman as my API platform and Spring Boot as the framework of choice, let&rsquo;s delve into the process."/>
+<meta name="twitter:description" content="I embarked on a journey to harness the capabilities of Langchain4j, crafting a powerful AI application in Java using the local language model. Utilizing Spring Boot, Postman, and various Langchain4j components, I explored setting up, implementing a chat service, integrating custom tools, embedding functionality with Chroma, translation, persistence, retrieval, and streaming services. The blog post serves as a comprehensive guide for building personalized AI applications, showcasing the versatility and potential of Langchain4j in Java development."/>
 
       
     
@@ -147,6 +143,9 @@ Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Deve
       
 
       
+        <time class="f6 mv4 dib tracked" ddatetime="2023-11-07T20:00:00+08:00">
+          (Updated:&nbsp;December 22, 2023)
+        </time>
 
       
       
@@ -565,8 +564,8 @@ Getting Started To kick things off, I&rsquo;ve chosen STS4 as my Integrated Deve
 <p>In this section, we&rsquo;ve introduced a Retrieval Service utilizing a local Language Model (LLM) through <a href="https://localai.io/">LocalAI</a>. Here are the key components and implementations:</p>
 <h3 id="setting-up-local-ai">Setting up Local AI</h3>
 <p>Before running the Spring Boot application, set up Local AI using the following commands within <a href="https://learn.microsoft.com/en-us/windows/wsl/install">WSL</a>. Please <em>note</em> that for below example, the docker container will download or use the models under the models folder:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker pull quay.io/go-skynet/local-ai
-</span></span><span style="display:flex;"><span>docker run -p 8080:8080 -v $PWD/models:/models -ti --rm quay.io/go-skynet/local-ai:latest --models-path /models --context-size <span style="color:#ae81ff">2000</span> --threads <span style="color:#ae81ff">8</span> --debug<span style="color:#f92672">=</span>true
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker pull quay.io/go-skynet/local-ai:v2.0.0
+</span></span><span style="display:flex;"><span>docker run -p 8080:8080 -v $PWD/models:/models -ti --rm quay.io/go-skynet/local-ai:v2.0.0 --models-path /models --context-size <span style="color:#ae81ff">2000</span> --threads <span style="color:#ae81ff">8</span> --debug<span style="color:#f92672">=</span>true
 </span></span></code></pre></div><p>By setting to debug on, you should be seeing something like this:
 <img src="/images/langchain4j/langchain4j-local-ai.png" alt="langchain4j-local-ai"></p>
 <p>Next, try to download a model with the command:</p>
