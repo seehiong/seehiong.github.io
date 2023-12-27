@@ -41,14 +41,15 @@
 <meta itemprop="name" content="[Home Lab] Deploying OpenAI-Compatible LLAMA CPP Server in Home Lab with K3S">
 <meta itemprop="description" content="In this post, I expand my Home Lab by adding a perpetual LLAMA model for on-demand inferencing. The steps involve crafting a Dockerfile, packaging Microsoft&#39;s Phi2 model, and deploying it with K3S. This ensures a continuously accessible LLAMA server for seamless integration into various inferencing projects."><meta itemprop="datePublished" content="2023-12-22T20:00:00+08:00" />
 <meta itemprop="dateModified" content="2023-12-22T20:00:00+08:00" />
-<meta itemprop="wordCount" content="765">
+<meta itemprop="wordCount" content="802">
 <meta itemprop="keywords" content="Phi2,Uvicorn,Docker,LLaMA,HomeLab," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Home Lab] Deploying OpenAI-Compatible LLAMA CPP Server in Home Lab with K3S"/>
 <meta name="twitter:description" content="In this post, I expand my Home Lab by adding a perpetual LLAMA model for on-demand inferencing. The steps involve crafting a Dockerfile, packaging Microsoft&#39;s Phi2 model, and deploying it with K3S. This ensures a continuously accessible LLAMA server for seamless integration into various inferencing projects."/>
 
       
     
-	
+	<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js"></script>
   </head>
 
   <body class="ma0 avenir bg-near-white">
@@ -147,7 +148,7 @@
       
       
         <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 765 words </span>
+        <span class="f6 mv4 dib tracked"> - 802 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>Commencing my week-long Christmas break, I extend the concepts from my <a href="https://seehiong.github.io/2023/running-llama-server-in-local-machine/">previous post</a> to establish an OpenAI-compatible server in my <a href="https://seehiong.github.io/2023/setting-up-k3s-for-your-home-lab/">Home Lab</a>.</p>
@@ -175,7 +176,7 @@
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># We need to set the host to 0.0.0.0 to allow outside access</span><span style="color:#960050;background-color:#1e0010">
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> HOST 0.0.0.0<span style="color:#960050;background-color:#1e0010">
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> . .<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> ./phi-2.Q4_K_M.gguf .<span style="color:#960050;background-color:#1e0010">
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Install the package</span><span style="color:#960050;background-color:#1e0010">
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> apt update <span style="color:#f92672">&amp;&amp;</span> apt install -y libopenblas-dev ninja-build build-essential pkg-config<span style="color:#960050;background-color:#1e0010">
@@ -186,7 +187,9 @@
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Run the server</span><span style="color:#960050;background-color:#1e0010">
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;python3&#34;</span>, <span style="color:#e6db74">&#34;-m&#34;</span>, <span style="color:#e6db74">&#34;llama_cpp.server&#34;</span>, <span style="color:#e6db74">&#34;--model&#34;</span>, <span style="color:#e6db74">&#34;/phi-2.Q4_K_M.gguf&#34;</span>]<span style="color:#960050;background-color:#1e0010">
-</span></span></span></code></pre></div><h2 id="docker-image-build-and-run">Docker Image Build and Run</h2>
+</span></span></span></code></pre></div><p>For the <a href="https://huggingface.co/microsoft/phi-2">Micorsoft&rsquo;s Phi2</a> model, I downloaded the GGUF format via <a href="https://huggingface.co/TheBloke/phi-2-GGUF/blob/main/phi-2.Q4_K_M.gguf">here</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>wget https://huggingface.co/TheBloke/phi-2-GGUF/resolve/main/phi-2.Q4_K_M.gguf
+</span></span></code></pre></div><h2 id="docker-image-build-and-run">Docker Image Build and Run</h2>
 <p>The image, packaged with Microsoft&rsquo;s Phi2 model, is built using:</p>
 <p><img src="/images/homelab/homelab-docker-llama.png" alt="homelab-docker-llama"></p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker build . -t llama-microsoft-phi2:v0.2.24
@@ -194,7 +197,7 @@
 <p>To run the image:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker run -p 8000:8000 --rm -it llama-microsoft-phi2:v0.2.24
 </span></span></code></pre></div><p><img src="/images/homelab/homelab-docker-run-llama-cpp-python.png" alt="homelab-docker-run-llama-cpp-python"></p>
-<p>NOTE: To resolve the <em>&ldquo;failed to mlock&rdquo;</em> warning, add <em>&ndash;cap-add IPC_LOCK</em> like so:</p>
+<p><strong>NOTE</strong>: To resolve the <em>&ldquo;failed to mlock&rdquo;</em> warning, add <em>&ndash;cap-add IPC_LOCK</em> like so:</p>
 <pre tabindex="0"><code>docker run --cap-add IPC_LOCK -p 8000:8000 --rm -it llama-microsoft-phi2:v0.2.24
 </code></pre><p><img src="/images/homelab/homelab-llama-cpp-python-docs.png" alt="homelab-llama-cpp-python-docs"></p>
 <h2 id="docker-image-push-and-deployment">Docker Image Push and Deployment</h2>
@@ -235,7 +238,7 @@
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Restart k3s agent after the change</span>
 </span></span><span style="display:flex;"><span>sudo systemctl daemon-reload
 </span></span><span style="display:flex;"><span>sudo systemctl restart k3s-agent
-</span></span></code></pre></div><p>Change ExecStart to:</p>
+</span></span></code></pre></div><p>Change ExecStart of <em>k3s-agent.service</em> to:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">ExecStart</span>=<span style="color:#e6db74">/usr/</span><span style="color:#a6e22e">local</span><span style="color:#e6db74">/bin/</span><span style="color:#a6e22e">k3s</span> \
 </span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">agent</span> \
 </span></span><span style="display:flex;"><span>    --<span style="color:#a6e22e">docker</span>
@@ -298,13 +301,18 @@
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kca llama-phi2-svc.yaml
 </span></span></code></pre></div><p>Access the llama-phi2 server through nodePort 3000:</p>
 <p><img src="/images/homelab/homelab-llama-cpp-python-from-k3s.png" alt="homelab-llama-cpp-python-from-k3s"></p>
-<p>NOTE: If you want a straight forward label-based match, you may use node selector to use a specific host to run the pod:</p>
+<p><strong>NOTE</strong>: If you want a straight forward label-based match, you may use node selector to use a specific host to run the pod:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">nodeSelector</span>:
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">hostname</span>: <span style="color:#ae81ff">alien</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ... rest of the container spec ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Alternatively you may consider the default kubernetes.io/hostname: alien</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># By using the default value, we need not set the label</span>
 </span></span></code></pre></div><p>To label the node, you may use this:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kc label no alien hostname<span style="color:#f92672">=</span>alien
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check current labels</span>
+</span></span><span style="display:flex;"><span>kc get no --show-labels
+</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Re-deploy with the latest yaml change</span>
 </span></span><span style="display:flex;"><span>kca llama-phi2-deploy.yaml
 </span></span></code></pre></div><h2 id="troubleshooting">Troubleshooting</h2>

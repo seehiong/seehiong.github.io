@@ -41,14 +41,15 @@
 <meta itemprop="name" content="[Home Lab] GitLab Setup: Installation, Migration, and CI/CD Simplified">
 <meta itemprop="description" content="Discover a streamlined approach to GitLab installation, repository migration, and CI/CD optimization. This comprehensive guide covers setting up GitLab in your home lab, upgrading to the latest version, configuring external URLs, and migrating repositories. Learn how to install GitLab Runner, Docker, and seamlessly integrate them into your development workflow. The guide concludes with optional steps for registering GitLab Runner as a service. Elevate your version control and continuous integration experience with this concise and practical tutorial."><meta itemprop="datePublished" content="2023-12-24T20:00:00+08:00" />
 <meta itemprop="dateModified" content="2023-12-24T20:00:00+08:00" />
-<meta itemprop="wordCount" content="610">
+<meta itemprop="wordCount" content="658">
 <meta itemprop="keywords" content="GitLab,CI/CD,Docker,HomeLab," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Home Lab] GitLab Setup: Installation, Migration, and CI/CD Simplified"/>
 <meta name="twitter:description" content="Discover a streamlined approach to GitLab installation, repository migration, and CI/CD optimization. This comprehensive guide covers setting up GitLab in your home lab, upgrading to the latest version, configuring external URLs, and migrating repositories. Learn how to install GitLab Runner, Docker, and seamlessly integrate them into your development workflow. The guide concludes with optional steps for registering GitLab Runner as a service. Elevate your version control and continuous integration experience with this concise and practical tutorial."/>
 
       
     
-	
+	<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js"></script>
   </head>
 
   <body class="ma0 avenir bg-near-white">
@@ -146,8 +147,8 @@
 
       
       
-        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 610 words </span>
+        <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 658 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>In this guide, I&rsquo;ll walk you through the process of installing <a href="https://docs.gitlab.com/omnibus/installation/">GitLab</a>, a comprehensive suite of tools for version control, continuous integration, continuous delivery, and more, in my Home Lab collection.</p>
@@ -184,7 +185,9 @@
 <p>Clone the existing repository to your local machine:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git clone &lt;old_repo_url&gt;
 </span></span></code></pre></div><h3 id="2-set-up-ssh-key">2. Set up SSH key</h3>
-<p>Generate an SSH key on your working machine:</p>
+<ol>
+<li>Generate an SSH key on your working machine:</li>
+</ol>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>ssh-keygen -t rsa -b <span style="color:#ae81ff">4096</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>eval <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>ssh-agent -s<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
@@ -194,7 +197,18 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Export the public key</span>
 </span></span><span style="display:flex;"><span>cat ~/.ssh/gitlab_id_rsa.pub
-</span></span></code></pre></div><p>Save the SSH public key in GitLab.</p>
+</span></span></code></pre></div><ol start="2">
+<li>Update shell profile (e.g. ~/.bashrc) by adding the following lines to the bottom:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">eval</span> <span style="color:#e6db74">&#34;$(ssh-agent -s)&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ssh</span>-<span style="color:#a6e22e">add</span> ~<span style="color:#e6db74">/.ssh/</span><span style="color:#a6e22e">gitlab_id_rsa</span>
+</span></span></code></pre></div><ol start="3">
+<li>Restart your shell or source the configuration:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>source ~/.bashrc  <span style="color:#75715e"># or source ~/.zshrc for Zsh</span>
+</span></span></code></pre></div><ol start="4">
+<li>Save the SSH public key in GitLab.</li>
+</ol>
 <p><img src="/images/gitlab/gitlab-add-ssh-public-key.png" alt="gitlab-add-ssh-public-key"></p>
 <h3 id="3-create-a-new-repository">3. Create a New Repository</h3>
 <p>Navigate to the cloned repository directory and update the remote URL:</p>
@@ -248,7 +262,8 @@
 <p>Once the runner is created, copy the command provided:</p>
 <p><img src="/images/gitlab/gitlab-runner-created.png" alt="gitlab-runner-created"></p>
 <p>Next, paste the command to <a href="https://docs.gitlab.com/runner/register/">register a runner</a>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>gitlab-runner register  --url http://192.168.68.126  --token glrt--LuoR7v6HNubypzQusrz
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># You may use sudo to save config to /etc/gitlab-runner/config.toml instead (otherwise follow optional section)</span>
+</span></span><span style="display:flex;"><span>gitlab-runner register  --url http://192.168.68.126  --token glrt--LuoR7v6HNubypzQusrz
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># You can run this in the background</span>
 </span></span><span style="display:flex;"><span>gitlab-runner run
@@ -323,6 +338,8 @@
     <a href="https://seehiong.github.io/2023/deploying-openai-compatible-llama-cpp-server-in-home-lab-with-k3s/">[Home Lab] Deploying OpenAI-Compatible LLAMA CPP Server in Home Lab with K3S</a>
     
     
+    <a href="https://seehiong.github.io/2023/upgrading-my-tech-blog-hugo-giscus-pagefind-integration/">[Blog] Upgrading My Tech Blog: Hugo, Giscus, and Pagefind Integration</a>
+    
 </div></div>
 
     <aside class="w-100-l mt6-l">
@@ -343,15 +360,15 @@
         </li>
 	    
 	     <li  class="mb2">
+          <a href="/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-4/">[Raspberry Pi] CI/CD Pipeline on Pi Cluster (IV)</a>
+        </li>
+	    
+	     <li  class="mb2">
           <a href="/2023/utilizing-vllm-for-efficient-language-model-serving/">[Artificial Intelligence] Utilizing vLLM for Efficient Language Model Serving</a>
         </li>
 	    
 	     <li  class="mb2">
           <a href="/2023/unleashing-the-power-of-llama-server-in-docker-container/">[Artificial Intelligence] Unleashing the Power of LLaMA Server in Docker Container</a>
-        </li>
-	    
-	     <li  class="mb2">
-          <a href="/2021/building-a-ci-cd-pipeline-on-a-raspberry-pi-cluster-part-4/">[Raspberry Pi] CI/CD Pipeline on Pi Cluster (IV)</a>
         </li>
 	    
 	     <li  class="mb2">
