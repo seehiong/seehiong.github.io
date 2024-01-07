@@ -41,7 +41,7 @@
 <meta itemprop="name" content="[Blog] Upgrading My Tech Blog: Hugo, Giscus, and Pagefind Integration">
 <meta itemprop="description" content="Explore my journey of enhancing my tech blog by adopting Hugo, a powerful static site generator. Discover the streamlined setup process using Chocolately, theme selection, and local site preview. Dive into seamless integration with Giscus for robust GitHub Discussions-powered comments. Enhance user experience with Pagefind, a fully static search library, for efficient content discovery. Follow this step-by-step guide to leverage these tools and elevate your tech blog&#39;s functionality and engagement. Uncover insights into Hugo, Giscus, and Pagefind, making your blogging experience more dynamic and user-friendly."><meta itemprop="datePublished" content="2023-12-26T20:00:00+08:00" />
 <meta itemprop="dateModified" content="2023-12-26T20:00:00+08:00" />
-<meta itemprop="wordCount" content="311">
+<meta itemprop="wordCount" content="427">
 <meta itemprop="keywords" content="Hugo,Giscus,Pagefind,Blog," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Blog] Upgrading My Tech Blog: Hugo, Giscus, and Pagefind Integration"/>
 <meta name="twitter:description" content="Explore my journey of enhancing my tech blog by adopting Hugo, a powerful static site generator. Discover the streamlined setup process using Chocolately, theme selection, and local site preview. Dive into seamless integration with Giscus for robust GitHub Discussions-powered comments. Enhance user experience with Pagefind, a fully static search library, for efficient content discovery. Follow this step-by-step guide to leverage these tools and elevate your tech blog&#39;s functionality and engagement. Uncover insights into Hugo, Giscus, and Pagefind, making your blogging experience more dynamic and user-friendly."/>
@@ -116,7 +116,7 @@
     <main class="pb7" role="main">
       
   
-  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+  <article class="flex-l flex-wrap justify-between mw8 center ph3" data-pagefind-body>
     <header class="mt4 w-100">
       <aside class="instapaper_ignoref b helvetica tracked">
           
@@ -153,8 +153,8 @@
 
       
       
-        <span class="f6 mv4 dib tracked"> - 2 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 311 words </span>
+        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 427 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>In this post, I will provide updates on my transition to utilizing <a href="https://gohugo.io/">Hugo</a> for my tech blog.</p>
@@ -228,7 +228,32 @@ Upon completing your post, you can view your site at <em>http://localhost:1313</
 </span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">script</span>&gt;
 </span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">div</span>&gt;
 </span></span></code></pre></div><p>Enjoy experimenting with Giscus and Pagefind on your Hugo site. I hope this information proves helpful in your endeavors!</p>
-<ul class="pa0">
+<h2 id="optional">Optional</h2>
+<p>Since I wanted to index only the main post, following <a href="https://pagefind.app/docs/indexing/">pagefind indexing</a>, these are the customizations that I made.</p>
+<ol>
+<li>Add <strong>data-pagefind-body</strong> to <em>\themes\ananke\layouts_default\single.html</em> file:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>{{ define &#34;main&#34; }}
+</span></span><span style="display:flex;"><span>  {{ $section := .Site.GetPage &#34;section&#34; .Section }}
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">article</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;flex-l flex-wrap justify-between mw8 center ph3&#34;</span> <span style="color:#a6e22e">data-pagefind-body</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">header</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;mt4 w-100&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  ...
+</span></span></code></pre></div><ol start="2">
+<li>Add <strong>data-pagefind-ignore</strong> to <em>\themes\ananke\layouts\partials\summary-with-image.html</em> file:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>{{ partial &#34;func/warn&#34; `You are currently using &#39;partial &#34;summary-with-image&#34;&#39; in your project templates. 
+</span></span><span style="display:flex;"><span>You should replace it with &#39;.Render &#34;summary-with-image&#34;&#39; as the use of this partial will be deprecated in future releases.
+</span></span><span style="display:flex;"><span>More info here: https://github.com/theNewDynamic/gohugo-theme-ananke/releases/tag/v2.8.1` }}
+</span></span><span style="display:flex;"><span>{{ $featured_image := partial &#34;func/GetFeaturedImage.html&#34; . }}
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">article</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;bb b--black-10&#34;</span> <span style="color:#a6e22e">data-pagefind-ignore</span>&gt;
+</span></span><span style="display:flex;"><span>...
+</span></span></code></pre></div><ol start="3">
+<li>Add <strong>data-pagefind-ignore</strong> to <em>\themes\ananke\layouts\partials\tags.html</em> file:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">ul</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;pa0&#34;</span> <span style="color:#a6e22e">data-pagefind-ignore</span>&gt;
+</span></span><span style="display:flex;"><span>  {{ range .GetTerms &#34;tags&#34; }}
+</span></span><span style="display:flex;"><span>  ...
+</span></span></code></pre></div><ul class="pa0" data-pagefind-ignore>
   
    <li class="list di">
      <a href="/tags/hugo/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Hugo</a>
