@@ -434,15 +434,6 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Apply the MetalLB manifest</span>
 </span></span><span style="display:flex;"><span>kca metallb-native.yaml
-</span></span></code></pre></div><p>For a more advanced Address Pool configuration, add the following details to <em>metallb-ip-address-pool.yaml</em>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">metallb.io/v1beta1</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">IPAddressPool</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">first-pool</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">metallb-system</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">addresses</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">192.168.68.220-192.168.68.240</span>
 </span></span></code></pre></div><p>To implement advanced L2 configration, add the following in <em>metallb-l2-advertisement.yaml</em>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">metallb.io/v1beta1</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">L2Advertisement</span>
@@ -452,9 +443,18 @@
 </span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">ipAddressPools</span>:
 </span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">first-pool</span>
+</span></span></code></pre></div><p>For a more advanced Address Pool configuration, add the following details to <em>metallb-ip-address-pool.yaml</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">metallb.io/v1beta1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">IPAddressPool</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">first-pool</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">metallb-system</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">addresses</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">192.168.68.220-192.168.68.240</span>
 </span></span></code></pre></div><p>MetalLB will assign the specified IP addresses upon applying these configurations:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kca metallb-ip-address-pool.yaml
-</span></span><span style="display:flex;"><span>kca metallb-l2-advertisement.yaml
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kca metallb-l2-advertisement.yaml
+</span></span><span style="display:flex;"><span>kca metallb-ip-address-pool.yaml
 </span></span></code></pre></div><p><img src="/images/kong/metallb-system-applications-in-home-lab.png" alt="metallb-system-applications-in-home-lab"></p>
 <h2 id="configuring-kong-services-and-routes">Configuring Kong Services and Routes</h2>
 <p>Referencing from my previous posts on deploying <a href="https://seehiong.github.io/2023/deploying-openai-compatible-llama-cpp-server-with-k3s/">llama-phi2-svc</a> and <a href="https://seehiong.github.io/2023/ai-integration-localai-chroma-langchain4j/">localai-server-svc</a>, here&rsquo;s how I set them up:</p>
