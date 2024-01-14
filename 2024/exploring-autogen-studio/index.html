@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>[Artificial Intelligence] Exploring Autogen Studio | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="In this exploration of Autogen Studio, we navigated through the AI landscape, harnessing the LM Studio API to compare responses from diverse language models. Employing the Mistral Instruct 7B model, we scrutinized prompts like Stock Price and Paint, visualizing outcomes and delving into key configurations. The post also offered insights into the primary assistant, model configuration, and agent workflows, accompanied by a comparative analysis of Mistral model responses. This comprehensive journey demystifies the power of Autogen Studio and its seamless integration with LM Studio API, providing practical guidance for AI enthusiasts.">
+    <meta name="generator" content="Hugo 0.120.4">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="[Artificial Intelligence] Exploring Autogen Studio" />
+<meta property="og:description" content="In this exploration of Autogen Studio, we navigated through the AI landscape, harnessing the LM Studio API to compare responses from diverse language models. Employing the Mistral Instruct 7B model, we scrutinized prompts like Stock Price and Paint, visualizing outcomes and delving into key configurations. The post also offered insights into the primary assistant, model configuration, and agent workflows, accompanied by a comparative analysis of Mistral model responses. This comprehensive journey demystifies the power of Autogen Studio and its seamless integration with LM Studio API, providing practical guidance for AI enthusiasts." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2024/exploring-autogen-studio/" /><meta property="article:section" content="2024" />
+<meta property="article:published_time" content="2024-01-14T20:00:00+08:00" />
+<meta property="article:modified_time" content="2024-01-14T20:00:00+08:00" />
+
+<meta itemprop="name" content="[Artificial Intelligence] Exploring Autogen Studio">
+<meta itemprop="description" content="In this exploration of Autogen Studio, we navigated through the AI landscape, harnessing the LM Studio API to compare responses from diverse language models. Employing the Mistral Instruct 7B model, we scrutinized prompts like Stock Price and Paint, visualizing outcomes and delving into key configurations. The post also offered insights into the primary assistant, model configuration, and agent workflows, accompanied by a comparative analysis of Mistral model responses. This comprehensive journey demystifies the power of Autogen Studio and its seamless integration with LM Studio API, providing practical guidance for AI enthusiasts."><meta itemprop="datePublished" content="2024-01-14T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2024-01-14T20:00:00+08:00" />
+<meta itemprop="wordCount" content="610">
+<meta itemprop="keywords" content="AI,OpenAI,LM Studio,Autogen,AutogenStudio,HomeLab," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[Artificial Intelligence] Exploring Autogen Studio"/>
+<meta name="twitter:description" content="In this exploration of Autogen Studio, we navigated through the AI landscape, harnessing the LM Studio API to compare responses from diverse language models. Employing the Mistral Instruct 7B model, we scrutinized prompts like Stock Price and Paint, visualizing outcomes and delving into key configurations. The post also offered insights into the primary assistant, model configuration, and agent workflows, accompanied by a comparative analysis of Mistral model responses. This comprehensive journey demystifies the power of Autogen Studio and its seamless integration with LM Studio API, providing practical guidance for AI enthusiasts."/>
+
+      
+    
+	<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js"></script>
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv1 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2024/" title="2024 page">
+              2024
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3" data-pagefind-body>
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2024
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">[Artificial Intelligence] Exploring Autogen Studio</h1>
+      
+      <p class="tracked">
+        By <strong>See Hiong</strong>
+      </p>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2024-01-14T20:00:00+08:00">January 14, 2024</time>
+      
+
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 610 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>In this comprehensive exploration, we delve into the realm of <a href="https://microsoft.github.io/autogen/blog/2023/12/01/AutoGenStudio/">Autogen Studio</a>, a powerful tool designed to streamline the rapid prototyping of multi-agent solutions for various tasks.</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>The journey begins with the initial setup. A new Python virtual environment is created using Conda, followed by the installation of Autogen Studio and the essential configuration of API keys.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>conda create -n autogenstudio python<span style="color:#f92672">=</span>3.10
+</span></span><span style="display:flex;"><span>conda activate autogenstudio
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pip install autogenstudio
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>export OPENAI_API_KEY<span style="color:#f92672">=</span>sk-xxxx
+</span></span><span style="display:flex;"><span>autogenstudio ui --port <span style="color:#ae81ff">8081</span>
+</span></span></code></pre></div><h2 id="playtime-with-openai-api">Playtime with OpenAI API</h2>
+<p>Navigate to <em>http://localhost:8081</em>, access the <em>Playground</em> and initiate a <em>General Agent Workflow</em> session. We experiment with sample prompts like <strong>Stock Price</strong> and <strong>Paint</strong> to observe Autogen Studio&rsquo;s capabilities.</p>
+<p><img src="/images/autogenstudio/autogen-studio-stock-price-openai-result.png" alt="autogen-studio-stock-price-openai-result"></p>
+<p><img src="/images/autogenstudio/autogen-studio-paint-openai-result.png" alt="autogen-studio-paint-openai-result"></p>
+<h2 id="harnessing-lm-studio-api">Harnessing LM Studio API</h2>
+<p>Diving deeper, we explore the behavior of different language models (LLMs) using the LM Studio API. Employing the <a href="https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF">Mistral Instruct 7B</a> model, we compare responses to prompts like <strong>Stock Price</strong> and <strong>Paint</strong>.</p>
+<p><img src="/images/autogenstudio/autogen-studio-stock-price-mistral-result.png" alt="autogen-studio-stock-price-mistral-result"></p>
+<p><img src="/images/autogenstudio/autogen-studio-stock-price-mistral-agent-messages.png" alt="autogen-studio-stock-price-mistral-agent-messages"></p>
+<p><img src="/images/autogenstudio/autogen-studio-paint-mistral-result.png" alt="autogen-studio-paint-mistral-result"></p>
+<p><img src="/images/autogenstudio/autogen-studio-markdown-mistral-result.png" alt="autogen-studio-markdown-mistral-result"></p>
+<h3 id="configuration-insights">Configuration Insights</h3>
+<p>These are my key changes for the local LLM:</p>
+<h4 id="system-message">System Message:</h4>
+<pre tabindex="0"><code>Reply TERMINATE when you are satisfied with the response.
+</code></pre><h4 id="primary-assistant-setting">Primary Assistant Setting:</h4>
+<p><img src="/images/autogenstudio/autogen-studio-primary-assistant-agent-spec.png" alt="autogen-studio-primary-assistant-agent-spec"></p>
+<h4 id="model-configuration">Model Configuration:</h4>
+<p><img src="/images/autogenstudio/autogen-studio-add-model-config.png" alt="autogen-studio-add-model-config"></p>
+<h4 id="default-agent-workflow-setting">Default Agent Workflow setting:</h4>
+<p><img src="/images/autogenstudio/autogen-studio-default-agent-workflow.png" alt="autogen-studio-default-agent-workflow"></p>
+<p><strong>NOTE</strong>: Even if OpenAI API is not employed for inference, it remains imperative to set the OPENAI_API_KEY, ensuring seamless functionality. Set it to an arbitrary value: <em>export OPENAI_API_KEY=111</em>.</p>
+<h2 id="connectivity-with-homelab-api">Connectivity with HomeLab API</h2>
+<p>If you followed my <a href="https://seehiong.github.io/2024/integrating-nfs-for-improved-scalability/">previous post</a>, I have setup few LLM in my HomeLab. Let&rsquo;s try to connect to <em><a href="http://api.local/dolphin-mistral/vi">http://api.local/dolphin-mistral/vi</a></em>:</p>
+<p><img src="/images/autogenstudio/autogen-studio-markdown-dolphin-mistral-result.png" alt="autogen-studio-markdown-dolphin-mistral-result"></p>
+<p><img src="/images/autogenstudio/autogen-studio-edit-model-config.png" alt="autogen-studio-edit-model-config"></p>
+<p><strong>NOTE</strong>:</p>
+<ol>
+<li>
+<p>When editing the <em>Default Agent Workflow</em>, we need to create a new Playground session for the new changes to take effect.</p>
+</li>
+<li>
+<p>For the same reason where different LLM reacts to the prompts differently, there are some that takes very long to complete. To terminate, press CTRL-Z for Windows command prompt and from WSL:</p>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>fuser 8081/tcp
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Sample result:</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 8081/tcp:             5929</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kill -9 <span style="color:#f92672">[</span>5929<span style="color:#f92672">]</span>
+</span></span></code></pre></div><h2 id="dockerization-for-seamless-deployment">Dockerization for Seamless Deployment</h2>
+<p>To ensure portability and ease of deployment, we encapsulate Autogen Studio in a Docker image. The Dockerfile configuration and steps for building, testing, and publishing the image are detailed.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> python:3.11-slim-bookworm</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> : <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> apt-get update <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> DEBIAN_FRONTEND<span style="color:#f92672">=</span>noninteractive apt-get install -y --no-install-recommends <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>        software-properties-common <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> DEBIAN_FRONTEND<span style="color:#f92672">=</span>noninteractive apt-get install -y --no-install-recommends <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>        python3-venv <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> apt-get clean <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> rm -rf /var/lib/apt/lists/* <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> :<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> python3 -m venv /venv<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> PATH<span style="color:#f92672">=</span>/venv/bin:$PATH<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8081</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /venv; pip install autogenstudio<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Pre-load popular packages as per https://learnpython.com/blog/most-popular-python-packages/</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> pip install numpy pandas matplotlib seaborn scikit-learn requests urllib3 nltk pillow pytest beautifulsoup4<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;sh&#34;</span>, <span style="color:#e6db74">&#34;-c&#34;</span>, <span style="color:#e6db74">&#34;autogenstudio ui --host 0.0.0.0 --port 8081&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Build the image:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker build . -t autogenstudio:latest
+</span></span></code></pre></div><p>Test run the image:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker run -p 8081:8081 -it autogenstudio:latest
+</span></span></code></pre></div><p>Publish to HomeLab registry:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker tag autogenstudio:latest registry.local:5000/autogenstudio:latest
+</span></span><span style="display:flex;"><span>docker push registry.local:5000/autogenstudio:latest
+</span></span></code></pre></div><h1 id="deployment-in-homelab">Deployment in HomeLab</h1>
+<p>Facilitating deployment in the HomeLab environment involves creating Kubernetes deployment and service YAML files. The final section guides through these steps, resulting in direct access to Autogen Studio from within the HomeLab network.</p>
+<p>Let&rsquo;s prepare the <em>deploy.yaml</em> file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">autogen-studio</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">llm</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">replicas</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">autogen-studio</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">autogen-studio</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">autogen-studio</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">registry.local:5000/autogenstudio:latest</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">imagePullPolicy</span>: <span style="color:#ae81ff">IfNotPresent</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">8081</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">imagePullSecrets</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">regcred</span>
+</span></span></code></pre></div><p>This is the <em>svc.yaml</em> file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">autogen-studio-svc</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">llm</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">autogen-studio</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">LoadBalancer</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">http</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">port</span>: <span style="color:#ae81ff">80</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">8081</span>
+</span></span></code></pre></div><p>After applying these yaml files, check the external IP from portainer:</p>
+<p><img src="/images/autogenstudio/autogen-studio-svc-from-portainer.png" alt="autogen-studio-svc-from-portainer"></p>
+<p>And that&rsquo;s it! We can now access Autogen Studio directly from our HomeLab!</p>
+<p><img src="/images/autogenstudio/autogen-studio-from-home-lab.png" alt="autogen-studio-from-home-lab"></p>
+<p>In conclusion, this exploration not only showcases Autogen Studio&rsquo;s capabilities in AI development but also provides practical insights into its integration with different APIs and deployment scenarios. Autogen Studio emerges as a versatile tool for AI enthusiasts and professionals alike.</p>
+<ul class="pa0" data-pagefind-ignore>
+  
+   <li class="list di">
+     <a href="/tags/ai/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">AI</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/openai/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">OpenAI</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/lm-studio/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">LM Studio</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/autogen/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Autogen</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/autogenstudio/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">AutogenStudio</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/homelab/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">HomeLab</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      <p class="f5 b mb3">Post a comment:</p>
+<script src="https://giscus.app/client.js"
+    data-repo="seehiong/seehiong.github.io"
+    data-repo-id="R_kgDOJg7Puw"
+    data-category="General"
+    data-category-id="DIC_kwDOJg7Pu84Cbyhc"
+    data-mapping="url"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="en"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+      </div><br/>
+<div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2024/deploying-llms-with-wasmedge-in-homelab/">[Artificial Intelligence] Deploying LLMs with WasmEdge in HomeLab</a>
+    
+    
+</div></div>
+
+    <aside class="w-100-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2023/unveiling-agent-autobuild-in-autogen/">[Artificial Intelligence] Unveiling Agent AutoBuild in Autogen</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/empowering-autogen-enabling-seamless-java-code-execution/">[Artificial Intelligence] Empowering Autogen: Enabling Seamless Java Code Execution</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/multi-agent-conservation-autogen/">[Artificial Intelligence] Multi-agent Conservation with Autogen</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/exploring-autogen-with-lm-studio-and-local-llm/">[Artificial Intelligence] Exploring AutoGen with LM Studio and Local LLM</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/deploying-llms-with-wasmedge-in-homelab/">[Artificial Intelligence] Deploying LLMs with WasmEdge in HomeLab</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/integration-of-kong-into-ai-workflow/">[Artificial Intelligence] Integration of Kong into AI Workflow</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/ai-integration-localai-chroma-langchain4j/">[Home Lab] AI Integration: LocalAI, Chroma, and Langchain4j</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/rag-over-java-code-with-langchain4j/">[Artificial Intelligence] RAG over Java code with Langchain4j</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/unlocking-the-power-of-gpt4all-summarizing-youtube-videos-in-minutes-2/">[Artificial Intelligence] Unlocking the Power of GPT4All: How to summarize YouTube Videos in Minutes (Part 2)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/unlocking-the-power-of-gpt4all-summarizing-youtube-videos-in-minutes/">[Artificial Intelligence] Unlocking the Power of GPT4All: How to summarize YouTube Videos in Minutes (Part 1)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/receipt-ocr-with-langchain-and-openai/">[Artificial Intelligence] Receipt OCR with LangChain, OpenAI and PyTesseract</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/auto-fill-pdf-with-langchain-and-langflow/">[Artificial Intelligence] Autofill PDF with LangChain and LangFlow</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/running-gpt4all-for-postgresql-with-langchain/">[Artificial Intelligence] Running GPT4All for your PostgreSQL with LangChain</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/integrating-nfs-for-improved-scalability/">[Home Lab] Integrating NFS for Improved Scalability</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/exploring-kong-ingress-controller-kic/">[Home Lab] Exploring Kong Ingress Controller (KIC)</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2024 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
