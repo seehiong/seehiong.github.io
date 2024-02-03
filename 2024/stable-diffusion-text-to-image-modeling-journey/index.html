@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>[Artificial Intelligence] Stable Diffusion: Text-to-Image Modeling Journey | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="This post explores Stable Diffusion, a latent text-to-image diffusion model in machine learning. Diffusion models, with forward, reverse, and sampling components, understand and generate patterns in datasets. Illustrating applications in image tasks, it introduces the process of installing and utilizing Stable Diffusion. The post details image generation and modification using prompts, with examples and troubleshooting. Notably, it shares an encounter with CUDA out-of-memory errors and the resolution through image resizing. Overall, it offers a comprehensive guide, combining theoretical insights with practical implementation steps in a professional manner.">
+    <meta name="generator" content="Hugo 0.120.4">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="[Artificial Intelligence] Stable Diffusion: Text-to-Image Modeling Journey" />
+<meta property="og:description" content="This post explores Stable Diffusion, a latent text-to-image diffusion model in machine learning. Diffusion models, with forward, reverse, and sampling components, understand and generate patterns in datasets. Illustrating applications in image tasks, it introduces the process of installing and utilizing Stable Diffusion. The post details image generation and modification using prompts, with examples and troubleshooting. Notably, it shares an encounter with CUDA out-of-memory errors and the resolution through image resizing. Overall, it offers a comprehensive guide, combining theoretical insights with practical implementation steps in a professional manner." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2024/stable-diffusion-text-to-image-modeling-journey/" /><meta property="article:section" content="2024" />
+<meta property="article:published_time" content="2024-02-03T10:00:00+08:00" />
+<meta property="article:modified_time" content="2024-02-03T10:00:00+08:00" />
+
+<meta itemprop="name" content="[Artificial Intelligence] Stable Diffusion: Text-to-Image Modeling Journey">
+<meta itemprop="description" content="This post explores Stable Diffusion, a latent text-to-image diffusion model in machine learning. Diffusion models, with forward, reverse, and sampling components, understand and generate patterns in datasets. Illustrating applications in image tasks, it introduces the process of installing and utilizing Stable Diffusion. The post details image generation and modification using prompts, with examples and troubleshooting. Notably, it shares an encounter with CUDA out-of-memory errors and the resolution through image resizing. Overall, it offers a comprehensive guide, combining theoretical insights with practical implementation steps in a professional manner."><meta itemprop="datePublished" content="2024-02-03T10:00:00+08:00" />
+<meta itemprop="dateModified" content="2024-02-03T10:00:00+08:00" />
+<meta itemprop="wordCount" content="434">
+<meta itemprop="keywords" content="AI,Stable Diffusion,Text to Image," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[Artificial Intelligence] Stable Diffusion: Text-to-Image Modeling Journey"/>
+<meta name="twitter:description" content="This post explores Stable Diffusion, a latent text-to-image diffusion model in machine learning. Diffusion models, with forward, reverse, and sampling components, understand and generate patterns in datasets. Illustrating applications in image tasks, it introduces the process of installing and utilizing Stable Diffusion. The post details image generation and modification using prompts, with examples and troubleshooting. Notably, it shares an encounter with CUDA out-of-memory errors and the resolution through image resizing. Overall, it offers a comprehensive guide, combining theoretical insights with practical implementation steps in a professional manner."/>
+
+      
+    
+	<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js"></script>
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv1 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2024/" title="2024 page">
+              2024
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3" data-pagefind-body>
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2024
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">[Artificial Intelligence] Stable Diffusion: Text-to-Image Modeling Journey</h1>
+      
+      <p class="tracked">
+        By <strong>See Hiong</strong>
+      </p>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2024-02-03T10:00:00+08:00">February 3, 2024</time>
+      
+
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 434 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>In this article, we will delve into <a href="https://github.com/CompVis/stable-diffusion">Stable Diffusion</a>, a latent text-to-image diffusion model. In simple terms, diffusion models in machine learning represent a type of sophisticated computer program designed to learn how patterns evolve over time. Comprising three essential components – a forward process, a reverse process, and a sampling procedure – these models aim to comprehend and generate intricate patterns within a given dataset.</p>
+<p>Consider having a blurry image that needs enhancement. Diffusion models act as intelligent tools that learn to eliminate blurriness by grasping how images blur and then effectively reversing that process.</p>
+<p>These models find applications in various tasks, including image denoising, completing missing portions of an image, improving image clarity, and even generating entirely new images. For instance, OpenAI&rsquo;s DALL-E 2, unveiled in April 2022, utilizes diffusion models to create images based on text descriptions.</p>
+<h2 id="preparation">Preparation</h2>
+<p>Upon installing Anaconda3 on my Windows Subsystem for Linux (WSL) machine, I cloned <a href="https://github.com/CompVis/stable-diffusion.git">stable-diffusion</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/CompVis/stable-diffusion.git
+</span></span><span style="display:flex;"><span>cd stable-diffusion
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>conda env create -f environment.yaml
+</span></span><span style="display:flex;"><span>conda activate ldm
+</span></span></code></pre></div><p>Next, from <a href="https://huggingface.co/CompVis/stable-diffusion-v-1-4-original/tree/main">Hugging Face</a>, I obtained the provided checkpoint:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>wget https://huggingface.co/CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt
+</span></span></code></pre></div><p>Linked the model:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p models/ldm/stable-diffusion-v1/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Actual path to the checkpoint file</span>
+</span></span><span style="display:flex;"><span>ln -s ~/stable-diffusion/sd-v1-4.ckpt models/ldm/stable-diffusion-v1/model.ckpt 
+</span></span></code></pre></div><h2 id="image-generation">Image generation</h2>
+<p>Let&rsquo;s experiment with generating a sample:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python scripts/txt2img.py --prompt <span style="color:#e6db74">&#34;a photograph of an astronaut riding a horse&#34;</span> --plms 
+</span></span></code></pre></div><p><img src="/images/stable-diffusion/stable-diffusion-image-generation.png" alt="stable-diffusion-image-generation"></p>
+<p>This image is from <em>outputs/txt2img-samples/</em>:</p>
+<p><img src="/images/stable-diffusion/stable-diffusion-photograph-of-an-astronaut-riding-a-horse.png" alt="stable-diffusion-photograph-of-an-astronaut-riding-a-horse"></p>
+<p>Trying another sample:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python scripts/txt2img.py --prompt <span style="color:#e6db74">&#34;an astronaut riding a horse in photorealistic style&#34;</span> --plms 
+</span></span></code></pre></div><p><img src="/images/stable-diffusion/stable-diffusion-astronaut-riding-a-horse-in-photorealistic-style.png" alt="stable-diffusion-astronaut-riding-a-horse-in-photorealistic-style"></p>
+<h2 id="image-modification">Image modification</h2>
+<p>Resizing my original image, <em>st-john-island-original.jpeg</em>, to 512 x 512 with <em>resize.py</em> and executing with &ldquo;python resize.py&rdquo;:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> PIL <span style="color:#f92672">import</span> Image
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">resize_image</span>(input_path, output_path, new_size):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">with</span> Image<span style="color:#f92672">.</span>open(input_path) <span style="color:#66d9ef">as</span> img:
+</span></span><span style="display:flex;"><span>            resized_img <span style="color:#f92672">=</span> img<span style="color:#f92672">.</span>resize(new_size)
+</span></span><span style="display:flex;"><span>            resized_img<span style="color:#f92672">.</span>save(output_path)
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Image resized and saved to </span><span style="color:#e6db74">{</span>output_path<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Error: </span><span style="color:#e6db74">{</span>e<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>input_image_path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;./st-john-island-original.jpeg&#34;</span>
+</span></span><span style="display:flex;"><span>output_image_path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;./st-john-island-resized.jpg&#34;</span>
+</span></span><span style="display:flex;"><span>new_size <span style="color:#f92672">=</span> (<span style="color:#ae81ff">512</span>, <span style="color:#ae81ff">512</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>resize_image(input_image_path, output_image_path, new_size)
+</span></span></code></pre></div><p><img src="/images/stable-diffusion/st-john-island-resized.jpg" alt="st-john-island-resized"></p>
+<p>Modifying the image with this prompt:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python scripts/img2img.py --prompt <span style="color:#e6db74">&#34;monkey swinging from tree to tree on island&#34;</span> --init-img st-john-island-resized.jpg --strength 0.8
+</span></span></code></pre></div><p><img src="/images/stable-diffusion/monkey-swinging-from-tree-to-tree-on-island.png" alt="monkey-swinging-from-tree-to-tree-on-island"></p>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<p>The original image, <em>st-john-island-original.jpeg</em>, is 1600 x 1200 in size.</p>
+<p><img src="/images/stable-diffusion/st-john-island-original.jpeg" alt="st-john-island-original"></p>
+<p>However, encountered this error with the same prompt:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>RuntimeError: CUDA out of memory. Tried to allocate 52.22 GiB <span style="color:#f92672">(</span>GPU 0; 5.99 GiB total capacity; 56.84 GiB already allocated; <span style="color:#ae81ff">0</span> bytes free; 58.18 GiB reserved in total by PyTorch<span style="color:#f92672">)</span> If reserved memory is &gt;&gt; allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation <span style="color:#66d9ef">for</span> Memory Management and PYTORCH_CUDA_ALLOC_CONF
+</span></span></code></pre></div><p><img src="/images/stable-diffusion/cuda-out-of-memory.png" alt="cuda-out-of-memory"></p>
+<p>Even after attempting to expand memory in the <em>.wslconfig</em> file and restarting WSL with <strong>wsl &ndash;shutdown</strong>, the error persisted:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#a6e22e">Settings</span> <span style="color:#a6e22e">apply</span> <span style="color:#a6e22e">across</span> <span style="color:#a6e22e">all</span> <span style="color:#a6e22e">Linux</span> <span style="color:#a6e22e">distros</span> <span style="color:#a6e22e">running</span> <span style="color:#a6e22e">on</span> <span style="color:#a6e22e">WSL</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">wsl2</span>]
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">nestedVirtualization</span>=<span style="color:#a6e22e">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">kernelCommandLine</span>=<span style="color:#a6e22e">ipv6</span>.<span style="color:#a6e22e">disable</span>=<span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">memory</span>=<span style="color:#ae81ff">80</span>GB 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">processors</span>=<span style="color:#ae81ff">8</span>
+</span></span></code></pre></div><p>In the end, I opted to resize my image to overcome this issue.</p>
+<ul class="pa0" data-pagefind-ignore>
+  
+   <li class="list di">
+     <a href="/tags/ai/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">AI</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/stable-diffusion/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Stable Diffusion</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/text-to-image/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Text to Image</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      <p class="f5 b mb3">Post a comment:</p>
+<script src="https://giscus.app/client.js"
+    data-repo="seehiong/seehiong.github.io"
+    data-repo-id="R_kgDOJg7Puw"
+    data-category="General"
+    data-category-id="DIC_kwDOJg7Pu84Cbyhc"
+    data-mapping="url"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="en"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+      </div><br/>
+<div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2024/openvino-optimum-intel-cpu-an-exploration-in-model-optimization/">[Artificial Intelligence] OpenVINO, Optimum-Intel, CPU: An Exploration in Model Optimization</a>
+    
+    
+</div></div>
+
+    <aside class="w-100-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2024/openvino-optimum-intel-cpu-an-exploration-in-model-optimization/">[Artificial Intelligence] OpenVINO, Optimum-Intel, CPU: An Exploration in Model Optimization</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/exploring-autogen-studio/">[Artificial Intelligence] Exploring Autogen Studio</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/deploying-llms-with-wasmedge-in-homelab/">[Artificial Intelligence] Deploying LLMs with WasmEdge in HomeLab</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/integration-of-kong-into-ai-workflow/">[Artificial Intelligence] Integration of Kong into AI Workflow</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/ai-integration-localai-chroma-langchain4j/">[Home Lab] AI Integration: LocalAI, Chroma, and Langchain4j</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/unveiling-agent-autobuild-in-autogen/">[Artificial Intelligence] Unveiling Agent AutoBuild in Autogen</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/empowering-autogen-enabling-seamless-java-code-execution/">[Artificial Intelligence] Empowering Autogen: Enabling Seamless Java Code Execution</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/multi-agent-conservation-autogen/">[Artificial Intelligence] Multi-agent Conservation with Autogen</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/exploring-autogen-with-lm-studio-and-local-llm/">[Artificial Intelligence] Exploring AutoGen with LM Studio and Local LLM</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/boosting-inference-speed-ssd-and-gpu-acceleration/">[Artificial Intelligence] Boosting Inference Speed: SSD and GPU Acceleration</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/rag-over-java-code-with-langchain4j/">[Artificial Intelligence] RAG over Java code with Langchain4j</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/building-an-ai-application-with-langchain4j/">[Artificial Intelligence] Building an AI Application with Langchain4j</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/unlocking-the-power-of-machine-learning-with-mlc-llm/">[Artificial Intelligence] Unlocking the Power of Machine Learning with MLC LLM</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/utilizing-vllm-for-efficient-language-model-serving/">[Artificial Intelligence] Utilizing vLLM for Efficient Language Model Serving</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/unleashing-the-power-of-llama-server-in-docker-container/">[Artificial Intelligence] Unleashing the Power of LLaMA Server in Docker Container</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2024 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
