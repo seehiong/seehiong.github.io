@@ -41,7 +41,7 @@
 <meta itemprop="name" content="[Home Lab] Deploying Appwrite in HomeLab with K3s">
 <meta itemprop="description" content="Learn how to seamlessly integrate Appwrite, an open-source platform, into your HomeLab setup using K3s. Follow step-by-step instructions to deploy K3s with Portainer, prepare Appwrite volumes, and configure miscellaneous services like MariaDB and InfluxDB. Utilize Kompose to convert Docker Compose files to Kubernetes for efficient deployment. Ensure smooth installation by mapping necessary environment variables and applying all required deployments and services. Finally, witness the successful deployment of Appwrite services and access the login page to start building scalable applications. Master the art of HomeLab application deployment with Appwrite and K3s."><meta itemprop="datePublished" content="2024-02-16T20:00:00+08:00" />
 <meta itemprop="dateModified" content="2024-02-16T20:00:00+08:00" />
-<meta itemprop="wordCount" content="671">
+<meta itemprop="wordCount" content="710">
 <meta itemprop="keywords" content="HomeLab,K3s,Appwrite," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Home Lab] Deploying Appwrite in HomeLab with K3s"/>
 <meta name="twitter:description" content="Learn how to seamlessly integrate Appwrite, an open-source platform, into your HomeLab setup using K3s. Follow step-by-step instructions to deploy K3s with Portainer, prepare Appwrite volumes, and configure miscellaneous services like MariaDB and InfluxDB. Utilize Kompose to convert Docker Compose files to Kubernetes for efficient deployment. Ensure smooth installation by mapping necessary environment variables and applying all required deployments and services. Finally, witness the successful deployment of Appwrite services and access the login page to start building scalable applications. Master the art of HomeLab application deployment with Appwrite and K3s."/>
@@ -154,7 +154,7 @@
       
       
         <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 671 words </span>
+        <span class="f6 mv4 dib tracked"> - 710 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>In this post, we&rsquo;ll embark on installing <a href="https://appwrite.io/">Appwrite</a>, an open-source platform designed to facilitate the integration of authentication, databases, functions, and storage, enabling the development of scalable applications within our HomeLab setup.</p>
@@ -188,7 +188,7 @@
 </span></span><span style="display:flex;"><span>./kompose convert
 </span></span></code></pre></div><p><img src="/images/appwrite/appwrite-converted-k8s-files.png" alt="appwrite-converted-k8s-files"></p>
 <h2 id="preparing-appwrite-volumes">Preparing Appwrite Volumes</h2>
-<p>Drawing from my <a href="https://seehiong.github.io/2024/integrating-nfs-for-improved-scalability/">previous NFS post</a>, let&rsquo;s prepare the files to be placed in <em>/var/lib/rancher/k3s/server/manifests</em>. We require a total of 9 storage classes. Refer to my public repository, <a href="https://github.com/seehiong/appwrite-k8s-deployment">appwrite-k8s-deployment</a> for all necessary Kubernetes files mentioned in this post.</p>
+<p>From my <a href="https://seehiong.github.io/2024/integrating-nfs-for-improved-scalability/">previous NFS post</a>, let&rsquo;s prepare the files to be placed in <em>/var/lib/rancher/k3s/server/manifests</em>. We require a total of 9 storage classes. Refer to my public repository, <a href="https://github.com/seehiong/appwrite-k8s-deployment">appwrite-k8s-deployment</a> for all necessary Kubernetes files mentioned in this post.</p>
 <p>Below is an example for <em>appwrite-builds.yaml</em>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Example: appwrite-builds.yaml</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">helm.cattle.io/v1</span>
@@ -201,16 +201,11 @@
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">repo</span>: <span style="color:#ae81ff">https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">set</span>:
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.server</span>: <span style="color:#ae81ff">tnas.local</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.path</span>: <span style="color:#ae81ff">/mnt/public/appwrite-bee</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.path</span>: <span style="color:#ae81ff">/mnt/public/appwrite</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.name</span>: <span style="color:#ae81ff">appwrite-builds</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.reclaimPolicy</span>: <span style="color:#ae81ff">Retain</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.accessModes</span>: <span style="color:#ae81ff">ReadWriteMany</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.reclaimPolicy</span>: <span style="color:#ae81ff">Retain</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">valuesContent</span>: |-<span style="color:#e6db74">
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    tolerations:
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - key: &#34;k3s-controlplane&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      operator: &#34;Exists&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      effect: &#34;NoSchedule&#34;</span>    
 </span></span></code></pre></div><p>Let&rsquo;s proceed to copying these 9 files to the auto-deployed folder:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ls appwrite-*.yaml
 </span></span><span style="display:flex;"><span>sudo cp appwrite-*.yaml /var/lib/rancher/k3s/server/manifests
@@ -358,7 +353,16 @@
 </span></span></code></pre></div><p>Congratulations! By now, you should see the Appwrite login page:</p>
 <p><img src="/images/appwrite/appwrite-login.png" alt="appwrite-login"></p>
 <p><img src="/images/appwrite/appwrite-hello-world-app.png" alt="appwrite-hello-world-app"></p>
-<p>That&rsquo;s all for this post! Happy Appwriting!</p>
+<h2 id="optional">Optional</h2>
+<p>For those who wish to enable <em>traefik</em>, install k3s with this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;644&#34;</span> sh -
+</span></span></code></pre></div><p>Proceed with the rest of this post but to apply the following (instead of <em>appwrite-svc.yaml</em>):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>kca appwrite-svc-with-ing.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-ing.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check your traefik loadbalancer external-ip</span>
+</span></span><span style="display:flex;"><span>kc get svc -n kube-system
+</span></span></code></pre></div><p>That&rsquo;s all for this post! Happy Appwriting!</p>
 <ul class="pa0" data-pagefind-ignore>
   
    <li class="list di">
@@ -399,6 +403,8 @@
     
     <a href="https://seehiong.github.io/2024/text-to-image-with-stablediffusionpipeline/">[Artificial Intelligence] Text-to-Image with StableDiffusionPipeline</a>
     
+    
+    <a href="https://seehiong.github.io/2024/deploying-budibase-in-homelab/">[Home Lab] Deploying Budibase in HomeLab</a>
     
 </div></div>
 
