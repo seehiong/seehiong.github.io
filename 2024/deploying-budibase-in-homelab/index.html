@@ -41,7 +41,7 @@
 <meta itemprop="name" content="[Home Lab] Deploying Budibase in HomeLab">
 <meta itemprop="description" content="This post outlines the process of installing Budibase in a HomeLab environment, starting with testing it on Docker Desktop and then deploying it using Helm in Kubernetes. It guides through setting up an admin user, building the first app by creating a database, designing an application form, and configuring submission actions. The summary encapsulates the steps involved in testing, deploying, and building an application with Budibase, highlighting key actions such as Docker Compose setup, Helm installation, app creation, and deployment in a concise manner."><meta itemprop="datePublished" content="2024-02-25T10:00:00+08:00" />
 <meta itemprop="dateModified" content="2024-02-25T10:00:00+08:00" />
-<meta itemprop="wordCount" content="283">
+<meta itemprop="wordCount" content="412">
 <meta itemprop="keywords" content="HomeLab,K3s,Helm,Budibase," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Home Lab] Deploying Budibase in HomeLab"/>
 <meta name="twitter:description" content="This post outlines the process of installing Budibase in a HomeLab environment, starting with testing it on Docker Desktop and then deploying it using Helm in Kubernetes. It guides through setting up an admin user, building the first app by creating a database, designing an application form, and configuring submission actions. The summary encapsulates the steps involved in testing, deploying, and building an application with Budibase, highlighting key actions such as Docker Compose setup, Helm installation, app creation, and deployment in a concise manner."/>
@@ -154,7 +154,7 @@
       
       
         <span class="f6 mv4 dib tracked"> - 2 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 283 words </span>
+        <span class="f6 mv4 dib tracked"> - 412 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>In this guide, we&rsquo;ll delve into the process of installing <a href="https://budibase.com/">Budibase</a> within our HomeLab environment. Budibase offers the capability to craft robust applications and workflows from various data sources, enabling the secure deployment of professional-grade solutions across our teams.</p>
@@ -197,6 +197,55 @@
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>http://192.168.68.115/app/application-form#/form
 </span></span></code></pre></div><p><img src="/images/budibase/budibase-application-form-app.png" alt="budibase-application-form-app"></p>
 <p>And there you have it! We&rsquo;ve successfully built and published our first app using Budibase!</p>
+<h1 id="optional">Optional</h1>
+<p>Let&rsquo;s first export the current data and to uninstall the application. Next, let&rsquo;s create the <em>values.yaml</em> file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">couchdb</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">persistentVolume</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">enabled</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass</span>: <span style="color:#e6db74">&#34;budibase-couchdb&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">size</span>: <span style="color:#e6db74">&#34;1Gi&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">services</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">objectStore</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass</span>: <span style="color:#e6db74">&#34;budibase-services&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">redis</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass</span>: <span style="color:#e6db74">&#34;budibase-services&#34;</span>
+</span></span></code></pre></div><p>Copy the budibase-nfs.yaml file to <em>/var/lib/rancher/k3s/server/manifests</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">helm.cattle.io/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">HelmChart</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">budibase-couchdb</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">budibase</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">chart</span>: <span style="color:#ae81ff">nfs-subdir-external-provisioner</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">repo</span>: <span style="color:#ae81ff">https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">set</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.server</span>: <span style="color:#ae81ff">tnas.local</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.path</span>: <span style="color:#ae81ff">/mnt/public/budibase</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.name</span>: <span style="color:#ae81ff">budibase-couchdb</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.reclaimPolicy</span>: <span style="color:#ae81ff">Retain</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.accessModes</span>: <span style="color:#ae81ff">ReadWriteMany</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.reclaimPolicy</span>: <span style="color:#ae81ff">Retain</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">helm.cattle.io/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">HelmChart</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">budibase-services</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">budibase</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">chart</span>: <span style="color:#ae81ff">nfs-subdir-external-provisioner</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">repo</span>: <span style="color:#ae81ff">https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">set</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.server</span>: <span style="color:#ae81ff">tnas.local</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.path</span>: <span style="color:#ae81ff">/mnt/public/budibase</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.name</span>: <span style="color:#ae81ff">budibase-services</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.reclaimPolicy</span>: <span style="color:#ae81ff">Retain</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.accessModes</span>: <span style="color:#ae81ff">ReadWriteMany</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.reclaimPolicy</span>: <span style="color:#ae81ff">Retain</span>
+</span></span></code></pre></div><p>Reinstall Budibase with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Install Helm Chart</span>
+</span></span><span style="display:flex;"><span>helm install --create-namespace --namespace budibase -f values.yaml budibase budibase/budibase
+</span></span></code></pre></div><p>Finally import your app and from now onwards, all the Budibase files will be saved to our shared NAS!</p>
 <ul class="pa0" data-pagefind-ignore>
   
    <li class="list di">
@@ -241,6 +290,8 @@
     
     <a href="https://seehiong.github.io/2024/deploying-appwrite-in-homelab-with-k3s/">[Home Lab] Deploying Appwrite in HomeLab with K3s</a>
     
+    
+    <a href="https://seehiong.github.io/2024/configuring-appwrite-functions-with-k3s/">[Home Lab] Configuring Appwrite Functions with K3s</a>
     
 </div></div>
 
