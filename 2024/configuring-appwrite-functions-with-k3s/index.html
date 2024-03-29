@@ -41,7 +41,7 @@
 <meta itemprop="name" content="[Home Lab] Configuring Appwrite Functions with K3s">
 <meta itemprop="description" content="This guide outlines configuring Appwrite Functions within a K3s environment. It covers essential steps, including installing ngrok for external network access, registering a GitHub App, and setting up Appwrite with required configurations. The process involves updating YAML files for deployment, ensuring proper routing with Traefik, and creating functions through the Appwrite interface. Once set up, the functions are deployed successfully, enabling seamless integration and execution within the K3s infrastructure."><meta itemprop="datePublished" content="2024-03-10T10:00:00+08:00" />
 <meta itemprop="dateModified" content="2024-03-10T10:00:00+08:00" />
-<meta itemprop="wordCount" content="738">
+<meta itemprop="wordCount" content="836">
 <meta itemprop="keywords" content="HomeLab,K3s,Appwrite," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Home Lab] Configuring Appwrite Functions with K3s"/>
 <meta name="twitter:description" content="This guide outlines configuring Appwrite Functions within a K3s environment. It covers essential steps, including installing ngrok for external network access, registering a GitHub App, and setting up Appwrite with required configurations. The process involves updating YAML files for deployment, ensuring proper routing with Traefik, and creating functions through the Appwrite interface. Once set up, the functions are deployed successfully, enabling seamless integration and execution within the K3s infrastructure."/>
@@ -154,7 +154,7 @@
       
       
         <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 738 words </span>
+        <span class="f6 mv4 dib tracked"> - 836 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>Following up on my previous post about <a href="https://seehiong.github.io/2024/deploying-appwrite-in-homelab-with-k3s/">deploying Appwrite with K3s</a>, I will now guide you through configuring K3s to support Appwrite Functions.</p>
@@ -165,7 +165,6 @@
 </span></span><span style="display:flex;"><span>ngrok config add-authtoken xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 </span></span><span style="display:flex;"><span>ngrok http http://appwrite.local/                      
 </span></span></code></pre></div><p>Take note of the host; in my case, it is <strong>d7e9-42-60-49-2.ngrok-free.app</strong>.</p>
-<p><img src="/images/appwrite-fn/appwrite-ngrok-forwarding.png" alt="appwrite-ngrok-forwarding"></p>
 <h2 id="register-github-app">Register GitHub App</h2>
 <p>After logging in to your GitHub account, navigate to your <em>avatar</em> on the top right, and select <em>Settings</em>. Then, click on <em>Developer settings</em> and select <strong>New GitHub App</strong> at the top right corner.</p>
 <p><img src="/images/appwrite-fn/appwrite-register-new-github-app.png" alt="appwrite-register-new-github-app"></p>
@@ -333,7 +332,19 @@ https://d7e9-42-60-49-2.ngrok-free.app/v1/account/sessions/oauth2/callback/githu
 <p><img src="/images/appwrite-fn/appwrite-openruntimes-executor.png" alt="appwrite-openruntimes-executor"></p>
 <p><img src="/images/appwrite-fn/appwrite-ingresses.png" alt="appwrite-ingresses"></p>
 <p>That concludes the setup, and your functions should now be deployed successfully!</p>
-<ul class="pa0" data-pagefind-ignore>
+<h1 id="troubleshooting">Troubleshooting</h1>
+<h2 id="function-execution-failed">Function execution failed</h2>
+<p>The function failed to be executed, with the openruntimes-executor pod logging these errors:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>[<span style="color:#a6e22e">Error</span>] <span style="color:#a6e22e">Type</span>: <span style="color:#a6e22e">Exception</span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Error</span>] <span style="color:#a6e22e">Message</span>: <span style="color:#a6e22e">An</span> <span style="color:#a6e22e">internal</span> <span style="color:#a6e22e">curl</span> <span style="color:#a6e22e">error</span> <span style="color:#a6e22e">has</span> <span style="color:#a6e22e">occurred</span> <span style="color:#a6e22e">within</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">executor</span>! <span style="color:#a6e22e">Error</span> <span style="color:#a6e22e">Msg</span>: <span style="color:#a6e22e">Could</span> <span style="color:#a6e22e">not</span> <span style="color:#a6e22e">resolve</span> <span style="color:#a6e22e">host</span>: <span style="color:#ae81ff">66069922</span>a<span style="color:#ae81ff">8</span>ab<span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Error</span>] <span style="color:#a6e22e">File</span>: <span style="color:#e6db74">/usr/</span><span style="color:#a6e22e">local</span><span style="color:#e6db74">/app/</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">php</span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Error</span>] <span style="color:#a6e22e">Line</span>: <span style="color:#ae81ff">1027</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">Warning</span>: <span style="color:#a6e22e">Swoole</span>\<span style="color:#a6e22e">Table</span>::<span style="color:#66d9ef">set</span>(): <span style="color:#a6e22e">key</span>[<span style="color:#a6e22e">executor</span><span style="color:#ae81ff">-755</span>b<span style="color:#ae81ff">4586</span>d<span style="color:#ae81ff">7-5</span>bmp<span style="color:#ae81ff">8-660002098</span>ba<span style="color:#ae81ff">892717675-6600395</span>e<span style="color:#ae81ff">2</span>b<span style="color:#ae81ff">19005</span>c<span style="color:#ae81ff">2</span>ddd] <span style="color:#a6e22e">is</span> <span style="color:#a6e22e">too</span> <span style="color:#a6e22e">long</span> <span style="color:#a6e22e">in</span> <span style="color:#e6db74">/usr/</span><span style="color:#a6e22e">local</span><span style="color:#e6db74">/app/</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">php</span> <span style="color:#a6e22e">on</span> <span style="color:#a6e22e">line</span> <span style="color:#ae81ff">1283</span>
+</span></span></code></pre></div><p><img src="/images/appwrite-fn/appwrite-function-execution-failed.png" alt="appwrite-function-execution-failed"></p>
+<p>Wanted to run ngrok with custom subdomain, but this is only a feature off the paid plans:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ERROR:  failed to start tunnel: Custom subdomains are a feature on ngrok<span style="color:#e6db74">&#39;s paid plans.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">ERROR:  Failed to bind the custom subdomain &#39;</span>ngrok-free.app<span style="color:#e6db74">&#39; for the account &#39;</span>xxxxxx<span style="color:#960050;background-color:#1e0010">&#39;</span>.
+</span></span></code></pre></div><ul class="pa0" data-pagefind-ignore>
   
    <li class="list di">
      <a href="/tags/homelab/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">HomeLab</a>
