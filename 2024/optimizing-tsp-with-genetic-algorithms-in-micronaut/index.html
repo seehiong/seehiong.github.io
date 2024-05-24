@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>[Backend] Optimizing TSP with Genetic Algorithms in Micronaut | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="In this post, I explore solving a massive Traveling Salesman Problem (TSP) involving 38,810 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively.">
+    <meta name="generator" content="Hugo 0.120.4">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="[Backend] Optimizing TSP with Genetic Algorithms in Micronaut" />
+<meta property="og:description" content="In this post, I explore solving a massive Traveling Salesman Problem (TSP) involving 38,810 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2024/optimizing-tsp-with-genetic-algorithms-in-micronaut/" /><meta property="article:section" content="2024" />
+<meta property="article:published_time" content="2024-05-23T20:00:00+08:00" />
+<meta property="article:modified_time" content="2024-05-23T20:00:00+08:00" />
+
+<meta itemprop="name" content="[Backend] Optimizing TSP with Genetic Algorithms in Micronaut">
+<meta itemprop="description" content="In this post, I explore solving a massive Traveling Salesman Problem (TSP) involving 38,810 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively."><meta itemprop="datePublished" content="2024-05-23T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2024-05-23T20:00:00+08:00" />
+<meta itemprop="wordCount" content="2458">
+<meta itemprop="keywords" content="Genetic Algorithm,Micronaut,TSP,BE,Backend," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[Backend] Optimizing TSP with Genetic Algorithms in Micronaut"/>
+<meta name="twitter:description" content="In this post, I explore solving a massive Traveling Salesman Problem (TSP) involving 38,810 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively."/>
+
+      
+    
+
+    
+      <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>
+    
+
+	<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js"></script>
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv1 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2024/" title="2024 page">
+              2024
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3" data-pagefind-body>
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2024
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">[Backend] Optimizing TSP with Genetic Algorithms in Micronaut</h1>
+      
+      <p class="tracked">
+        By <strong>See Hiong</strong>
+      </p>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2024-05-23T20:00:00+08:00">May 23, 2024</time>
+      
+
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 12 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 2458 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><h1 id="problem-statement">Problem Statement</h1>
+<p>Having a keen interest in discrete optimization, I enrolled in a Coursera course <a href="https://www.coursera.org/learn/discrete-optimization">Discrete Optimisation</a>. This time, I encountered a more challenging task than my previous work on the <a href="https://seehiong.github.io/2024/efficient-tsp-solver-api-with-micronaut/">TSP solver</a> visiting 38,810 cities! Research suggests that the  <a href="https://www.math.uwaterloo.ca/tsp/pla85900/index.html">Optimal 85,900-Point Tour</a> is the largest solved instance of the Traveling Salesman Problem (TSP).</p>
+<p>Genetic algorithms simulate the process of natural selection, mimicking &ldquo;survival of the fittest&rdquo; to solve problems. These algorithms evolve over generations, with each generation comprising individuals better adapted to solving the problem.</p>
+<p>Referencing <a href="https://www.geeksforgeeks.org/traveling-salesman-problem-using-genetic-algorithm/">Genetic Algorithm for TSP</a>, I documented my solution steps.</p>
+<h3 id="initialisation">Initialisation</h3>
+<p>To handle the vast number of cities (38,810), I implemented the genome as an int[]. Here’s my <em>Individual.java</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#f92672">import</span> io.micronaut.serde.annotation.Serdeable;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> lombok.*;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Data</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Builder</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@AllArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@NoArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Serdeable.Serializable</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Individual</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome; <span style="color:#75715e">// sequence of cities to visit, starting with first city 0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> fitness; <span style="color:#75715e">// total distance travelled</span>
+</span></span><span style="display:flex;"><span>    String message; <span style="color:#75715e">// additional information attached to the individual</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Here are the configuration parameters in <em>TspGaService.java</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> POPULATION_SIZE <span style="color:#f92672">=</span> 100; <span style="color:#75715e">// Population size</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> MAX_GENERATIONS <span style="color:#f92672">=</span> 1200; <span style="color:#75715e">// Maximum number of generations</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">double</span> INITIAL_TEMPERATURE <span style="color:#f92672">=</span> 1000; <span style="color:#75715e">// Initial temperature to start with</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">double</span> FINAL_TEMPERATURE <span style="color:#f92672">=</span> 1; <span style="color:#75715e">// Terminate main loop when temperature reached</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">double</span> COOLING_RATE <span style="color:#f92672">=</span> 0.<span style="color:#a6e22e">9995</span>; <span style="color:#75715e">// Cooling rate</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> FITNESS_MEMO_SIZE <span style="color:#f92672">=</span> 10000000; <span style="color:#75715e">// Limit the size of the fitness memo (out of heap size, avoid OOM error)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> STAGNATION_THRESHOLD <span style="color:#f92672">=</span> 50; <span style="color:#75715e">// Number of generations without improvement to trigger action</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> LOCAL_SEARCH_ATTEMPTS <span style="color:#f92672">=</span> 50; <span style="color:#75715e">// Number of attempts on local search before exiting local optima</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> MUTATION_ATTEMPTS <span style="color:#f92672">=</span> 50; <span style="color:#75715e">// Number of attempts on mutation</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> maxCities;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> graph; <span style="color:#75715e">// Populate with actual distances</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">double</span> fitnessThreshold; <span style="color:#75715e">// The desired fitness threshold</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> maxStagnationRetry <span style="color:#f92672">=</span> 10;
+</span></span><span style="display:flex;"><span>ConcurrentHashMap<span style="color:#f92672">&lt;</span>Integer, Double<span style="color:#f92672">&gt;</span> fitnessMemo <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcurrentHashMap<span style="color:#f92672">&lt;&gt;</span>(); <span style="color:#75715e">// Thread-safe memoization for fitness</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> generation <span style="color:#f92672">=</span> 1;
+</span></span><span style="display:flex;"><span>DecimalFormat df <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DecimalFormat(<span style="color:#e6db74">&#34;#&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> optimalCount <span style="color:#f92672">=</span> 0;
+</span></span></code></pre></div><p>In the same class, these helper methods were used:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Individual <span style="color:#a6e22e">getIndividual</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> Individual.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">genome</span>(genome).<span style="color:#a6e22e">fitness</span>(calculateFitness(genome)).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Individual <span style="color:#a6e22e">getIndividual</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome, <span style="color:#66d9ef">double</span> fitness) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> Individual.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">genome</span>(genome).<span style="color:#a6e22e">fitness</span>(fitness).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Random number generator function</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">randNumber</span>(<span style="color:#66d9ef">int</span> start, <span style="color:#66d9ef">int</span> end) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (<span style="color:#66d9ef">int</span>) (Math.<span style="color:#a6e22e">random</span>() <span style="color:#f92672">*</span> (end <span style="color:#f92672">-</span> start)) <span style="color:#f92672">+</span> start;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">double</span> <span style="color:#a6e22e">calculateCityDistance</span>(<span style="color:#66d9ef">double</span> x1, <span style="color:#66d9ef">double</span> y1, <span style="color:#66d9ef">double</span> x2, <span style="color:#66d9ef">double</span> y2) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> xDelta <span style="color:#f92672">=</span> (x1 <span style="color:#f92672">-</span> x2);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> yDelta <span style="color:#f92672">=</span> (y1 <span style="color:#f92672">-</span> y2);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> Math.<span style="color:#a6e22e">sqrt</span>((xDelta <span style="color:#f92672">*</span> xDelta) <span style="color:#f92672">+</span> (yDelta <span style="color:#f92672">*</span> yDelta));
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">double</span> <span style="color:#a6e22e">calculateDistance</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> distance <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> genome.<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> 1; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> from <span style="color:#f92672">=</span> genome<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> to <span style="color:#f92672">=</span> genome<span style="color:#f92672">[</span>i <span style="color:#f92672">+</span> 1<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        distance <span style="color:#f92672">+=</span> graph<span style="color:#f92672">[</span>from<span style="color:#f92672">][</span>to<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//NOTE: This is distance needed to travel back to the original city</span>
+</span></span><span style="display:flex;"><span>    distance <span style="color:#f92672">+=</span> graph<span style="color:#f92672">[</span>genome<span style="color:#f92672">[</span>genome.<span style="color:#a6e22e">length</span><span style="color:#f92672">-</span>1<span style="color:#f92672">]][</span>0<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> distance;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Hash-based map for the fitness (total distance of the entire genome)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">double</span> <span style="color:#a6e22e">calculateFitness</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> genomeHash <span style="color:#f92672">=</span> Arrays.<span style="color:#a6e22e">hashCode</span>(genome); <span style="color:#75715e">// Compute the hashcode of entire genome as key, to reduce memory usage</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (fitnessMemo.<span style="color:#a6e22e">containsKey</span>(genomeHash)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> fitnessMemo.<span style="color:#a6e22e">get</span>(genomeHash);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> totalDistance <span style="color:#f92672">=</span> calculateDistance(genome);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (fitnessMemo.<span style="color:#a6e22e">size</span>() <span style="color:#f92672">&lt;</span> FITNESS_MEMO_SIZE) {
+</span></span><span style="display:flex;"><span>        fitnessMemo.<span style="color:#a6e22e">put</span>(genomeHash, totalDistance);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> totalDistance;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Function to create a genome</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">createGenome</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span><span style="color:#f92672">[</span>maxCities<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    genome<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>    Set<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> newGenome <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashSet<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>    newGenome.<span style="color:#a6e22e">add</span>(0);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> index <span style="color:#f92672">=</span> 1;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (newGenome.<span style="color:#a6e22e">size</span>() <span style="color:#f92672">&lt;</span> maxCities) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> temp <span style="color:#f92672">=</span> randNumber(1, maxCities);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>newGenome.<span style="color:#a6e22e">contains</span>(temp)) {
+</span></span><span style="display:flex;"><span>            genome<span style="color:#f92672">[</span>index<span style="color:#f92672">++]</span> <span style="color:#f92672">=</span> temp;
+</span></span><span style="display:flex;"><span>            newGenome.<span style="color:#a6e22e">add</span>(temp);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> genome;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Convenience method to reinit portion of population</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">reinitializePartOfPopulation</span>(List<span style="color:#f92672">&lt;</span>Individual<span style="color:#f92672">&gt;</span> population) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> reinitializeCount <span style="color:#f92672">=</span> POPULATION_SIZE <span style="color:#f92672">/</span> 5; <span style="color:#75715e">// Reinitialize 20% of the population</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> reinitializeCount; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome <span style="color:#f92672">=</span> createGenome();
+</span></span><span style="display:flex;"><span>        population.<span style="color:#a6e22e">set</span>(randNumber(2, population.<span style="color:#a6e22e">size</span>()), getIndividual(genome)); <span style="color:#75715e">// Replace random individuals (excluding the best two)</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>List<span style="color:#f92672">&lt;</span>Individual<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">initialPopulation</span>() {
+</span></span><span style="display:flex;"><span>    List<span style="color:#f92672">&lt;</span>Individual<span style="color:#f92672">&gt;</span> population <span style="color:#f92672">=</span> Collections.<span style="color:#a6e22e">synchronizedList</span>(<span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;</span>());
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> POPULATION_SIZE; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        population.<span style="color:#a6e22e">add</span>(getIndividual(createGenome()));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> population;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="local-search">Local Search</h3>
+<p>I implemented the 2-opt swap for local search to optimize the tour. Given the significant increase to 38,810 cities, I made adjustments to control the neighborhood search. My current approach emphasizes breaking the loop as soon as a better solution is found, rather than exhaustively checking all pairs, which would have a complexity of \( O(n^2) \). If I had more time, I would consider further optimizing by dividing the neighborhood into smaller chunks and processing them in parallel threads.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">double</span> <span style="color:#a6e22e">calculateDelta</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome, <span style="color:#66d9ef">int</span> i, <span style="color:#66d9ef">int</span> j) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Calculate the difference in the tour length if the swap (i, j) is made</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> graph<span style="color:#f92672">[</span>genome<span style="color:#f92672">[</span>i <span style="color:#f92672">-</span> 1<span style="color:#f92672">]][</span>genome<span style="color:#f92672">[</span>j<span style="color:#f92672">]]</span> <span style="color:#f92672">+</span> graph<span style="color:#f92672">[</span>genome<span style="color:#f92672">[</span>i<span style="color:#f92672">]][</span>genome<span style="color:#f92672">[</span>j <span style="color:#f92672">+</span> 1<span style="color:#f92672">]]</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-</span> graph<span style="color:#f92672">[</span>genome<span style="color:#f92672">[</span>i <span style="color:#f92672">-</span> 1<span style="color:#f92672">]][</span>genome<span style="color:#f92672">[</span>i<span style="color:#f92672">]]</span> <span style="color:#f92672">-</span> graph<span style="color:#f92672">[</span>genome<span style="color:#f92672">[</span>j<span style="color:#f92672">]][</span>genome<span style="color:#f92672">[</span>j <span style="color:#f92672">+</span> 1<span style="color:#f92672">]]</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">twoOptSwap</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome, <span style="color:#66d9ef">int</span> i, <span style="color:#66d9ef">int</span> j) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (i <span style="color:#f92672">&lt;</span> j) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> temp <span style="color:#f92672">=</span> genome<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        genome<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> genome<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        genome<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> temp;
+</span></span><span style="display:flex;"><span>        i<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>        j<span style="color:#f92672">--</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Few variations, used this as it seems to be work better for both small and large number of cities</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">localSearch</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> newGenome <span style="color:#f92672">=</span> genome.<span style="color:#a6e22e">clone</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">boolean</span> improvement <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> iteration <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (improvement <span style="color:#f92672">&amp;&amp;</span> iteration <span style="color:#f92672">&lt;</span> LOCAL_SEARCH_ATTEMPTS) {
+</span></span><span style="display:flex;"><span>        improvement <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1; i <span style="color:#f92672">&lt;</span> newGenome.<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> 2; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> i <span style="color:#f92672">+</span> 1; j <span style="color:#f92672">&lt;</span> (newGenome.<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> 1); j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (i <span style="color:#f92672">==</span> j) <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">double</span> delta <span style="color:#f92672">=</span> calculateDelta(newGenome, i, j);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (delta <span style="color:#f92672">&lt;</span> 0) {
+</span></span><span style="display:flex;"><span>                    twoOptSwap(newGenome, i, j);
+</span></span><span style="display:flex;"><span>                    improvement <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>; <span style="color:#75715e">// Early exit on improvement</span>
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (improvement) <span style="color:#66d9ef">break</span>; <span style="color:#75715e">// Early exit on improvement</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        iteration<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> newGenome;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="mutation">Mutation</h3>
+<p>To maintain genetic diversity within the population, I implemented three distinct mutation methods:</p>
+<ul>
+<li><strong>Inversion Mutation</strong>: Randomly inverts a sequence within the genome.</li>
+<li><strong>Insertion Mutation</strong>: Randomly inserts a sequence at a different position within the genome.</li>
+<li><strong>Swap Mutation</strong>: Randomly swaps the positions of two genes within the genome.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">inversionMutation</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> newGenome <span style="color:#f92672">=</span> genome.<span style="color:#a6e22e">clone</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> start <span style="color:#f92672">=</span> randNumber(1, maxCities);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> end <span style="color:#f92672">=</span> randNumber(1, maxCities);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (start <span style="color:#f92672">&gt;</span> end) {
+</span></span><span style="display:flex;"><span>        end <span style="color:#f92672">=</span> randNumber(1, maxCities);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (start <span style="color:#f92672">&lt;</span> end) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> temp <span style="color:#f92672">=</span> newGenome<span style="color:#f92672">[</span>start<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        newGenome<span style="color:#f92672">[</span>start<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> newGenome<span style="color:#f92672">[</span>end<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        newGenome<span style="color:#f92672">[</span>end<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> temp;
+</span></span><span style="display:flex;"><span>        start<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>        end<span style="color:#f92672">--</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> newGenome;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">insertionMutation</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> newGenome <span style="color:#f92672">=</span> genome.<span style="color:#a6e22e">clone</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> start <span style="color:#f92672">=</span> randNumber(1, maxCities);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> end <span style="color:#f92672">=</span> randNumber(1, maxCities);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (start <span style="color:#f92672">==</span> end) {
+</span></span><span style="display:flex;"><span>        end <span style="color:#f92672">=</span> randNumber(1, maxCities);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> temp <span style="color:#f92672">=</span> newGenome<span style="color:#f92672">[</span>start<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (start <span style="color:#f92672">&lt;</span> end) {
+</span></span><span style="display:flex;"><span>        System.<span style="color:#a6e22e">arraycopy</span>(newGenome, start <span style="color:#f92672">+</span> 1, newGenome, start, end <span style="color:#f92672">-</span> start);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        System.<span style="color:#a6e22e">arraycopy</span>(newGenome, end, newGenome, end <span style="color:#f92672">+</span> 1, start <span style="color:#f92672">-</span> end);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    newGenome<span style="color:#f92672">[</span>end<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> temp;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> newGenome;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">swapMutation</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> newGenome <span style="color:#f92672">=</span> genome.<span style="color:#a6e22e">clone</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> index1 <span style="color:#f92672">=</span> randNumber(1, maxCities);  <span style="color:#75715e">// Avoid swapping the first position</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> index2 <span style="color:#f92672">=</span> randNumber(1, maxCities);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> temp <span style="color:#f92672">=</span> genome<span style="color:#f92672">[</span>index1<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    genome<span style="color:#f92672">[</span>index1<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> genome<span style="color:#f92672">[</span>index2<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    genome<span style="color:#f92672">[</span>index2<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> temp;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> newGenome;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Mutation Operator to maintain diversity in population</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">mutateGenome</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> newGenome <span style="color:#f92672">=</span> genome.<span style="color:#a6e22e">clone</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> mutationType <span style="color:#f92672">=</span> randNumber(0, 3);  <span style="color:#75715e">// Adjust to the number of mutation operators</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">switch</span> (mutationType) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> 0 <span style="color:#f92672">-&gt;</span> inversionMutation(newGenome);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> 1 <span style="color:#f92672">-&gt;</span> insertionMutation(newGenome);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">default</span> <span style="color:#f92672">-&gt;</span> swapMutation(newGenome);
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">performMutation</span>(Individual individual, <span style="color:#66d9ef">double</span> temperature) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> newGenome <span style="color:#f92672">=</span> individual.<span style="color:#a6e22e">genome</span>.<span style="color:#a6e22e">clone</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> newFitness;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> mutationAttempts <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (mutationAttempts <span style="color:#f92672">&lt;</span> MUTATION_ATTEMPTS) {
+</span></span><span style="display:flex;"><span>        mutationAttempts<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        newGenome <span style="color:#f92672">=</span> mutateGenome(newGenome); <span style="color:#75715e">// Apply mutation</span>
+</span></span><span style="display:flex;"><span>        newGenome <span style="color:#f92672">=</span> localSearch(newGenome);  <span style="color:#75715e">// Integrate local search</span>
+</span></span><span style="display:flex;"><span>        newFitness <span style="color:#f92672">=</span> calculateFitness(newGenome);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (newFitness <span style="color:#f92672">&lt;</span> individual.<span style="color:#a6e22e">fitness</span> <span style="color:#f92672">||</span> Math.<span style="color:#a6e22e">exp</span>((individual.<span style="color:#a6e22e">fitness</span> <span style="color:#f92672">-</span> newFitness) <span style="color:#f92672">/</span> temperature) <span style="color:#f92672">&gt;</span> Math.<span style="color:#a6e22e">random</span>()) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> newGenome;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// No improvements after mutation attempts</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> individual.<span style="color:#a6e22e">genome</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="crossover">Crossover</h3>
+<p>In each generation, the algorithm selects the two fittest individuals to perform crossover. This process creates new offspring by combining genetic material from both parents. A segment of the chromosome is randomly selected from the first parent and incorporated into the offspring. Then, the remaining genes are filled in from the second parent, ensuring that no genes are duplicated. This method blends the characteristics of both parents, producing diverse and potentially more fit offspring for the next generation.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span> <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">performCrossover</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> parent1, <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> parent2) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> length <span style="color:#f92672">=</span> parent1.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> child <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span><span style="color:#f92672">[</span>length<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    Set<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> usedGenes <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashSet<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Choose a segment from parent1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> startPos <span style="color:#f92672">=</span> randNumber(1, length);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> endPos <span style="color:#f92672">=</span> randNumber(1, length);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Ensure startPos is less than endPos</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (startPos <span style="color:#f92672">&gt;</span> endPos) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> temp <span style="color:#f92672">=</span> startPos;
+</span></span><span style="display:flex;"><span>        startPos <span style="color:#f92672">=</span> endPos;
+</span></span><span style="display:flex;"><span>        endPos <span style="color:#f92672">=</span> temp;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Copy the segment from parent1 to the child</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> startPos; i <span style="color:#f92672">&lt;</span> endPos; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        child<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> parent1<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        usedGenes.<span style="color:#a6e22e">add</span>(parent1<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Ensure the first position is always the starting point</span>
+</span></span><span style="display:flex;"><span>    child<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>    usedGenes.<span style="color:#a6e22e">add</span>(0);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Fill the remaining positions with genes from parent2 in the order they appear</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> currentPos <span style="color:#f92672">=</span> endPos;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1; i <span style="color:#f92672">&lt;</span> length; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> geneFromParent2 <span style="color:#f92672">=</span> parent2<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>usedGenes.<span style="color:#a6e22e">contains</span>(geneFromParent2)) {
+</span></span><span style="display:flex;"><span>            usedGenes.<span style="color:#a6e22e">add</span>(geneFromParent2);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (currentPos <span style="color:#f92672">&gt;=</span> length) {
+</span></span><span style="display:flex;"><span>                currentPos <span style="color:#f92672">=</span> 1; <span style="color:#75715e">// Wrap around to start filling from the beginning (skipping index 0)</span>
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (child<span style="color:#f92672">[</span>currentPos<span style="color:#f92672">]</span> <span style="color:#f92672">==</span> 0) {
+</span></span><span style="display:flex;"><span>                child<span style="color:#f92672">[</span>currentPos<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> geneFromParent2;
+</span></span><span style="display:flex;"><span>                currentPos<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Fill any remaining unfilled positions with random unused genes</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1; i <span style="color:#f92672">&lt;</span> length; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (child<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">==</span> 0) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> rand;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">do</span> {
+</span></span><span style="display:flex;"><span>                rand <span style="color:#f92672">=</span> randNumber(1, length);
+</span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">while</span> (usedGenes.<span style="color:#a6e22e">contains</span>(rand));
+</span></span><span style="display:flex;"><span>            child<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> rand;
+</span></span><span style="display:flex;"><span>            usedGenes.<span style="color:#a6e22e">add</span>(rand);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> child;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="combining-with-simulated-anealling">Combining with Simulated Anealling</h3>
+<p>To enhance the efficiency of solving the problem, I combined the genetic algorithm with simulated annealing. This hybrid approach leverages the strengths of both techniques. The simulated annealing mechanism uses temperature as a probabilistic factor to either accept a better genome or, occasionally, accept a worse genome. This strategy maintains diversity and fosters exploration within the solution space.</p>
+<p>The temperature starts high and gradually decreases according to a cooling rate. At higher temperatures, the algorithm is more likely to accept suboptimal solutions, promoting exploration and helping escape local optima. As the temperature drops, the algorithm becomes more selective, favoring better solutions and converging towards an optimal or near-optimal solution.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">double</span> <span style="color:#a6e22e">adaptiveCooling</span>(<span style="color:#66d9ef">double</span> temperature, <span style="color:#66d9ef">int</span> generation) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> temperature <span style="color:#f92672">*</span> Math.<span style="color:#a6e22e">pow</span>(COOLING_RATE, generation <span style="color:#f92672">/</span> (<span style="color:#66d9ef">double</span>) MAX_GENERATIONS);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">// Combine simulated annealing with genetic algorithm</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">simulatedAnnealing</span>(Individual individual, <span style="color:#66d9ef">double</span> temperature) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> 100; i<span style="color:#f92672">++</span>) {  <span style="color:#75715e">// Simulated annealing iterations</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> mutatedGenome <span style="color:#f92672">=</span> mutateGenome(individual.<span style="color:#a6e22e">genome</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span> mutatedFitness <span style="color:#f92672">=</span> calculateFitness(mutatedGenome);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (mutatedFitness <span style="color:#f92672">&lt;</span> individual.<span style="color:#a6e22e">fitness</span> <span style="color:#f92672">||</span> Math.<span style="color:#a6e22e">exp</span>((individual.<span style="color:#a6e22e">fitness</span> <span style="color:#f92672">-</span> mutatedFitness) <span style="color:#f92672">/</span> temperature) <span style="color:#f92672">&gt;</span> Math.<span style="color:#a6e22e">random</span>()) {
+</span></span><span style="display:flex;"><span>            individual.<span style="color:#a6e22e">genome</span> <span style="color:#f92672">=</span> mutatedGenome;
+</span></span><span style="display:flex;"><span>            individual.<span style="color:#a6e22e">fitness</span> <span style="color:#f92672">=</span> mutatedFitness;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="tspgaservice-singleton">TspGaService Singleton</h2>
+<p>This is the <em>TspGaService.java</em> singleton, with the main solve and processLines methods:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Singleton</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TspGaService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Configurations</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Helper methods</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// LocalSearch</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Mutation</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Crossover</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Simulated Annealing</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Individual <span style="color:#a6e22e">solve</span>(<span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> input) {
+</span></span><span style="display:flex;"><span>        Instant startTime <span style="color:#f92672">=</span> Instant.<span style="color:#a6e22e">now</span>(); <span style="color:#75715e">// Record the start time</span>
+</span></span><span style="display:flex;"><span>        fitnessMemo.<span style="color:#a6e22e">clear</span>();
+</span></span><span style="display:flex;"><span>        graph <span style="color:#f92672">=</span> input;
+</span></span><span style="display:flex;"><span>        maxCities <span style="color:#f92672">=</span> graph.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        List<span style="color:#f92672">&lt;</span>Individual<span style="color:#f92672">&gt;</span> population <span style="color:#f92672">=</span> initialPopulation();
+</span></span><span style="display:flex;"><span>        Individual bestIndividual <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span> bestFitness <span style="color:#f92672">=</span> Double.<span style="color:#a6e22e">MAX_VALUE</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> stagnationCount <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> stagnationResetCount <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span> temperature <span style="color:#f92672">=</span> INITIAL_TEMPERATURE;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (temperature <span style="color:#f92672">&gt;</span> FINAL_TEMPERATURE <span style="color:#f92672">&amp;&amp;</span> generation <span style="color:#f92672">&lt;</span> MAX_GENERATIONS <span style="color:#f92672">&amp;&amp;</span> stagnationResetCount <span style="color:#f92672">&lt;</span> maxStagnationRetry) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Sort the population by fitness</span>
+</span></span><span style="display:flex;"><span>            Collections.<span style="color:#a6e22e">sort</span>(population, Comparator.<span style="color:#a6e22e">comparingDouble</span>(a <span style="color:#f92672">-&gt;</span> a.<span style="color:#a6e22e">fitness</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Retain the best two individuals for elitism and crossover</span>
+</span></span><span style="display:flex;"><span>            Individual bestCurrentIndividual <span style="color:#f92672">=</span> population.<span style="color:#a6e22e">get</span>(0);
+</span></span><span style="display:flex;"><span>            Individual secondBestIndividual <span style="color:#f92672">=</span> population.<span style="color:#a6e22e">get</span>(1);
+</span></span><span style="display:flex;"><span>            List<span style="color:#f92672">&lt;</span>Individual<span style="color:#f92672">&gt;</span> newPopulation <span style="color:#f92672">=</span> Collections.<span style="color:#a6e22e">synchronizedList</span>(<span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;</span>());
+</span></span><span style="display:flex;"><span>            newPopulation.<span style="color:#a6e22e">add</span>(bestCurrentIndividual);
+</span></span><span style="display:flex;"><span>            newPopulation.<span style="color:#a6e22e">add</span>(secondBestIndividual);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Perform crossover and mutation</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> POPULATION_SIZE; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> newGnome;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (Math.<span style="color:#a6e22e">random</span>() <span style="color:#f92672">&lt;</span> 0.<span style="color:#a6e22e">5</span>) {
+</span></span><span style="display:flex;"><span>                    newGnome <span style="color:#f92672">=</span> performCrossover(bestCurrentIndividual.<span style="color:#a6e22e">genome</span>, secondBestIndividual.<span style="color:#a6e22e">genome</span>);
+</span></span><span style="display:flex;"><span>                } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                    Individual randomIndividual <span style="color:#f92672">=</span> population.<span style="color:#a6e22e">get</span>(i);
+</span></span><span style="display:flex;"><span>                    newGnome <span style="color:#f92672">=</span> performMutation(randomIndividual, temperature);
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                newGnome <span style="color:#f92672">=</span> localSearch(newGnome);
+</span></span><span style="display:flex;"><span>                Individual newIndividual <span style="color:#f92672">=</span> getIndividual(newGnome, calculateFitness(newGnome));
+</span></span><span style="display:flex;"><span>                simulatedAnnealing(newIndividual, temperature); <span style="color:#75715e">// Apply simulated annealing</span>
+</span></span><span style="display:flex;"><span>                newPopulation.<span style="color:#a6e22e">add</span>(newIndividual);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Ensure population is updated correctly</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>newPopulation.<span style="color:#a6e22e">isEmpty</span>()) {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Use a mix of old and new population to maintain diversity</span>
+</span></span><span style="display:flex;"><span>                population <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;</span>(newPopulation);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">while</span> (population.<span style="color:#a6e22e">size</span>() <span style="color:#f92672">&lt;</span> POPULATION_SIZE) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome <span style="color:#f92672">=</span> createGenome();
+</span></span><span style="display:flex;"><span>                    population.<span style="color:#a6e22e">add</span>(getIndividual(genome, calculateFitness(genome)));
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> POPULATION_SIZE; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome <span style="color:#f92672">=</span> createGenome();
+</span></span><span style="display:flex;"><span>                    population.<span style="color:#a6e22e">add</span>(getIndividual(genome, calculateFitness(genome)));
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Update temperature regardless of population changes</span>
+</span></span><span style="display:flex;"><span>            temperature <span style="color:#f92672">=</span> adaptiveCooling(temperature, generation);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Check for stagnation</span>
+</span></span><span style="display:flex;"><span>            Individual currentBest <span style="color:#f92672">=</span> Collections.<span style="color:#a6e22e">min</span>(population, Comparator.<span style="color:#a6e22e">comparingDouble</span>(a <span style="color:#f92672">-&gt;</span> a.<span style="color:#a6e22e">fitness</span>));
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (currentBest.<span style="color:#a6e22e">fitness</span> <span style="color:#f92672">==</span> bestFitness) {
+</span></span><span style="display:flex;"><span>                optimalCount<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>                System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Potentially an optimal solution! &#34;</span> <span style="color:#f92672">+</span> bestFitness);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (optimalCount <span style="color:#f92672">&gt;</span> 3) {
+</span></span><span style="display:flex;"><span>                    System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Optimal solution, existing &#34;</span> <span style="color:#f92672">+</span> bestFitness);
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (currentBest.<span style="color:#a6e22e">fitness</span> <span style="color:#f92672">&lt;</span> bestFitness) {
+</span></span><span style="display:flex;"><span>                 optimalCount <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>                bestIndividual <span style="color:#f92672">=</span> currentBest;
+</span></span><span style="display:flex;"><span>                bestFitness <span style="color:#f92672">=</span> bestIndividual.<span style="color:#a6e22e">fitness</span>;
+</span></span><span style="display:flex;"><span>                Duration elapsedDuration <span style="color:#f92672">=</span> Duration.<span style="color:#a6e22e">between</span>(startTime, Instant.<span style="color:#a6e22e">now</span>());
+</span></span><span style="display:flex;"><span>                System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(elapsedDuration.<span style="color:#a6e22e">toSeconds</span>() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, generation &#34;</span> <span style="color:#f92672">+</span> generation <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, fitness &#34;</span> <span style="color:#f92672">+</span> df.<span style="color:#a6e22e">format</span>(bestFitness) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, fitnessMemo &#34;</span> <span style="color:#f92672">+</span> fitnessMemo.<span style="color:#a6e22e">size</span>());
+</span></span><span style="display:flex;"><span>                stagnationCount <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                stagnationCount<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (stagnationCount <span style="color:#f92672">&gt;=</span> STAGNATION_THRESHOLD) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#75715e">// Increase mutation rate to escape local optima</span>
+</span></span><span style="display:flex;"><span>                    Duration elapsedDuration <span style="color:#f92672">=</span> Duration.<span style="color:#a6e22e">between</span>(startTime, Instant.<span style="color:#a6e22e">now</span>());
+</span></span><span style="display:flex;"><span>                    System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(elapsedDuration.<span style="color:#a6e22e">toSeconds</span>() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, stagnation detected: &#34;</span> <span style="color:#f92672">+</span> stagnationResetCount);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                    reinitializePartOfPopulation(population);  <span style="color:#75715e">// Reinitialize part of the population</span>
+</span></span><span style="display:flex;"><span>                    stagnationCount <span style="color:#f92672">=</span> 0;  <span style="color:#75715e">// Reset stagnation count</span>
+</span></span><span style="display:flex;"><span>                    stagnationResetCount<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            generation<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Check if the current best fitness meets the required threshold</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (bestIndividual <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> bestIndividual.<span style="color:#a6e22e">fitness</span> <span style="color:#f92672">&lt;=</span> fitnessThreshold) {
+</span></span><span style="display:flex;"><span>                System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Reached the fitness threshold. Stopping the algorithm.&#34;</span>);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Find and print the most efficient path</span>
+</span></span><span style="display:flex;"><span>        System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Most efficient path after &#34;</span> <span style="color:#f92672">+</span> generation  <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; generations, threshold=&#34;</span> <span style="color:#f92672">+</span> fitnessThreshold <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, temp:&#34;</span> <span style="color:#f92672">+</span>temperature);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> bestIndividual;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> <span style="color:#a6e22e">processLines</span>(List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lines) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// parse the data in the file</span>
+</span></span><span style="display:flex;"><span>        String<span style="color:#f92672">[]</span> firstLine <span style="color:#f92672">=</span> lines.<span style="color:#a6e22e">get</span>(0).<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34;\\s+&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> cityCount <span style="color:#f92672">=</span> Integer.<span style="color:#a6e22e">parseInt</span>(firstLine<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> cities <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[</span>cityCount<span style="color:#f92672">][</span>2<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1; i <span style="color:#f92672">&lt;</span> cityCount <span style="color:#f92672">+</span> 1; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            String line <span style="color:#f92672">=</span> lines.<span style="color:#a6e22e">get</span>(i);
+</span></span><span style="display:flex;"><span>            String<span style="color:#f92672">[]</span> parts <span style="color:#f92672">=</span> line.<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34;\\s+&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">double</span> x <span style="color:#f92672">=</span> Double.<span style="color:#a6e22e">parseDouble</span>(parts<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">double</span> y <span style="color:#f92672">=</span> Double.<span style="color:#a6e22e">parseDouble</span>(parts<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>            cities<span style="color:#f92672">[</span>i <span style="color:#f92672">-</span> 1<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[]</span>{
+</span></span><span style="display:flex;"><span>                    x,
+</span></span><span style="display:flex;"><span>                    y,
+</span></span><span style="display:flex;"><span>            };
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> cityDistances <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[</span>cityCount<span style="color:#f92672">][</span>cityCount<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> cityCount; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> cityCount; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (i <span style="color:#f92672">==</span> j) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">double</span><span style="color:#f92672">[]</span> srcCity <span style="color:#f92672">=</span> cities<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">double</span><span style="color:#f92672">[]</span> destCity <span style="color:#f92672">=</span> cities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">double</span> distance <span style="color:#f92672">=</span> calculateCityDistance(srcCity<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>, srcCity<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>, destCity<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>, destCity<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>                cityDistances<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> distance;
+</span></span><span style="display:flex;"><span>                cityDistances<span style="color:#f92672">[</span>j<span style="color:#f92672">][</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> distance;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> cityDistances;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="tspcontroller">TSPController</h2>
+<p>Refactored from my previous controller:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Controller</span>(<span style="color:#e6db74">&#34;/tsp&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TSPController</span> {
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> TspGaService tspGaService;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Post</span>(<span style="color:#e6db74">&#34;/solveGa&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Produces</span>(MediaType.<span style="color:#a6e22e">APPLICATION_JSON</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Consumes</span>(MediaType.<span style="color:#a6e22e">APPLICATION_JSON</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Individual <span style="color:#a6e22e">solveTspGa</span>(<span style="color:#a6e22e">@Body</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> distances) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> tspGaService.<span style="color:#a6e22e">solve</span>(distances);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Post</span>(value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/solveTspGaFile&#34;</span>, consumes <span style="color:#f92672">=</span> MediaType.<span style="color:#a6e22e">MULTIPART_FORM_DATA</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Individual <span style="color:#a6e22e">updateAndSolveTspGa</span>(CompletedFileUpload file) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Read the contents of the file into a List of Strings</span>
+</span></span><span style="display:flex;"><span>            List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lines <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">try</span> (BufferedReader input <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BufferedReader(<span style="color:#66d9ef">new</span> InputStreamReader(file.<span style="color:#a6e22e">getInputStream</span>(), Charset.<span style="color:#a6e22e">forName</span>(<span style="color:#e6db74">&#34;UTF-8&#34;</span>)))) {
+</span></span><span style="display:flex;"><span>                String line;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">while</span> ((line <span style="color:#f92672">=</span> input.<span style="color:#a6e22e">readLine</span>()) <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>                    lines.<span style="color:#a6e22e">add</span>(line);
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> distances <span style="color:#f92672">=</span> tspGaService.<span style="color:#a6e22e">processLines</span>(lines);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> tspGaService.<span style="color:#a6e22e">solve</span>(distances);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">catch</span> (IOException e) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> Individual.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">message</span>(e.<span style="color:#a6e22e">getMessage</span>()).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="solver-in-action">Solver in Action</h2>
+<p>Following these steps, I achieved a solution to the problem, though there is still room for improvement. This approach demonstrates how simulated annealing, genetic algorithms, and local search can collectively address the TSP, even with a large number of cities.</p>
+<p>Compared to my previous solver, this algorithm performs significantly better:</p>
+<p><img src="/images/tsp/tsp-ga-postman.png" alt="tsp-ga-postman"></p>
+<p>With this custom implementation, here is the result for 51 cities:</p>
+<p><img src="/images/tsp/tsp-ga-51-city.png" alt="tsp-ga-51-city"></p>
+<p>And fo 200 cities:</p>
+<p><img src="/images/tsp/tsp-ga-200-city.png" alt="tsp-ga-200-city"></p>
+<p>It takes about 3 hours to complete 1000 generations, and the solution is still far from optimal!</p>
+<p><img src="/images/tsp/tsp-ga-33810-upload.png" alt="tsp-ga-33810-upload"></p>
+<h2 id="visualisation">Visualisation</h2>
+<p>Thanks to the online tool provided through the course, here’s the visualized path for 51 cities:</p>
+<p><img src="/images/tsp/tsp-graph-51.png" alt="tsp-graph-51"></p>
+<p>And For 33810 cities:</p>
+<p><img src="/images/tsp/tsp-graph-33810.png" alt="tsp-graph-33810"></p>
+<h2 id="lessons-learnt">Lessons Learnt</h2>
+<p>Chat Less, Think More!</p>
+<p>While I enjoy discussing algorithms with <a href="https://openai.com/index/hello-gpt-4o/">GPT-4o</a>, sometimes it&rsquo;s crucial to chat less and think more about the algorithm&rsquo;s implementation!</p>
+<ul class="pa0" data-pagefind-ignore>
+  
+   <li class="list di">
+     <a href="/tags/genetic-algorithm/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Genetic Algorithm</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/micronaut/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Micronaut</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/tsp/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">TSP</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/be/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">BE</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/backend/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Backend</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      <p class="f5 b mb3">Post a comment:</p>
+<script src="https://giscus.app/client.js"
+    data-repo="seehiong/seehiong.github.io"
+    data-repo-id="R_kgDOJg7Puw"
+    data-category="General"
+    data-category-id="DIC_kwDOJg7Pu84Cbyhc"
+    data-mapping="url"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="en"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+      </div><br/>
+<div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2024/efficient-tsp-solver-api-with-micronaut/">[Backend] Efficient TSP Solver API with Micronaut</a>
+    
+    
+</div></div>
+
+    <aside class="w-100-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2024/efficient-tsp-solver-api-with-micronaut/">[Backend] Efficient TSP Solver API with Micronaut</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2024 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
