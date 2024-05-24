@@ -6,7 +6,7 @@
     
     <title>[Backend] Optimizing TSP with Genetic Algorithms in Micronaut | Tech Blog</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1">
-    <meta name="description" content="In this post, I explore solving a massive Traveling Salesman Problem (TSP) involving 38,810 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively.">
+    <meta name="description" content="In this post, I explore solving a Traveling Salesman Problem (TSP) involving 200 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively.">
     <meta name="generator" content="Hugo 0.120.4">
     
     
@@ -32,19 +32,19 @@
     
     
     <meta property="og:title" content="[Backend] Optimizing TSP with Genetic Algorithms in Micronaut" />
-<meta property="og:description" content="In this post, I explore solving a massive Traveling Salesman Problem (TSP) involving 38,810 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively." />
+<meta property="og:description" content="In this post, I explore solving a Traveling Salesman Problem (TSP) involving 200 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seehiong.github.io/2024/optimizing-tsp-with-genetic-algorithms-in-micronaut/" /><meta property="article:section" content="2024" />
 <meta property="article:published_time" content="2024-05-23T20:00:00+08:00" />
 <meta property="article:modified_time" content="2024-05-23T20:00:00+08:00" />
 
 <meta itemprop="name" content="[Backend] Optimizing TSP with Genetic Algorithms in Micronaut">
-<meta itemprop="description" content="In this post, I explore solving a massive Traveling Salesman Problem (TSP) involving 38,810 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively."><meta itemprop="datePublished" content="2024-05-23T20:00:00+08:00" />
+<meta itemprop="description" content="In this post, I explore solving a Traveling Salesman Problem (TSP) involving 200 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively."><meta itemprop="datePublished" content="2024-05-23T20:00:00+08:00" />
 <meta itemprop="dateModified" content="2024-05-23T20:00:00+08:00" />
-<meta itemprop="wordCount" content="2458">
+<meta itemprop="wordCount" content="2166">
 <meta itemprop="keywords" content="Genetic Algorithm,Micronaut,TSP,BE,Backend," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Backend] Optimizing TSP with Genetic Algorithms in Micronaut"/>
-<meta name="twitter:description" content="In this post, I explore solving a massive Traveling Salesman Problem (TSP) involving 38,810 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively."/>
+<meta name="twitter:description" content="In this post, I explore solving a Traveling Salesman Problem (TSP) involving 200 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers, with visualized results for smaller and larger datasets. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively."/>
 
       
     
@@ -166,16 +166,16 @@
 
       
       
-        <span class="f6 mv4 dib tracked"> - 12 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 2458 words </span>
+        <span class="f6 mv4 dib tracked"> - 11 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 2166 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><h1 id="problem-statement">Problem Statement</h1>
-<p>Having a keen interest in discrete optimization, I enrolled in a Coursera course <a href="https://www.coursera.org/learn/discrete-optimization">Discrete Optimisation</a>. This time, I encountered a more challenging task than my previous work on the <a href="https://seehiong.github.io/2024/efficient-tsp-solver-api-with-micronaut/">TSP solver</a> visiting 38,810 cities! Research suggests that the  <a href="https://www.math.uwaterloo.ca/tsp/pla85900/index.html">Optimal 85,900-Point Tour</a> is the largest solved instance of the Traveling Salesman Problem (TSP).</p>
+<p>Research suggests that the  <a href="https://www.math.uwaterloo.ca/tsp/pla85900/index.html">Optimal 85,900-Point Tour</a> is the largest solved instance of the Traveling Salesman Problem (TSP). For this post, I will attempt to solve the TSP problem involving 200 cities.</p>
 <p>Genetic algorithms simulate the process of natural selection, mimicking &ldquo;survival of the fittest&rdquo; to solve problems. These algorithms evolve over generations, with each generation comprising individuals better adapted to solving the problem.</p>
 <p>Referencing <a href="https://www.geeksforgeeks.org/traveling-salesman-problem-using-genetic-algorithm/">Genetic Algorithm for TSP</a>, I documented my solution steps.</p>
 <h3 id="initialisation">Initialisation</h3>
-<p>To handle the vast number of cities (38,810), I implemented the genome as an int[]. Here’s my <em>Individual.java</em>:</p>
+<p>I implemented the genome as an int[]. Here’s my <em>Individual.java</em>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#f92672">import</span> io.micronaut.serde.annotation.Serdeable;
 </span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> lombok.*;
 </span></span><span style="display:flex;"><span>
@@ -293,7 +293,7 @@
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> population;
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="local-search">Local Search</h3>
-<p>I implemented the 2-opt swap for local search to optimize the tour. Given the significant increase to 38,810 cities, I made adjustments to control the neighborhood search. My current approach emphasizes breaking the loop as soon as a better solution is found, rather than exhaustively checking all pairs, which would have a complexity of \( O(n^2) \). If I had more time, I would consider further optimizing by dividing the neighborhood into smaller chunks and processing them in parallel threads.</p>
+<p>I implemented the 2-opt swap for local search to optimize the tour. My current approach emphasizes breaking the loop as soon as a better solution is found, rather than exhaustively checking all pairs, which would have a complexity of \( O(n^2) \).</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">double</span> <span style="color:#a6e22e">calculateDelta</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> genome, <span style="color:#66d9ef">int</span> i, <span style="color:#66d9ef">int</span> j) {
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Calculate the difference in the tour length if the swap (i, j) is made</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> graph<span style="color:#f92672">[</span>genome<span style="color:#f92672">[</span>i <span style="color:#f92672">-</span> 1<span style="color:#f92672">]][</span>genome<span style="color:#f92672">[</span>j<span style="color:#f92672">]]</span> <span style="color:#f92672">+</span> graph<span style="color:#f92672">[</span>genome<span style="color:#f92672">[</span>i<span style="color:#f92672">]][</span>genome<span style="color:#f92672">[</span>j <span style="color:#f92672">+</span> 1<span style="color:#f92672">]]</span>
@@ -498,7 +498,7 @@
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="tspgaservice-singleton">TspGaService Singleton</h2>
-<p>This is the <em>TspGaService.java</em> singleton, with the main solve and processLines methods:</p>
+<p>This is the <em>TspGaService.java</em> singleton, with the main solve methods:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Singleton</span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TspGaService</span> {
 </span></span><span style="display:flex;"><span>
@@ -619,39 +619,6 @@
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> bestIndividual;
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> <span style="color:#a6e22e">processLines</span>(List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lines) {
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// parse the data in the file</span>
-</span></span><span style="display:flex;"><span>        String<span style="color:#f92672">[]</span> firstLine <span style="color:#f92672">=</span> lines.<span style="color:#a6e22e">get</span>(0).<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34;\\s+&#34;</span>);
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> cityCount <span style="color:#f92672">=</span> Integer.<span style="color:#a6e22e">parseInt</span>(firstLine<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> cities <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[</span>cityCount<span style="color:#f92672">][</span>2<span style="color:#f92672">]</span>;
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1; i <span style="color:#f92672">&lt;</span> cityCount <span style="color:#f92672">+</span> 1; i<span style="color:#f92672">++</span>) {
-</span></span><span style="display:flex;"><span>            String line <span style="color:#f92672">=</span> lines.<span style="color:#a6e22e">get</span>(i);
-</span></span><span style="display:flex;"><span>            String<span style="color:#f92672">[]</span> parts <span style="color:#f92672">=</span> line.<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34;\\s+&#34;</span>);
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">double</span> x <span style="color:#f92672">=</span> Double.<span style="color:#a6e22e">parseDouble</span>(parts<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>);
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">double</span> y <span style="color:#f92672">=</span> Double.<span style="color:#a6e22e">parseDouble</span>(parts<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>);
-</span></span><span style="display:flex;"><span>            cities<span style="color:#f92672">[</span>i <span style="color:#f92672">-</span> 1<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[]</span>{
-</span></span><span style="display:flex;"><span>                    x,
-</span></span><span style="display:flex;"><span>                    y,
-</span></span><span style="display:flex;"><span>            };
-</span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> cityDistances <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[</span>cityCount<span style="color:#f92672">][</span>cityCount<span style="color:#f92672">]</span>;
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> cityCount; i<span style="color:#f92672">++</span>) {
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> cityCount; j<span style="color:#f92672">++</span>) {
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (i <span style="color:#f92672">==</span> j) {
-</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">continue</span>;
-</span></span><span style="display:flex;"><span>                }
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">double</span><span style="color:#f92672">[]</span> srcCity <span style="color:#f92672">=</span> cities<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>;
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">double</span><span style="color:#f92672">[]</span> destCity <span style="color:#f92672">=</span> cities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>;
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">double</span> distance <span style="color:#f92672">=</span> calculateCityDistance(srcCity<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>, srcCity<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>, destCity<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>, destCity<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>);
-</span></span><span style="display:flex;"><span>                cityDistances<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> distance;
-</span></span><span style="display:flex;"><span>                cityDistances<span style="color:#f92672">[</span>j<span style="color:#f92672">][</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> distance;
-</span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> cityDistances;
-</span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="tspcontroller">TSPController</h2>
 <p>Refactored from my previous controller:</p>
@@ -667,25 +634,6 @@
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> tspGaService.<span style="color:#a6e22e">solve</span>(distances);
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Post</span>(value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/solveTspGaFile&#34;</span>, consumes <span style="color:#f92672">=</span> MediaType.<span style="color:#a6e22e">MULTIPART_FORM_DATA</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Individual <span style="color:#a6e22e">updateAndSolveTspGa</span>(CompletedFileUpload file) {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Read the contents of the file into a List of Strings</span>
-</span></span><span style="display:flex;"><span>            List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lines <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;</span>();
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">try</span> (BufferedReader input <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BufferedReader(<span style="color:#66d9ef">new</span> InputStreamReader(file.<span style="color:#a6e22e">getInputStream</span>(), Charset.<span style="color:#a6e22e">forName</span>(<span style="color:#e6db74">&#34;UTF-8&#34;</span>)))) {
-</span></span><span style="display:flex;"><span>                String line;
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">while</span> ((line <span style="color:#f92672">=</span> input.<span style="color:#a6e22e">readLine</span>()) <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
-</span></span><span style="display:flex;"><span>                    lines.<span style="color:#a6e22e">add</span>(line);
-</span></span><span style="display:flex;"><span>                }
-</span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> distances <span style="color:#f92672">=</span> tspGaService.<span style="color:#a6e22e">processLines</span>(lines);
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> tspGaService.<span style="color:#a6e22e">solve</span>(distances);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">catch</span> (IOException e) {
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> Individual.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">message</span>(e.<span style="color:#a6e22e">getMessage</span>()).<span style="color:#a6e22e">build</span>();
-</span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="solver-in-action">Solver in Action</h2>
 <p>Following these steps, I achieved a solution to the problem, though there is still room for improvement. This approach demonstrates how simulated annealing, genetic algorithms, and local search can collectively address the TSP, even with a large number of cities.</p>
@@ -695,13 +643,6 @@
 <p><img src="/images/tsp/tsp-ga-51-city.png" alt="tsp-ga-51-city"></p>
 <p>And fo 200 cities:</p>
 <p><img src="/images/tsp/tsp-ga-200-city.png" alt="tsp-ga-200-city"></p>
-<p>It takes about 3 hours to complete 1000 generations, and the solution is still far from optimal!</p>
-<p><img src="/images/tsp/tsp-ga-33810-upload.png" alt="tsp-ga-33810-upload"></p>
-<h2 id="visualisation">Visualisation</h2>
-<p>Thanks to the online tool provided through the course, here’s the visualized path for 51 cities:</p>
-<p><img src="/images/tsp/tsp-graph-51.png" alt="tsp-graph-51"></p>
-<p>And For 33810 cities:</p>
-<p><img src="/images/tsp/tsp-graph-33810.png" alt="tsp-graph-33810"></p>
 <h2 id="lessons-learnt">Lessons Learnt</h2>
 <p>Chat Less, Think More!</p>
 <p>While I enjoy discussing algorithms with <a href="https://openai.com/index/hello-gpt-4o/">GPT-4o</a>, sometimes it&rsquo;s crucial to chat less and think more about the algorithm&rsquo;s implementation!</p>
