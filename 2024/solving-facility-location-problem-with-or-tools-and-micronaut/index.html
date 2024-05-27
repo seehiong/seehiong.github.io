@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>[Backend] Solving Facility Location Problem with OR-Tools and Micronaut | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="This post demonstrates solving the Facility Location Problem (FLP) using OR-Tools and Micronaut. It covers defining the solver, variables, constraints, and objective function in Java. The implementation includes creating a Micronaut service and controller to handle file uploads, process the data, and compute the optimal solution. The example input file format and expected outputs are also illustrated, providing a complete guide to implementing and testing the FLP solution.">
+    <meta name="generator" content="Hugo 0.120.4">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="[Backend] Solving Facility Location Problem with OR-Tools and Micronaut" />
+<meta property="og:description" content="This post demonstrates solving the Facility Location Problem (FLP) using OR-Tools and Micronaut. It covers defining the solver, variables, constraints, and objective function in Java. The implementation includes creating a Micronaut service and controller to handle file uploads, process the data, and compute the optimal solution. The example input file format and expected outputs are also illustrated, providing a complete guide to implementing and testing the FLP solution." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2024/solving-facility-location-problem-with-or-tools-and-micronaut/" /><meta property="article:section" content="2024" />
+<meta property="article:published_time" content="2024-05-27T20:00:00+08:00" />
+<meta property="article:modified_time" content="2024-05-27T20:00:00+08:00" />
+
+<meta itemprop="name" content="[Backend] Solving Facility Location Problem with OR-Tools and Micronaut">
+<meta itemprop="description" content="This post demonstrates solving the Facility Location Problem (FLP) using OR-Tools and Micronaut. It covers defining the solver, variables, constraints, and objective function in Java. The implementation includes creating a Micronaut service and controller to handle file uploads, process the data, and compute the optimal solution. The example input file format and expected outputs are also illustrated, providing a complete guide to implementing and testing the FLP solution."><meta itemprop="datePublished" content="2024-05-27T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2024-05-27T20:00:00+08:00" />
+<meta itemprop="wordCount" content="1637">
+<meta itemprop="keywords" content="OR-Tools,Micronaut,FLP,Backend," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[Backend] Solving Facility Location Problem with OR-Tools and Micronaut"/>
+<meta name="twitter:description" content="This post demonstrates solving the Facility Location Problem (FLP) using OR-Tools and Micronaut. It covers defining the solver, variables, constraints, and objective function in Java. The implementation includes creating a Micronaut service and controller to handle file uploads, process the data, and compute the optimal solution. The example input file format and expected outputs are also illustrated, providing a complete guide to implementing and testing the FLP solution."/>
+
+      
+    
+
+    
+      <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>
+    
+
+	<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js"></script>
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv1 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2024/" title="2024 page">
+              2024
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3" data-pagefind-body>
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2024
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">[Backend] Solving Facility Location Problem with OR-Tools and Micronaut</h1>
+      
+      <p class="tracked">
+        By <strong>See Hiong</strong>
+      </p>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2024-05-27T20:00:00+08:00">May 27, 2024</time>
+      
+
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 8 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 1637 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><h1 id="problem-statement">Problem Statement</h1>
+<p>In this post, I&rsquo;ll tackle the <a href="https://en.wikipedia.org/wiki/Facility_location_problem">Facility Location Problem</a>, which involves deciding the optimal placement of facilities to minimize costs. Unlike my previous post on using a <a href="https://seehiong.github.io/2024/optimizing-tsp-with-genetic-algorithms-in-micronaut/">genetic algorithm for the TSP</a>, I&rsquo;ll utilize <a href="https://developers.google.com/optimization/">OR-Tools</a> to solve this problem.</p>
+<h2 id="defining-the-solver">Defining the solver</h2>
+<p>Referencing the <a href="https://developers.google.com/optimization/mip/mip_example">MIP example</a>,  I&rsquo;ll solve the FLP using the MIP approach. Let&rsquo;s place all solver codes in <strong>FLPService.java</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Create the linear solver with the SCIP backend.</span>
+</span></span><span style="display:flex;"><span>MPSolver solver <span style="color:#f92672">=</span> MPSolver.<span style="color:#a6e22e">createSolver</span>(<span style="color:#e6db74">&#34;SCIP&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (solver <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>    System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Could not create solver SCIP&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="defining-the-variables">Defining the variables</h2>
+<p>Each facility \( j \) in the set of facilities \( J \quad j \in J \)</p>
+<ul>
+<li>A fixed setup cost \( s_j \quad s_j \in \mathbb{R}^+ \)</li>
+<li>A capacity \( c_j \quad c_j \in \mathbb{Z}^+ \)
+​</li>
+</ul>
+<p>This is represented in <strong>Facility.java</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Data</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Builder</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@AllArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@NoArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Serdeable.Serializable</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Facility</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> setupCost;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> capacity;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> x;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> y;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Each customer \( i \) in the set of customers \( I \quad i \in I \)</p>
+<ul>
+<li>A demand \( d_i \quad d_i \in \mathbb{Z}^+ \)</li>
+</ul>
+<p>This is represented in <strong>Customer.java</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Data</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Builder</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@AllArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@NoArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Serdeable.Serializable</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Customer</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> demand;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> x;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> y;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The delivery cost is proportional to the distance between the facility and the customer, \( dist_{i,j} \quad dist_{i,j} \in \mathbb{R}^+ \).</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> dist <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[</span>customerCount<span style="color:#f92672">][</span>facilityCount<span style="color:#f92672">]</span>;
+</span></span></code></pre></div><p>Define decision variables:</p>
+<ul>
+<li>\( f_j \) for facility \( j \)</li>
+<li>\( a_{i,j} \) for assigning customer \( i \) to facility \( j \)</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Decision Variables: f[j] is 1 if facility j is opened, otherwise 0</span>
+</span></span><span style="display:flex;"><span>MPVariable<span style="color:#f92672">[]</span> f <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeIntVarArray</span>(numFacility,0.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;f_&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">// Decision Variables: a[i][j] is 1 when customer i is assigned to facility j, otherwise 0</span>
+</span></span><span style="display:flex;"><span>MPVariable<span style="color:#f92672">[][]</span> a <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> MPVariable<span style="color:#f92672">[</span>numCustomer<span style="color:#f92672">][</span>numFacility<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    a<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeIntVarArray</span>(numFacility, 0.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;a_&#34;</span> <span style="color:#f92672">+</span> i);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="defining-the-constraints">Defining the constraints</h2>
+<p>Each customer must be served by exactly one facility:
+\[ \sum_{j \in J} a_{i,j} = 1 \quad \forall i \in I \]</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Customer constraint: Each customer is assigned to exactly one facility</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    MPConstraint constraint <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeConstraint</span>(1.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;customer_&#34;</span> <span style="color:#f92672">+</span> i);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        constraint.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, 1.<span style="color:#a6e22e">0</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Each facility must meet the demand of its assigned customers without exceeding its capacity:
+\[ \sum_{i \in I} (d_i \cdot a_{i,j}) \leq c_j \cdot f_j \quad \forall j \in J \]</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Capacity constraint: Facility capacities</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    MPConstraint constraint <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeConstraint</span>(<span style="color:#f92672">-</span>MPSolver.<span style="color:#a6e22e">infinity</span>(), 0.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;capacity_&#34;</span> <span style="color:#f92672">+</span> j);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        constraint.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, customers<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>.<span style="color:#a6e22e">demand</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    constraint.<span style="color:#a6e22e">setCoefficient</span>(f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>, <span style="color:#f92672">-</span>facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">capacity</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="defining-the-objective">Defining the objective</h2>
+<p>Minimize the total cost, including setup and delivery costs:
+\[ \sum_{j \in J} (f_j \cdot s_j + \sum_{i \in I} a_{i,j} \cdot dist_{i,j}) \]</p>
+<p>This is implemented as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Objective function: minimize total cost (including setup costs and delivery cost)</span>
+</span></span><span style="display:flex;"><span>MPObjective objective <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">objective</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Add setup cost for each facility</span>
+</span></span><span style="display:flex;"><span>    objective.<span style="color:#a6e22e">setCoefficient</span>(f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>, facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">setupCost</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Add delivery cost for assigning each customer to each facility</span>
+</span></span><span style="display:flex;"><span>        objective.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, dist<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>objective.<span style="color:#a6e22e">setMinimization</span>();
+</span></span></code></pre></div><h2 id="displaying-the-solution">Displaying the solution</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// checks solver output progress</span>
+</span></span><span style="display:flex;"><span>solver.<span style="color:#a6e22e">enableOutput</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// sets the max solving time in milliseconds</span>
+</span></span><span style="display:flex;"><span>solver.<span style="color:#a6e22e">setTimeLimit</span>(1200000);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// calls the solver</span>
+</span></span><span style="display:flex;"><span>MPSolver.<span style="color:#a6e22e">ResultStatus</span> resultStatus <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">solve</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Check that the problem has a feasible solution</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (resultStatus <span style="color:#f92672">==</span> MPSolver.<span style="color:#a6e22e">ResultStatus</span>.<span style="color:#a6e22e">OPTIMAL</span> <span style="color:#f92672">||</span> resultStatus <span style="color:#f92672">==</span> MPSolver.<span style="color:#a6e22e">ResultStatus</span>.<span style="color:#a6e22e">FEASIBLE</span>) {
+</span></span><span style="display:flex;"><span>    System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Total cost: &#34;</span> <span style="color:#f92672">+</span> objective.<span style="color:#a6e22e">value</span>() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\n&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; <span style="color:#f92672">++</span>j) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span> toatlCost <span style="color:#f92672">=</span> facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">setupCost</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>() <span style="color:#f92672">&gt;</span> 0.<span style="color:#a6e22e">5</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">double</span> totalDemand <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>() <span style="color:#f92672">&gt;</span> 0.<span style="color:#a6e22e">0</span>) {
+</span></span><span style="display:flex;"><span>                    totalDemand <span style="color:#f92672">+=</span> customers<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>.<span style="color:#a6e22e">demand</span>;
+</span></span><span style="display:flex;"><span>                    toatlCost <span style="color:#f92672">+=</span> dist<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Facility: &#34;</span> <span style="color:#f92672">+</span> j <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, capacity: &#34;</span> <span style="color:#f92672">+</span> facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">capacity</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, demand: &#34;</span> <span style="color:#f92672">+</span> totalDemand <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, cost: &#34;</span> <span style="color:#f92672">+</span> toatlCost);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;No solution found.&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="the-input-file">The input file</h2>
+<p>Sample input file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#ae81ff">3</span> <span style="color:#ae81ff">12</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">100</span> <span style="color:#ae81ff">100</span> <span style="color:#ae81ff">1065</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1065</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">100</span> <span style="color:#ae81ff">100</span> <span style="color:#ae81ff">1062</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1062</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">100</span> <span style="color:#ae81ff">500</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">50</span> <span style="color:#ae81ff">1397</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1397</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">50</span> <span style="color:#ae81ff">1398</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1398</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">75</span> <span style="color:#ae81ff">1399</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1399</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">75</span> <span style="color:#ae81ff">586</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">586</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">80</span> <span style="color:#ae81ff">900</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">900</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">80</span> <span style="color:#ae81ff">910</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">910</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">90</span> <span style="color:#ae81ff">1200</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1200</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">90</span> <span style="color:#ae81ff">1210</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1210</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">70</span> <span style="color:#ae81ff">700</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">700</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">70</span> <span style="color:#ae81ff">710</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">710</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">60</span> <span style="color:#ae81ff">800</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">800</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">60</span> <span style="color:#ae81ff">810</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">810</span>.<span style="color:#ae81ff">0</span>
+</span></span></code></pre></div><p>Where</p>
+<ul>
+<li>Lines 2- 4 represent facilities (cost, capacity, coordinates)</li>
+<li>Lines 5 -16 represent customers (demand, coordinates)</li>
+</ul>
+<h2 id="the-solution">The solution</h2>
+<p>The <strong>FLPSolution.java</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Data</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Builder</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@AllArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@NoArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Serdeable.Serializable</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FLPSolution</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">double</span> objectiveValue;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> Map<span style="color:#f92672">&lt;</span>String, Double<span style="color:#f92672">&gt;</span> variableValue;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> String status;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="micronaut-service-for-flp">Micronaut Service for FLP</h2>
+<p>The solve method in <strong>FLPService.java</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Singleton</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FLPService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>     FLPSolution <span style="color:#a6e22e">solve</span>(Facility<span style="color:#f92672">[]</span> facilities, Customer<span style="color:#f92672">[]</span> customers, <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> dist) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> numFacility <span style="color:#f92672">=</span> facilities.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> numCustomer <span style="color:#f92672">=</span> customers.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Loader.<span style="color:#a6e22e">loadNativeLibraries</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Create the linear solver with the SCIP backend</span>
+</span></span><span style="display:flex;"><span>        MPSolver solver <span style="color:#f92672">=</span> MPSolver.<span style="color:#a6e22e">createSolver</span>(<span style="color:#e6db74">&#34;SCIP&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (solver <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>            System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Could not create solver SCIP&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Define decision variables</span>
+</span></span><span style="display:flex;"><span>        MPVariable<span style="color:#f92672">[]</span> f <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeIntVarArray</span>(numFacility,0.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;f_&#34;</span>);
+</span></span><span style="display:flex;"><span>        MPVariable<span style="color:#f92672">[][]</span> a <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> MPVariable<span style="color:#f92672">[</span>numCustomer<span style="color:#f92672">][</span>numFacility<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            a<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeIntVarArray</span>(numFacility, 0.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;a_&#34;</span> <span style="color:#f92672">+</span> i);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Customer constraint: each customer is assigned to exactly one facility</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            MPConstraint constraint <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeConstraint</span>(1.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;customer_&#34;</span> <span style="color:#f92672">+</span> i);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                constraint.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, 1.<span style="color:#a6e22e">0</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Capacity constraint: facility capacities</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            MPConstraint constraint <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeConstraint</span>(<span style="color:#f92672">-</span>MPSolver.<span style="color:#a6e22e">infinity</span>(), 0.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;capacity_&#34;</span> <span style="color:#f92672">+</span> j);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                constraint.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, customers<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>.<span style="color:#a6e22e">demand</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            constraint.<span style="color:#a6e22e">setCoefficient</span>(f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>, <span style="color:#f92672">-</span>facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">capacity</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Objective function: minimize total cost (including setup and delivery cost)</span>
+</span></span><span style="display:flex;"><span>        MPObjective objective <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">objective</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            objective.<span style="color:#a6e22e">setCoefficient</span>(f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>, facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">setupCost</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                objective.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, dist<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        objective.<span style="color:#a6e22e">setMinimization</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Set solver parameters</span>
+</span></span><span style="display:flex;"><span>        solver.<span style="color:#a6e22e">enableOutput</span>();
+</span></span><span style="display:flex;"><span>        solver.<span style="color:#a6e22e">setTimeLimit</span>(1200000);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Solve the problem</span>
+</span></span><span style="display:flex;"><span>        MPSolver.<span style="color:#a6e22e">ResultStatus</span> resultStatus <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">solve</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Prepare the solution</span>
+</span></span><span style="display:flex;"><span>        Map<span style="color:#f92672">&lt;</span>String, Double<span style="color:#f92672">&gt;</span> variables <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (resultStatus <span style="color:#f92672">==</span> MPSolver.<span style="color:#a6e22e">ResultStatus</span>.<span style="color:#a6e22e">OPTIMAL</span> <span style="color:#f92672">||</span> resultStatus <span style="color:#f92672">==</span> MPSolver.<span style="color:#a6e22e">ResultStatus</span>.<span style="color:#a6e22e">FEASIBLE</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; <span style="color:#f92672">++</span>j) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>() <span style="color:#f92672">&gt;</span> 0.<span style="color:#a6e22e">5</span>) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">if</span> (a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>() <span style="color:#f92672">&gt;</span> 0.<span style="color:#a6e22e">0</span>) {
+</span></span><span style="display:flex;"><span>                             variables.<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;a_&#34;</span> <span style="color:#f92672">+</span> i <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;_&#34;</span> <span style="color:#f92672">+</span> j, a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>());
+</span></span><span style="display:flex;"><span>                        }
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                    variables.<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;f_&#34;</span> <span style="color:#f92672">+</span> j, f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>());
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> FLPSolution.<span style="color:#a6e22e">builder</span>()
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">objectiveValue</span>(objective.<span style="color:#a6e22e">value</span>())
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">variableValue</span>(variables)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">status</span>(resultStatus.<span style="color:#a6e22e">name</span>())
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This service finds the optimal facility locations, minimizing costs while ensuring each customer&rsquo;s demand is met.</p>
+<h2 id="micronaut-controller-for-flp">Micronaut Controller for FLP</h2>
+<p>The <strong>FLPController.java</strong> file is responsible for exposing an API endpoint that allows users to upload a file containing the input data for the FLP and then processes that data to find the optimal solution.</p>
+<p>Here&rsquo;s the implementation:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Controller</span>(<span style="color:#e6db74">&#34;/flp&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FLPController</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> FLPService flpService;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">FLPController</span>(FLPService flpService) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">flpService</span> <span style="color:#f92672">=</span> flpService;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Post</span>(value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/uploadAndSolve&#34;</span>, consumes <span style="color:#f92672">=</span> MediaType.<span style="color:#a6e22e">MULTIPART_FORM_DATA</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> FLPSolution <span style="color:#a6e22e">uploadAndSolve</span>(CompletedFileUpload file) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Read the contents of the file into a List of Strings</span>
+</span></span><span style="display:flex;"><span>            List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lines <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">try</span> (BufferedReader input <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BufferedReader(<span style="color:#66d9ef">new</span> InputStreamReader(file.<span style="color:#a6e22e">getInputStream</span>(), StandardCharsets.<span style="color:#a6e22e">UTF_8</span>))) {
+</span></span><span style="display:flex;"><span>                String line;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">while</span> ((line <span style="color:#f92672">=</span> input.<span style="color:#a6e22e">readLine</span>()) <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>                    lines.<span style="color:#a6e22e">add</span>(line);
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Process the lines to extract facilities, customers, and distances</span>
+</span></span><span style="display:flex;"><span>            Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> dataMap <span style="color:#f92672">=</span> flpService.<span style="color:#a6e22e">processLines</span>(lines);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> distances <span style="color:#f92672">=</span> (<span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span>) dataMap.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#34;distances&#34;</span>);
+</span></span><span style="display:flex;"><span>            Facility<span style="color:#f92672">[]</span> facilities <span style="color:#f92672">=</span> (Facility<span style="color:#f92672">[]</span>) dataMap.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#34;facilities&#34;</span>);
+</span></span><span style="display:flex;"><span>            Customer<span style="color:#f92672">[]</span> customers <span style="color:#f92672">=</span> (Customer<span style="color:#f92672">[]</span>) dataMap.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#34;customers&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Solve the FLP with the extracted data</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> flpService.<span style="color:#a6e22e">solve</span>(facilities, customers, distances);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">catch</span> (IOException e) {
+</span></span><span style="display:flex;"><span>            e.<span style="color:#a6e22e">printStackTrace</span>();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>; <span style="color:#75715e">// or handle error appropriately</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="the-service-method-to-process-input-lines">The Service Method to Process Input Lines</h2>
+<p>The <em>processLines</em> method in <strong>FLPService</strong> parses the input file lines and extracts the necessary data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Singleton</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FLPService</span> {
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> {
+</span></span><span style="display:flex;"><span>        Loader.<span style="color:#a6e22e">loadNativeLibraries</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">processLines</span>(List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lines) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Extract the number of facilities and customers from the first line</span>
+</span></span><span style="display:flex;"><span>        String<span style="color:#f92672">[]</span> firstLine <span style="color:#f92672">=</span> lines.<span style="color:#a6e22e">get</span>(0).<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34; &#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> numFacilities <span style="color:#f92672">=</span> Integer.<span style="color:#a6e22e">parseInt</span>(firstLine<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> numCustomers <span style="color:#f92672">=</span> Integer.<span style="color:#a6e22e">parseInt</span>(firstLine<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Create arrays for facilities and customers</span>
+</span></span><span style="display:flex;"><span>        Facility<span style="color:#f92672">[]</span> facilities <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Facility<span style="color:#f92672">[</span>numFacilities<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        Customer<span style="color:#f92672">[]</span> customers <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Customer<span style="color:#f92672">[</span>numCustomers<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Parse facility data</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1; i <span style="color:#f92672">&lt;</span> numFacilities <span style="color:#f92672">+</span> 1; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            String<span style="color:#f92672">[]</span> facilityData <span style="color:#f92672">=</span> lines.<span style="color:#a6e22e">get</span>(i).<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34; &#34;</span>);
+</span></span><span style="display:flex;"><span>            facilities<span style="color:#f92672">[</span>i <span style="color:#f92672">-</span> 1<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> Facility.<span style="color:#a6e22e">builder</span>()
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">setupCost</span>(Double.<span style="color:#a6e22e">parseDouble</span>(facilityData<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>)).
+</span></span><span style="display:flex;"><span>                    capacity(Integer.<span style="color:#a6e22e">parseInt</span>(facilityData<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>))
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">x</span>(Double.<span style="color:#a6e22e">parseDouble</span>(facilityData<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>)).
+</span></span><span style="display:flex;"><span>                    y(Double.<span style="color:#a6e22e">parseDouble</span>(facilityData<span style="color:#f92672">[</span>3<span style="color:#f92672">]</span>)).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Parse customer data</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> numFacilities <span style="color:#f92672">+</span> 1; i <span style="color:#f92672">&lt;</span> numFacilities <span style="color:#f92672">+</span> numCustomers <span style="color:#f92672">+</span> 1; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            String<span style="color:#f92672">[]</span> customerData <span style="color:#f92672">=</span> lines.<span style="color:#a6e22e">get</span>(i).<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34; &#34;</span>);
+</span></span><span style="display:flex;"><span>            customers<span style="color:#f92672">[</span>i <span style="color:#f92672">-</span> numFacilities <span style="color:#f92672">-</span> 1<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> Customer.<span style="color:#a6e22e">builder</span>()
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">demand</span>(Integer.<span style="color:#a6e22e">parseInt</span>(customerData<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>))
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">x</span>(Double.<span style="color:#a6e22e">parseDouble</span>(customerData<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>))
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">y</span>(Double.<span style="color:#a6e22e">parseDouble</span>(customerData<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>)).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Calculate distances</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> distances <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[</span>numCustomers<span style="color:#f92672">][</span>numFacilities<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomers; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacilities; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                distances<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> calculateDistance(customers<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>, facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Prepare the result map</span>
+</span></span><span style="display:flex;"><span>        Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> dataMap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>        dataMap.<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;distances&#34;</span>, distances);
+</span></span><span style="display:flex;"><span>        dataMap.<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;facilities&#34;</span>, facilities);
+</span></span><span style="display:flex;"><span>        dataMap.<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;customers&#34;</span>, customers);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> dataMap;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">calculateDistance</span>(Customer customer, Facility facility) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span> dx <span style="color:#f92672">=</span> customer.<span style="color:#a6e22e">getX</span>() <span style="color:#f92672">-</span> facility.<span style="color:#a6e22e">getX</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span> dy <span style="color:#f92672">=</span> customer.<span style="color:#a6e22e">getY</span>() <span style="color:#f92672">-</span> facility.<span style="color:#a6e22e">getY</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Math.<span style="color:#a6e22e">sqrt</span>(dx <span style="color:#f92672">*</span> dx <span style="color:#f92672">+</span> dy <span style="color:#f92672">*</span> dy);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// The solve method remains the same as defined in the previous sections</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h1 id="summary">Summary</h1>
+<p>This Micronaut setup allows users to upload an input file to solve the Facility Location Problem using the provided FLP service. The controller processes the file, extracts data, and leverages OR-Tools to find the optimal solution.</p>
+<h1 id="testing-the-controller">Testing the Controller</h1>
+<p>To test the controller, you can use tools like Postman to send a POST request with a multipart/form-data containing the input file. The service will process the file and return the solution, which you can inspect in the response.</p>
+<h1 id="sample-solver-output">Sample Solver Output</h1>
+<p>Upon successful upload and processing, you will see the solver&rsquo;s output with the details of the selected facilities and assigned customers:</p>
+<p><img src="/images/flp/flp-upload-and-solve.png" alt="flp-upload-and-solve"></p>
+<p>And this is the sample solver output from micronaut:</p>
+<p><img src="/images/flp/flp-sample-solver-enable-output.png" alt="flp-sample-solver-enable-output"></p>
+<p>With this setup, you now have a fully functional Micronaut application that can solve the Facility Location Problem based on user-provided input files. If you have any questions or need further assistance, feel free to ask!</p>
+<ul class="pa0" data-pagefind-ignore>
+  
+   <li class="list di">
+     <a href="/tags/or-tools/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">OR-Tools</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/micronaut/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Micronaut</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/flp/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">FLP</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/backend/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Backend</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      <p class="f5 b mb3">Post a comment:</p>
+<script src="https://giscus.app/client.js"
+    data-repo="seehiong/seehiong.github.io"
+    data-repo-id="R_kgDOJg7Puw"
+    data-category="General"
+    data-category-id="DIC_kwDOJg7Pu84Cbyhc"
+    data-mapping="url"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="en"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+      </div><br/>
+<div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2024/optimizing-tsp-with-genetic-algorithms-in-micronaut/">[Backend] Optimizing TSP with Genetic Algorithms in Micronaut</a>
+    
+    
+</div></div>
+
+    <aside class="w-100-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2024/optimizing-tsp-with-genetic-algorithms-in-micronaut/">[Backend] Optimizing TSP with Genetic Algorithms in Micronaut</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/efficient-tsp-solver-api-with-micronaut/">[Backend] Efficient TSP Solver API with Micronaut</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2024 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
