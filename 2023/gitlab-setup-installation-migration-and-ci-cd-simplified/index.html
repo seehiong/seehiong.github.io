@@ -36,12 +36,12 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seehiong.github.io/2023/gitlab-setup-installation-migration-and-ci-cd-simplified/" /><meta property="article:section" content="2023" />
 <meta property="article:published_time" content="2023-12-24T20:00:00+08:00" />
-<meta property="article:modified_time" content="2023-12-24T20:00:00+08:00" />
+<meta property="article:modified_time" content="2024-06-09T00:00:00+00:00" />
 
 <meta itemprop="name" content="[Home Lab] GitLab Setup: Installation, Migration, and CI/CD Simplified">
 <meta itemprop="description" content="Discover a streamlined approach to GitLab installation, repository migration, and CI/CD optimization. This comprehensive guide covers setting up GitLab in your home lab, upgrading to the latest version, configuring external URLs, and migrating repositories. Learn how to install GitLab Runner, Docker, and seamlessly integrate them into your development workflow. The guide concludes with optional steps for registering GitLab Runner as a service. Elevate your version control and continuous integration experience with this concise and practical tutorial."><meta itemprop="datePublished" content="2023-12-24T20:00:00+08:00" />
-<meta itemprop="dateModified" content="2023-12-24T20:00:00+08:00" />
-<meta itemprop="wordCount" content="658">
+<meta itemprop="dateModified" content="2024-06-09T00:00:00+00:00" />
+<meta itemprop="wordCount" content="781">
 <meta itemprop="keywords" content="GitLab,CI/CD,Docker,HomeLab," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Home Lab] GitLab Setup: Installation, Migration, and CI/CD Simplified"/>
 <meta name="twitter:description" content="Discover a streamlined approach to GitLab installation, repository migration, and CI/CD optimization. This comprehensive guide covers setting up GitLab in your home lab, upgrading to the latest version, configuring external URLs, and migrating repositories. Learn how to install GitLab Runner, Docker, and seamlessly integrate them into your development workflow. The guide concludes with optional steps for registering GitLab Runner as a service. Elevate your version control and continuous integration experience with this concise and practical tutorial."/>
@@ -163,11 +163,14 @@
       
 
       
+        <time class="f6 mv4 dib tracked" ddatetime="2023-12-24T20:00:00+08:00">
+          (Updated:&nbsp;June 9, 2024)
+        </time>
 
       
       
         <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 658 words </span>
+        <span class="f6 mv4 dib tracked"> - 781 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>In this guide, I&rsquo;ll walk you through the process of installing <a href="https://docs.gitlab.com/omnibus/installation/">GitLab</a>, a comprehensive suite of tools for version control, continuous integration, continuous delivery, and more, in my Home Lab collection.</p>
@@ -312,7 +315,54 @@
 </span></span><span style="display:flex;"><span>sudo systemctl status gitlab-runner
 </span></span></code></pre></div><p>Run the pipeline again:</p>
 <p><img src="/images/gitlab/gitlab-pipeline-rebuild.png" alt="gitlab-pipeline-rebuild"></p>
-<ul class="pa0" data-pagefind-ignore>
+<h2 id="optional-enable-container-and-package-registry">Optional: Enable Container and Package Registry</h2>
+<p>To enable the container and package registry, follow these steps:</p>
+<ol>
+<li>Modifies the <em>gitlab.rb</em> file:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/gitlab/gitlab.rb
+</span></span></code></pre></div><ol start="2">
+<li>Make the necessary changes to configure the registry:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">external_url</span> <span style="color:#e6db74">&#39;http://192.168.68.126&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry_external_url</span> <span style="color:#e6db74">&#39;http://192.168.68.126:5005&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;registry_enabled&#39;</span>] = <span style="color:#a6e22e">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;registry_host&#39;</span>] = <span style="color:#e6db74">&#34;192.168.68.126&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;registry_port&#39;</span>] = <span style="color:#e6db74">&#34;5005&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;registry_path&#39;</span>] = <span style="color:#e6db74">&#34;/mnt/registry&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;enable&#39;</span>] = <span style="color:#a6e22e">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;dir&#39;</span>] = <span style="color:#e6db74">&#34;/var/opt/gitlab/registry&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;registry_http_addr&#39;</span>] = <span style="color:#e6db74">&#34;127.0.0.1:5000&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;log_directory&#39;</span>] = <span style="color:#e6db74">&#34;/var/log/gitlab/registry&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;env_directory&#39;</span>] = <span style="color:#e6db74">&#34;/opt/gitlab/etc/registry/env&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;env&#39;</span>] = {
+</span></span><span style="display:flex;"><span><span style="color:#75715e">  &#34;REGISTRY_HTTP_RELATIVEURLS&#34; =&gt; true</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">letsencrypt</span>[<span style="color:#e6db74">&#39;enable&#39;</span>] = <span style="color:#a6e22e">false</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;packages_enabled&#39;</span>] = <span style="color:#a6e22e">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;packages_storage_path&#39;</span>] = <span style="color:#e6db74">&#34;/mnt/packages&#34;</span>
+</span></span></code></pre></div><ol start="3">
+<li>Reconfigures gitlab:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo gitlab-ctl reconfigure
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Verifies if gitlab registry is accessible; authentication required message expected</span>
+</span></span><span style="display:flex;"><span>curl -k http://192.168.68.126:5005/v2/
+</span></span></code></pre></div><ol start="4">
+<li>Modify Docker Desktop (for Windows) via Settings -&gt; Docker Engine:</li>
+</ol>
+<pre tabindex="0"><code>&#34;insecure-registries&#34;: [
+   &#34;192.168.68.126:5005&#34;
+],
+</code></pre><ol start="5">
+<li>Log in to the registry from your Windows machine:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span> docker login 192.168.68.126:5005
+</span></span></code></pre></div><ul class="pa0" data-pagefind-ignore>
   
    <li class="list di">
      <a href="/tags/gitlab/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">GitLab</a>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Building Advanced RAG Applications with MyScaleDB and LlamaIndex | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="Explore how to build advanced Retrieval-Augmented Generation (RAG) applications using MyScaleDB and LlamaIndex. This guide covers the installation of necessary tools, setting up a virtual environment, and creating an index for document categorization. Learn how to execute simple and filtered queries, and troubleshoot common issues. Enhance your understanding of integrating high-performance SQL vector databases with cutting-edge data frameworks for efficient LLM applications.">
+    <meta name="generator" content="Hugo 0.120.4">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Building Advanced RAG Applications with MyScaleDB and LlamaIndex" />
+<meta property="og:description" content="Explore how to build advanced Retrieval-Augmented Generation (RAG) applications using MyScaleDB and LlamaIndex. This guide covers the installation of necessary tools, setting up a virtual environment, and creating an index for document categorization. Learn how to execute simple and filtered queries, and troubleshoot common issues. Enhance your understanding of integrating high-performance SQL vector databases with cutting-edge data frameworks for efficient LLM applications." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2024/building-advanced-rag-applications-with-myscaledb-and-llamaindex/" /><meta property="article:section" content="2024" />
+<meta property="article:published_time" content="2024-06-15T20:00:00+08:00" />
+<meta property="article:modified_time" content="2024-06-15T20:00:00+08:00" />
+
+<meta itemprop="name" content="Building Advanced RAG Applications with MyScaleDB and LlamaIndex">
+<meta itemprop="description" content="Explore how to build advanced Retrieval-Augmented Generation (RAG) applications using MyScaleDB and LlamaIndex. This guide covers the installation of necessary tools, setting up a virtual environment, and creating an index for document categorization. Learn how to execute simple and filtered queries, and troubleshoot common issues. Enhance your understanding of integrating high-performance SQL vector databases with cutting-edge data frameworks for efficient LLM applications."><meta itemprop="datePublished" content="2024-06-15T20:00:00+08:00" />
+<meta itemprop="dateModified" content="2024-06-15T20:00:00+08:00" />
+<meta itemprop="wordCount" content="521">
+<meta itemprop="keywords" content="AI,Ollama,LlamaIndex,VSCodium,ClickHouse,MyScaleDB," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Building Advanced RAG Applications with MyScaleDB and LlamaIndex"/>
+<meta name="twitter:description" content="Explore how to build advanced Retrieval-Augmented Generation (RAG) applications using MyScaleDB and LlamaIndex. This guide covers the installation of necessary tools, setting up a virtual environment, and creating an index for document categorization. Learn how to execute simple and filtered queries, and troubleshoot common issues. Enhance your understanding of integrating high-performance SQL vector databases with cutting-edge data frameworks for efficient LLM applications."/>
+
+      
+    
+
+    
+      <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>
+    
+
+	<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js"></script>
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv1 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2024/" title="2024 page">
+              2024
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3" data-pagefind-body>
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2024
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Building Advanced RAG Applications with MyScaleDB and LlamaIndex</h1>
+      
+      <p class="tracked">
+        By <strong>See Hiong</strong>
+      </p>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2024-06-15T20:00:00+08:00">June 15, 2024</time>
+      
+
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 521 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>In this post, I will explore <a href="https://github.com/myscale/myscaledb">MyScaleDB</a>, an open-source, high-performance SQL vector database built on ClickHouse, and <a href="https://www.llamaindex.ai/">LlamaIndex</a>, the leading data framework for building LLM applications.</p>
+<h1 id="installation">Installation</h1>
+<p>After installing <a href="https://vscodium.com/#install">VSCodium</a> as my primary IDE, I proceeded with installing the Python extension via <a href="https://open-vsx.org/vscode/item?itemName=ms-python.python">Marketplace Link</a>.
+Next, I created the <a href="https://docs.python.org/3/library/venv.html">virtual environment</a> using venv:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create the envrionment</span>
+</span></span><span style="display:flex;"><span>python -m venv myscaledb
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Activate the environment</span>
+</span></span><span style="display:flex;"><span>myscaledb<span style="color:#ae81ff">\S</span>cripts<span style="color:#ae81ff">\a</span>ctivate
+</span></span></code></pre></div><p>This is my <em>requirements.txt</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">langchain</span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">langchain_community</span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">pydantic</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">clickhouse</span>-<span style="color:#a6e22e">connect</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">llama</span>-<span style="color:#a6e22e">index</span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">llama</span>-<span style="color:#a6e22e">index</span>-<span style="color:#a6e22e">llms</span>-<span style="color:#a6e22e">ollama</span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">llama</span>-<span style="color:#a6e22e">index</span>-<span style="color:#a6e22e">vector</span>-<span style="color:#a6e22e">stores</span>-<span style="color:#a6e22e">myscale</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">llama</span>-<span style="color:#a6e22e">index</span>-<span style="color:#a6e22e">embeddings</span>-<span style="color:#a6e22e">langchain</span>
+</span></span></code></pre></div><p>Install all the requirement pakcages with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip install -r requirements.txt
+</span></span></code></pre></div><h1 id="preparation">Preparation</h1>
+<p>After signing up an account with MyScale, click on the Clusters and from the Actions, select Connection Details:</p>
+<p><img src="/images/myscaledb/myscaledb-connection-details.png" alt="myscaledb-connection-details"></p>
+<h1 id="building-an-rag-application">Building an RAG application</h1>
+<p>By following closely to <a href="https://myscale.com/blog/build-rag-app-with-myscale-and-llamaindex/">Build An Advanced RAG Application using MyScaleDB and LlamaIndex</a>, this is my <em>rag.py</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> llama_index.llms.ollama <span style="color:#f92672">import</span> Ollama
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> Ollama(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;llama3&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># NOTE:  I added the send_receive_timeout and connect_timeout settings to fix the write operation timeout</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># SEE: https://clickhouse.com/docs/en/integrations/python#clickhouse-connect-driver-api</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> clickhouse_connect
+</span></span><span style="display:flex;"><span>client <span style="color:#f92672">=</span> clickhouse_connect<span style="color:#f92672">.</span>get_client(
+</span></span><span style="display:flex;"><span>   host<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;xxxxxx.myscale.com&#39;</span>,
+</span></span><span style="display:flex;"><span>   port<span style="color:#f92672">=</span><span style="color:#ae81ff">443</span>,
+</span></span><span style="display:flex;"><span>   username<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;xxxxxx&#39;</span>,
+</span></span><span style="display:flex;"><span>   password<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;xxxxxx&#39;</span>,
+</span></span><span style="display:flex;"><span>   send_receive_timeout<span style="color:#f92672">=</span><span style="color:#ae81ff">600000</span>,
+</span></span><span style="display:flex;"><span>   connect_timeout<span style="color:#f92672">=</span><span style="color:#ae81ff">600000</span>
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>Next, download and load the data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> requests
+</span></span><span style="display:flex;"><span>url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://niketeam-asset-download.nike.net/catalogs/2024/2024_Nike%20Kids_02_09_24.pdf?cb=09302022&#39;</span>
+</span></span><span style="display:flex;"><span>response <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>get(url)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;Nike_Catalog.pdf&#39;</span>, <span style="color:#e6db74">&#39;wb&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>   f<span style="color:#f92672">.</span>write(response<span style="color:#f92672">.</span>content)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> llama_index.core <span style="color:#f92672">import</span> SimpleDirectoryReader
+</span></span><span style="display:flex;"><span>reader <span style="color:#f92672">=</span> SimpleDirectoryReader(
+</span></span><span style="display:flex;"><span>   input_files<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;Nike_Catalog.pdf&#34;</span>]
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>documents <span style="color:#f92672">=</span> reader<span style="color:#f92672">.</span>load_data()
+</span></span></code></pre></div><p>Categorize  the data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">analyze_and_assign_category</span>(text):
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;football&#34;</span> <span style="color:#f92672">in</span> text<span style="color:#f92672">.</span>lower():
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Football&#34;</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">elif</span> <span style="color:#e6db74">&#34;basketball&#34;</span> <span style="color:#f92672">in</span> text<span style="color:#f92672">.</span>lower():
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Basketball&#34;</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">elif</span> <span style="color:#e6db74">&#34;running&#34;</span> <span style="color:#f92672">in</span> text<span style="color:#f92672">.</span>lower():
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Running&#34;</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Uncategorized&#34;</span>
+</span></span></code></pre></div><p>Since I am using Ollama, pull the embedding model with  <strong>ollama pull mxbai-embed-large</strong>. This is how it is used:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.embeddings <span style="color:#f92672">import</span> OllamaEmbeddings
+</span></span><span style="display:flex;"><span>embeddings <span style="color:#f92672">=</span> OllamaEmbeddings(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;mxbai-embed-large&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> llama_index.core <span style="color:#f92672">import</span> VectorStoreIndex, Settings
+</span></span><span style="display:flex;"><span>Settings<span style="color:#f92672">.</span>embed_model <span style="color:#f92672">=</span> embeddings
+</span></span><span style="display:flex;"><span>Settings<span style="color:#f92672">.</span>llm <span style="color:#f92672">=</span> llm
+</span></span></code></pre></div><p>Next, creates an index:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> llama_index.vector_stores.myscale <span style="color:#f92672">import</span> MyScaleVectorStore
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> llama_index.core <span style="color:#f92672">import</span> StorageContext
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> document <span style="color:#f92672">in</span> documents:
+</span></span><span style="display:flex;"><span>   category <span style="color:#f92672">=</span> analyze_and_assign_category(document<span style="color:#f92672">.</span>text)
+</span></span><span style="display:flex;"><span>   document<span style="color:#f92672">.</span>metadata <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;Category&#34;</span>: category}
+</span></span><span style="display:flex;"><span>   
+</span></span><span style="display:flex;"><span>vector_store <span style="color:#f92672">=</span> MyScaleVectorStore(myscale_client<span style="color:#f92672">=</span>client)
+</span></span><span style="display:flex;"><span>storage_context <span style="color:#f92672">=</span> StorageContext<span style="color:#f92672">.</span>from_defaults(vector_store<span style="color:#f92672">=</span>vector_store)
+</span></span><span style="display:flex;"><span>index <span style="color:#f92672">=</span> VectorStoreIndex<span style="color:#f92672">.</span>from_documents(
+</span></span><span style="display:flex;"><span>   documents, storage_context<span style="color:#f92672">=</span>storage_context
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>This is a sample result with this command from SQL workspace:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> llama_index;
+</span></span></code></pre></div><p><img src="/images/myscaledb/myscaledb-sql-workspace.png" alt="myscaledb-sql-workspace"></p>
+<h2 id="simple-query">Simple Query</h2>
+<p>To test it out with a simple query:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>query_engine <span style="color:#f92672">=</span> index<span style="color:#f92672">.</span>as_query_engine()
+</span></span><span style="display:flex;"><span>response <span style="color:#f92672">=</span> query_engine<span style="color:#f92672">.</span>query(<span style="color:#e6db74">&#34;I want a few running shoes&#34;</span>)
+</span></span><span style="display:flex;"><span>print(response)
+</span></span></code></pre></div><p>This is a sample response:</p>
+<p><img src="/images/myscaledb/myscaledb-simple-query.png" alt="myscaledb-simple-query"></p>
+<h2 id="filtered-query">Filtered Query</h2>
+<p>The query engine is configured with the metadata filter:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Connect to the external vector store directly</span>
+</span></span><span style="display:flex;"><span>index <span style="color:#f92672">=</span> VectorStoreIndex<span style="color:#f92672">.</span>from_vector_store(
+</span></span><span style="display:flex;"><span>   vector_store<span style="color:#f92672">=</span>vector_store
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> llama_index.core.vector_stores <span style="color:#f92672">import</span> ExactMatchFilter, MetadataFilters
+</span></span><span style="display:flex;"><span>query_engine <span style="color:#f92672">=</span> index<span style="color:#f92672">.</span>as_query_engine(
+</span></span><span style="display:flex;"><span>   filters<span style="color:#f92672">=</span>MetadataFilters(
+</span></span><span style="display:flex;"><span>       filters<span style="color:#f92672">=</span>[
+</span></span><span style="display:flex;"><span>           ExactMatchFilter(key<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Category&#34;</span>, value<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Running&#34;</span>),
+</span></span><span style="display:flex;"><span>       ]
+</span></span><span style="display:flex;"><span>   ),
+</span></span><span style="display:flex;"><span>   similarity_top_k<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>   vector_store_query_mode<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;hybrid&#34;</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>response <span style="color:#f92672">=</span> query_engine<span style="color:#f92672">.</span>query(<span style="color:#e6db74">&#34;I want a few running shoes?&#34;</span>)
+</span></span><span style="display:flex;"><span>print(response<span style="color:#f92672">.</span>source_nodes[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>text)
+</span></span></code></pre></div><p>This is a sample response:</p>
+<p><img src="/images/myscaledb/myscaledb-filtered-query.png" alt="myscaledb-filtered-query"></p>
+<h1 id="troubleshooting">Troubleshooting</h1>
+<p>Initially I wanted to self-host <a href="https://github.com/myscale/myscaledb/blob/main/README.md">MyScaleDB</a> with this <em>docker-compose.yaml</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#39;3.7&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">services</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">myscaledb</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">myscale/myscaledb:1.5</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">tty</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#39;8123:8123&#39;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#39;9000:9000&#39;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#39;8998:8998&#39;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#39;9363:9363&#39;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#39;9116:9116&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">myscaledb_network</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ipv4_address</span>: <span style="color:#ae81ff">10.0.0.2</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">C:\myscaledb\volumes\data:/var/lib/clickhouse</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">C:\myscaledb\volumes\log:/var/log/clickhouse-server</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">C:\myscaledb\volumes\config\users.d\custom_users_config.xml:/etc/clickhouse-server/users.d/custom_users_config.xml</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">deploy</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">resources</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">limits</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">cpus</span>: <span style="color:#e6db74">&#34;4.00&#34;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">memory</span>: <span style="color:#ae81ff">32Gb</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">myscaledb_network</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">driver</span>: <span style="color:#ae81ff">bridge</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ipam</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">driver</span>: <span style="color:#ae81ff">default</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">config</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">subnet</span>: <span style="color:#ae81ff">10.0.0.0</span><span style="color:#ae81ff">/24</span>
+</span></span></code></pre></div><p>and this <em>custom_users_config.yaml</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ae81ff">&lt;clickhouse&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">&lt;users&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">&lt;default&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">&lt;password&gt;&lt;/password&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">&lt;networks&gt;</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#ae81ff">&lt;ip&gt;::1&lt;/ip&gt;</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#ae81ff">&lt;ip&gt;127.0.0.1&lt;/ip&gt;</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#ae81ff">&lt;ip&gt;10.0.0.0/24&lt;/ip&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">&lt;/networks&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">&lt;profile&gt;default&lt;/profile&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">&lt;quota&gt;default&lt;/quota&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">&lt;access_management&gt;1&lt;/access_management&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">&lt;named_collection_control&gt;1&lt;/named_collection_control&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">&lt;show_named_collections&gt;1&lt;/show_named_collections&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ae81ff">&lt;show_named_collections_secrets&gt;1&lt;/show_named_collections_secrets&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">&lt;/default&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">&lt;/users&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">&lt;/clickhouse&gt;</span>
+</span></span></code></pre></div><p>I tried to create the user after logging into the console:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>clickhouse-client
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>CREATE USER myscale IDENTIFIED WITH plaintext_password BY <span style="color:#e6db74">&#39;myscale&#39;</span>
+</span></span><span style="display:flex;"><span>COMMIT
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>GRANT ALL ON *.* TO myscale WITH GRANT OPTION;
+</span></span><span style="display:flex;"><span>quit
+</span></span></code></pre></div><p>But I was greeted with this error:</p>
+<p><img src="/images/myscaledb/myscaledb-unknown-type-mstg.png" alt="myscaledb-unknown-type-mstg"></p>
+<p>I realised that MSTG (Multi-scale Tree Graph) algorithm is provided through MyScale Cloud.</p>
+<p><img src="/images/myscaledb/myscaledb-mstg-through-myscale-cloud.png" alt="myscaledb-mstg-through-myscale-cloud"></p>
+<ul class="pa0" data-pagefind-ignore>
+  
+   <li class="list di">
+     <a href="/tags/ai/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">AI</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/ollama/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Ollama</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/llamaindex/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">LlamaIndex</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/vscodium/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">VSCodium</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/clickhouse/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">ClickHouse</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/myscaledb/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">MyScaleDB</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      <p class="f5 b mb3">Post a comment:</p>
+<script src="https://giscus.app/client.js"
+    data-repo="seehiong/seehiong.github.io"
+    data-repo-id="R_kgDOJg7Puw"
+    data-category="General"
+    data-category-id="DIC_kwDOJg7Pu84Cbyhc"
+    data-mapping="url"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="en"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+      </div><br/>
+<div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2024/planning-gift-deliveries-with-qgis/">[Home Lab] Planning Gift Deliveries With QGIS</a>
+    
+    
+</div></div>
+
+    <aside class="w-100-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2024/coding-with-crewai-ai-orchestration-simplified/">[Artifical Intelligence] Coding with CrewAI: AI Orchestration Simplified</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/text-to-image-with-stablediffusionpipeline/">[Artificial Intelligence] Text-to-Image with StableDiffusionPipeline</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/stable-diffusion-text-to-image-modeling-journey/">[Artificial Intelligence] Stable Diffusion: Text-to-Image Modeling Journey</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/openvino-optimum-intel-cpu-an-exploration-in-model-optimization/">[Artificial Intelligence] OpenVINO, Optimum-Intel, CPU: An Exploration in Model Optimization</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/exploring-autogen-studio/">[Artificial Intelligence] Exploring Autogen Studio</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/deploying-llms-with-wasmedge-in-homelab/">[Artificial Intelligence] Deploying LLMs with WasmEdge in HomeLab</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/integration-of-kong-into-ai-workflow/">[Artificial Intelligence] Integration of Kong into AI Workflow</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/unveiling-agent-autobuild-in-autogen/">[Artificial Intelligence] Unveiling Agent AutoBuild in Autogen</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/empowering-autogen-enabling-seamless-java-code-execution/">[Artificial Intelligence] Empowering Autogen: Enabling Seamless Java Code Execution</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/multi-agent-conservation-autogen/">[Artificial Intelligence] Multi-agent Conservation with Autogen</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/exploring-autogen-with-lm-studio-and-local-llm/">[Artificial Intelligence] Exploring AutoGen with LM Studio and Local LLM</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/boosting-inference-speed-ssd-and-gpu-acceleration/">[Artificial Intelligence] Boosting Inference Speed: SSD and GPU Acceleration</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/rag-over-java-code-with-langchain4j/">[Artificial Intelligence] RAG over Java code with Langchain4j</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/building-an-ai-application-with-langchain4j/">[Artificial Intelligence] Building an AI Application with Langchain4j</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/unlocking-the-power-of-machine-learning-with-mlc-llm/">[Artificial Intelligence] Unlocking the Power of Machine Learning with MLC LLM</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2024 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
