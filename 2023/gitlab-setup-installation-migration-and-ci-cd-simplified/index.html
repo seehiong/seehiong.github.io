@@ -36,12 +36,12 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://seehiong.github.io/2023/gitlab-setup-installation-migration-and-ci-cd-simplified/" /><meta property="article:section" content="2023" />
 <meta property="article:published_time" content="2023-12-24T20:00:00+08:00" />
-<meta property="article:modified_time" content="2024-06-09T00:00:00+00:00" />
+<meta property="article:modified_time" content="2024-06-23T00:00:00+00:00" />
 
 <meta itemprop="name" content="[Home Lab] GitLab Setup: Installation, Migration, and CI/CD Simplified">
 <meta itemprop="description" content="Discover a streamlined approach to GitLab installation, repository migration, and CI/CD optimization. This comprehensive guide covers setting up GitLab in your home lab, upgrading to the latest version, configuring external URLs, and migrating repositories. Learn how to install GitLab Runner, Docker, and seamlessly integrate them into your development workflow. The guide concludes with optional steps for registering GitLab Runner as a service. Elevate your version control and continuous integration experience with this concise and practical tutorial."><meta itemprop="datePublished" content="2023-12-24T20:00:00+08:00" />
-<meta itemprop="dateModified" content="2024-06-09T00:00:00+00:00" />
-<meta itemprop="wordCount" content="781">
+<meta itemprop="dateModified" content="2024-06-23T00:00:00+00:00" />
+<meta itemprop="wordCount" content="889">
 <meta itemprop="keywords" content="GitLab,CI/CD,Docker,HomeLab," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Home Lab] GitLab Setup: Installation, Migration, and CI/CD Simplified"/>
 <meta name="twitter:description" content="Discover a streamlined approach to GitLab installation, repository migration, and CI/CD optimization. This comprehensive guide covers setting up GitLab in your home lab, upgrading to the latest version, configuring external URLs, and migrating repositories. Learn how to install GitLab Runner, Docker, and seamlessly integrate them into your development workflow. The guide concludes with optional steps for registering GitLab Runner as a service. Elevate your version control and continuous integration experience with this concise and practical tutorial."/>
@@ -164,13 +164,13 @@
 
       
         <time class="f6 mv4 dib tracked" ddatetime="2023-12-24T20:00:00+08:00">
-          (Updated:&nbsp;June 9, 2024)
+          (Updated:&nbsp;June 23, 2024)
         </time>
 
       
       
-        <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 781 words </span>
+        <span class="f6 mv4 dib tracked"> - 5 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 889 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>In this guide, I&rsquo;ll walk you through the process of installing <a href="https://docs.gitlab.com/omnibus/installation/">GitLab</a>, a comprehensive suite of tools for version control, continuous integration, continuous delivery, and more, in my Home Lab collection.</p>
@@ -232,7 +232,13 @@
 <li>Save the SSH public key in GitLab.</li>
 </ol>
 <p><img src="/images/gitlab/gitlab-add-ssh-public-key.png" alt="gitlab-add-ssh-public-key"></p>
-<h3 id="3-create-a-new-repository">3. Create a New Repository</h3>
+<ol start="5">
+<li>Since th SSH key pair is not in the default location, save these settings in <em>~/.ssh/config</em> file:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">Host</span> <span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">68</span>.<span style="color:#ae81ff">126</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">PreferredAuthentications</span> <span style="color:#a6e22e">publickey</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">IdentityFile</span> <span style="color:#a6e22e">C</span>:\<span style="color:#a6e22e">Users</span>\<span style="color:#a6e22e">seehi</span>\.<span style="color:#a6e22e">ssh</span>\<span style="color:#a6e22e">gitlab_id_rsa</span>
+</span></span></code></pre></div><h3 id="3-create-a-new-repository">3. Create a New Repository</h3>
 <p>Navigate to the cloned repository directory and update the remote URL:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cd &lt;local_repo_directory&gt;
 </span></span><span style="display:flex;"><span>
@@ -274,7 +280,7 @@
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Verify Docker Engine installation</span>
 </span></span><span style="display:flex;"><span>sudo docker run hello-world
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Adds user to docker group</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Adds user to docker group (needs to re-login to take effect)</span>
 </span></span><span style="display:flex;"><span>sudo usermod -aG docker pi
 </span></span></code></pre></div><h2 id="register-gitlab-runner">Register GitLab Runner</h2>
 <p>In the project settings, navigate to the CI/CD option, expand the Runners section, and click on the <strong>New project runner</strong> button:</p>
@@ -362,7 +368,25 @@
 <li>Log in to the registry from your Windows machine:</li>
 </ol>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span> docker login 192.168.68.126:5005
-</span></span></code></pre></div><ul class="pa0" data-pagefind-ignore>
+</span></span></code></pre></div><ol start="6">
+<li>You may have to configure your docker if you see this error from Windows box:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>Error response from daemon: Get <span style="color:#e6db74">&#34;https://192.168.68.126:5005/v2/&#34;</span>: http: server gave HTTP response to HTTPS client
+</span></span></code></pre></div><blockquote>
+<p>a. From gitlab server, configure docker to use local registry:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/docker/daemon.json
+</span></span></code></pre></div><p>b. Copy this content into daemon.json:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span><span style="color:#75715e"> &#34;insecure-registries&#34;: [</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">   &#34;192.168.68.126:5005&#34;</span>
+</span></span><span style="display:flex;"><span> ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>c. Edit docker default configuration file, with <em>sudo vi /etc/default/docker</em> and add this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">DOCKER_OPTS</span>=<span style="color:#e6db74">&#34;--config-file=/etc/docker/daemon.json&#34;</span>
+</span></span></code></pre></div><p>d. Restart docker to apply the changes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo systemctl restart docker
+</span></span></code></pre></div></blockquote>
+<ul class="pa0" data-pagefind-ignore>
   
    <li class="list di">
      <a href="/tags/gitlab/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">GitLab</a>
