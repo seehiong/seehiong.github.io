@@ -41,7 +41,7 @@
 <meta itemprop="name" content="Setting Up Kubeflow on Kubernetes: A Step-by-Step Guide">
 <meta itemprop="description" content="In this post, I provide a comprehensive guide to setting up Kubeflow, a machine learning toolkit for Kubernetes. From initial preparation and downloading necessary binaries to installing all Kubeflow components and troubleshooting common issues, this step-by-step tutorial ensures a smooth installation process. You&#39;ll also learn how to create your first notebook and resolve potential errors, making it easier to leverage Kubeflow&#39;s powerful features for your machine learning projects."><meta itemprop="datePublished" content="2024-06-24T10:00:00+08:00" />
 <meta itemprop="dateModified" content="2024-06-24T10:00:00+08:00" />
-<meta itemprop="wordCount" content="463">
+<meta itemprop="wordCount" content="772">
 <meta itemprop="keywords" content="HomeLab,K3s,Kubernetes,Jupyter,Kubeflow," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Setting Up Kubeflow on Kubernetes: A Step-by-Step Guide"/>
 <meta name="twitter:description" content="In this post, I provide a comprehensive guide to setting up Kubeflow, a machine learning toolkit for Kubernetes. From initial preparation and downloading necessary binaries to installing all Kubeflow components and troubleshooting common issues, this step-by-step tutorial ensures a smooth installation process. You&#39;ll also learn how to create your first notebook and resolve potential errors, making it easier to leverage Kubeflow&#39;s powerful features for your machine learning projects."/>
@@ -166,11 +166,11 @@
 
       
       
-        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 463 words </span>
+        <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 772 words </span>
       
     </header>
-    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>The car inspection went well, and I will sepnd the rest of my half-day leave documenting the steps for setting up <a href="https://www.kubeflow.org/">Kubeflow</a>, the machine learning toolkit for kubernetes.</p>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>The car inspection went well, and I will spend the rest of my half-day leave documenting the steps for setting up <a href="https://www.kubeflow.org/">Kubeflow</a>, the machine learning toolkit for kubernetes.</p>
 <h1 id="preparation">Preparation</h1>
 <p><a href="https://kustomize.io/">Kustomize</a> introduces a template-free way to customize application configuration, simplifying the use of off-the-shelf application. The simplest way to get started is to download the precompiled binaries:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -s <span style="color:#e6db74">&#34;https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh&#34;</span>  | bash
@@ -201,6 +201,53 @@
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Hello World!&#34;</span>)
 </span></span></code></pre></div><p>That&rsquo;s it! We have successfully created our first working notebook in Kubeflow:</p>
 <p><img src="/images/kubeflow/kubeflow-first-hello-world-python-command.png" alt="kubeflow-first-hello-world-python-command"></p>
+<h1 id="optional">Optional</h1>
+<p>To add a new test user to Kubeflow, you may restart by removing the current setup with these commands (or just proceed to the next):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Remain in this folder in subsequent steps</span>
+</span></span><span style="display:flex;"><span>cd manifest
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Delete the entire installs</span>
+</span></span><span style="display:flex;"><span>kustomize build example | kubectl delete -f -
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Delete the remaining namespace</span>
+</span></span><span style="display:flex;"><span>kubectl delete ns kubeflow-user-example-com
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Run this if deleting a particular namespace hangs</span>
+</span></span><span style="display:flex;"><span>kubectl get namespace <span style="color:#e6db74">&#34;kubeflow-user-example-com&#34;</span> -o json <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  | tr -d <span style="color:#e6db74">&#34;\n&#34;</span> | sed <span style="color:#e6db74">&#34;s/\&#34;finalizers\&#34;: \[[^]]\+\]/\&#34;finalizers\&#34;: []/&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  | kubectl replace --raw /api/v1/namespaces/kubeflow-user-example-com/finalize -f -
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> ! kustomize build example | kubectl apply -f -; <span style="color:#66d9ef">do</span> echo <span style="color:#e6db74">&#34;Retrying to apply resources&#34;</span>; sleep 20; <span style="color:#66d9ef">done</span>
+</span></span></code></pre></div><p>Generate the password hash with this command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Install passlib</span>
+</span></span><span style="display:flex;"><span>pip install passlib
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate the password hash</span>
+</span></span><span style="display:flex;"><span>python3 -c <span style="color:#e6db74">&#39;from passlib.hash import bcrypt; import getpass; print(bcrypt.using(rounds=12, ident=&#34;2y&#34;).hash(getpass.getpass()))&#39;</span>
+</span></span></code></pre></div><p><img src="/images/kubeflow/kubeflow-test-example-com-password.png" alt="kubeflow-test-example-com-password"></p>
+<p>Add a password for this test user by updating the following file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>vi common/dex/base/dex-passwords.yaml
+</span></span></code></pre></div><p><img src="/images/kubeflow/kubeflow-dex-passwords.png" alt="kubeflow-dex-passwords"></p>
+<p>Next, add the new user by updating the file <em>common/dex/base/config-map.yaml</em> with the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>- <span style="color:#f92672">email</span>: <span style="color:#ae81ff">test@example.com</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">hashFromEnv</span>: <span style="color:#ae81ff">DEX_TEST_PASSWORD</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">username</span>: <span style="color:#ae81ff">test</span>
+</span></span></code></pre></div><p><img src="/images/kubeflow/kubeflow-test-example-com-username.png" alt="kubeflow-test-example-com-username"></p>
+<p>Finally, update the default setting in <em>apps/centraldashboard/upstream/base/params.env</em> with the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">CD_REGISTRATION_FLOW</span>=<span style="color:#a6e22e">true</span>
+</span></span></code></pre></div><p>Reinstall Kubeflow with the same command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Execute these to replace the defaults (otherwise test@example.com will not be recognised):</span>
+</span></span><span style="display:flex;"><span>kca common/dex/base/dex-passwords.yaml -n auth
+</span></span><span style="display:flex;"><span>kca common/dex/base/config-map.yaml -n auth
+</span></span><span style="display:flex;"><span>kubectl rollout restart deployment dex -n auth
+</span></span></code></pre></div><p>From Windows, use the same port forwarding command to log in as the newly created test user and grant access:</p>
+<p><img src="/images/kubeflow/kubeflow-test-example-com-login.png" alt="kubeflow-test-example-com-login"></p>
+<p>With the registration flow enabled, you will be greeted with:</p>
+<p><img src="/images/kubeflow/kubeflow-test-example-com-welcome.png" alt="kubeflow-test-example-com-welcome"></p>
+<p>And this:</p>
+<p><img src="/images/kubeflow/kubeflow-test-example-com-namespace.png" alt="kubeflow-test-example-com-namespace"></p>
+<p>That&rsquo;s all there is to it! Now you have your own new test user namespace.</p>
+<p><img src="/images/kubeflow/kubeflow-test-example-com-dashboard.png" alt="kubeflow-test-example-com-dashboard"></p>
 <h1 id="troubleshooting">Troubleshooting</h1>
 <details>
     <summary>Too many open files error</summary>
@@ -242,11 +289,17 @@ fs.inotify.max_user_watches = 999999
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Reapply with the same command</span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> ! kustomize build example | kubectl apply -f -; <span style="color:#66d9ef">do</span> echo <span style="color:#e6db74">&#34;Retrying to apply resources&#34;</span>; sleep 20; <span style="color:#66d9ef">done</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Creates another new RBAC error when launching the Kubeflow dashboard, before I redo all over again</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Above step creates another new RBAC error when launching the Kubeflow dashboard, before I redo all over again</span>
 </span></span><span style="display:flex;"><span>git checkout master
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> ! kustomize build example | kubectl apply -f -; <span style="color:#66d9ef">do</span> echo <span style="color:#e6db74">&#34;Retrying to apply resources&#34;</span>; sleep 20; <span style="color:#66d9ef">done</span>
 </span></span></code></pre></div></div>
+</details>
+<details>
+    <summary>Jwks doesn&rsquo;t have key to match kid or alg from Jwt</summary>
+    <div><p>If you encounter the Jwks doesn&rsquo;t have key to match kid or alg from Jwt error, try logging in using incognito mode. If the error still persists, please clear your browser cache.</p>
+<p><img src="/images/kubeflow/kubeflow-jwks-doesnt-have-key-to-match-kid.png" alt="kubeflow-jwks-doesnt-have-key-to-match-kid"></p>
+</div>
 </details>
 <ul class="pa0" data-pagefind-ignore>
   
@@ -296,6 +349,8 @@ fs.inotify.max_user_watches = 999999
     
     <a href="https://seehiong.github.io/2024/building-advanced-rag-applications-with-myscaledb-and-llamaindex/">Building Advanced RAG Applications with MyScaleDB and LlamaIndex</a>
     
+    
+    <a href="https://seehiong.github.io/2024/setting-up-and-using-kserve-with-kubeflow/">Setting Up and Using KServe with Kubeflow</a>
     
 </div></div>
 

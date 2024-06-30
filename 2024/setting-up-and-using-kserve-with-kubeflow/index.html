@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Setting Up and Using KServe with Kubeflow | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="In this post, we explore KServe, a model inference platform on Kubernetes designed for scalability. Building on our previous Kubeflow guide, we detail how to set up your first KServe endpoint, make predictions, and troubleshoot common issues. Follow our step-by-step instructions to seamlessly integrate KServe with your Kubeflow environment and enhance your machine learning deployment process.">
+    <meta name="generator" content="Hugo 0.120.4">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Setting Up and Using KServe with Kubeflow" />
+<meta property="og:description" content="In this post, we explore KServe, a model inference platform on Kubernetes designed for scalability. Building on our previous Kubeflow guide, we detail how to set up your first KServe endpoint, make predictions, and troubleshoot common issues. Follow our step-by-step instructions to seamlessly integrate KServe with your Kubeflow environment and enhance your machine learning deployment process." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2024/setting-up-and-using-kserve-with-kubeflow/" /><meta property="article:section" content="2024" />
+<meta property="article:published_time" content="2024-06-30T10:00:00+08:00" />
+<meta property="article:modified_time" content="2024-06-30T10:00:00+08:00" />
+
+<meta itemprop="name" content="Setting Up and Using KServe with Kubeflow">
+<meta itemprop="description" content="In this post, we explore KServe, a model inference platform on Kubernetes designed for scalability. Building on our previous Kubeflow guide, we detail how to set up your first KServe endpoint, make predictions, and troubleshoot common issues. Follow our step-by-step instructions to seamlessly integrate KServe with your Kubeflow environment and enhance your machine learning deployment process."><meta itemprop="datePublished" content="2024-06-30T10:00:00+08:00" />
+<meta itemprop="dateModified" content="2024-06-30T10:00:00+08:00" />
+<meta itemprop="wordCount" content="822">
+<meta itemprop="keywords" content="KServe,Kubeflow,K3s,Kubernetes,HomeLab," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Setting Up and Using KServe with Kubeflow"/>
+<meta name="twitter:description" content="In this post, we explore KServe, a model inference platform on Kubernetes designed for scalability. Building on our previous Kubeflow guide, we detail how to set up your first KServe endpoint, make predictions, and troubleshoot common issues. Follow our step-by-step instructions to seamlessly integrate KServe with your Kubeflow environment and enhance your machine learning deployment process."/>
+
+      
+    
+
+    
+      <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>
+    
+
+	<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js"></script>
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv1 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2024/" title="2024 page">
+              2024
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3" data-pagefind-body>
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2024
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Setting Up and Using KServe with Kubeflow</h1>
+      
+      <p class="tracked">
+        By <strong>See Hiong</strong>
+      </p>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2024-06-30T10:00:00+08:00">June 30, 2024</time>
+      
+
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 822 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>Expanding on my previous post on <a href="https://seehiong.github.io/2024/setting-up-kubeflow-on-kubernetes-a-step-by-step-guide/">Kubeflow</a>, I will explore <a href="https://kserve.github.io/website/latest/">KServe</a>, a standard Model Inference Platform on Kubernetes built for highly scalable use cases.</p>
+<h1 id="first-kserve-endpoint">First KServe Endpoint</h1>
+<p>Referencing <a href="https://github.com/kserve/kserve/blob/master/docs/samples/istio-dex/README.md">KServe on Kubeflow with Istio-Dex</a>, below is the <em>sklearn.yaml</em> configuration. Note the sidecar annotation, which instructs not to inject the istio sidecar. Without this annotation, you may encounter error (refer to the troubleshooting section):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#e6db74">&#34;serving.kserve.io/v1beta1&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#e6db74">&#34;InferenceService&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#e6db74">&#34;sklearn-iris&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">annotations</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">sidecar.istio.io/inject</span>: <span style="color:#e6db74">&#34;false&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">predictor</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">model</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">modelFormat</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">name</span>: <span style="color:#ae81ff">sklearn</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">storageUri</span>: <span style="color:#e6db74">&#34;gs://kfserving-examples/models/sklearn/1.0/model&#34;</span>
+</span></span></code></pre></div><p>From the Kubeflow dashboard, navigate to KServe Endpoints, click on the <strong>New Endpoint</strong> button on the top right, and input the above configuration:</p>
+<p><img src="/images/kserve/kserve-first-endpoint.png" alt="kserve-first-endpoint"></p>
+<p>Here are the details of the sklearn-iris endpoint:</p>
+<p><img src="/images/kserve/kserve-sklearn-iris-endpoint.png" alt="kserve-sklearn-iris-endpoint"></p>
+<p>And its corresponding Kubernetes deployment:</p>
+<p><img src="/images/kserve/kserve-sklearn-iris-predictor-deployment.png" alt="kserve-sklearn-iris-predictor-deployment"></p>
+<h1 id="first-prediction">First Prediction</h1>
+<p>Using the <a href="https://github.com/kserve/kserve/blob/master/docs/samples/istio-dex/dex_auth.py">dex_auth.py</a>, input the following into your first notebook:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> re
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> urllib.parse <span style="color:#f92672">import</span> urlsplit
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> requests
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_istio_auth_session</span>(url: str, username: str, password: str) <span style="color:#f92672">-&gt;</span> dict:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Determine if the specified URL is secured by Dex and try to obtain a session cookie.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    WARNING: only Dex `staticPasswords` and `LDAP` authentication are currently supported
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">             (we default to using `staticPasswords` if both are enabled)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param url: Kubeflow server URL, including protocol
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param username: Dex `staticPasswords` or `LDAP` username
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param password: Dex `staticPasswords` or `LDAP` password
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :return: auth session information
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># define the default return object</span>
+</span></span><span style="display:flex;"><span>    auth_session <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;endpoint_url&#34;</span>: url,  <span style="color:#75715e"># KF endpoint URL</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;redirect_url&#34;</span>: <span style="color:#66d9ef">None</span>,  <span style="color:#75715e"># KF redirect URL, if applicable</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;dex_login_url&#34;</span>: <span style="color:#66d9ef">None</span>,  <span style="color:#75715e"># Dex login URL (for POST of credentials)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;is_secured&#34;</span>: <span style="color:#66d9ef">None</span>,  <span style="color:#75715e"># True if KF endpoint is secured</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;session_cookie&#34;</span>: <span style="color:#66d9ef">None</span>,  <span style="color:#75715e"># Resulting session cookies in the form &#34;key1=value1; key2=value2&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># use a persistent session (for cookies)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> requests<span style="color:#f92672">.</span>Session() <span style="color:#66d9ef">as</span> s:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">################</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Determine if Endpoint is Secured</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">################</span>
+</span></span><span style="display:flex;"><span>        resp <span style="color:#f92672">=</span> s<span style="color:#f92672">.</span>get(url, allow_redirects<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> resp<span style="color:#f92672">.</span>status_code <span style="color:#f92672">!=</span> <span style="color:#ae81ff">200</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">RuntimeError</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;HTTP status code &#39;</span><span style="color:#e6db74">{</span>resp<span style="color:#f92672">.</span>status_code<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39; for GET against: </span><span style="color:#e6db74">{</span>url<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        auth_session[<span style="color:#e6db74">&#34;redirect_url&#34;</span>] <span style="color:#f92672">=</span> resp<span style="color:#f92672">.</span>url
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># if we were NOT redirected, then the endpoint is UNSECURED</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> len(resp<span style="color:#f92672">.</span>history) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>            auth_session[<span style="color:#e6db74">&#34;is_secured&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> auth_session
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            auth_session[<span style="color:#e6db74">&#34;is_secured&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">################</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Get Dex Login URL</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">################</span>
+</span></span><span style="display:flex;"><span>        redirect_url_obj <span style="color:#f92672">=</span> urlsplit(auth_session[<span style="color:#e6db74">&#34;redirect_url&#34;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># if we are at `/auth?=xxxx` path, we need to select an auth type</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> re<span style="color:#f92672">.</span>search(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#34;/auth$&#34;</span>, redirect_url_obj<span style="color:#f92672">.</span>path):
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">#######</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># TIP: choose the default auth type by including ONE of the following</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">#######</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># OPTION 1: set &#34;staticPasswords&#34; as default auth type</span>
+</span></span><span style="display:flex;"><span>            redirect_url_obj <span style="color:#f92672">=</span> redirect_url_obj<span style="color:#f92672">.</span>_replace(
+</span></span><span style="display:flex;"><span>                path<span style="color:#f92672">=</span>re<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#34;/auth$&#34;</span>, <span style="color:#e6db74">&#34;/auth/local&#34;</span>, redirect_url_obj<span style="color:#f92672">.</span>path)
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># OPTION 2: set &#34;ldap&#34; as default auth type</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># redirect_url_obj = redirect_url_obj._replace(</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">#     path=re.sub(r&#34;/auth$&#34;, &#34;/auth/ldap&#34;, redirect_url_obj.path)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># )</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># if we are at `/auth/xxxx/login` path, then no further action is needed (we can use it for login POST)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> re<span style="color:#f92672">.</span>search(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#34;/auth/.*/login$&#34;</span>, redirect_url_obj<span style="color:#f92672">.</span>path):
+</span></span><span style="display:flex;"><span>            auth_session[<span style="color:#e6db74">&#34;dex_login_url&#34;</span>] <span style="color:#f92672">=</span> redirect_url_obj<span style="color:#f92672">.</span>geturl()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># else, we need to be redirected to the actual login page</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># this GET should redirect us to the `/auth/xxxx/login` path</span>
+</span></span><span style="display:flex;"><span>            resp <span style="color:#f92672">=</span> s<span style="color:#f92672">.</span>get(redirect_url_obj<span style="color:#f92672">.</span>geturl(), allow_redirects<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> resp<span style="color:#f92672">.</span>status_code <span style="color:#f92672">!=</span> <span style="color:#ae81ff">200</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">RuntimeError</span>(
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;HTTP status code &#39;</span><span style="color:#e6db74">{</span>resp<span style="color:#f92672">.</span>status_code<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39; for GET against: </span><span style="color:#e6db74">{</span>redirect_url_obj<span style="color:#f92672">.</span>geturl()<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>                )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># set the login url</span>
+</span></span><span style="display:flex;"><span>            auth_session[<span style="color:#e6db74">&#34;dex_login_url&#34;</span>] <span style="color:#f92672">=</span> resp<span style="color:#f92672">.</span>url
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">################</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Attempt Dex Login</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">################</span>
+</span></span><span style="display:flex;"><span>        resp <span style="color:#f92672">=</span> s<span style="color:#f92672">.</span>post(
+</span></span><span style="display:flex;"><span>            auth_session[<span style="color:#e6db74">&#34;dex_login_url&#34;</span>],
+</span></span><span style="display:flex;"><span>            data<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;login&#34;</span>: username, <span style="color:#e6db74">&#34;password&#34;</span>: password},
+</span></span><span style="display:flex;"><span>            allow_redirects<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> len(resp<span style="color:#f92672">.</span>history) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">RuntimeError</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Login credentials were probably invalid - &#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;No redirect after POST to: </span><span style="color:#e6db74">{</span>auth_session[<span style="color:#e6db74">&#39;dex_login_url&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># store the session cookies in a &#34;key1=value1; key2=value2&#34; string</span>
+</span></span><span style="display:flex;"><span>        auth_session[<span style="color:#e6db74">&#34;session_cookie&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;; &#34;</span><span style="color:#f92672">.</span>join(
+</span></span><span style="display:flex;"><span>            [<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>c<span style="color:#f92672">.</span>name<span style="color:#e6db74">}</span><span style="color:#e6db74">=</span><span style="color:#e6db74">{</span>c<span style="color:#f92672">.</span>value<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> s<span style="color:#f92672">.</span>cookies]
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        auth_session[<span style="color:#e6db74">&#34;authservice_session&#34;</span>] <span style="color:#f92672">=</span> s<span style="color:#f92672">.</span>cookies<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;authservice_session&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> auth_session
+</span></span></code></pre></div><p>To determine the cluster IP, use this command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>CLUSTER_IP<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>kubectl -n istio-system get service istio-ingressgateway -o jsonpath<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{.spec.clusterIP}&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>echo $CLUSTER_IP
+</span></span></code></pre></div><p><img src="/images/kserve/kserve-cluster-ip.png" alt="kserve-cluster-ip"></p>
+<p>Next, in the notebook, enter the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> requests 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>KUBEFLOW_ENDPOINT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://10.43.239.213&#34;</span>   <span style="color:#75715e"># Cluster IP and port</span>
+</span></span><span style="display:flex;"><span>KUBEFLOW_USERNAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;user@example.com&#34;</span>
+</span></span><span style="display:flex;"><span>KUBEFLOW_PASSWORD <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;12341234&#34;</span>
+</span></span><span style="display:flex;"><span>MODEL_NAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sklearn-iris&#34;</span>
+</span></span><span style="display:flex;"><span>SERVICE_HOSTNAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sklearn-iris.kubeflow-user-example-com.svc.cluster.local&#34;</span>
+</span></span><span style="display:flex;"><span>PREDICT_ENDPOINT <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>KUBEFLOW_ENDPOINT<span style="color:#e6db74">}</span><span style="color:#e6db74">/v1/models/</span><span style="color:#e6db74">{</span>MODEL_NAME<span style="color:#e6db74">}</span><span style="color:#e6db74">:predict&#34;</span>
+</span></span><span style="display:flex;"><span>iris_input <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;instances&#34;</span>: [[<span style="color:#ae81ff">6.8</span>, <span style="color:#ae81ff">2.8</span>, <span style="color:#ae81ff">4.8</span>, <span style="color:#ae81ff">1.4</span>], [<span style="color:#ae81ff">6.0</span>, <span style="color:#ae81ff">3.4</span>, <span style="color:#ae81ff">4.5</span>, <span style="color:#ae81ff">1.6</span>]]}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>_auth_session <span style="color:#f92672">=</span> get_istio_auth_session(
+</span></span><span style="display:flex;"><span>    url<span style="color:#f92672">=</span>KUBEFLOW_ENDPOINT, username<span style="color:#f92672">=</span>KUBEFLOW_USERNAME, password<span style="color:#f92672">=</span>KUBEFLOW_PASSWORD
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(_auth_session)
+</span></span></code></pre></div><p><img src="/images/kserve/kserve-sklearn-iris-auth-service.png" alt="kserve-sklearn-iris-auth-service"></p>
+<p>Finally, in the last cell, input the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>cookies <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;authservice_session&#34;</span>: _auth_session[<span style="color:#e6db74">&#39;authservice_session&#39;</span>]}
+</span></span><span style="display:flex;"><span>jar <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>cookies<span style="color:#f92672">.</span>cookiejar_from_dict(cookies)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>res <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>post(
+</span></span><span style="display:flex;"><span>    url<span style="color:#f92672">=</span>PREDICT_ENDPOINT,
+</span></span><span style="display:flex;"><span>    headers<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;Host&#34;</span>: SERVICE_HOSTNAME, <span style="color:#e6db74">&#34;Content-Type&#34;</span>: <span style="color:#e6db74">&#34;application/json&#34;</span>},
+</span></span><span style="display:flex;"><span>    cookies<span style="color:#f92672">=</span>jar,
+</span></span><span style="display:flex;"><span>    json<span style="color:#f92672">=</span>iris_input,
+</span></span><span style="display:flex;"><span>    timeout<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Status Code: &#34;</span>, res<span style="color:#f92672">.</span>status_code)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Response: &#34;</span>, res<span style="color:#f92672">.</span>json())
+</span></span></code></pre></div><p><img src="/images/kserve/kserve-sklearn-iris-prediction.png" alt="kserve-sklearn-iris-prediction"></p>
+<p>And that&rsquo;s it! We see the expected two predictions returned (i.e. {&ldquo;predictions&rdquo;: [1, 1]}).</p>
+<h1 id="troubleshooting">Troubleshooting</h1>
+<details>
+    <summary>KServe sklearn-iris 302 error</summary>
+    <div><p>In my setup, if I follow the official <a href="https://kserve.github.io/website/latest/get_started/first_isvc">First InferenceService</a>, the above python scripts will not work. Below is the schema from the official link:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#e6db74">&#34;serving.kserve.io/v1beta1&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#e6db74">&#34;InferenceService&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#e6db74">&#34;sklearn-iris&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">predictor</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">model</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">modelFormat</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">name</span>: <span style="color:#ae81ff">sklearn</span>
+</span></span></code></pre></div><p>And the <em>iris-input.json</em> file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;instances&#34;</span>: [
+</span></span><span style="display:flex;"><span>      [<span style="color:#ae81ff">6.8</span>,  <span style="color:#ae81ff">2.8</span>,  <span style="color:#ae81ff">4.8</span>,  <span style="color:#ae81ff">1.4</span>],
+</span></span><span style="display:flex;"><span>      [<span style="color:#ae81ff">6.0</span>,  <span style="color:#ae81ff">3.4</span>,  <span style="color:#ae81ff">4.5</span>,  <span style="color:#ae81ff">1.6</span>]
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p>With or without the Istio sidecar for the inference service, by authenticating through the service access token, I am faced with this 302 error:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>SERVICE_HOSTNAME<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>kubectl get inferenceservice sklearn-iris -n kubeflow-user-example-com -o jsonpath<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{.status.url}&#39;</span> | cut -d <span style="color:#e6db74">&#34;/&#34;</span> -f 3<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>INGRESS_HOST<span style="color:#f92672">=</span>localhost
+</span></span><span style="display:flex;"><span>INGRESS_PORT<span style="color:#f92672">=</span><span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TOKEN<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>kubectl create token default-editor -n kubeflow-user-example-com --audience<span style="color:#f92672">=</span>istio-ingressgateway.istio-system.svc.cluster.local --duration<span style="color:#f92672">=</span>24h<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>curl -v -H <span style="color:#e6db74">&#34;Host: </span><span style="color:#e6db74">${</span>SERVICE_HOSTNAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -H <span style="color:#e6db74">&#34;Authorization: Bearer </span>$TOKEN<span style="color:#e6db74">&#34;</span> -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#e6db74">&#34;http://</span><span style="color:#e6db74">${</span>INGRESS_HOST<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">${</span>INGRESS_PORT<span style="color:#e6db74">}</span><span style="color:#e6db74">/v1/models/sklearn-iris:predict&#34;</span> -d @./iris-input.json
+</span></span></code></pre></div><p><img src="/images/kserve/kserve-with-token-inference-error.png" alt="kserve-with-token-inference-error"></p>
+<p>With basic authentication, it fails too:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl --user user@example.com:12341234 -v -H <span style="color:#e6db74">&#34;Host: </span><span style="color:#e6db74">${</span>SERVICE_HOSTNAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#e6db74">&#34;http://</span><span style="color:#e6db74">${</span>INGRESS_HOST<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">${</span>INGRESS_PORT<span style="color:#e6db74">}</span><span style="color:#e6db74">/v1/models/sklearn-iris:predict&#34;</span> -d @./iris-input.json
+</span></span></code></pre></div><p><img src="/images/kserve/kserve-with-basic-auth-error.png" alt="kserve-with-basic-auth-error"></p>
+<p>Using cookies also fails:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl --cookie <span style="color:#e6db74">&#34;authservice_session=None&#34;</span> -v -H <span style="color:#e6db74">&#34;Host: </span><span style="color:#e6db74">${</span>SERVICE_HOSTNAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#e6db74">&#34;http://</span><span style="color:#e6db74">${</span>INGRESS_HOST<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">${</span>INGRESS_PORT<span style="color:#e6db74">}</span><span style="color:#e6db74">/v1/models/sklearn-iris:predict&#34;</span> -d @./iris-input.json
+</span></span></code></pre></div><p><img src="/images/kserve/kserve-with-cookie-error.png" alt="kserve-with-cookie-error"></p>
+</div>
+</details>
+<ul class="pa0" data-pagefind-ignore>
+  
+   <li class="list di">
+     <a href="/tags/kserve/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">KServe</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/kubeflow/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Kubeflow</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/k3s/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">K3s</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/kubernetes/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Kubernetes</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/homelab/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">HomeLab</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      <p class="f5 b mb3">Post a comment:</p>
+<script src="https://giscus.app/client.js"
+    data-repo="seehiong/seehiong.github.io"
+    data-repo-id="R_kgDOJg7Puw"
+    data-category="General"
+    data-category-id="DIC_kwDOJg7Pu84Cbyhc"
+    data-mapping="url"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="en"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+      </div><br/>
+<div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2024/setting-up-kubeflow-on-kubernetes-a-step-by-step-guide/">Setting Up Kubeflow on Kubernetes: A Step-by-Step Guide</a>
+    
+    
+</div></div>
+
+    <aside class="w-100-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2024/setting-up-kubeflow-on-kubernetes-a-step-by-step-guide/">Setting Up Kubeflow on Kubernetes: A Step-by-Step Guide</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/log-management-with-graylog/">[Home Lab] Log Management with Graylog</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/autopilot-setup-for-vs-code/">[Home Lab] AutoPilot Setup for VS Code</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/configuring-appwrite-functions-with-k3s/">[Home Lab] Configuring Appwrite Functions with K3s</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/deploying-budibase-in-homelab/">[Home Lab] Deploying Budibase in HomeLab</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/deploying-appwrite-in-homelab-with-k3s/">[Home Lab] Deploying Appwrite in HomeLab with K3s</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/java-integration-with-jupyter-notebooks/">[Home Lab] Java Integration with Jupyter Notebooks</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/integrating-nfs-for-improved-scalability/">[Home Lab] Integrating NFS for Improved Scalability</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/integration-of-kong-into-ai-workflow/">[Artificial Intelligence] Integration of Kong into AI Workflow</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/exploring-kong-ingress-controller-kic/">[Home Lab] Exploring Kong Ingress Controller (KIC)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/streamlining-api-management-with-kong/">[Home Lab] Streamlining API Management with Kong</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/ai-integration-localai-chroma-langchain4j/">[Home Lab] AI Integration: LocalAI, Chroma, and Langchain4j</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/setting-up-k3s/">[Home Lab] Setting up K3s</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/planning-gift-deliveries-with-qgis/">[Home Lab] Planning Gift Deliveries With QGIS</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/exploring-autogen-studio/">[Artificial Intelligence] Exploring Autogen Studio</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2024 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
