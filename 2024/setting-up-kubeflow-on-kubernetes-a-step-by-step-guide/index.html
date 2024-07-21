@@ -42,7 +42,7 @@
 <meta itemprop="description" content="In this post, I provide a comprehensive guide to setting up Kubeflow, a machine learning toolkit for Kubernetes. From initial preparation and downloading necessary binaries to installing all Kubeflow components and troubleshooting common issues, this step-by-step tutorial ensures a smooth installation process. You&#39;ll also learn how to create your first notebook and resolve potential errors, making it easier to leverage Kubeflow&#39;s powerful features for your machine learning projects."><meta itemprop="datePublished" content="2024-06-24T10:00:00+08:00" />
 <meta itemprop="dateModified" content="2024-06-24T10:00:00+08:00" />
 <meta itemprop="wordCount" content="766">
-<meta itemprop="keywords" content="HomeLab,K3s,Kubernetes,Jupyter,Kubeflow," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="HomeLab,K3s,Kubernetes,Jupyter,Kubeflow,MLOps," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Setting Up Kubeflow on Kubernetes: A Step-by-Step Guide"/>
 <meta name="twitter:description" content="In this post, I provide a comprehensive guide to setting up Kubeflow, a machine learning toolkit for Kubernetes. From initial preparation and downloading necessary binaries to installing all Kubeflow components and troubleshooting common issues, this step-by-step tutorial ensures a smooth installation process. You&#39;ll also learn how to create your first notebook and resolve potential errors, making it easier to leverage Kubeflow&#39;s powerful features for your machine learning projects."/>
 
@@ -267,14 +267,14 @@
 <p>You can temporarily increase the <em>max_user_instances</em> and <em>max_user_watches</em> settings and then redeploy the affected pods (<a href="https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files">reference</a>):</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># default returns a value of 128</span>
 </span></span><span style="display:flex;"><span>cat /proc/sys/fs/inotify/max_user_instances
-</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">999999</span> | sudo tee /proc/sys/fs/inotify/max_user_instances
+</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">2280</span> | sudo tee /proc/sys/fs/inotify/max_user_instances
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># default returns a value of around 121865, depending on the current ubuntu host</span>
 </span></span><span style="display:flex;"><span>cat /proc/sys/fs/inotify/max_user_watches
-</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">999999</span> | sudo tee /proc/sys/fs/inotify/max_user_watches
+</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">1255360</span> | sudo tee /proc/sys/fs/inotify/max_user_watches
 </span></span></code></pre></div><p>For a permanent fix, add these lines to <em>/etc/sysctl.conf</em>:</p>
-<pre tabindex="0"><code>fs.inotify.max_user_instances = 999999
-fs.inotify.max_user_watches = 999999
+<pre tabindex="0"><code>fs.inotify.max_user_instances = 2280
+fs.inotify.max_user_watches = 1255360
 </code></pre><p><img src="/images/kubeflow/kubeflow-sysctl-increase-user-settings.png" alt="kubeflow-sysctl-increase-user-settings"></p>
 </div>
 </details>
@@ -320,6 +320,10 @@ fs.inotify.max_user_watches = 999999
   
    <li class="list di">
      <a href="/tags/kubeflow/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Kubeflow</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/mlops/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">MLOps</a>
    </li>
   
 </ul>

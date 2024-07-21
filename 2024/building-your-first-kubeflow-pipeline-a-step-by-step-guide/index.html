@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Building Your First Kubeflow Pipeline: A Step-by-Step Guide | Tech Blog</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="In this blog post, I guide you through creating and running your first Kubeflow pipeline. We&#39;ll start with the &#34;Hello World&#34; example, demonstrate how to manage sequential and shared pipelines, and explore artifact storage with MinIO. Additionally, I&#39;ll introduce K9s, a powerful terminal-based UI for managing your Kubernetes clusters efficiently. By the end, you&#39;ll have a solid understanding of setting up and managing Kubeflow pipelines in your machine learning workflows.">
+    <meta name="generator" content="Hugo 0.120.4">
+    
+    
+    
+    
+      <meta name="robots" content="index, follow">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Building Your First Kubeflow Pipeline: A Step-by-Step Guide" />
+<meta property="og:description" content="In this blog post, I guide you through creating and running your first Kubeflow pipeline. We&#39;ll start with the &#34;Hello World&#34; example, demonstrate how to manage sequential and shared pipelines, and explore artifact storage with MinIO. Additionally, I&#39;ll introduce K9s, a powerful terminal-based UI for managing your Kubernetes clusters efficiently. By the end, you&#39;ll have a solid understanding of setting up and managing Kubeflow pipelines in your machine learning workflows." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://seehiong.github.io/2024/building-your-first-kubeflow-pipeline-a-step-by-step-guide/" /><meta property="article:section" content="2024" />
+<meta property="article:published_time" content="2024-07-20T10:00:00+08:00" />
+<meta property="article:modified_time" content="2024-07-20T10:00:00+08:00" />
+
+<meta itemprop="name" content="Building Your First Kubeflow Pipeline: A Step-by-Step Guide">
+<meta itemprop="description" content="In this blog post, I guide you through creating and running your first Kubeflow pipeline. We&#39;ll start with the &#34;Hello World&#34; example, demonstrate how to manage sequential and shared pipelines, and explore artifact storage with MinIO. Additionally, I&#39;ll introduce K9s, a powerful terminal-based UI for managing your Kubernetes clusters efficiently. By the end, you&#39;ll have a solid understanding of setting up and managing Kubeflow pipelines in your machine learning workflows."><meta itemprop="datePublished" content="2024-07-20T10:00:00+08:00" />
+<meta itemprop="dateModified" content="2024-07-20T10:00:00+08:00" />
+<meta itemprop="wordCount" content="568">
+<meta itemprop="keywords" content="HomeLab,K3s,K9s,MinIO,Kubernetes,KFP,Kubeflow,MLOps," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Building Your First Kubeflow Pipeline: A Step-by-Step Guide"/>
+<meta name="twitter:description" content="In this blog post, I guide you through creating and running your first Kubeflow pipeline. We&#39;ll start with the &#34;Hello World&#34; example, demonstrate how to manage sequential and shared pipelines, and explore artifact storage with MinIO. Additionally, I&#39;ll introduce K9s, a powerful terminal-based UI for managing your Kubernetes clusters efficiently. By the end, you&#39;ll have a solid understanding of setting up and managing Kubeflow pipelines in your machine learning workflows."/>
+
+      
+    
+
+    
+      <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>
+    
+
+	<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js"></script>
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv1 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Tech Blog
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2020/" title="2020 page">
+              2020
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2021/" title="2021 page">
+              2021
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2023/" title="2023 page">
+              2023
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/2024/" title="2024 page">
+              2024
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3" data-pagefind-body>
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        2024
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Building Your First Kubeflow Pipeline: A Step-by-Step Guide</h1>
+      
+      <p class="tracked">
+        By <strong>See Hiong</strong>
+      </p>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2024-07-20T10:00:00+08:00">July 20, 2024</time>
+      
+
+      
+
+      
+      
+        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 568 words </span>
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p><a href="https://www.kubeflow.org/docs/components/pipelines/overview/">Kubeflow Pipelines (KFP)</a> is a powerful platform for creating and deploying scalable machine learning (ML) workflows using Docker containers. It enables data scientists and ML engineers to author workflows in Python, manage and visualize pipeline runs, and efficiently utilize compute resources. KFP supports custom ML components, leverages existing ones, and ensures cross-platform portability with a platform-neutral <a href="https://www.kubeflow.org/docs/components/pipelines/user-guides/core-functions/compile-a-pipeline/#ir-yaml">IR YAML definition</a>. In this post, I’ll share my learnings about KFP v2.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>pip list <span style="color:#f92672">|</span> grep kfp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Current versions</span>
+</span></span><span style="display:flex;"><span>kfp                          <span style="color:#ae81ff">2.8.0</span>
+</span></span><span style="display:flex;"><span>kfp<span style="color:#f92672">-</span>pipeline<span style="color:#f92672">-</span>spec            <span style="color:#ae81ff">0.3.0</span>
+</span></span><span style="display:flex;"><span>kfp<span style="color:#f92672">-</span>server<span style="color:#f92672">-</span>api               <span style="color:#ae81ff">2.0.5</span>
+</span></span></code></pre></div><h2 id="creating-a-pipeline">Creating a Pipeline</h2>
+<p>Referencing the <a href="https://github.com/kubeflow/pipelines/blob/master/samples/v2/hello_world.py">Hello World</a> sample code, here is the result of running the <em>hello_world.py</em> notebook:</p>
+<p><img src="/images/kfp/kfp-hello-world-pipeline-create-pipeline.png" alt="kfp-hello-world-pipeline-create-pipeline"></p>
+<p>Download the <em>hello_world_pipeline.json</em> to your local drive:</p>
+<p><img src="/images/kfp/kfp-hello-world-pipeline-json-file.png" alt="kfp-hello-world-pipeline-json-file"></p>
+<h2 id="running-the-pipeline">Running the Pipeline</h2>
+<p>Following the official <a href="https://www.kubeflow.org/docs/components/pipelines/user-guides/core-functions/run-a-pipeline/">Run a Pipeline</a> guide, I will run the pipeline by submitting it via the <strong>Upload pipeline</strong> button:</p>
+<p><img src="/images/kfp/kfp-hello-world-pipeline-json.png" alt="kfp-hello-world-pipeline-json"></p>
+<p>Next, from the <em>hello-world-pipeline</em> pipelines, click on the <strong>Create experiment</strong> button.</p>
+<p><img src="/images/kfp/kfp-hello-world-pipeline-new-experiment.png" alt="kfp-hello-world-pipeline-new-experiment"></p>
+<p>After a new run is triggered, select the pipeline and change the default pipeline-root according to your setup:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">minio</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">mlpipeline</span><span style="color:#e6db74">/v2/</span><span style="color:#a6e22e">artifacts</span>
+</span></span></code></pre></div><p><img src="/images/kfp/kfp-hello-world-pipeline-new-run.png" alt="kfp-hello-world-pipeline-new-run"></p>
+<p>Here is the result of the run:</p>
+<p><img src="/images/kfp/kfp-hello-world-pipeline-run.png" alt="kfp-hello-world-pipeline-run"></p>
+<h2 id="sequential-pipeline">Sequential Pipeline</h2>
+<p>Referencing the <a href="https://github.com/kubeflow/pipelines/blob/master/samples/core/sequential/sequential.py">Sequential</a> sample code, here is the final run result:</p>
+<p><img src="/images/kfp/kfp-sequential-pipeline-run.png" alt="kfp-sequential-pipeline-run"></p>
+<p>Here is a view of all the runs:</p>
+<p><img src="/images/kfp/kfp-pipeline-runs.png" alt="kfp-pipeline-runs"></p>
+<h2 id="shared-pipelines">Shared Pipelines</h2>
+<p>To run the shared pipleine, click on the <em>Data passing in python components</em> pipeline:</p>
+<p><img src="/images/kfp/kfp-shared-pipelines.png" alt="kfp-shared-pipelines"></p>
+<p>Similar to our own pipelines, after clicking on the <strong>Create experiment</strong> button, start a new run. Here is the sample run result:</p>
+<p><img src="/images/kfp/kfp-shared-pipeline-run.png" alt="kfp-shared-pipeline-run"></p>
+<h2 id="artifacts">Artifacts</h2>
+<p>As expected, the artifacts are stored in the default MinIO path:</p>
+<p><img src="/images/kfp/kfp-shared-pipeline-artifacts.png" alt="kfp-shared-pipeline-artifacts"></p>
+<h2 id="minio-browser">MinIO Browser</h2>
+<p>To open the MinIO browser, you can do a port-forward and navigate to <em>http://localhost:9000/</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl port-forward -n kubeflow svc/minio-service 9000:9000
+</span></span></code></pre></div><p>Here is the view from the MinIO Browser:</p>
+<p><img src="/images/kfp/kfp-minio-tutorial-data-passing.png" alt="kfp-minio-tutorial-data-passing"></p>
+<h2 id="k9s">K9s</h2>
+<p>As managing the many Kubeflow pods can be overwhelming, I would like to introduce <a href="https://k9scli.io/">K9s</a>, a terminal-based UI to interact with your K8s clusters.</p>
+<p>To install K9s on Windows via Chocolatey, use the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>choco install k9s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To upgrade in elevated shell</span>
+</span></span><span style="display:flex;"><span>choco upgrade k9s
+</span></span></code></pre></div><p><img src="/images/kfp/kfp-interaction-via-k9s.png" alt="kfp-interaction-via-k9s"></p>
+<p>To achieve the same MinIO browser port-forward, follow these steps:</p>
+<ol>
+<li>Type : (colon) and enter <strong>svc</strong> as the resource to view all the services</li>
+<li>Type / (slash) and enter <strong>minio</strong> to perform a search for the service</li>
+<li>Press Enter to go to the pod view and type <strong>shift-f</strong> for the port-forward</li>
+</ol>
+<p><img src="/images/kfp/kfp-minio-port-forward-with-k9s.png" alt="kfp-minio-port-forward-with-k9s"></p>
+<blockquote>
+<p><strong>Note</strong>: You may have to copy the contents of <em>.kube/config</em> from your master node to your <em>%USER%/.kube/config</em> file</p>
+</blockquote>
+<p>Some other useful commands are:</p>
+<ul>
+<li>Press <strong>ctrl-a</strong> at any time to see all resources</li>
+<li>Press <strong>?</strong> to see contextual help</li>
+<li>Press <strong>esc</strong> to return to the previous resource</li>
+<li>Press <strong>ctrl-c</strong> to quit K9s</li>
+</ul>
+<h3 id="optional---run-pipeline-from-kfp-sdk-client">Optional - Run Pipeline from KFP SDK client</h3>
+<p>To run a pipeline from the KFP SDK client, your notebook must have access to KFP. Referencing the <a href="https://github.com/kubeflow/pipelines/blob/master/samples/core/XGBoost/xgboost_sample.py">XGBoost</a> sample code, here is the result:</p>
+<p><img src="/images/kfp/kfp-xgboost-pipeline-run.png" alt="kfp-xgboost-pipeline-run"></p>
+<p>However, there are some RBAC errors. When I click on the Experiment details link, here is the result:</p>
+<p><img src="/images/kfp/kfp-xgboost-pipeline-experiment.png" alt="kfp-xgboost-pipeline-experiment"></p>
+<p>And here is the Run details result:</p>
+<p><img src="/images/kfp/kfp-xgboost-pipeline-run-errors.png" alt="kfp-xgboost-pipeline-run-errors"></p>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<details>
+    <summary>Failed to read a token from file</summary>
+    <div><p>If you encounter this error when running a pipeline from the KFP client (default location: <em>/var/run/secrets/kubeflow/pipelines/token</em>):</p>
+<p><img src="/images/kfp/kfp-failed-to-read-a-token-from-file.png" alt="kfp-failed-to-read-a-token-from-file"></p>
+<p>Please proceed to the next error for the fix.</p>
+</div>
+</details>
+<details>
+    <summary>Missing Configurations - Allow access to Kubeflow Pipelines</summary>
+    <div><p>You might not see this configuration when creating a new notebook:</p>
+<p><img src="/images/kfp/kfp-allow-access-to-kubeflow-pipelines.png" alt="kfp-allow-access-to-kubeflow-pipelines"></p>
+<p>Referencing the <a href="https://www.kubeflow.org/docs/components/pipelines/user-guides/core-functions/connect-api/">Connect API</a>, you may need to use Kubeflow&rsquo;s PodDefaults to inject the ServiceAccount token volume into your Pods.</p>
+<p><img src="/images/kfp/kfp-access-ml-pipeline-kubeflow-user-example-com.png" alt="kfp-access-ml-pipeline-kubeflow-user-example-com"></p>
+<p>Resolve this by pulling the latest <a href="https://github.com/kubeflow/manifests.git">Kubeflow Manifest</a> and applying it as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd manifests
+</span></span><span style="display:flex;"><span>kubectl apply -f tests/gh-actions/kf-objects/poddefaults.access-ml-pipeline.kubeflow-user-example-com.yaml
+</span></span></code></pre></div></div>
+</details>
+<ul class="pa0" data-pagefind-ignore>
+  
+   <li class="list di">
+     <a href="/tags/homelab/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">HomeLab</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/k3s/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">K3s</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/k9s/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">K9s</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/minio/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">MinIO</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/kubernetes/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Kubernetes</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/kfp/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">KFP</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/kubeflow/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">Kubeflow</a>
+   </li>
+  
+   <li class="list di">
+     <a href="/tags/mlops/" class="link f5 grow no-underline br-pill ba ph3 pv2 mb2 dib black sans-serif">MLOps</a>
+   </li>
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      <p class="f5 b mb3">Post a comment:</p>
+<script src="https://giscus.app/client.js"
+    data-repo="seehiong/seehiong.github.io"
+    data-repo-id="R_kgDOJg7Puw"
+    data-category="General"
+    data-category-id="DIC_kwDOJg7Pu84Cbyhc"
+    data-mapping="url"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="en"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async>
+</script>
+      </div><br/>
+<div class="flex justify-between">
+    
+    <a href="https://seehiong.github.io/2024/integrating-draw-io-and-plantuml-with-gitlab/">Integrating Draw.io and PlantUML with GitLab</a>
+    
+    
+</div></div>
+
+    <aside class="w-100-l mt6-l">
+
+
+
+
+  <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">Related</p>
+    <ul class="pa0 list">
+	   
+	     <li  class="mb2">
+          <a href="/2024/setting-up-and-using-kserve-with-kubeflow/">Setting Up and Using KServe with Kubeflow</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/setting-up-kubeflow-on-kubernetes-a-step-by-step-guide/">Setting Up Kubeflow on Kubernetes: A Step-by-Step Guide</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/log-management-with-graylog/">[Home Lab] Log Management with Graylog</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/autopilot-setup-for-vs-code/">[Home Lab] AutoPilot Setup for VS Code</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/configuring-appwrite-functions-with-k3s/">[Home Lab] Configuring Appwrite Functions with K3s</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/deploying-budibase-in-homelab/">[Home Lab] Deploying Budibase in HomeLab</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/deploying-appwrite-in-homelab-with-k3s/">[Home Lab] Deploying Appwrite in HomeLab with K3s</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/java-integration-with-jupyter-notebooks/">[Home Lab] Java Integration with Jupyter Notebooks</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/integrating-nfs-for-improved-scalability/">[Home Lab] Integrating NFS for Improved Scalability</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/integration-of-kong-into-ai-workflow/">[Artificial Intelligence] Integration of Kong into AI Workflow</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/exploring-kong-ingress-controller-kic/">[Home Lab] Exploring Kong Ingress Controller (KIC)</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/streamlining-api-management-with-kong/">[Home Lab] Streamlining API Management with Kong</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/ai-integration-localai-chroma-langchain4j/">[Home Lab] AI Integration: LocalAI, Chroma, and Langchain4j</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2023/setting-up-k3s/">[Home Lab] Setting up K3s</a>
+        </li>
+	    
+	     <li  class="mb2">
+          <a href="/2024/integrating-draw-io-and-plantuml-with-gitlab/">Integrating Draw.io and PlantUML with GitLab</a>
+        </li>
+	    
+    </ul>
+</div>
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://seehiong.github.io/" >
+    &copy;  Tech Blog 2024 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+    <a href="#" class="hover-white no-underline white-70 pv2">Back to Top</a>
+  </div>
+</footer>
+
+  </body>
+</html>
