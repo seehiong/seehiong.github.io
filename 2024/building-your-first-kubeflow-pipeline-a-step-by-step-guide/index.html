@@ -41,7 +41,7 @@
 <meta itemprop="name" content="Building Your First Kubeflow Pipeline: A Step-by-Step Guide">
 <meta itemprop="description" content="In this blog post, I guide you through creating and running your first Kubeflow pipeline. We&#39;ll start with the &#34;Hello World&#34; example, demonstrate how to manage sequential and shared pipelines, and explore artifact storage with MinIO. Additionally, I&#39;ll introduce K9s, a powerful terminal-based UI for managing your Kubernetes clusters efficiently. By the end, you&#39;ll have a solid understanding of setting up and managing Kubeflow pipelines in your machine learning workflows."><meta itemprop="datePublished" content="2024-07-20T10:00:00+08:00" />
 <meta itemprop="dateModified" content="2024-07-20T10:00:00+08:00" />
-<meta itemprop="wordCount" content="568">
+<meta itemprop="wordCount" content="653">
 <meta itemprop="keywords" content="HomeLab,K3s,K9s,MinIO,Kubernetes,KFP,Kubeflow,MLOps," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Building Your First Kubeflow Pipeline: A Step-by-Step Guide"/>
 <meta name="twitter:description" content="In this blog post, I guide you through creating and running your first Kubeflow pipeline. We&#39;ll start with the &#34;Hello World&#34; example, demonstrate how to manage sequential and shared pipelines, and explore artifact storage with MinIO. Additionally, I&#39;ll introduce K9s, a powerful terminal-based UI for managing your Kubernetes clusters efficiently. By the end, you&#39;ll have a solid understanding of setting up and managing Kubeflow pipelines in your machine learning workflows."/>
@@ -166,8 +166,8 @@
 
       
       
-        <span class="f6 mv4 dib tracked"> - 3 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 568 words </span>
+        <span class="f6 mv4 dib tracked"> - 4 minutes read </span>
+        <span class="f6 mv4 dib tracked"> - 653 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p><a href="https://www.kubeflow.org/docs/components/pipelines/overview/">Kubeflow Pipelines (KFP)</a> is a powerful platform for creating and deploying scalable machine learning (ML) workflows using Docker containers. It enables data scientists and ML engineers to author workflows in Python, manage and visualize pipeline runs, and efficiently utilize compute resources. KFP supports custom ML components, leverages existing ones, and ensures cross-platform portability with a platform-neutral <a href="https://www.kubeflow.org/docs/components/pipelines/user-guides/core-functions/compile-a-pipeline/#ir-yaml">IR YAML definition</a>. In this post, I’ll share my learnings about KFP v2.</p>
@@ -206,7 +206,7 @@
 <p>As expected, the artifacts are stored in the default MinIO path:</p>
 <p><img src="/images/kfp/kfp-shared-pipeline-artifacts.png" alt="kfp-shared-pipeline-artifacts"></p>
 <h2 id="minio-browser">MinIO Browser</h2>
-<p>To open the MinIO browser, you can do a port-forward and navigate to <em>http://localhost:9000/</em>:</p>
+<p>To open the MinIO browser, you can do a port-forward and navigate to <em>http://localhost:9000/</em>. The default username is <strong>minio</strong> and password is <strong>minio123</strong>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl port-forward -n kubeflow svc/minio-service 9000:9000
 </span></span></code></pre></div><p>Here is the view from the MinIO Browser:</p>
 <p><img src="/images/kfp/kfp-minio-tutorial-data-passing.png" alt="kfp-minio-tutorial-data-passing"></p>
@@ -256,9 +256,21 @@
 <p><img src="/images/kfp/kfp-allow-access-to-kubeflow-pipelines.png" alt="kfp-allow-access-to-kubeflow-pipelines"></p>
 <p>Referencing the <a href="https://www.kubeflow.org/docs/components/pipelines/user-guides/core-functions/connect-api/">Connect API</a>, you may need to use Kubeflow&rsquo;s PodDefaults to inject the ServiceAccount token volume into your Pods.</p>
 <p><img src="/images/kfp/kfp-access-ml-pipeline-kubeflow-user-example-com.png" alt="kfp-access-ml-pipeline-kubeflow-user-example-com"></p>
-<p>Resolve this by pulling the latest <a href="https://github.com/kubeflow/manifests.git">Kubeflow Manifest</a> and applying it as follows:</p>
+<p>To address this issue, pull the latest <a href="https://github.com/kubeflow/manifests.git">Kubeflow Manifest</a> and apply the necessary configurations as follows:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd manifests
 </span></span><span style="display:flex;"><span>kubectl apply -f tests/gh-actions/kf-objects/poddefaults.access-ml-pipeline.kubeflow-user-example-com.yaml
+</span></span></code></pre></div></div>
+</details>
+<details>
+    <summary>Could not find CSRF cookie XSRF-TOKEN in the request</summary>
+    <div><p>If you encounter this issue, it could mean that you are exposing Kubeflow over HTTP.</p>
+<p><img src="/images/kfp/kfp-could-not-find-csrf-cookie-xsrf-token.png" alt="kfp-could-not-find-csrf-cookie-xsrf-token"></p>
+<p>While not recommended due to security risks, if this is for a home lab setup like mine, you may edit <em>apps/jupyter/jupyter-web-app/upstream/base/params.env</em> and set <strong>APP_SECURE_COOKIES</strong> to false as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ae81ff">JWA_APP_SECURE_COOKIES=false</span>
+</span></span></code></pre></div><p>You may wish to change these as well:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ae81ff">TWA_APP_SECURE_COOKIES=false</span> <span style="color:#75715e"># in apps/tensorboard/tensorboards-web-app/upstream/base/params.env</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">VWA_APP_SECURE_COOKIES=false</span> <span style="color:#75715e"># in apps/volumes-web-app/upstream/base/params.env</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">APP_SECURE_COOKIES=false</span> <span style="color:#75715e"># in contrib/kserve/models-web-app/overlays/kubeflow/kustomization.yaml</span>
 </span></span></code></pre></div></div>
 </details>
 <ul class="pa0" data-pagefind-ignore>
@@ -321,6 +333,8 @@
     
     <a href="https://seehiong.github.io/2024/integrating-draw-io-and-plantuml-with-gitlab/">Integrating Draw.io and PlantUML with GitLab</a>
     
+    
+    <a href="https://seehiong.github.io/2024/setting-up-kafka-with-microk8s-and-multipass/">Setting Up Kafka with MicroK8s and Multipass</a>
     
 </div></div>
 

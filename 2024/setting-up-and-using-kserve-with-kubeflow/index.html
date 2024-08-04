@@ -41,7 +41,7 @@
 <meta itemprop="name" content="Setting Up and Using KServe with Kubeflow">
 <meta itemprop="description" content="In this post, we explore KServe, a model inference platform on Kubernetes designed for scalability. Building on our previous Kubeflow guide, we detail how to set up your first KServe endpoint, make predictions, and troubleshoot common issues. Follow our step-by-step instructions to seamlessly integrate KServe with your Kubeflow environment and enhance your machine learning deployment process."><meta itemprop="datePublished" content="2024-06-30T10:00:00+08:00" />
 <meta itemprop="dateModified" content="2024-07-07T00:00:00+00:00" />
-<meta itemprop="wordCount" content="994">
+<meta itemprop="wordCount" content="1011">
 <meta itemprop="keywords" content="Metallb,KServe,Kubeflow,K3s,Kubernetes,HomeLab,MLOps," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Setting Up and Using KServe with Kubeflow"/>
 <meta name="twitter:description" content="In this post, we explore KServe, a model inference platform on Kubernetes designed for scalability. Building on our previous Kubeflow guide, we detail how to set up your first KServe endpoint, make predictions, and troubleshoot common issues. Follow our step-by-step instructions to seamlessly integrate KServe with your Kubeflow environment and enhance your machine learning deployment process."/>
@@ -170,7 +170,7 @@
       
       
         <span class="f6 mv4 dib tracked"> - 5 minutes read </span>
-        <span class="f6 mv4 dib tracked"> - 994 words </span>
+        <span class="f6 mv4 dib tracked"> - 1011 words </span>
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-100-l"><p>Expanding on my previous post on <a href="https://seehiong.github.io/2024/setting-up-kubeflow-on-kubernetes-a-step-by-step-guide/">Kubeflow</a>, I will explore <a href="https://kserve.github.io/website/latest/">KServe</a>, a standard Model Inference Platform on Kubernetes built for highly scalable use cases.</p>
@@ -304,7 +304,7 @@
 <p>Next, in the notebook, enter the following:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> requests 
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>KUBEFLOW_ENDPOINT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://10.43.239.213&#34;</span>   <span style="color:#75715e"># Cluster IP and port</span>
+</span></span><span style="display:flex;"><span>KUBEFLOW_ENDPOINT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://10.43.239.213&#34;</span>   <span style="color:#75715e"># Cluster or LoadBalancer IP and port</span>
 </span></span><span style="display:flex;"><span>KUBEFLOW_USERNAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;user@example.com&#34;</span>
 </span></span><span style="display:flex;"><span>KUBEFLOW_PASSWORD <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;12341234&#34;</span>
 </span></span><span style="display:flex;"><span>MODEL_NAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sklearn-iris&#34;</span>
@@ -355,7 +355,7 @@
 <p>With this configuration, you can now access Kubeflow directly via <em>http://192.168.68.234/</em> without using the port-forward command:</p>
 <p><img src="/images/kserve/kserve-sklearn-iris-endpoint-details.png" alt="kserve-sklearn-iris-endpoint-details"></p>
 <h1 id="optional---integrate-with-gitlab">Optional - Integrate with GitLab</h1>
-<p>After organising your notebooks, such as into a <em>first-notebook</em>, let&rsquo;s commit them to GitLab by opening a terminal.</p>
+<p>After organising your notebooks, such as into a <em>first-notebook</em>, you can commit them to GitLab by opening a terminal. Alternatively, you may use the built-in <a href="https://github.com/jupyterlab/jupyterlab-git">jupyterlab-git</a> UI for a more visual approach.</p>
 <h2 id="initialise-environment">Initialise Environment</h2>
 <p>Set global Git settings as follows:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git config --global --add safe.directory /home/jovyan
@@ -385,12 +385,14 @@
 </span></span><span style="display:flex;"><span>      <span style="color:#f92672">storageUri</span>: <span style="color:#e6db74">&#34;gs://kfserving-examples/models/sklearn/1.0/model&#34;</span>
 </span></span></code></pre></div><p>And the <em>iris-input.json</em> file:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;instances&#34;</span>: [
-</span></span><span style="display:flex;"><span>      [<span style="color:#ae81ff">6.8</span>,  <span style="color:#ae81ff">2.8</span>,  <span style="color:#ae81ff">4.8</span>,  <span style="color:#ae81ff">1.4</span>],
-</span></span><span style="display:flex;"><span>      [<span style="color:#ae81ff">6.0</span>,  <span style="color:#ae81ff">3.4</span>,  <span style="color:#ae81ff">4.5</span>,  <span style="color:#ae81ff">1.6</span>]
-</span></span><span style="display:flex;"><span>    ]
-</span></span><span style="display:flex;"><span>  }
-</span></span></code></pre></div><p>With or without the Istio sidecar for the inference service, by authenticating through the service access token, I am faced with this 302 issue:</p>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;instances&#34;</span>: [
+</span></span><span style="display:flex;"><span>    [<span style="color:#ae81ff">6.8</span>,  <span style="color:#ae81ff">2.8</span>,  <span style="color:#ae81ff">4.8</span>,  <span style="color:#ae81ff">1.4</span>],
+</span></span><span style="display:flex;"><span>    [<span style="color:#ae81ff">6.0</span>,  <span style="color:#ae81ff">3.4</span>,  <span style="color:#ae81ff">4.5</span>,  <span style="color:#ae81ff">1.6</span>]
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><blockquote>
+<p><strong>Note</strong>: With or without the Istio sidecar for the inference service, by authenticating through the service access token, I am faced with this 302 issue:</p>
+</blockquote>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80 
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>SERVICE_HOSTNAME<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>kubectl get inferenceservice sklearn-iris -n kubeflow-user-example-com -o jsonpath<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{.status.url}&#39;</span> | cut -d <span style="color:#e6db74">&#34;/&#34;</span> -f 3<span style="color:#66d9ef">)</span>
