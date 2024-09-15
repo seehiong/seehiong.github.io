@@ -1652,41 +1652,25 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
   <br>
 <div class="comments">
     <script>
-        const getStoredTheme = () => localStorage.getItem("pref-theme") || "dark";
-        
-        const setStoredTheme = (theme) => {
-            localStorage.setItem("pref-theme", theme);
+        const getStoredTheme = () => {
+            const themeFromLS = localStorage.getItem("theme");
+            const themeFromHugo = document.body.classList.contains("dark-theme") ? "dark" : "light";
+            const currentTheme = themeFromLS ? themeFromLS : themeFromHugo;
+            return currentTheme;
         };
 
-        const applyTheme = (theme) => {
-            document.documentElement.setAttribute("data-theme", theme);
-            syncThemeSwitcherIcon(theme);
-            setGiscusTheme();
-        };
-
-        const syncThemeSwitcherIcon = (theme) => {
-            const themeSwitcher = document.querySelector(".btn-light-dark");
-            if (themeSwitcher) {
-                const isDark = theme === "dark";
-                themeSwitcher.querySelector(".moon").style.display = isDark ? "none" : "inline";
-                themeSwitcher.querySelector(".sun").style.display = isDark ? "inline" : "none";
-            }
-        };
-
-        const setGiscusTheme = () => {
-            const theme = getStoredTheme();
+        const setGiscusTheme = (theme) => {
             const sendMessage = (message) => {
                 const iframe = document.querySelector('iframe.giscus-frame');
                 if (iframe) {
                     iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
                 }
             };
-            sendMessage({ setConfig: { theme: theme } });
+            sendMessage({ setConfig: { theme } });
         };
 
         document.addEventListener("DOMContentLoaded", () => {
-            const initialTheme = getStoredTheme();
-            applyTheme(initialTheme);
+            setGiscusTheme(getStoredTheme());
 
             const giscusAttributes = {
                 "src": "https://giscus.app/client.js",
@@ -1716,10 +1700,9 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
             const themeSwitcher = document.querySelector(".btn-light-dark");
             if (themeSwitcher) {
                 themeSwitcher.addEventListener("click", () => {
-                    const currentTheme = getStoredTheme();
-                    const newTheme = currentTheme === "dark" ? "light" : "dark";
-                    setStoredTheme(newTheme);
-                    applyTheme(newTheme);
+                    const currentTheme = document.documentElement.classList.contains("dark") ? "light" : "dark";
+                    document.documentElement.classList.toggle("dark", currentTheme === "dark");
+                    setGiscusTheme(currentTheme);
                 });
             }
         });
