@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+<script defer language="javascript" type="text/javascript" src="/js/bundle.min.b989f0fdae3971a3effd81d6d0b27b3cb1023ff0b601ff43e2118b0d9d82ddb9.js"></script>
+
+
+
+
+
+
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="icon" href=/favicon.png>
+
+    
+    
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+
+
+<!-- Open Graph image and Twitter Card metadata -->
+
+<title itemprop="name">Tech Blog - Log Management with Graylog</title>
+<meta property="og:title" content=Tech&#32;Blog&#32;-&#32;Log&#32;Management&#32;with&#32;Graylog />
+<meta name="twitter:title" content=Tech&#32;Blog&#32;-&#32;Log&#32;Management&#32;with&#32;Graylog />
+<meta itemprop="name" content=Tech&#32;Blog&#32;-&#32;Log&#32;Management&#32;with&#32;Graylog />
+<meta name="application-name" content=Tech&#32;Blog&#32;-&#32;Log&#32;Management&#32;with&#32;Graylog />
+<meta property="og:site_name" content="See Hiong&#39;s Blog" />
+
+
+<meta name="description" content="Explore setting up Graylog in your HomeLab for comprehensive log management. Configure MongoDB and OpenSearch, deploy Fluent Bit for log forwarding, and implement advanced features like Grok patterns and pipelines. Troubleshoot efficiently with tools like netshoot and tcpdump. Enhance your HomeLab environment with a scalable and efficient log management solution." />
+<meta itemprop="description" content="Explore setting up Graylog in your HomeLab for comprehensive log management. Configure MongoDB and OpenSearch, deploy Fluent Bit for log forwarding, and implement advanced features like Grok patterns and pipelines. Troubleshoot efficiently with tools like netshoot and tcpdump. Enhance your HomeLab environment with a scalable and efficient log management solution." />
+<meta property="og:description" content="Explore setting up Graylog in your HomeLab for comprehensive log management. Configure MongoDB and OpenSearch, deploy Fluent Bit for log forwarding, and implement advanced features like Grok patterns and pipelines. Troubleshoot efficiently with tools like netshoot and tcpdump. Enhance your HomeLab environment with a scalable and efficient log management solution." />
+<meta name="twitter:description" content="Explore setting up Graylog in your HomeLab for comprehensive log management. Configure MongoDB and OpenSearch, deploy Fluent Bit for log forwarding, and implement advanced features like Grok patterns and pipelines. Troubleshoot efficiently with tools like netshoot and tcpdump. Enhance your HomeLab environment with a scalable and efficient log management solution." />
+
+
+<base href="//localhost:1313/2024/log-management-with-graylog/" />
+<link rel="canonical" href="//localhost:1313/2024/log-management-with-graylog/" itemprop="url" />
+<meta name="url" content="//localhost:1313/2024/log-management-with-graylog/" />
+<meta name="twitter:url" content="//localhost:1313/2024/log-management-with-graylog/" />
+<meta property="og:url" content="//localhost:1313/2024/log-management-with-graylog/" />
+
+
+<meta property="og:updated_time" content="2024-04-19T20:00:00&#43;08:00" />
+
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href='//localhost:1313/sitemap.xml' />
+
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+
+
+<meta property="fb:admins" content="" />
+
+
+<meta name="apple-mobile-web-app-title" content="See Hiong&#39;s Blog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.134.1">
+
+
+    
+    
+
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.03b57bbaf31d739f14c95df7f05d1cefcfa60bbafa36ba47313afdeb325aeada.css">
+
+
+    
+    <style>
+    body {
+        --sidebar-bg-color: #202020;
+        --sidebar-img-border-color: #515151;
+        --sidebar-p-color: #909090;
+        --sidebar-h1-color: #FFF;
+        --sidebar-a-color: #FFF;
+        --sidebar-socials-color: #FFF;
+        --text-color: #222;
+        --bkg-color: #FAF9F6;
+        --post-title-color: #303030;
+        --list-color: #5a5a5a;
+        --link-color: #268bd2;
+        --date-color: #515151;
+        --table-border-color: #E5E5E5;
+        --table-stripe-color: #F9F9F9;
+        --code-color: #000;
+        --code-background-color: #E5E5E5;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+        --moon-sun-color: #FFF;
+        --moon-sun-background-color: #515151;
+    }
+    body.dark-theme {
+        --text-color: #eee;
+        --bkg-color: #121212;
+        --post-title-color: #DBE2E9;
+        --list-color: #9d9d9d;
+        --link-color: #268bd2;
+        --date-color: #9a9a9a;
+        --table-border-color: #515151;
+        --table-stripe-color: #202020;
+        --code-color: #fff;
+        --code-background-color: #515151;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+    }
+    body {
+        background-color: var(--bkg-color);
+    }
+</style>
+
+</head>
+
+    <body class="dark-theme">
+        <div class="wrapper">
+            <aside class="sidebar">
+    <div class="container sidebar-sticky">
+        <div class="light-dark" align="right">
+    <button class="btn-light-dark" title="Toggle light/dark mode">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6 .278a.768.768 0 0 1 .08.858a7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277c.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316a.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71C0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        </svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+    </button>
+</div>
+
+        <div class="sidebar-about">
+    <h1 class="brand">
+        
+        
+            <a href="//localhost:1313/">
+                <h1>Tech Blog</h1>
+            </a>
+        
+    </h1>
+    <p class="lead">
+    Chronicling my personal expedition of technology exploration and experimentation, facilitated by a home-based self-configured laboratory
+    </p>
+</div>
+
+        <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<style>
+    :root {
+        --pagefind-ui-primary: #eeeeee;
+        --pagefind-ui-text: #eeeeee;
+        --pagefind-ui-background: #152028;
+        --pagefind-ui-border: #152028;
+        --pagefind-ui-tag: #152028;
+    }
+</style>
+<script src="/pagefind/pagefind-ui.js"></script>
+<div style="max-width: 100%; margin: clamp(2px, 1vw, 10px) auto;">
+    <div id="search"></div>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true, showImages: false, excerptLength: 15 });
+        });
+    </script>
+</div>
+        <nav>
+    <ul class="sidebar-nav">
+
+        
+        
+        
+        
+            
+
+            
+                
+                
+                    <li class="heading">
+                        <a href="/2024/">2024</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            Recent
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/talos-linux-setting-up-a-secure-immutable-kubernetes-cluster/">Talos Linux: Setting Up a Secure, Immutable Kubernetes Cluster</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/audio-generation-with-nvidia-jetson-orin-nx/">Audio Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/unleashing-text-generation-with-nvidia-jetson-orin-nx/">Unleashing Text Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/scaling-kafka-workloads-with-keda-in-kubernetes/">Scaling Kafka Workloads with KEDA in Kubernetes</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/exploring-nvidia-jetson-orin-nx-flashing-and-setup-guide/">Exploring NVIDIA Jetson Orin NX: Flashing and Setup Guide</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/setting-up-kafka-with-microk8s-and-multipass/">Setting Up Kafka with MicroK8s and Multipass</a>
+                            </li>
+                        
+                    
+                
+            
+                
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/archives/">Archives</a>
+                    </li>
+                    
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+
+    </ul>
+</nav>
+
+        
+    <a target="_blank" class="social" title="GitHub" href="https://github.com/seehiong">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="-2 -2 24 24">
+            <path fill="currentColor" d="M18.88 1.099C18.147.366 17.265 0 16.233 0H3.746C2.714 0 1.832.366 1.099 1.099C.366 1.832 0 2.714 0 3.746v12.487c0 1.032.366 1.914 1.099 2.647c.733.733 1.615 1.099 2.647 1.099H6.66c.19 0 .333-.007.429-.02a.504.504 0 0 0 .286-.169c.095-.1.143-.245.143-.435l-.007-.885c-.004-.564-.006-1.01-.006-1.34l-.3.052c-.19.035-.43.05-.721.046a5.555 5.555 0 0 1-.904-.091a2.026 2.026 0 0 1-.872-.39a1.651 1.651 0 0 1-.572-.8l-.13-.3a3.25 3.25 0 0 0-.41-.663c-.186-.243-.375-.407-.566-.494l-.09-.065a.956.956 0 0 1-.17-.156a.723.723 0 0 1-.117-.182c-.026-.061-.004-.111.065-.15c.07-.04.195-.059.378-.059l.26.04c.173.034.388.138.643.311a2.1 2.1 0 0 1 .631.677c.2.355.44.626.722.813c.282.186.566.28.852.28c.286 0 .533-.022.742-.065a2.59 2.59 0 0 0 .585-.196c.078-.58.29-1.028.637-1.34a8.907 8.907 0 0 1-1.333-.234a5.314 5.314 0 0 1-1.223-.507a3.5 3.5 0 0 1-1.047-.872c-.277-.347-.505-.802-.683-1.365c-.177-.564-.266-1.215-.266-1.952c0-1.049.342-1.942 1.027-2.68c-.32-.788-.29-1.673.091-2.652c.252-.079.625-.02 1.119.175c.494.195.856.362 1.086.5c.23.14.414.257.553.352a9.233 9.233 0 0 1 2.497-.338c.859 0 1.691.113 2.498.338l.494-.312a6.997 6.997 0 0 1 1.197-.572c.46-.174.81-.221 1.054-.143c.39.98.424 1.864.103 2.653c.685.737 1.028 1.63 1.028 2.68c0 .737-.089 1.39-.267 1.957c-.177.568-.407 1.023-.689 1.366a3.65 3.65 0 0 1-1.053.865c-.42.234-.828.403-1.223.507a8.9 8.9 0 0 1-1.333.235c.45.39.676 1.005.676 1.846v3.11c0 .147.021.266.065.357a.36.36 0 0 0 .208.189c.096.034.18.056.254.064c.074.01.18.013.318.013h2.914c1.032 0 1.914-.366 2.647-1.099c.732-.732 1.099-1.615 1.099-2.647V3.746c0-1.032-.367-1.914-1.1-2.647z"/>
+        </svg>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a target="_blank" class="social" title="RSS Feed" href="/2024/index.xml">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 1280.000000 1280.000000">
+            <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="currentColor">
+                <path d="M2295 11929 c-284 -12 -642 -45 -707 -65 -17 -5 -18 -63 -18 -1039 0 -569 4 -1036 8 -1039 5 -3 74 6 153 19 510 86 1168 95 1789 25 1348 -153 2602 -677 3670 -1531 385 -308 820 -744 1126 -1129 842 -1060 1362 -2313 1514 -3650 70 -621 61 -1279 -25 -1789 -13 -79 -22 -148 -19 -153 3 -4 471 -8 1039 -8 l1035 0 5 23 c51 225 85 942 67 1419 -23 605 -77 1044 -198 1617 -294 1400 -927 2734 -1823 3846 -1043 1295 -2364 2259 -3909 2854 -1158 447 -2451 656 -3707 600z"/>
+                <path d="M2255 7845 c-269 -25 -620 -81 -667 -106 -17 -9 -18 -55 -18 -899 0 -706 3 -890 13 -890 6 0 66 18 132 41 130 44 288 79 467 105 154 21 577 30 749 15 1207 -107 2267 -823 2814 -1902 166 -327 268 -637 330 -1001 38 -227 48 -384 42 -662 -8 -348 -44 -590 -126 -831 -23 -66 -41 -126 -41 -132 0 -10 184 -13 890 -13 844 0 890 1 899 18 27 50 88 452 110 725 14 162 14 624 1 782 -59 703 -233 1323 -545 1945 -481 956 -1313 1788 -2270 2268 -620 310 -1239 483 -1940 542 -165 14 -669 10 -840 -5z"/>
+                <path d="M2519 3815 c-391 -66 -725 -336 -868 -703 -79 -201 -96 -462 -45 -677 83 -344 338 -641 666 -774 116 -47 205 -69 330 -80 412 -39 811 153 1040 500 193 292 240 648 128 981 -135 403 -492 699 -914 757 -100 14 -241 12 -337 -4z"/>
+            </g>
+        </svg>
+    </a>
+
+
+
+
+
+        <p class="footnote">
+powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a target="_blank" href="https://github.com/lukeorth/poison">poison</a>
+    <br>
+    &copy; 2024 See Hiong&#39;s Blog. All rights reserved.
+</p>
+
+  </div>
+</aside>
+
+            <main class="content container">
+                <div class="post" data-pagefind-body>
+  <div class="info">
+  <h1 class="post-title">
+    <a href="//localhost:1313/2024/log-management-with-graylog/">Log Management with Graylog</a>
+  </h1>
+
+  <div class="headline" data-pagefind-ignore>
+    <div>
+      
+      
+      <time datetime=" 2024-04-19T20:00:00&#43;0800" class="post-date">
+        April 19, 2024
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>5 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-HomeLab">
+        <a href="//localhost:1313/tags/homelab">HomeLab</a>
+      </li>
+      
+      <li class="tag-K3s">
+        <a href="//localhost:1313/tags/k3s">K3s</a>
+      </li>
+      
+      <li class="tag-K8s">
+        <a href="//localhost:1313/tags/k8s">K8s</a>
+      </li>
+      
+      <li class="tag-Mongo">
+        <a href="//localhost:1313/tags/mongo">Mongo</a>
+      </li>
+      
+      <li class="tag-OpenSearch">
+        <a href="//localhost:1313/tags/opensearch">OpenSearch</a>
+      </li>
+      
+      <li class="tag-Graylog">
+        <a href="//localhost:1313/tags/graylog">Graylog</a>
+      </li>
+      
+      <li class="tag-Docker">
+        <a href="//localhost:1313/tags/docker">Docker</a>
+      </li>
+      
+      <li class="tag-MongoDB">
+        <a href="//localhost:1313/tags/mongodb">MongoDB</a>
+      </li>
+      
+      <li class="tag-Fluent Bit">
+        <a href="//localhost:1313/tags/fluent-bit">Fluent Bit</a>
+      </li>
+      
+      <li class="tag-Netshoot">
+        <a href="//localhost:1313/tags/netshoot">Netshoot</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+
+  
+</div>
+
+  <p>In this blog post, I&rsquo;ll guide you through the setup of <a href="https://graylog.org/" target="_blank">Graylog</a>, an open-source log management platform, within a HomeLab environment, providing a comprehensive solution for log analysis and monitoring.</p>
+<hr>
+<h2 id="setting-up-graylog-with-docker">Setting up Graylog with Docker</h2>
+<p>To initiate our exploration of Graylog, we&rsquo;ll opt for a <a href="https://go2docs.graylog.org/5-2/downloading_and_installing_graylog/docker_installation.htm" target="_blank">Docker Installation</a>, which ensures simplicity and ease of deployment. Follow the steps outlined in the official documentation to set up Graylog via Docker. Upon successful installation, access the Graylog interface by navigating to <em>http://localhost:9000/</em>, and use the default credentials: <strong>admin/admin</strong>.</p>
+<p><img src="/images/graylog/graylog-welcome-page.png" alt="graylog-welcome-page"></p>
+<hr>
+<h2 id="configure-mongodb">Configure MongoDB</h2>
+<p><a href="https://www.mongodb.com/" target="_blank">MongoDB</a> serves as the backend database for Graylog, facilitating efficient data storage and retrieval. Below is the configuration snippet for deploying MongoDB within our Kubernetes environment:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongo</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">log</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">replicas</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">mongo</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">mongo</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongo</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mongo:6.0.14</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">27017</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">mongo</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mongo-svc</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">log</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">port</span>: <span style="color:#ae81ff">27017</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">27017</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">mongo</span>
+</span></span></code></pre></div><hr>
+<h2 id="configure-opensearch">Configure Opensearch</h2>
+<p><a href="https://opensearch.org/" target="_blank">OpenSearch</a>, a robust and scalable open-source search and analytics engine, complements Graylog by providing enhanced capabilities for data indexing and querying. Utilize the following configuration to deploy OpenSearch:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">opensearch</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">log</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">replicas</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">opensearch</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">opensearch</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">opensearch</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">opensearchproject/opensearch:2.2.0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">OPENSEARCH_JAVA_OPTS</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: -<span style="color:#ae81ff">Xms512m -Xmx512m</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">bootstrap.memory_lock</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">discovery.type</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">single-node</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">action.auto_create_index</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#e6db74">&#34;false&#34;</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">plugins.security.ssl.http.enabled</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#e6db74">&#34;false&#34;</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">plugins.security.disabled</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#e6db74">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Can generate a password for `OPENSEARCH_INITIAL_ADMIN_PASSWORD` using a linux device via:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># tr -dc A-Z-a-z-0-9_@#%^-_=+ &lt; /dev/urandom  | head -c${1:-32}</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">OPENSEARCH_INITIAL_ADMIN_PASSWORD</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">w6zp+GhiM2jvyT8MW#ANfI+Pz-IMppSs</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>          - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">9200</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">opensearch-svc</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">log</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">opensearch</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">NodePort</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#e6db74">&#34;9200&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">9200</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">9200</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nodePort</span>: <span style="color:#ae81ff">30200</span>
+</span></span></code></pre></div><hr>
+<h2 id="configure-graylog">Configure Graylog</h2>
+<p>The pivotal step involves configuring Graylog itself. Below, you&rsquo;ll find the deployment configuration for Graylog, including necessary environment variables for seamless integration with MongoDB and OpenSearch:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">graylog</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">log</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">replicas</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">graylog</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">graylog</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">graylog</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">graylog/graylog:5.2</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">GRAYLOG_SERVER_JAVA_OPTS</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#e6db74">&#34;-Xms1g -Xmx1g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow&#34;</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">GRAYLOG_NODE_ID_FILE</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">/usr/share/graylog/data/data/node-id</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">GRAYLOG_PASSWORD_SECRET</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">e2ssyyBDYfKMmBm7iAcQ3WjroGlcueh8mzC7nL6suirLw2lsSHTEQeVuDf1rJ7WTZaWA3GeDeqwW6tMwbnSd4lkBHgCSUzEp</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># echo -n &#34;Enter Password: &#34; &amp;&amp; head -1 &lt;/dev/stdin | tr -d &#39;\n&#39; | sha256sum | cut -d&#34; &#34; -f1</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">GRAYLOG_ROOT_PASSWORD_SHA2</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">GRAYLOG_HTTP_BIND_ADDRESS</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">0.0.0.0</span>:<span style="color:#ae81ff">9000</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">GRAYLOG_HTTP_EXTERNAL_URI</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">http://192.168.68.239:9000/</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">GRAYLOG_MONGODB_URI</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">mongodb://mongo-svc.log.svc:27017/graylog</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">GRAYLOG_ELASTICSEARCH_HOSTS</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">value</span>: <span style="color:#ae81ff">http://admin:admin@opensearch-svc.log.svc:9200</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">9000</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">12201</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">graylog-svc</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">log</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">LoadBalancer</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">graylog</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#e6db74">&#34;9000&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">9000</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">9000</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#e6db74">&#34;12201&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">12201</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">12201</span>
+</span></span></code></pre></div><p>Once deployed, Graylog will be accessible via a LoadBalancer service, allowing for efficient log management and analysis. This is my GELF TCP input setup:</p>
+<p><img src="/images/graylog/graylog-setup-gelf-tcp-input.png" alt="graylog-setup-gelf-tcp-input"></p>
+<hr>
+<h2 id="deploying-fluent-bit-for-log-forwarding">Deploying Fluent Bit for Log Forwarding</h2>
+<p><a href="https://fluentbit.io/" target="_blank">Fluent Bit</a> emerges as a lightweight and high-performance log processor and forwarder, enhancing the overall log management infrastructure. Follow the steps below to integrate Fluent Bit into your HomeLab environment:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>helm repo add fluent https://fluent.github.io/helm-charts
+</span></span><span style="display:flex;"><span>helm upgrade --install fluent-bit fluent/fluent-bit
+</span></span></code></pre></div><p>Upon successful deployment, configure Fluent Bit to forward Kubernetes logs to Graylog using custom parsers and filters, ensuring seamless integration and enhanced log enrichment.</p>
+<hr>
+<h3 id="customizing-log-parsing-and-enrichment">Customizing Log Parsing and Enrichment</h3>
+<p>Referencing from the <a href="https://docs.fluentbit.io/manual/pipeline/parsers/json" target="_blank">JSON</a> parser, this is my config:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>[<span style="color:#a6e22e">PARSER</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Name</span>        <span style="color:#a6e22e">docker</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Format</span>      <span style="color:#a6e22e">json</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Time_Key</span>    <span style="color:#a6e22e">time</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Time_Format</span> %<span style="color:#a6e22e">Y</span>-%<span style="color:#a6e22e">m</span>-%<span style="color:#a6e22e">dT</span>%<span style="color:#a6e22e">H</span>:%<span style="color:#a6e22e">M</span>:%<span style="color:#a6e22e">S</span>.%<span style="color:#a6e22e">L</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Time_Keep</span>   <span style="color:#a6e22e">On</span>
+</span></span></code></pre></div><h3 id="setup-fluent-bitconf">Setup fluent-bit.conf</h3>
+<p>Utilizing the <a href="https://docs.fluentbit.io/manual/pipeline/inputs/tail" target="_blank">tail input plugin</a>, Fluent Bit channels all container logs to Graylog. The <a href="https://docs.fluentbit.io/manual/pipeline/filters/record-modifier" target="_blank">record modifier filter plugin</a> is employed to append the essential key, <em>Host</em>, for <a href="https://go2docs.graylog.org/5-2/getting_in_log_data/gelf.html" target="_blank">GELF</a> compatibility. The <a href="https://docs.fluentbit.io/manual/pipeline/filters/kubernetes" target="_blank">Fluent Bit Kubernetes Filter</a> enhances log files with Kubernetes metadata. Lastly, the <a href="https://docs.fluentbit.io/manual/pipeline/outputs/gelf" target="_blank">GELF output plugin</a> facilitates the direct transmission of logs in GELF format to my Graylog TCP input. Below is the configuration excerpt from my <em>fluent-bit.conf</em> file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>[<span style="color:#a6e22e">SERVICE</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Daemon</span>          <span style="color:#a6e22e">Off</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Flush</span>           <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Log_Level</span>       <span style="color:#a6e22e">info</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Parsers_File</span>    <span style="color:#e6db74">/fluent-bit/</span><span style="color:#a6e22e">etc</span>/<span style="color:#a6e22e">parsers</span>.<span style="color:#a6e22e">conf</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Parsers_File</span>    <span style="color:#e6db74">/fluent-bit/</span><span style="color:#a6e22e">etc</span><span style="color:#e6db74">/conf/</span><span style="color:#a6e22e">custom_parsers</span>.<span style="color:#a6e22e">conf</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">HTTP_Server</span>     <span style="color:#a6e22e">On</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">HTTP_Listen</span>     <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">HTTP_Port</span>       <span style="color:#ae81ff">2020</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Health_Check</span>    <span style="color:#a6e22e">On</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">INPUT</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Name</span>                <span style="color:#a6e22e">tail</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Tag</span>                 <span style="color:#a6e22e">kube</span>.*
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Path</span>                <span style="color:#e6db74">/var/</span><span style="color:#a6e22e">log</span><span style="color:#e6db74">/containers/</span>*.<span style="color:#a6e22e">log</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">multiline</span>.<span style="color:#a6e22e">parser</span>    <span style="color:#a6e22e">docker</span>, <span style="color:#a6e22e">cri</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">FILTER</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Name</span>    <span style="color:#a6e22e">record_modifier</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Match</span>   *
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Record</span>  <span style="color:#a6e22e">host</span> <span style="color:#a6e22e">k3s</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">FILTER</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Name</span>            <span style="color:#a6e22e">kubernetes</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Match</span>           <span style="color:#a6e22e">kube</span>.*
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Kube_URL</span>        <span style="color:#a6e22e">https</span>:<span style="color:#e6db74">//</span><span style="color:#a6e22e">kubernetes</span>.<span style="color:#a6e22e">default</span>.<span style="color:#a6e22e">svc</span>:<span style="color:#ae81ff">443</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Kube_CA_File</span>    <span style="color:#e6db74">/var/</span><span style="color:#a6e22e">run</span><span style="color:#e6db74">/secrets/</span><span style="color:#a6e22e">kubernetes</span>.<span style="color:#a6e22e">io</span><span style="color:#e6db74">/serviceaccount/</span><span style="color:#a6e22e">ca</span>.<span style="color:#a6e22e">crt</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Kube_Token_File</span> <span style="color:#e6db74">/var/</span><span style="color:#a6e22e">run</span><span style="color:#e6db74">/secrets/</span><span style="color:#a6e22e">kubernetes</span>.<span style="color:#a6e22e">io</span><span style="color:#e6db74">/serviceaccount/</span><span style="color:#a6e22e">token</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Kube_Tag_Prefix</span> <span style="color:#a6e22e">kube</span>.<span style="color:#a6e22e">var</span>.<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">containers</span>.
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Merge_Log</span>       <span style="color:#a6e22e">On</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Merge_Log_Key</span>   <span style="color:#a6e22e">log_processed</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">OUTPUT</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Name</span>                    <span style="color:#a6e22e">gelf</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Match</span>                   *
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Host</span>                    <span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">68</span>.<span style="color:#ae81ff">239</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Port</span>                    <span style="color:#ae81ff">12201</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Mode</span>                    <span style="color:#a6e22e">tcp</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Gelf_Short_Message_Key</span>  <span style="color:#a6e22e">log</span>
+</span></span></code></pre></div><p><img src="/images/graylog/graylog-fluent-bit-configmap.png" alt="graylog-fluent-bit-configmap"></p>
+<p>After updating the ConfigMap, let&rsquo;s restart the fluent-bit using <em>kubectl rollout</em> command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">kubectl</span> <span style="color:#a6e22e">rollout</span> <span style="color:#a6e22e">restart</span> <span style="color:#a6e22e">ds</span>/<span style="color:#a6e22e">fluent</span>-<span style="color:#a6e22e">bit</span>
+</span></span></code></pre></div><p><img src="/images/graylog/graylog-search-logs.png" alt="graylog-search-logs"></p>
+<hr>
+<h2 id="optional---implementing-grok-patterns-and-pipelines">Optional - Implementing Grok Patterns and Pipelines</h2>
+<p>For advanced log processing and filtering, consider implementing Grok patterns and pipelines within Graylog. These enable fine-grained control over log parsing and manipulation, enhancing the overall efficiency and effectiveness of log management.</p>
+<p>This is my GROK pattern to filter out ping command:</p>
+<p><img src="/images/graylog/graylog-grok-pattern-icmp-seq.png" alt="graylog-grok-pattern-icmp-seq"></p>
+<p><a href="https://go2docs.graylog.org/5-2/making_sense_of_your_log_data/pipelines.html" target="_blank">Pipelines</a> are the central concept for typing together the processing steps applied to the incoming messages. This is my <em>ping command</em> rule:</p>
+<p><img src="/images/graylog/graylog-create-pipeline-rule.png" alt="graylog-create-pipeline-rule"></p>
+<p>Adds the rule to the pipeline, so as to filter out any ping commands from the source logs.</p>
+<p><img src="/images/graylog/graylog-create-pipeline.png" alt="graylog-create-pipeline"></p>
+<hr>
+<h2 id="troubleshooting-and-network-analysis">Troubleshooting and Network Analysis</h2>
+<p>In case of any issues or network-related concerns, leverage troubleshooting tools like <a href="https://github.com/nicolaka/netshoot/blob/master/README.md" target="_blank">netshoot</a> and tcpdump to diagnose and resolve issues promptly. These tools facilitate comprehensive network analysis, ensuring seamless operation of the log management infrastructure.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">netshoot</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">nicolaka/netshoot</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">command</span>: [<span style="color:#e6db74">&#34;/bin/bash&#34;</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">args</span>: [<span style="color:#e6db74">&#34;-c&#34;</span>, <span style="color:#e6db74">&#34;while true; do ping localhost; sleep 60;done&#34;</span>]
+</span></span></code></pre></div><p>You may enter the console from portainer and issue the command to check for incoming messages:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>tcpdump -i eth0 port <span style="color:#ae81ff">12201</span> -w -
+</span></span></code></pre></div><p><img src="/images/graylog/graylog-tcpdump-on-eth0-port.png" alt="graylog-tcpdump-on-eth0-port"></p>
+<p>With these configurations and best practices in place, your HomeLab environment is equipped with a robust and scalable log management solution, empowering you to effectively monitor and analyze system logs with Graylog.</p>
+
+  
+  <hr>
+<div class="footer">
+    
+	    
+            <a class="previous-post" href="//localhost:1313/2024/coding-with-crewai-ai-orchestration-simplified/?ref=footer"><span style="font-weight:bold;">« Previous</span><br>Coding with CrewAI: AI Orchestration Simplified</a>
+        
+	    
+            <div class="next-post">
+                <a href="//localhost:1313/2024/efficient-tsp-solver-api-with-micronaut/?ref=footer"><span style="font-weight:bold;">Next »</span><br>Efficient TSP Solver API with Micronaut</a>
+            </div>
+        
+    
+</div>
+
+  
+    <div class="comments">
+    
+        <div style="clear: both;">
+            <br>
+            <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "seehiong" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </div>
+    
+</div>
+
+  
+</div>
+            </main>
+            
+  
+    <div class="article-toc ">
+    <div class="toc-wrapper">
+      <h4 id="contents"></h4>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#setting-up-graylog-with-docker">Setting up Graylog with Docker</a></li>
+    <li><a href="#configure-mongodb">Configure MongoDB</a></li>
+    <li><a href="#configure-opensearch">Configure Opensearch</a></li>
+    <li><a href="#configure-graylog">Configure Graylog</a></li>
+    <li><a href="#deploying-fluent-bit-for-log-forwarding">Deploying Fluent Bit for Log Forwarding</a>
+      <ul>
+        <li><a href="#customizing-log-parsing-and-enrichment">Customizing Log Parsing and Enrichment</a></li>
+        <li><a href="#setup-fluent-bitconf">Setup fluent-bit.conf</a></li>
+      </ul>
+    </li>
+    <li><a href="#optional---implementing-grok-patterns-and-pipelines">Optional - Implementing Grok Patterns and Pipelines</a></li>
+    <li><a href="#troubleshooting-and-network-analysis">Troubleshooting and Network Analysis</a></li>
+  </ul>
+</nav>
+
+      
+    </div>
+</div>
+  
+
+        </div>
+    </body>
+</html>
+
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>

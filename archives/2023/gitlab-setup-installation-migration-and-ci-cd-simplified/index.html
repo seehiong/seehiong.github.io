@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+<script defer language="javascript" type="text/javascript" src="/js/bundle.min.b989f0fdae3971a3effd81d6d0b27b3cb1023ff0b601ff43e2118b0d9d82ddb9.js"></script>
+
+
+
+
+
+
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="icon" href=/favicon.png>
+
+    
+    
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+
+
+<!-- Open Graph image and Twitter Card metadata -->
+
+<title itemprop="name">Tech Blog - GitLab Setup: Installation, Migration, and CI/CD Simplified</title>
+<meta property="og:title" content=Tech&#32;Blog&#32;-&#32;GitLab&#32;Setup:&#32;Installation,&#32;Migration,&#32;and&#32;CI/CD&#32;Simplified />
+<meta name="twitter:title" content=Tech&#32;Blog&#32;-&#32;GitLab&#32;Setup:&#32;Installation,&#32;Migration,&#32;and&#32;CI/CD&#32;Simplified />
+<meta itemprop="name" content=Tech&#32;Blog&#32;-&#32;GitLab&#32;Setup:&#32;Installation,&#32;Migration,&#32;and&#32;CI/CD&#32;Simplified />
+<meta name="application-name" content=Tech&#32;Blog&#32;-&#32;GitLab&#32;Setup:&#32;Installation,&#32;Migration,&#32;and&#32;CI/CD&#32;Simplified />
+<meta property="og:site_name" content="See Hiong&#39;s Blog" />
+
+
+<meta name="description" content="Discover a streamlined approach to GitLab installation, repository migration, and CI/CD optimization. This comprehensive guide covers setting up GitLab in your home lab, upgrading to the latest version, configuring external URLs, and migrating repositories. Learn how to install GitLab Runner, Docker, and seamlessly integrate them into your development workflow. The guide concludes with optional steps for registering GitLab Runner as a service. Elevate your version control and continuous integration experience with this concise and practical tutorial." />
+<meta itemprop="description" content="Discover a streamlined approach to GitLab installation, repository migration, and CI/CD optimization. This comprehensive guide covers setting up GitLab in your home lab, upgrading to the latest version, configuring external URLs, and migrating repositories. Learn how to install GitLab Runner, Docker, and seamlessly integrate them into your development workflow. The guide concludes with optional steps for registering GitLab Runner as a service. Elevate your version control and continuous integration experience with this concise and practical tutorial." />
+<meta property="og:description" content="Discover a streamlined approach to GitLab installation, repository migration, and CI/CD optimization. This comprehensive guide covers setting up GitLab in your home lab, upgrading to the latest version, configuring external URLs, and migrating repositories. Learn how to install GitLab Runner, Docker, and seamlessly integrate them into your development workflow. The guide concludes with optional steps for registering GitLab Runner as a service. Elevate your version control and continuous integration experience with this concise and practical tutorial." />
+<meta name="twitter:description" content="Discover a streamlined approach to GitLab installation, repository migration, and CI/CD optimization. This comprehensive guide covers setting up GitLab in your home lab, upgrading to the latest version, configuring external URLs, and migrating repositories. Learn how to install GitLab Runner, Docker, and seamlessly integrate them into your development workflow. The guide concludes with optional steps for registering GitLab Runner as a service. Elevate your version control and continuous integration experience with this concise and practical tutorial." />
+
+
+<base href="//localhost:1313/archives/2023/gitlab-setup-installation-migration-and-ci-cd-simplified/" />
+<link rel="canonical" href="//localhost:1313/archives/2023/gitlab-setup-installation-migration-and-ci-cd-simplified/" itemprop="url" />
+<meta name="url" content="//localhost:1313/archives/2023/gitlab-setup-installation-migration-and-ci-cd-simplified/" />
+<meta name="twitter:url" content="//localhost:1313/archives/2023/gitlab-setup-installation-migration-and-ci-cd-simplified/" />
+<meta property="og:url" content="//localhost:1313/archives/2023/gitlab-setup-installation-migration-and-ci-cd-simplified/" />
+
+
+<meta property="og:updated_time" content="2024-06-23T00:00:00Z" />
+
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href='//localhost:1313/sitemap.xml' />
+
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+
+
+<meta property="fb:admins" content="" />
+
+
+<meta name="apple-mobile-web-app-title" content="See Hiong&#39;s Blog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.134.1">
+
+
+    
+    
+
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.03b57bbaf31d739f14c95df7f05d1cefcfa60bbafa36ba47313afdeb325aeada.css">
+
+
+    
+    <style>
+    body {
+        --sidebar-bg-color: #202020;
+        --sidebar-img-border-color: #515151;
+        --sidebar-p-color: #909090;
+        --sidebar-h1-color: #FFF;
+        --sidebar-a-color: #FFF;
+        --sidebar-socials-color: #FFF;
+        --text-color: #222;
+        --bkg-color: #FAF9F6;
+        --post-title-color: #303030;
+        --list-color: #5a5a5a;
+        --link-color: #268bd2;
+        --date-color: #515151;
+        --table-border-color: #E5E5E5;
+        --table-stripe-color: #F9F9F9;
+        --code-color: #000;
+        --code-background-color: #E5E5E5;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+        --moon-sun-color: #FFF;
+        --moon-sun-background-color: #515151;
+    }
+    body.dark-theme {
+        --text-color: #eee;
+        --bkg-color: #121212;
+        --post-title-color: #DBE2E9;
+        --list-color: #9d9d9d;
+        --link-color: #268bd2;
+        --date-color: #9a9a9a;
+        --table-border-color: #515151;
+        --table-stripe-color: #202020;
+        --code-color: #fff;
+        --code-background-color: #515151;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+    }
+    body {
+        background-color: var(--bkg-color);
+    }
+</style>
+
+</head>
+
+    <body class="dark-theme">
+        <div class="wrapper">
+            <aside class="sidebar">
+    <div class="container sidebar-sticky">
+        <div class="light-dark" align="right">
+    <button class="btn-light-dark" title="Toggle light/dark mode">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6 .278a.768.768 0 0 1 .08.858a7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277c.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316a.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71C0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        </svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+    </button>
+</div>
+
+        <div class="sidebar-about">
+    <h1 class="brand">
+        
+        
+            <a href="//localhost:1313/">
+                <h1>Tech Blog</h1>
+            </a>
+        
+    </h1>
+    <p class="lead">
+    Chronicling my personal expedition of technology exploration and experimentation, facilitated by a home-based self-configured laboratory
+    </p>
+</div>
+
+        <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<style>
+    :root {
+        --pagefind-ui-primary: #eeeeee;
+        --pagefind-ui-text: #eeeeee;
+        --pagefind-ui-background: #152028;
+        --pagefind-ui-border: #152028;
+        --pagefind-ui-tag: #152028;
+    }
+</style>
+<script src="/pagefind/pagefind-ui.js"></script>
+<div style="max-width: 100%; margin: clamp(2px, 1vw, 10px) auto;">
+    <div id="search"></div>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true, showImages: false, excerptLength: 15 });
+        });
+    </script>
+</div>
+        <nav>
+    <ul class="sidebar-nav">
+
+        
+        
+        
+        
+            
+
+            
+                
+                
+                    <li class="heading">
+                        <a href="/2024/">2024</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            Recent
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/talos-linux-setting-up-a-secure-immutable-kubernetes-cluster/">Talos Linux: Setting Up a Secure, Immutable Kubernetes Cluster</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/audio-generation-with-nvidia-jetson-orin-nx/">Audio Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/unleashing-text-generation-with-nvidia-jetson-orin-nx/">Unleashing Text Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/scaling-kafka-workloads-with-keda-in-kubernetes/">Scaling Kafka Workloads with KEDA in Kubernetes</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/exploring-nvidia-jetson-orin-nx-flashing-and-setup-guide/">Exploring NVIDIA Jetson Orin NX: Flashing and Setup Guide</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/setting-up-kafka-with-microk8s-and-multipass/">Setting Up Kafka with MicroK8s and Multipass</a>
+                            </li>
+                        
+                    
+                
+            
+                
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/archives/">Archives</a>
+                    </li>
+                    
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+
+    </ul>
+</nav>
+
+        
+    <a target="_blank" class="social" title="GitHub" href="https://github.com/seehiong">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="-2 -2 24 24">
+            <path fill="currentColor" d="M18.88 1.099C18.147.366 17.265 0 16.233 0H3.746C2.714 0 1.832.366 1.099 1.099C.366 1.832 0 2.714 0 3.746v12.487c0 1.032.366 1.914 1.099 2.647c.733.733 1.615 1.099 2.647 1.099H6.66c.19 0 .333-.007.429-.02a.504.504 0 0 0 .286-.169c.095-.1.143-.245.143-.435l-.007-.885c-.004-.564-.006-1.01-.006-1.34l-.3.052c-.19.035-.43.05-.721.046a5.555 5.555 0 0 1-.904-.091a2.026 2.026 0 0 1-.872-.39a1.651 1.651 0 0 1-.572-.8l-.13-.3a3.25 3.25 0 0 0-.41-.663c-.186-.243-.375-.407-.566-.494l-.09-.065a.956.956 0 0 1-.17-.156a.723.723 0 0 1-.117-.182c-.026-.061-.004-.111.065-.15c.07-.04.195-.059.378-.059l.26.04c.173.034.388.138.643.311a2.1 2.1 0 0 1 .631.677c.2.355.44.626.722.813c.282.186.566.28.852.28c.286 0 .533-.022.742-.065a2.59 2.59 0 0 0 .585-.196c.078-.58.29-1.028.637-1.34a8.907 8.907 0 0 1-1.333-.234a5.314 5.314 0 0 1-1.223-.507a3.5 3.5 0 0 1-1.047-.872c-.277-.347-.505-.802-.683-1.365c-.177-.564-.266-1.215-.266-1.952c0-1.049.342-1.942 1.027-2.68c-.32-.788-.29-1.673.091-2.652c.252-.079.625-.02 1.119.175c.494.195.856.362 1.086.5c.23.14.414.257.553.352a9.233 9.233 0 0 1 2.497-.338c.859 0 1.691.113 2.498.338l.494-.312a6.997 6.997 0 0 1 1.197-.572c.46-.174.81-.221 1.054-.143c.39.98.424 1.864.103 2.653c.685.737 1.028 1.63 1.028 2.68c0 .737-.089 1.39-.267 1.957c-.177.568-.407 1.023-.689 1.366a3.65 3.65 0 0 1-1.053.865c-.42.234-.828.403-1.223.507a8.9 8.9 0 0 1-1.333.235c.45.39.676 1.005.676 1.846v3.11c0 .147.021.266.065.357a.36.36 0 0 0 .208.189c.096.034.18.056.254.064c.074.01.18.013.318.013h2.914c1.032 0 1.914-.366 2.647-1.099c.732-.732 1.099-1.615 1.099-2.647V3.746c0-1.032-.367-1.914-1.1-2.647z"/>
+        </svg>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a target="_blank" class="social" title="RSS Feed" href="/2024/index.xml">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 1280.000000 1280.000000">
+            <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="currentColor">
+                <path d="M2295 11929 c-284 -12 -642 -45 -707 -65 -17 -5 -18 -63 -18 -1039 0 -569 4 -1036 8 -1039 5 -3 74 6 153 19 510 86 1168 95 1789 25 1348 -153 2602 -677 3670 -1531 385 -308 820 -744 1126 -1129 842 -1060 1362 -2313 1514 -3650 70 -621 61 -1279 -25 -1789 -13 -79 -22 -148 -19 -153 3 -4 471 -8 1039 -8 l1035 0 5 23 c51 225 85 942 67 1419 -23 605 -77 1044 -198 1617 -294 1400 -927 2734 -1823 3846 -1043 1295 -2364 2259 -3909 2854 -1158 447 -2451 656 -3707 600z"/>
+                <path d="M2255 7845 c-269 -25 -620 -81 -667 -106 -17 -9 -18 -55 -18 -899 0 -706 3 -890 13 -890 6 0 66 18 132 41 130 44 288 79 467 105 154 21 577 30 749 15 1207 -107 2267 -823 2814 -1902 166 -327 268 -637 330 -1001 38 -227 48 -384 42 -662 -8 -348 -44 -590 -126 -831 -23 -66 -41 -126 -41 -132 0 -10 184 -13 890 -13 844 0 890 1 899 18 27 50 88 452 110 725 14 162 14 624 1 782 -59 703 -233 1323 -545 1945 -481 956 -1313 1788 -2270 2268 -620 310 -1239 483 -1940 542 -165 14 -669 10 -840 -5z"/>
+                <path d="M2519 3815 c-391 -66 -725 -336 -868 -703 -79 -201 -96 -462 -45 -677 83 -344 338 -641 666 -774 116 -47 205 -69 330 -80 412 -39 811 153 1040 500 193 292 240 648 128 981 -135 403 -492 699 -914 757 -100 14 -241 12 -337 -4z"/>
+            </g>
+        </svg>
+    </a>
+
+
+
+
+
+        <p class="footnote">
+powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a target="_blank" href="https://github.com/lukeorth/poison">poison</a>
+    <br>
+    &copy; 2024 See Hiong&#39;s Blog. All rights reserved.
+</p>
+
+  </div>
+</aside>
+
+            <main class="content container">
+                <div class="post" data-pagefind-body>
+  <div class="info">
+  <h1 class="post-title">
+    <a href="//localhost:1313/archives/2023/gitlab-setup-installation-migration-and-ci-cd-simplified/">GitLab Setup: Installation, Migration, and CI/CD Simplified</a>
+  </h1>
+
+  <div class="headline" data-pagefind-ignore>
+    <div>
+      
+      
+      <time datetime=" 2023-12-24T20:00:00&#43;0800" class="post-date">
+        December 24, 2023
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>5 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-GitLab">
+        <a href="//localhost:1313/tags/gitlab">GitLab</a>
+      </li>
+      
+      <li class="tag-CI/CD">
+        <a href="//localhost:1313/tags/ci/cd">CI/CD</a>
+      </li>
+      
+      <li class="tag-Docker">
+        <a href="//localhost:1313/tags/docker">Docker</a>
+      </li>
+      
+      <li class="tag-HomeLab">
+        <a href="//localhost:1313/tags/homelab">HomeLab</a>
+      </li>
+      
+      <li class="tag-Registry">
+        <a href="//localhost:1313/tags/registry">Registry</a>
+      </li>
+      
+      <li class="tag-Pipeline">
+        <a href="//localhost:1313/tags/pipeline">Pipeline</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+
+  
+</div>
+
+  <p>In this guide, I&rsquo;ll walk you through the process of installing <a href="https://docs.gitlab.com/omnibus/installation/" target="_blank">GitLab</a>, a comprehensive suite of tools for version control, continuous integration, continuous delivery, and more, in my Home Lab collection.</p>
+<hr>
+<h2 id="preparation">Preparation</h2>
+<p>After obtaining the latest <a href="https://ubuntu.com/download/server" target="_blank">Ubuntu Server</a>, I utilized <a href="https://rufus.ie/en/" target="_blank">Rufus</a>, a utility for formatting and creating bootable USB flash drives.</p>
+<hr>
+<h2 id="installation">Installation</h2>
+<p>Following the <a href="https://packages.gitlab.com/gitlab/gitlab-ce/install" target="_blank">installation instructions</a>, initiate a quick installation using the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+</span></span></code></pre></div><p><img src="/images/gitlab/gitlab-quick-install.png" alt="gitlab-quick-install"></p>
+<hr>
+<h2 id="upgrading-to-the-latest-version">Upgrading to the Latest Version</h2>
+<p>Referencing the <a href="https://docs.gitlab.com/ee/update/package/#upgrade-using-the-official-repositories" target="_blank">official repositories for upgrading</a>, upgrade GitLab to the latest version:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt update <span style="color:#f92672">&amp;&amp;</span> sudo apt install gitlab-ce
+</span></span></code></pre></div><p><img src="/images/gitlab/gitlab-upgraded.png" alt="gitlab-upgraded"></p>
+<hr>
+<h2 id="setting-external-url">Setting External URL</h2>
+<p>Begin by configuring the external URL:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/gitlab/gitlab.rb
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Search for external_url and input the IP address</span>
+</span></span><span style="display:flex;"><span>external_url <span style="color:#e6db74">&#39;http://192.168.68.126&#39;</span>
+</span></span></code></pre></div><p><img src="/images/gitlab/gitlab-external-url.png" alt="gitlab-external-url"></p>
+<p>Once configured, start the GitLab instance:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo gitlab-ctl reconfigure
+</span></span></code></pre></div><p><img src="/images/gitlab/gitlab-reconfigured.png" alt="gitlab-reconfigured"></p>
+<p>Retrieve the default admin account password:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/gitlab/initial_root_password
+</span></span></code></pre></div><p>Visit the configured address, <em>http://192.168.68.126</em>:</p>
+<p><img src="/images/gitlab/gitlab-initial-login.png" alt="gitlab-initial-login"></p>
+<p>Deactivate sign-up restrictions:</p>
+<p><img src="/images/gitlab/gitlab-deactivate-sign-up.png" alt="gitlab-deactivate-sign-up"></p>
+<p>Clink the <strong>Save changes</strong> button:</p>
+<p><img src="/images/gitlab/gitlab-uncheck-sign-up-enabled.png" alt="gitlab-uncheck-sign-up-enabled"></p>
+<hr>
+<h2 id="migrating-from-old-to-new-repository">Migrating from Old to New Repository</h2>
+<h3 id="1-clone-the-existing-repository">1. Clone the Existing Repository</h3>
+<p>Clone the existing repository to your local machine:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git clone &lt;old_repo_url&gt;
+</span></span></code></pre></div><h3 id="2-set-up-ssh-key">2. Set up SSH key</h3>
+<ol>
+<li>Generate an SSH key on your working machine:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>ssh-keygen -t rsa -b <span style="color:#ae81ff">4096</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>eval <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>ssh-agent -s<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Save the key to ~/.ssh/gitlab_id_rsa</span>
+</span></span><span style="display:flex;"><span>ssh-add ~/.ssh/gitlab_id_rsa
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Export the public key</span>
+</span></span><span style="display:flex;"><span>cat ~/.ssh/gitlab_id_rsa.pub
+</span></span></code></pre></div><ol start="2">
+<li>Update shell profile (e.g. ~/.bashrc) by adding the following lines to the bottom:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">eval</span> <span style="color:#e6db74">&#34;$(ssh-agent -s)&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ssh</span>-<span style="color:#a6e22e">add</span> ~<span style="color:#e6db74">/.ssh/</span><span style="color:#a6e22e">gitlab_id_rsa</span>
+</span></span></code></pre></div><ol start="3">
+<li>Restart your shell or source the configuration:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>source ~/.bashrc  <span style="color:#75715e"># or source ~/.zshrc for Zsh</span>
+</span></span></code></pre></div><ol start="4">
+<li>Save the SSH public key in GitLab.</li>
+</ol>
+<p><img src="/images/gitlab/gitlab-add-ssh-public-key.png" alt="gitlab-add-ssh-public-key"></p>
+<ol start="5">
+<li>Since th SSH key pair is not in the default location, save these settings in <em>~/.ssh/config</em> file:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">Host</span> <span style="color:#ae81ff">192</span>.<span style="color:#ae81ff">168</span>.<span style="color:#ae81ff">68</span>.<span style="color:#ae81ff">126</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">PreferredAuthentications</span> <span style="color:#a6e22e">publickey</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">IdentityFile</span> <span style="color:#a6e22e">C</span>:\<span style="color:#a6e22e">Users</span>\<span style="color:#a6e22e">seehi</span>\.<span style="color:#a6e22e">ssh</span>\<span style="color:#a6e22e">gitlab_id_rsa</span>
+</span></span></code></pre></div><h3 id="3-create-a-new-repository">3. Create a New Repository</h3>
+<p>Navigate to the cloned repository directory and update the remote URL:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cd &lt;local_repo_directory&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># In this example, a new group called personal is created; the new repo is not yet created</span>
+</span></span><span style="display:flex;"><span>git remote set-url origin git@192.168.68.126:personal/langchain4j-spring-boot.git
+</span></span></code></pre></div><h3 id="4-push-to-the-new-repository">4. Push to the New Repository</h3>
+<p>Push the local repository:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git push -u origin main
+</span></span></code></pre></div><hr>
+<h2 id="install-gitlab-runner">Install GitLab Runner</h2>
+<p>Referencing <a href="https://docs.gitlab.com/runner/install/" target="_blank">Install GitLab Runner</a>, add the official GitLab repository:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl -L <span style="color:#e6db74">&#34;https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh&#34;</span> | sudo bash
+</span></span></code></pre></div><p><img src="/images/gitlab/gitlab-add-repository-for-runner.png" alt="gitlab-add-repository-for-runner"></p>
+<p>Install the latest GitLab Runner version:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># To install or update the GitLab Runner</span>
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get install gitlab-runner
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Verify if GitLab Runner is running</span>
+</span></span><span style="display:flex;"><span>sudo gitlab-runner status
+</span></span></code></pre></div><hr>
+<h2 id="install-docker">Install Docker</h2>
+<p>Referring to <a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank">Install Docker Engine on Ubuntu</a>, set up Docker&rsquo;s apt repository:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Add Docker&#39;s official GPG key:</span>
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get install ca-certificates curl gnupg
+</span></span><span style="display:flex;"><span>sudo install -m <span style="color:#ae81ff">0755</span> -d /etc/apt/keyrings
+</span></span><span style="display:flex;"><span>curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+</span></span><span style="display:flex;"><span>sudo chmod a+r /etc/apt/keyrings/docker.gpg
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add the repository to Apt sources:</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;deb [arch=</span><span style="color:#66d9ef">$(</span>dpkg --print-architecture<span style="color:#66d9ef">)</span><span style="color:#e6db74"> signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  </span><span style="color:#66d9ef">$(</span>. /etc/os-release <span style="color:#f92672">&amp;&amp;</span> echo <span style="color:#e6db74">&#34;</span>$VERSION_CODENAME<span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">)</span><span style="color:#e6db74"> stable&#34;</span> | <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Install the Docker packages</span>
+</span></span><span style="display:flex;"><span>sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Verify Docker Engine installation</span>
+</span></span><span style="display:flex;"><span>sudo docker run hello-world
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Adds user to docker group (needs to re-login to take effect)</span>
+</span></span><span style="display:flex;"><span>sudo usermod -aG docker pi
+</span></span></code></pre></div><hr>
+<h2 id="register-gitlab-runner">Register GitLab Runner</h2>
+<p>In the project settings, navigate to the CI/CD option, expand the Runners section, and click on the <strong>New project runner</strong> button:</p>
+<p><img src="/images/gitlab/gitlab-setup-runner-for-project.png" alt="gitlab-setup-runner-for-project"></p>
+<p>Set the tag (e.g., docker-linux), select Run untagged jobs, and click the <strong>Create runner</strong> button:</p>
+<p><img src="/images/gitlab/gitlab-new-project-runner.png" alt="gitlab-new-project-runner"></p>
+<p>Once the runner is created, copy the command provided:</p>
+<p><img src="/images/gitlab/gitlab-runner-created.png" alt="gitlab-runner-created"></p>
+<p>Next, paste the command to <a href="https://docs.gitlab.com/runner/register/" target="_blank">register a runner</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># You may use sudo to save config to /etc/gitlab-runner/config.toml instead (otherwise follow optional section)</span>
+</span></span><span style="display:flex;"><span>gitlab-runner register  --url http://192.168.68.126  --token glrt--LuoR7v6HNubypzQusrz
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># You can run this in the background</span>
+</span></span><span style="display:flex;"><span>gitlab-runner run
+</span></span></code></pre></div><p><img src="/images/gitlab/gitlab-runner-registered.png" alt="gitlab-runner-registered"></p>
+<hr>
+<h2 id="run-gitlab-pipeline">Run GitLab Pipeline</h2>
+<p>Here&rsquo;s a sample <em>.gitlab-ci.yml</em> file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">variables</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">IMAGE_GRADLE_JAVA</span>: <span style="color:#ae81ff">gradle:jdk17</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">stages</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">build</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">gradle-build</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">$IMAGE_GRADLE_JAVA</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">stage</span>: <span style="color:#ae81ff">build</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">script</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#ae81ff">echo &#34;Building&#34;</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#ae81ff">sh $CI_PROJECT_DIR/gradlew clean build</span>
+</span></span></code></pre></div><p><img src="/images/gitlab/gitlab-create-ci-yml-file.png" alt="gitlab-create-ci-yml-file"></p>
+<p>To trigger the build stage, go to Build -&gt; Pipeline, and click on the <strong>Run pipeline</strong> button. Here&rsquo;s a sample run and its result:</p>
+<p><img src="/images/gitlab/gitlab-runner-run.png" alt="gitlab-runner-run"></p>
+<p><img src="/images/gitlab/gitlab-pipeline-build-result.png" alt="gitlab-pipeline-build-result"></p>
+<hr>
+<h2 id="optional-register-gitlab-runner-as-a-service">Optional: Register GitLab runner as a Service</h2>
+<p>If you observe, my config file is stored in <em>/home/pi/.gitlab-runner/config.toml</em>. To use this setting:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># The easiest way is to copy the config to the default location</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">sudo cp /home/pi/.gitlab-runner/config.toml /etc/gitlab-runner/config.toml</span>
+</span></span></code></pre></div><p>Start the GitLab runner service:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo systemctl enable gitlab-runner
+</span></span><span style="display:flex;"><span>sudo systemctl status gitlab-runner
+</span></span></code></pre></div><p>Run the pipeline again:</p>
+<p><img src="/images/gitlab/gitlab-pipeline-rebuild.png" alt="gitlab-pipeline-rebuild"></p>
+<hr>
+<h2 id="optional-enable-container-and-package-registry">Optional: Enable Container and Package Registry</h2>
+<p>To enable the container and package registry, follow these steps:</p>
+<ol>
+<li>Modifies the <em>gitlab.rb</em> file:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/gitlab/gitlab.rb
+</span></span></code></pre></div><ol start="2">
+<li>Make the necessary changes to configure the registry:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">external_url</span> <span style="color:#e6db74">&#39;http://192.168.68.126&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry_external_url</span> <span style="color:#e6db74">&#39;http://192.168.68.126:5005&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;registry_enabled&#39;</span>] = <span style="color:#a6e22e">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;registry_host&#39;</span>] = <span style="color:#e6db74">&#34;192.168.68.126&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;registry_port&#39;</span>] = <span style="color:#e6db74">&#34;5005&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;registry_path&#39;</span>] = <span style="color:#e6db74">&#34;/mnt/registry&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;enable&#39;</span>] = <span style="color:#a6e22e">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;dir&#39;</span>] = <span style="color:#e6db74">&#34;/var/opt/gitlab/registry&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;registry_http_addr&#39;</span>] = <span style="color:#e6db74">&#34;127.0.0.1:5000&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;log_directory&#39;</span>] = <span style="color:#e6db74">&#34;/var/log/gitlab/registry&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;env_directory&#39;</span>] = <span style="color:#e6db74">&#34;/opt/gitlab/etc/registry/env&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">registry</span>[<span style="color:#e6db74">&#39;env&#39;</span>] = {
+</span></span><span style="display:flex;"><span><span style="color:#75715e">  &#34;REGISTRY_HTTP_RELATIVEURLS&#34; =&gt; true</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">letsencrypt</span>[<span style="color:#e6db74">&#39;enable&#39;</span>] = <span style="color:#a6e22e">false</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;packages_enabled&#39;</span>] = <span style="color:#a6e22e">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">gitlab_rails</span>[<span style="color:#e6db74">&#39;packages_storage_path&#39;</span>] = <span style="color:#e6db74">&#34;/mnt/packages&#34;</span>
+</span></span></code></pre></div><ol start="3">
+<li>Reconfigures gitlab:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo gitlab-ctl reconfigure
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Verifies if gitlab registry is accessible; authentication required message expected</span>
+</span></span><span style="display:flex;"><span>curl -k http://192.168.68.126:5005/v2/
+</span></span></code></pre></div><ol start="4">
+<li>Modify Docker Desktop (for Windows) via Settings -&gt; Docker Engine:</li>
+</ol>
+<pre tabindex="0"><code>&#34;insecure-registries&#34;: [
+   &#34;192.168.68.126:5005&#34;
+],
+</code></pre><ol start="5">
+<li>Log in to the registry from your Windows machine:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span> docker login 192.168.68.126:5005
+</span></span></code></pre></div><ol start="6">
+<li>You may have to configure your docker if you see this error from Windows box:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>Error response from daemon: Get <span style="color:#e6db74">&#34;https://192.168.68.126:5005/v2/&#34;</span>: http: server gave HTTP response to HTTPS client
+</span></span></code></pre></div><blockquote class="note"><p>a. From gitlab server, configure docker to use local registry:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/docker/daemon.json
+</span></span></code></pre></div><p>b. Copy this content into daemon.json:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span><span style="color:#75715e"> &#34;insecure-registries&#34;: [</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">   &#34;192.168.68.126:5005&#34;</span>
+</span></span><span style="display:flex;"><span> ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>c. Edit docker default configuration file, with <em>sudo vi /etc/default/docker</em> and add this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#a6e22e">DOCKER_OPTS</span>=<span style="color:#e6db74">&#34;--config-file=/etc/docker/daemon.json&#34;</span>
+</span></span></code></pre></div><p>d. Restart docker to apply the changes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo systemctl restart docker
+</span></span></code></pre></div></blockquote>
+
+  
+  <hr>
+<div class="footer">
+    
+	    
+            <a class="previous-post" href="//localhost:1313/archives/2023/deploying-openai-compatible-llama-cpp-server-with-k3s/?ref=footer"><span style="font-weight:bold;">« Previous</span><br>Deploying OpenAI-Compatible LLAMA CPP Server with...</a>
+        
+	    
+            <div class="next-post">
+                <a href="//localhost:1313/archives/2023/upgrading-my-tech-blog-hugo-giscus-pagefind-integration/?ref=footer"><span style="font-weight:bold;">Next »</span><br>Upgrading My Tech Blog: Hugo, Giscus, and Pagefind...</a>
+            </div>
+        
+    
+</div>
+
+  
+    <div class="comments">
+    
+        <div style="clear: both;">
+            <br>
+            <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "seehiong" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </div>
+    
+</div>
+
+  
+</div>
+            </main>
+            
+  
+    <div class="article-toc ">
+    <div class="toc-wrapper">
+      <h4 id="contents"></h4>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#preparation">Preparation</a></li>
+    <li><a href="#installation">Installation</a></li>
+    <li><a href="#upgrading-to-the-latest-version">Upgrading to the Latest Version</a></li>
+    <li><a href="#setting-external-url">Setting External URL</a></li>
+    <li><a href="#migrating-from-old-to-new-repository">Migrating from Old to New Repository</a>
+      <ul>
+        <li><a href="#1-clone-the-existing-repository">1. Clone the Existing Repository</a></li>
+        <li><a href="#2-set-up-ssh-key">2. Set up SSH key</a></li>
+        <li><a href="#3-create-a-new-repository">3. Create a New Repository</a></li>
+        <li><a href="#4-push-to-the-new-repository">4. Push to the New Repository</a></li>
+      </ul>
+    </li>
+    <li><a href="#install-gitlab-runner">Install GitLab Runner</a></li>
+    <li><a href="#install-docker">Install Docker</a></li>
+    <li><a href="#register-gitlab-runner">Register GitLab Runner</a></li>
+    <li><a href="#run-gitlab-pipeline">Run GitLab Pipeline</a></li>
+    <li><a href="#optional-register-gitlab-runner-as-a-service">Optional: Register GitLab runner as a Service</a></li>
+    <li><a href="#optional-enable-container-and-package-registry">Optional: Enable Container and Package Registry</a></li>
+  </ul>
+</nav>
+
+      
+    </div>
+</div>
+  
+
+        </div>
+    </body>
+</html>
+
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>

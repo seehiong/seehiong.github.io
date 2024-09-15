@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+<script defer language="javascript" type="text/javascript" src="/js/bundle.min.b989f0fdae3971a3effd81d6d0b27b3cb1023ff0b601ff43e2118b0d9d82ddb9.js"></script>
+
+
+
+
+
+
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="icon" href=/favicon.png>
+
+    
+    
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+
+
+<!-- Open Graph image and Twitter Card metadata -->
+
+<title itemprop="name">Tech Blog - How to summarize YouTube Videos in Minutes (II)</title>
+<meta property="og:title" content=Tech&#32;Blog&#32;-&#32;How&#32;to&#32;summarize&#32;YouTube&#32;Videos&#32;in&#32;Minutes&#32;(II) />
+<meta name="twitter:title" content=Tech&#32;Blog&#32;-&#32;How&#32;to&#32;summarize&#32;YouTube&#32;Videos&#32;in&#32;Minutes&#32;(II) />
+<meta itemprop="name" content=Tech&#32;Blog&#32;-&#32;How&#32;to&#32;summarize&#32;YouTube&#32;Videos&#32;in&#32;Minutes&#32;(II) />
+<meta name="application-name" content=Tech&#32;Blog&#32;-&#32;How&#32;to&#32;summarize&#32;YouTube&#32;Videos&#32;in&#32;Minutes&#32;(II) />
+<meta property="og:site_name" content="See Hiong&#39;s Blog" />
+
+
+<meta name="description" content="In this comprehensive guide, I explore AI-powered techniques to extract and summarize YouTube videos using tools like Whisper.cpp, GPT4All, LLaMA.cpp, and OpenAI models. I detail the step-by-step process, from setting up the environment to transcribing audio and leveraging AI for summarization. Despite encountering issues with GPT4All&#39;s accuracy, alternative approaches using LLaMA.cpp and OpenAI models provide versatile summarization options. The tutorial aims to empower researchers, content creators, and information enthusiasts to efficiently analyze and summarize YouTube content using cutting-edge AI technologies." />
+<meta itemprop="description" content="In this comprehensive guide, I explore AI-powered techniques to extract and summarize YouTube videos using tools like Whisper.cpp, GPT4All, LLaMA.cpp, and OpenAI models. I detail the step-by-step process, from setting up the environment to transcribing audio and leveraging AI for summarization. Despite encountering issues with GPT4All&#39;s accuracy, alternative approaches using LLaMA.cpp and OpenAI models provide versatile summarization options. The tutorial aims to empower researchers, content creators, and information enthusiasts to efficiently analyze and summarize YouTube content using cutting-edge AI technologies." />
+<meta property="og:description" content="In this comprehensive guide, I explore AI-powered techniques to extract and summarize YouTube videos using tools like Whisper.cpp, GPT4All, LLaMA.cpp, and OpenAI models. I detail the step-by-step process, from setting up the environment to transcribing audio and leveraging AI for summarization. Despite encountering issues with GPT4All&#39;s accuracy, alternative approaches using LLaMA.cpp and OpenAI models provide versatile summarization options. The tutorial aims to empower researchers, content creators, and information enthusiasts to efficiently analyze and summarize YouTube content using cutting-edge AI technologies." />
+<meta name="twitter:description" content="In this comprehensive guide, I explore AI-powered techniques to extract and summarize YouTube videos using tools like Whisper.cpp, GPT4All, LLaMA.cpp, and OpenAI models. I detail the step-by-step process, from setting up the environment to transcribing audio and leveraging AI for summarization. Despite encountering issues with GPT4All&#39;s accuracy, alternative approaches using LLaMA.cpp and OpenAI models provide versatile summarization options. The tutorial aims to empower researchers, content creators, and information enthusiasts to efficiently analyze and summarize YouTube content using cutting-edge AI technologies." />
+
+
+<base href="//localhost:1313/archives/2023/how-to-summarize-youtube-videos-in-minutes-2/" />
+<link rel="canonical" href="//localhost:1313/archives/2023/how-to-summarize-youtube-videos-in-minutes-2/" itemprop="url" />
+<meta name="url" content="//localhost:1313/archives/2023/how-to-summarize-youtube-videos-in-minutes-2/" />
+<meta name="twitter:url" content="//localhost:1313/archives/2023/how-to-summarize-youtube-videos-in-minutes-2/" />
+<meta property="og:url" content="//localhost:1313/archives/2023/how-to-summarize-youtube-videos-in-minutes-2/" />
+
+
+<meta property="og:updated_time" content="2023-06-16T20:00:00&#43;20:00" />
+
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href='//localhost:1313/sitemap.xml' />
+
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+
+
+<meta property="fb:admins" content="" />
+
+
+<meta name="apple-mobile-web-app-title" content="See Hiong&#39;s Blog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.134.1">
+
+
+    
+    
+
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.03b57bbaf31d739f14c95df7f05d1cefcfa60bbafa36ba47313afdeb325aeada.css">
+
+
+    
+    <style>
+    body {
+        --sidebar-bg-color: #202020;
+        --sidebar-img-border-color: #515151;
+        --sidebar-p-color: #909090;
+        --sidebar-h1-color: #FFF;
+        --sidebar-a-color: #FFF;
+        --sidebar-socials-color: #FFF;
+        --text-color: #222;
+        --bkg-color: #FAF9F6;
+        --post-title-color: #303030;
+        --list-color: #5a5a5a;
+        --link-color: #268bd2;
+        --date-color: #515151;
+        --table-border-color: #E5E5E5;
+        --table-stripe-color: #F9F9F9;
+        --code-color: #000;
+        --code-background-color: #E5E5E5;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+        --moon-sun-color: #FFF;
+        --moon-sun-background-color: #515151;
+    }
+    body.dark-theme {
+        --text-color: #eee;
+        --bkg-color: #121212;
+        --post-title-color: #DBE2E9;
+        --list-color: #9d9d9d;
+        --link-color: #268bd2;
+        --date-color: #9a9a9a;
+        --table-border-color: #515151;
+        --table-stripe-color: #202020;
+        --code-color: #fff;
+        --code-background-color: #515151;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+    }
+    body {
+        background-color: var(--bkg-color);
+    }
+</style>
+
+</head>
+
+    <body class="dark-theme">
+        <div class="wrapper">
+            <aside class="sidebar">
+    <div class="container sidebar-sticky">
+        <div class="light-dark" align="right">
+    <button class="btn-light-dark" title="Toggle light/dark mode">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6 .278a.768.768 0 0 1 .08.858a7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277c.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316a.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71C0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        </svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+    </button>
+</div>
+
+        <div class="sidebar-about">
+    <h1 class="brand">
+        
+        
+            <a href="//localhost:1313/">
+                <h1>Tech Blog</h1>
+            </a>
+        
+    </h1>
+    <p class="lead">
+    Chronicling my personal expedition of technology exploration and experimentation, facilitated by a home-based self-configured laboratory
+    </p>
+</div>
+
+        <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<style>
+    :root {
+        --pagefind-ui-primary: #eeeeee;
+        --pagefind-ui-text: #eeeeee;
+        --pagefind-ui-background: #152028;
+        --pagefind-ui-border: #152028;
+        --pagefind-ui-tag: #152028;
+    }
+</style>
+<script src="/pagefind/pagefind-ui.js"></script>
+<div style="max-width: 100%; margin: clamp(2px, 1vw, 10px) auto;">
+    <div id="search"></div>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true, showImages: false, excerptLength: 15 });
+        });
+    </script>
+</div>
+        <nav>
+    <ul class="sidebar-nav">
+
+        
+        
+        
+        
+            
+
+            
+                
+                
+                    <li class="heading">
+                        <a href="/2024/">2024</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            Recent
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/talos-linux-setting-up-a-secure-immutable-kubernetes-cluster/">Talos Linux: Setting Up a Secure, Immutable Kubernetes Cluster</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/audio-generation-with-nvidia-jetson-orin-nx/">Audio Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/unleashing-text-generation-with-nvidia-jetson-orin-nx/">Unleashing Text Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/scaling-kafka-workloads-with-keda-in-kubernetes/">Scaling Kafka Workloads with KEDA in Kubernetes</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/exploring-nvidia-jetson-orin-nx-flashing-and-setup-guide/">Exploring NVIDIA Jetson Orin NX: Flashing and Setup Guide</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/setting-up-kafka-with-microk8s-and-multipass/">Setting Up Kafka with MicroK8s and Multipass</a>
+                            </li>
+                        
+                    
+                
+            
+                
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/archives/">Archives</a>
+                    </li>
+                    
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+
+    </ul>
+</nav>
+
+        
+    <a target="_blank" class="social" title="GitHub" href="https://github.com/seehiong">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="-2 -2 24 24">
+            <path fill="currentColor" d="M18.88 1.099C18.147.366 17.265 0 16.233 0H3.746C2.714 0 1.832.366 1.099 1.099C.366 1.832 0 2.714 0 3.746v12.487c0 1.032.366 1.914 1.099 2.647c.733.733 1.615 1.099 2.647 1.099H6.66c.19 0 .333-.007.429-.02a.504.504 0 0 0 .286-.169c.095-.1.143-.245.143-.435l-.007-.885c-.004-.564-.006-1.01-.006-1.34l-.3.052c-.19.035-.43.05-.721.046a5.555 5.555 0 0 1-.904-.091a2.026 2.026 0 0 1-.872-.39a1.651 1.651 0 0 1-.572-.8l-.13-.3a3.25 3.25 0 0 0-.41-.663c-.186-.243-.375-.407-.566-.494l-.09-.065a.956.956 0 0 1-.17-.156a.723.723 0 0 1-.117-.182c-.026-.061-.004-.111.065-.15c.07-.04.195-.059.378-.059l.26.04c.173.034.388.138.643.311a2.1 2.1 0 0 1 .631.677c.2.355.44.626.722.813c.282.186.566.28.852.28c.286 0 .533-.022.742-.065a2.59 2.59 0 0 0 .585-.196c.078-.58.29-1.028.637-1.34a8.907 8.907 0 0 1-1.333-.234a5.314 5.314 0 0 1-1.223-.507a3.5 3.5 0 0 1-1.047-.872c-.277-.347-.505-.802-.683-1.365c-.177-.564-.266-1.215-.266-1.952c0-1.049.342-1.942 1.027-2.68c-.32-.788-.29-1.673.091-2.652c.252-.079.625-.02 1.119.175c.494.195.856.362 1.086.5c.23.14.414.257.553.352a9.233 9.233 0 0 1 2.497-.338c.859 0 1.691.113 2.498.338l.494-.312a6.997 6.997 0 0 1 1.197-.572c.46-.174.81-.221 1.054-.143c.39.98.424 1.864.103 2.653c.685.737 1.028 1.63 1.028 2.68c0 .737-.089 1.39-.267 1.957c-.177.568-.407 1.023-.689 1.366a3.65 3.65 0 0 1-1.053.865c-.42.234-.828.403-1.223.507a8.9 8.9 0 0 1-1.333.235c.45.39.676 1.005.676 1.846v3.11c0 .147.021.266.065.357a.36.36 0 0 0 .208.189c.096.034.18.056.254.064c.074.01.18.013.318.013h2.914c1.032 0 1.914-.366 2.647-1.099c.732-.732 1.099-1.615 1.099-2.647V3.746c0-1.032-.367-1.914-1.1-2.647z"/>
+        </svg>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a target="_blank" class="social" title="RSS Feed" href="/2024/index.xml">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 1280.000000 1280.000000">
+            <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="currentColor">
+                <path d="M2295 11929 c-284 -12 -642 -45 -707 -65 -17 -5 -18 -63 -18 -1039 0 -569 4 -1036 8 -1039 5 -3 74 6 153 19 510 86 1168 95 1789 25 1348 -153 2602 -677 3670 -1531 385 -308 820 -744 1126 -1129 842 -1060 1362 -2313 1514 -3650 70 -621 61 -1279 -25 -1789 -13 -79 -22 -148 -19 -153 3 -4 471 -8 1039 -8 l1035 0 5 23 c51 225 85 942 67 1419 -23 605 -77 1044 -198 1617 -294 1400 -927 2734 -1823 3846 -1043 1295 -2364 2259 -3909 2854 -1158 447 -2451 656 -3707 600z"/>
+                <path d="M2255 7845 c-269 -25 -620 -81 -667 -106 -17 -9 -18 -55 -18 -899 0 -706 3 -890 13 -890 6 0 66 18 132 41 130 44 288 79 467 105 154 21 577 30 749 15 1207 -107 2267 -823 2814 -1902 166 -327 268 -637 330 -1001 38 -227 48 -384 42 -662 -8 -348 -44 -590 -126 -831 -23 -66 -41 -126 -41 -132 0 -10 184 -13 890 -13 844 0 890 1 899 18 27 50 88 452 110 725 14 162 14 624 1 782 -59 703 -233 1323 -545 1945 -481 956 -1313 1788 -2270 2268 -620 310 -1239 483 -1940 542 -165 14 -669 10 -840 -5z"/>
+                <path d="M2519 3815 c-391 -66 -725 -336 -868 -703 -79 -201 -96 -462 -45 -677 83 -344 338 -641 666 -774 116 -47 205 -69 330 -80 412 -39 811 153 1040 500 193 292 240 648 128 981 -135 403 -492 699 -914 757 -100 14 -241 12 -337 -4z"/>
+            </g>
+        </svg>
+    </a>
+
+
+
+
+
+        <p class="footnote">
+powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a target="_blank" href="https://github.com/lukeorth/poison">poison</a>
+    <br>
+    &copy; 2024 See Hiong&#39;s Blog. All rights reserved.
+</p>
+
+  </div>
+</aside>
+
+            <main class="content container">
+                <div class="post" data-pagefind-body>
+  <div class="info">
+  <h1 class="post-title">
+    <a href="//localhost:1313/archives/2023/how-to-summarize-youtube-videos-in-minutes-2/">How to summarize YouTube Videos in Minutes (II)</a>
+  </h1>
+
+  <div class="headline" data-pagefind-ignore>
+    <div>
+      
+      
+      <time datetime=" 2023-06-16T20:00:00&#43;2000" class="post-date">
+        June 16, 2023
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>5 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-LangChain">
+        <a href="//localhost:1313/tags/langchain">LangChain</a>
+      </li>
+      
+      <li class="tag-Youtube">
+        <a href="//localhost:1313/tags/youtube">Youtube</a>
+      </li>
+      
+      <li class="tag-GPT4All">
+        <a href="//localhost:1313/tags/gpt4all">GPT4All</a>
+      </li>
+      
+      <li class="tag-OpenAI">
+        <a href="//localhost:1313/tags/openai">OpenAI</a>
+      </li>
+      
+      <li class="tag-Whisper">
+        <a href="//localhost:1313/tags/whisper">Whisper</a>
+      </li>
+      
+      <li class="tag-LLaMA">
+        <a href="//localhost:1313/tags/llama">LLaMA</a>
+      </li>
+      
+      <li class="tag-AI">
+        <a href="//localhost:1313/tags/ai">AI</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+  <p class="seriesname">
+    Series: <a href="//localhost:1313/series/how-to-summarize-youtube-videos-in-minutes">How to summarize YouTube Videos in Minutes</a>
+  </p>
+  
+
+  
+</div>
+
+  <p>In continuation with the <a href="//localhost:1313/archives/2023/how-to-summarize-youtube-videos-in-minutes-1/">previous</a> post, we will explore the power of AI by leveraging the <a href="https://github.com/ggerganov/whisper.cpp" target="_blank">whisper.cpp</a> library to convert audio to text, extracting audio from YouTube videos using <a href="https://github.com/yt-dlp/yt-dlp" target="_blank">yt-dlp</a>, and demonstrating how to utilize AI models like GPT4All and OpenAI for summarization.</p>
+<hr>
+<h2 id="setting-up-the-environment">Setting Up the Environment</h2>
+<p>To get started, we need to set up the necessary tools and libraries. Follow the steps below:</p>
+<ol>
+<li>Installing whisper.cpp: Begin by cloning the whisper.cpp repository from GitHub and downloading the base.en model.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git clone https://github.com/ggerganov/whisper.cpp.git
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cd ~/whisper.cpp/models
+</span></span><span style="display:flex;"><span>./download-ggml-model.sh base.en
+</span></span></code></pre></div><ol start="2">
+<li>Verifying the Installation: Once the model is downloaded, you can test the installation by running a sample command:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>Downloading ggml model base.en from <span style="color:#e6db74">&#39;https://huggingface.co/ggerganov/whisper.cpp&#39;</span> ...
+</span></span><span style="display:flex;"><span>ggml-base.en.bin      100%<span style="color:#f92672">[========================</span>&gt;<span style="color:#f92672">]</span> 141.11M  10.9MB/s    in 14s
+</span></span><span style="display:flex;"><span>Done! Model <span style="color:#e6db74">&#39;base.en&#39;</span> saved in <span style="color:#e6db74">&#39;models/ggml-base.en.bin&#39;</span>
+</span></span><span style="display:flex;"><span>You can now use it like this:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  $ ./main -m models/ggml-base.en.bin -f samples/jfk.wav
+</span></span></code></pre></div><ol start="3">
+<li>Installing OpenBLAS: Ensure that <a href="https://www.openblas.net/" target="_blank">OpenBLAS</a>, a mathematical library, is installed on your system. This step is necessary for building whisper.cpp with OpenBLAS support.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cd ~/whisper.cpp
+</span></span><span style="display:flex;"><span>make clean
+</span></span><span style="display:flex;"><span>WHISPER_OPENBLAS<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> make -j
+</span></span></code></pre></div><p>This is the sample output (with BLAS = 1):</p>
+<p><img src="/images/youtube/whisper-sample-wav.png" alt="whisper-sample-wav.png"></p>
+<ol start="4">
+<li>Installing FFmpeg: <a href="https://ffmpeg.org/download.html" target="_blank">FFmpeg</a> is required for audio conversion. Install it using the appropriate package manager for your system.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt install ffmpeg
+</span></span></code></pre></div><ol start="5">
+<li>Installing yt-dlp and whispercpp: Use pip to install <a href="https://github.com/yt-dlp/yt-dlp/wiki/Installation#with-pip" target="_blank">yt-dlp</a>, a YouTube downloader, and the <a href="https://github.com/aarnphm/whispercpp" target="_blank">Python binding</a> for whisper.cpp.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>python3 -m pip install -U yt-dlp
+</span></span><span style="display:flex;"><span>pip install whispercpp ffmpeg-python
+</span></span></code></pre></div><hr>
+<h2 id="extracting-audio-from-youtube-videos">Extracting Audio from YouTube Videos</h2>
+<p>In this section, we will demonstrate how to extract audio from YouTube videos using the yt-dlp library. Here&rsquo;s the code snippet:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> unicode_literals
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> yt_dlp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">extract_audio</span>(urls):
+</span></span><span style="display:flex;"><span>    ydl_opts <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;format&#39;</span>: <span style="color:#e6db74">&#39;wav/bestaudio/best&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;postprocessors&#39;</span>: [{
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;key&#39;</span>: <span style="color:#e6db74">&#39;FFmpegExtractAudio&#39;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;preferredcodec&#39;</span>: <span style="color:#e6db74">&#39;wav&#39;</span>,
+</span></span><span style="display:flex;"><span>        }],
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;verbose&#39;</span>: <span style="color:#e6db74">&#39;true&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;outtmpl&#39;</span>: <span style="color:#e6db74">&#39;sample_audio&#39;</span>,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> yt_dlp<span style="color:#f92672">.</span>YoutubeDL(ydl_opts) <span style="color:#66d9ef">as</span> ydl:
+</span></span><span style="display:flex;"><span>        ydl<span style="color:#f92672">.</span>download(urls)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>URLS <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;https://www.youtube.com/watch?v=BaW_jenozKc&#39;</span>]
+</span></span><span style="display:flex;"><span>extract_audio(URLS)
+</span></span></code></pre></div><p><img src="/images/youtube/whisper-extract-audio-from-youtube-video.png" alt="whisper-extract-audio-from-youtube-video.png"></p>
+<hr>
+<h2 id="utilizing-whisper-to-transcribe-audio">Utilizing Whisper to Transcribe Audio</h2>
+<p>With the audio extracted, we can now utilize the whisper.cpp library to transcribe the audio into text. Follow the code snippet below:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> whispercpp <span style="color:#f92672">import</span> Whisper
+</span></span><span style="display:flex;"><span>w <span style="color:#f92672">=</span> Whisper<span style="color:#f92672">.</span>from_pretrained(<span style="color:#e6db74">&#34;base.en&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> ffmpeg
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">transcribe_audio</span>(filename):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>        y, _ <span style="color:#f92672">=</span> (
+</span></span><span style="display:flex;"><span>            ffmpeg<span style="color:#f92672">.</span>input(filename, threads<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">.</span>output(<span style="color:#e6db74">&#34;-&#34;</span>, format<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;s16le&#34;</span>, acodec<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;pcm_s16le&#34;</span>, ac<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>, ar<span style="color:#f92672">=</span><span style="color:#ae81ff">16000</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">.</span>run(cmd<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;ffmpeg&#34;</span>, <span style="color:#e6db74">&#34;-nostdin&#34;</span>], capture_stdout<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, capture_stderr<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> ffmpeg<span style="color:#f92672">.</span>Error <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">RuntimeError</span>(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Failed to load audio: </span><span style="color:#e6db74">{</span>e<span style="color:#f92672">.</span>stderr<span style="color:#f92672">.</span>decode()<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>) <span style="color:#f92672">from</span> e
+</span></span><span style="display:flex;"><span>    arr <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>frombuffer(y, np<span style="color:#f92672">.</span>int16)<span style="color:#f92672">.</span>flatten()<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>float32) <span style="color:#f92672">/</span> <span style="color:#ae81ff">32768.0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> w<span style="color:#f92672">.</span>transcribe(arr)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>filename <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sample_audio.wav&#34;</span>
+</span></span><span style="display:flex;"><span>transcribe_audio(filename)
+</span></span></code></pre></div><p>This code snippet uses the Whisper library to transcribe the audio stored in the &ldquo;sample_audio.wav&rdquo; file. The audio is processed using ffmpeg to convert it into a format suitable for transcription. The resulting transcription is stored in the transcripted variable and printed to the console:</p>
+<p><img src="/images/youtube/whisper-transcript-from-wav.png" alt="whisper-transcript-from-wav.png"></p>
+<hr>
+<h2 id="putting-it-together-extracting-and-summarizing-youtube-videos">Putting it Together: Extracting and Summarizing YouTube Videos</h2>
+<p>Now let&rsquo;s bring everything together by extracting audio from a YouTube video and using AI models for summarization.</p>
+<p>First, we&rsquo;ll download audio from a YouTube video. In this example, we&rsquo;ll use the video <a href="https://www.youtube.com/watch?v=aywZrzNaKjs" target="_blank">LangChain Explained in 13 Minutes</a> as an example. The downloaded audio will be saved as &ldquo;sample_audio.wav&rdquo;. Here&rsquo;s the code snippet to download the audio:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>URLS <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;https://www.youtube.com/watch?v=aywZrzNaKjs&#39;</span>]
+</span></span><span style="display:flex;"><span>extract_audio(URLS)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>filename <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sample_audio.wav&#34;</span>
+</span></span></code></pre></div><p>Next, we&rsquo;ll transcribe the audio using the Whisper library as shown earlier:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>transcripted <span style="color:#f92672">=</span> transcribe_audio(filename)
+</span></span><span style="display:flex;"><span>print(transcripted)
+</span></span></code></pre></div><p><img src="/images/youtube/whisper-transcript-from-extracted-wav.png" alt="whisper-transcript-from-extracted-wav.png"></p>
+<p>Now, let&rsquo;s summarize the transcribed text using an AI model like GPT4All:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.llms <span style="color:#f92672">import</span> GPT4All
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> GPT4All(model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/home/pi/models/ggml-gpt4all-j-v1.3-groovy.bin&#34;</span>, n_ctx<span style="color:#f92672">=</span><span style="color:#ae81ff">2048</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.chains.summarize <span style="color:#f92672">import</span> load_summarize_chain
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.chains <span style="color:#f92672">import</span> AnalyzeDocumentChain
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>summary_chain <span style="color:#f92672">=</span> load_summarize_chain(llm, chain_type<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;map_reduce&#34;</span>)
+</span></span><span style="display:flex;"><span>summarize_document_chain <span style="color:#f92672">=</span> AnalyzeDocumentChain(combine_docs_chain<span style="color:#f92672">=</span>summary_chain)
+</span></span><span style="display:flex;"><span>summarize_document_chain<span style="color:#f92672">.</span>run(transcripted)
+</span></span></code></pre></div><p>The code above demonstrates the utilization of the GPT4All model for summarizing the transcribed text. It involves loading the required chains and initiating the summarization process.</p>
+<p>However, it appears that the generated results from the AI model are not accurate, as shown in the provided example output:</p>
+<p><img src="/images/youtube/analyze-document-summarize-chain-strange-results.png" alt="analyze-document-summarize-chain-strange-results.png"></p>
+<p>This generated output seems to be unrelated and doesn&rsquo;t provide the expected summarization.</p>
+<p>It&rsquo;s important to note that the quality and accuracy of AI-generated summaries can vary depending on the model and the specific use case. In this instance, the GPT4All model did not produce the desired results.</p>
+<p>By combining the steps of audio extraction, transcription, and alternative summarization techniques, you can still leverage AI-powered tools to extract and summarize YouTube videos effectively.</p>
+<hr>
+<h2 id="utilizing-llamacpp-for-summarization-optional">Utilizing LLaMA.cpp for Summarization (Optional)</h2>
+<p>An alternative approach is to employ LLaMA.cpp for the summarization task. For the setup process, you can refer to my <a href="//localhost:1313/archives/2023/running-llama-model-locally/">previous</a> post.</p>
+<p>Here&rsquo;s an example code snippet showcasing the usage of LLaMA.cpp:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.llms <span style="color:#f92672">import</span> LlamaCpp
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> LlamaCpp(model_path<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/home/pi/models/WizardLM-7B-uncensored.ggmlv3.q5_0.bin&#34;</span>, n_ctx<span style="color:#f92672">=</span><span style="color:#ae81ff">2048</span>, verbose<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>summary_chain <span style="color:#f92672">=</span> load_summarize_chain(llm, chain_type<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;map_reduce&#34;</span>, verbose<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>summarize_document_chain <span style="color:#f92672">=</span> AnalyzeDocumentChain(combine_docs_chain<span style="color:#f92672">=</span>summary_chain)
+</span></span><span style="display:flex;"><span>summarize_document_chain<span style="color:#f92672">.</span>run(transcripted)
+</span></span></code></pre></div><p>The image below displays the generated output from this summarization process:
+<img src="/images/youtube/analyze-document-summarize-chain-with-llama-cpp.png" alt="analyze-document-summarize-chain-with-llama-cpp.png"></p>
+<p>By employing LLaMA.cpp, you can explore an alternative approach to summarizing the transcribed text. Remember to follow the setup instructions provided in the mentioned previous post to utilize LLaMA.cpp effectively.</p>
+<hr>
+<h2 id="utilizing-openai-for-summarization-optional">Utilizing OpenAI for Summarization (Optional)</h2>
+<p>For an alternative approach, you can leverage OpenAI models for the summarization task. Take a look at the following code snippet:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span>os<span style="color:#f92672">.</span>environ[<span style="color:#e6db74">&#34;OPENAI_API_KEY&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sk-...2o&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.chat_models <span style="color:#f92672">import</span> ChatOpenAI
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> ChatOpenAI(temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.chains.summarize <span style="color:#f92672">import</span> load_summarize_chain
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.chains <span style="color:#f92672">import</span> AnalyzeDocumentChain
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>summary_chain <span style="color:#f92672">=</span> load_summarize_chain(llm, chain_type<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;map_reduce&#34;</span>, verbose<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>summarize_document_chain <span style="color:#f92672">=</span> AnalyzeDocumentChain(combine_docs_chain<span style="color:#f92672">=</span>summary_chain)
+</span></span><span style="display:flex;"><span>summarize_document_chain<span style="color:#f92672">.</span>run(transcripted)
+</span></span></code></pre></div><p>This code snippet demonstrates the utilization of OpenAI&rsquo;s Chat models for the summarization process. It involves setting the OpenAI API key, loading the required chains, and executing the summarization.</p>
+<p>The resulting output can be seen in the image below:</p>
+<p><img src="/images/youtube/analyze-document-summarize-chain-success.png" alt="analyze-document-summarize-chain-success.png"></p>
+<p>By incorporating OpenAI models into your workflow, you can obtain alternative summarization outcomes. The provided code snippet showcases how to seamlessly integrate OpenAI models for this purpose.</p>
+<p>That concludes our exploration of utilizing AI techniques to extract and summarize information from YouTube videos. By employing tools like Whisper.cpp, GPT4ALL, LLaMA.cpp, and OpenAI models, you can leverage the power of AI to extract audio, transcribe it, and generate concise summaries. These techniques offer valuable applications for tasks such as content analysis, research, and information retrieval.</p>
+<p>By incorporating these AI-powered approaches into your workflows, you can streamline the process of extracting key insights from video content. Whether you&rsquo;re a researcher, content creator, or information enthusiast, these tools provide efficient and effective means of analyzing and summarizing YouTube videos.</p>
+
+  
+  <hr>
+<div class="footer">
+    
+    
+    
+    <p>
+    This is a post in the <b><a href="//localhost:1313/series/how-to-summarize-youtube-videos-in-minutes">How to summarize YouTube Videos in Minutes</a></b> series.
+        <br>Other posts in this series:
+        <ul class="series">
+            
+            
+            
+            <li>
+                June 16, 2023 -
+                
+                    How to summarize YouTube Videos in Minutes (II)
+                
+            </li>
+            
+            <li>
+                June 10, 2023 -
+                
+                    <a href="/archives/2023/how-to-summarize-youtube-videos-in-minutes-1/">How to summarize YouTube Videos in Minutes (I)</a>
+                
+            </li>
+            
+        </ul>
+    </p>
+    
+</div>
+
+  
+    <div class="comments">
+    
+        <div style="clear: both;">
+            <br>
+            <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "seehiong" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </div>
+    
+</div>
+
+  
+</div>
+            </main>
+            
+  
+    <div class="article-toc ">
+    <div class="toc-wrapper">
+      <h4 id="contents"></h4>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#setting-up-the-environment">Setting Up the Environment</a></li>
+    <li><a href="#extracting-audio-from-youtube-videos">Extracting Audio from YouTube Videos</a></li>
+    <li><a href="#utilizing-whisper-to-transcribe-audio">Utilizing Whisper to Transcribe Audio</a></li>
+    <li><a href="#putting-it-together-extracting-and-summarizing-youtube-videos">Putting it Together: Extracting and Summarizing YouTube Videos</a></li>
+    <li><a href="#utilizing-llamacpp-for-summarization-optional">Utilizing LLaMA.cpp for Summarization (Optional)</a></li>
+    <li><a href="#utilizing-openai-for-summarization-optional">Utilizing OpenAI for Summarization (Optional)</a></li>
+  </ul>
+</nav>
+
+      
+        <hr>
+        
+              <div class="previous-post">
+                <a href="//localhost:1313/archives/2023/how-to-summarize-youtube-videos-in-minutes-1/?ref=footer"><span style="font-weight:bold;">« Previous</span><br>How to summarize YouTube Videos in Minutes (I)</a>
+              </div>
+              <br><br>
+          
+        
+              <div class="next-post">
+                  <a href="//localhost:1313/archives/2023/unleashing-the-power-of-llama-server-in-docker-container/?ref=footer"><span style="font-weight:bold;">Next »</span><br>Unleashing the Power of LLaMA Server in Docker...</a>
+              </div>
+          
+      
+    </div>
+</div>
+  
+
+        </div>
+    </body>
+</html>
+
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>

@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+<script defer language="javascript" type="text/javascript" src="/js/bundle.min.b989f0fdae3971a3effd81d6d0b27b3cb1023ff0b601ff43e2118b0d9d82ddb9.js"></script>
+
+
+
+
+
+
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="icon" href=/favicon.png>
+
+    
+    
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+
+
+<!-- Open Graph image and Twitter Card metadata -->
+
+<title itemprop="name">Tech Blog - Solving Facility Location Problem with OR-Tools and Micronaut</title>
+<meta property="og:title" content=Tech&#32;Blog&#32;-&#32;Solving&#32;Facility&#32;Location&#32;Problem&#32;with&#32;OR-Tools&#32;and&#32;Micronaut />
+<meta name="twitter:title" content=Tech&#32;Blog&#32;-&#32;Solving&#32;Facility&#32;Location&#32;Problem&#32;with&#32;OR-Tools&#32;and&#32;Micronaut />
+<meta itemprop="name" content=Tech&#32;Blog&#32;-&#32;Solving&#32;Facility&#32;Location&#32;Problem&#32;with&#32;OR-Tools&#32;and&#32;Micronaut />
+<meta name="application-name" content=Tech&#32;Blog&#32;-&#32;Solving&#32;Facility&#32;Location&#32;Problem&#32;with&#32;OR-Tools&#32;and&#32;Micronaut />
+<meta property="og:site_name" content="See Hiong&#39;s Blog" />
+
+
+<meta name="description" content="This post demonstrates solving the Facility Location Problem (FLP) using OR-Tools and Micronaut. It covers defining the solver, variables, constraints, and objective function in Java. The implementation includes creating a Micronaut service and controller to handle file uploads, process the data, and compute the optimal solution. The example input file format and expected outputs are also illustrated, providing a complete guide to implementing and testing the FLP solution." />
+<meta itemprop="description" content="This post demonstrates solving the Facility Location Problem (FLP) using OR-Tools and Micronaut. It covers defining the solver, variables, constraints, and objective function in Java. The implementation includes creating a Micronaut service and controller to handle file uploads, process the data, and compute the optimal solution. The example input file format and expected outputs are also illustrated, providing a complete guide to implementing and testing the FLP solution." />
+<meta property="og:description" content="This post demonstrates solving the Facility Location Problem (FLP) using OR-Tools and Micronaut. It covers defining the solver, variables, constraints, and objective function in Java. The implementation includes creating a Micronaut service and controller to handle file uploads, process the data, and compute the optimal solution. The example input file format and expected outputs are also illustrated, providing a complete guide to implementing and testing the FLP solution." />
+<meta name="twitter:description" content="This post demonstrates solving the Facility Location Problem (FLP) using OR-Tools and Micronaut. It covers defining the solver, variables, constraints, and objective function in Java. The implementation includes creating a Micronaut service and controller to handle file uploads, process the data, and compute the optimal solution. The example input file format and expected outputs are also illustrated, providing a complete guide to implementing and testing the FLP solution." />
+
+
+<base href="//localhost:1313/2024/solving-facility-location-problem-with-or-tools-and-micronaut/" />
+<link rel="canonical" href="//localhost:1313/2024/solving-facility-location-problem-with-or-tools-and-micronaut/" itemprop="url" />
+<meta name="url" content="//localhost:1313/2024/solving-facility-location-problem-with-or-tools-and-micronaut/" />
+<meta name="twitter:url" content="//localhost:1313/2024/solving-facility-location-problem-with-or-tools-and-micronaut/" />
+<meta property="og:url" content="//localhost:1313/2024/solving-facility-location-problem-with-or-tools-and-micronaut/" />
+
+
+<meta property="og:updated_time" content="2024-05-27T20:00:00&#43;08:00" />
+
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href='//localhost:1313/sitemap.xml' />
+
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+
+
+<meta property="fb:admins" content="" />
+
+
+<meta name="apple-mobile-web-app-title" content="See Hiong&#39;s Blog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.134.1">
+
+
+    
+    
+
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.03b57bbaf31d739f14c95df7f05d1cefcfa60bbafa36ba47313afdeb325aeada.css">
+
+
+    
+    <style>
+    body {
+        --sidebar-bg-color: #202020;
+        --sidebar-img-border-color: #515151;
+        --sidebar-p-color: #909090;
+        --sidebar-h1-color: #FFF;
+        --sidebar-a-color: #FFF;
+        --sidebar-socials-color: #FFF;
+        --text-color: #222;
+        --bkg-color: #FAF9F6;
+        --post-title-color: #303030;
+        --list-color: #5a5a5a;
+        --link-color: #268bd2;
+        --date-color: #515151;
+        --table-border-color: #E5E5E5;
+        --table-stripe-color: #F9F9F9;
+        --code-color: #000;
+        --code-background-color: #E5E5E5;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+        --moon-sun-color: #FFF;
+        --moon-sun-background-color: #515151;
+    }
+    body.dark-theme {
+        --text-color: #eee;
+        --bkg-color: #121212;
+        --post-title-color: #DBE2E9;
+        --list-color: #9d9d9d;
+        --link-color: #268bd2;
+        --date-color: #9a9a9a;
+        --table-border-color: #515151;
+        --table-stripe-color: #202020;
+        --code-color: #fff;
+        --code-background-color: #515151;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+    }
+    body {
+        background-color: var(--bkg-color);
+    }
+</style>
+
+</head>
+
+    <body class="dark-theme">
+        <div class="wrapper">
+            <aside class="sidebar">
+    <div class="container sidebar-sticky">
+        <div class="light-dark" align="right">
+    <button class="btn-light-dark" title="Toggle light/dark mode">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6 .278a.768.768 0 0 1 .08.858a7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277c.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316a.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71C0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        </svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+    </button>
+</div>
+
+        <div class="sidebar-about">
+    <h1 class="brand">
+        
+        
+            <a href="//localhost:1313/">
+                <h1>Tech Blog</h1>
+            </a>
+        
+    </h1>
+    <p class="lead">
+    Chronicling my personal expedition of technology exploration and experimentation, facilitated by a home-based self-configured laboratory
+    </p>
+</div>
+
+        <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<style>
+    :root {
+        --pagefind-ui-primary: #eeeeee;
+        --pagefind-ui-text: #eeeeee;
+        --pagefind-ui-background: #152028;
+        --pagefind-ui-border: #152028;
+        --pagefind-ui-tag: #152028;
+    }
+</style>
+<script src="/pagefind/pagefind-ui.js"></script>
+<div style="max-width: 100%; margin: clamp(2px, 1vw, 10px) auto;">
+    <div id="search"></div>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true, showImages: false, excerptLength: 15 });
+        });
+    </script>
+</div>
+        <nav>
+    <ul class="sidebar-nav">
+
+        
+        
+        
+        
+            
+
+            
+                
+                
+                    <li class="heading">
+                        <a href="/2024/">2024</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            Recent
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/talos-linux-setting-up-a-secure-immutable-kubernetes-cluster/">Talos Linux: Setting Up a Secure, Immutable Kubernetes Cluster</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/audio-generation-with-nvidia-jetson-orin-nx/">Audio Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/unleashing-text-generation-with-nvidia-jetson-orin-nx/">Unleashing Text Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/scaling-kafka-workloads-with-keda-in-kubernetes/">Scaling Kafka Workloads with KEDA in Kubernetes</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/exploring-nvidia-jetson-orin-nx-flashing-and-setup-guide/">Exploring NVIDIA Jetson Orin NX: Flashing and Setup Guide</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/setting-up-kafka-with-microk8s-and-multipass/">Setting Up Kafka with MicroK8s and Multipass</a>
+                            </li>
+                        
+                    
+                
+            
+                
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/archives/">Archives</a>
+                    </li>
+                    
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+
+    </ul>
+</nav>
+
+        
+    <a target="_blank" class="social" title="GitHub" href="https://github.com/seehiong">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="-2 -2 24 24">
+            <path fill="currentColor" d="M18.88 1.099C18.147.366 17.265 0 16.233 0H3.746C2.714 0 1.832.366 1.099 1.099C.366 1.832 0 2.714 0 3.746v12.487c0 1.032.366 1.914 1.099 2.647c.733.733 1.615 1.099 2.647 1.099H6.66c.19 0 .333-.007.429-.02a.504.504 0 0 0 .286-.169c.095-.1.143-.245.143-.435l-.007-.885c-.004-.564-.006-1.01-.006-1.34l-.3.052c-.19.035-.43.05-.721.046a5.555 5.555 0 0 1-.904-.091a2.026 2.026 0 0 1-.872-.39a1.651 1.651 0 0 1-.572-.8l-.13-.3a3.25 3.25 0 0 0-.41-.663c-.186-.243-.375-.407-.566-.494l-.09-.065a.956.956 0 0 1-.17-.156a.723.723 0 0 1-.117-.182c-.026-.061-.004-.111.065-.15c.07-.04.195-.059.378-.059l.26.04c.173.034.388.138.643.311a2.1 2.1 0 0 1 .631.677c.2.355.44.626.722.813c.282.186.566.28.852.28c.286 0 .533-.022.742-.065a2.59 2.59 0 0 0 .585-.196c.078-.58.29-1.028.637-1.34a8.907 8.907 0 0 1-1.333-.234a5.314 5.314 0 0 1-1.223-.507a3.5 3.5 0 0 1-1.047-.872c-.277-.347-.505-.802-.683-1.365c-.177-.564-.266-1.215-.266-1.952c0-1.049.342-1.942 1.027-2.68c-.32-.788-.29-1.673.091-2.652c.252-.079.625-.02 1.119.175c.494.195.856.362 1.086.5c.23.14.414.257.553.352a9.233 9.233 0 0 1 2.497-.338c.859 0 1.691.113 2.498.338l.494-.312a6.997 6.997 0 0 1 1.197-.572c.46-.174.81-.221 1.054-.143c.39.98.424 1.864.103 2.653c.685.737 1.028 1.63 1.028 2.68c0 .737-.089 1.39-.267 1.957c-.177.568-.407 1.023-.689 1.366a3.65 3.65 0 0 1-1.053.865c-.42.234-.828.403-1.223.507a8.9 8.9 0 0 1-1.333.235c.45.39.676 1.005.676 1.846v3.11c0 .147.021.266.065.357a.36.36 0 0 0 .208.189c.096.034.18.056.254.064c.074.01.18.013.318.013h2.914c1.032 0 1.914-.366 2.647-1.099c.732-.732 1.099-1.615 1.099-2.647V3.746c0-1.032-.367-1.914-1.1-2.647z"/>
+        </svg>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a target="_blank" class="social" title="RSS Feed" href="/2024/index.xml">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 1280.000000 1280.000000">
+            <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="currentColor">
+                <path d="M2295 11929 c-284 -12 -642 -45 -707 -65 -17 -5 -18 -63 -18 -1039 0 -569 4 -1036 8 -1039 5 -3 74 6 153 19 510 86 1168 95 1789 25 1348 -153 2602 -677 3670 -1531 385 -308 820 -744 1126 -1129 842 -1060 1362 -2313 1514 -3650 70 -621 61 -1279 -25 -1789 -13 -79 -22 -148 -19 -153 3 -4 471 -8 1039 -8 l1035 0 5 23 c51 225 85 942 67 1419 -23 605 -77 1044 -198 1617 -294 1400 -927 2734 -1823 3846 -1043 1295 -2364 2259 -3909 2854 -1158 447 -2451 656 -3707 600z"/>
+                <path d="M2255 7845 c-269 -25 -620 -81 -667 -106 -17 -9 -18 -55 -18 -899 0 -706 3 -890 13 -890 6 0 66 18 132 41 130 44 288 79 467 105 154 21 577 30 749 15 1207 -107 2267 -823 2814 -1902 166 -327 268 -637 330 -1001 38 -227 48 -384 42 -662 -8 -348 -44 -590 -126 -831 -23 -66 -41 -126 -41 -132 0 -10 184 -13 890 -13 844 0 890 1 899 18 27 50 88 452 110 725 14 162 14 624 1 782 -59 703 -233 1323 -545 1945 -481 956 -1313 1788 -2270 2268 -620 310 -1239 483 -1940 542 -165 14 -669 10 -840 -5z"/>
+                <path d="M2519 3815 c-391 -66 -725 -336 -868 -703 -79 -201 -96 -462 -45 -677 83 -344 338 -641 666 -774 116 -47 205 -69 330 -80 412 -39 811 153 1040 500 193 292 240 648 128 981 -135 403 -492 699 -914 757 -100 14 -241 12 -337 -4z"/>
+            </g>
+        </svg>
+    </a>
+
+
+
+
+
+        <p class="footnote">
+powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a target="_blank" href="https://github.com/lukeorth/poison">poison</a>
+    <br>
+    &copy; 2024 See Hiong&#39;s Blog. All rights reserved.
+</p>
+
+  </div>
+</aside>
+
+            <main class="content container">
+                <div class="post" data-pagefind-body>
+  <div class="info">
+  <h1 class="post-title">
+    <a href="//localhost:1313/2024/solving-facility-location-problem-with-or-tools-and-micronaut/">Solving Facility Location Problem with OR-Tools and Micronaut</a>
+  </h1>
+
+  <div class="headline" data-pagefind-ignore>
+    <div>
+      
+      
+      <time datetime=" 2024-05-27T20:00:00&#43;0800" class="post-date">
+        May 27, 2024
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>8 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-OR-Tools">
+        <a href="//localhost:1313/tags/or-tools">OR-Tools</a>
+      </li>
+      
+      <li class="tag-MIP">
+        <a href="//localhost:1313/tags/mip">MIP</a>
+      </li>
+      
+      <li class="tag-Micronaut">
+        <a href="//localhost:1313/tags/micronaut">Micronaut</a>
+      </li>
+      
+      <li class="tag-FLP">
+        <a href="//localhost:1313/tags/flp">FLP</a>
+      </li>
+      
+      <li class="tag-Backend">
+        <a href="//localhost:1313/tags/backend">Backend</a>
+      </li>
+      
+      <li class="tag-BE">
+        <a href="//localhost:1313/tags/be">BE</a>
+      </li>
+      
+      <li class="tag-Java">
+        <a href="//localhost:1313/tags/java">Java</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+  <p class="seriesname">
+    Series: <a href="//localhost:1313/series/combinatorial-optimization-problems">Combinatorial Optimization Problems</a>
+  </p>
+  
+
+  
+</div>
+
+  <h2 id="problem-statement">Problem Statement</h2>
+<p>In this post, I&rsquo;ll tackle the <a href="https://en.wikipedia.org/wiki/Facility_location_problem" target="_blank">Facility Location Problem</a>, which involves deciding the optimal placement of facilities to minimize costs. Unlike my previous post on using a <a href="//localhost:1313/2024/optimizing-tsp-with-genetic-algorithms-in-micronaut/">genetic algorithm for the TSP</a>, I&rsquo;ll utilize <a href="https://developers.google.com/optimization/" target="_blank">OR-Tools</a> to solve this problem.</p>
+<hr>
+<h2 id="defining-the-solver">Defining the solver</h2>
+<p>Referencing the <a href="https://developers.google.com/optimization/mip/mip_example" target="_blank">MIP example</a>,  I&rsquo;ll solve the FLP using the MIP approach. Let&rsquo;s place all solver codes in <strong>FLPService.java</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Create the linear solver with the SCIP backend.</span>
+</span></span><span style="display:flex;"><span>MPSolver solver <span style="color:#f92672">=</span> MPSolver.<span style="color:#a6e22e">createSolver</span>(<span style="color:#e6db74">&#34;SCIP&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (solver <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>    System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Could not create solver SCIP&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="defining-the-variables">Defining the variables</h3>
+<p>Each facility \( j \) in the set of facilities \( J \quad j \in J \)</p>
+<ul>
+<li>A fixed setup cost \( s_j \quad s_j \in \mathbb{R}^+ \)</li>
+<li>A capacity \( c_j \quad c_j \in \mathbb{Z}^+ \)
+​</li>
+</ul>
+<p>This is represented in <strong>Facility.java</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Data</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Builder</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@AllArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@NoArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Serdeable.Serializable</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Facility</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> setupCost;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> capacity;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> x;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> y;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Each customer \( i \) in the set of customers \( I \quad i \in I \)</p>
+<ul>
+<li>A demand \( d_i \quad d_i \in \mathbb{Z}^+ \)</li>
+</ul>
+<p>This is represented in <strong>Customer.java</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Data</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Builder</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@AllArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@NoArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Serdeable.Serializable</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Customer</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> demand;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> x;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> y;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The delivery cost is proportional to the distance between the facility and the customer, \( dist_{i,j} \quad dist_{i,j} \in \mathbb{R}^+ \).</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> dist <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[</span>customerCount<span style="color:#f92672">][</span>facilityCount<span style="color:#f92672">]</span>;
+</span></span></code></pre></div><p>Define decision variables:</p>
+<ul>
+<li>\( f_j \) for facility \( j \)</li>
+<li>\( a_{i,j} \) for assigning customer \( i \) to facility \( j \)</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Decision Variables: f[j] is 1 if facility j is opened, otherwise 0</span>
+</span></span><span style="display:flex;"><span>MPVariable<span style="color:#f92672">[]</span> f <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeIntVarArray</span>(numFacility,0.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;f_&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">// Decision Variables: a[i][j] is 1 when customer i is assigned to facility j, otherwise 0</span>
+</span></span><span style="display:flex;"><span>MPVariable<span style="color:#f92672">[][]</span> a <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> MPVariable<span style="color:#f92672">[</span>numCustomer<span style="color:#f92672">][</span>numFacility<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    a<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeIntVarArray</span>(numFacility, 0.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;a_&#34;</span> <span style="color:#f92672">+</span> i);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="defining-the-constraints">Defining the constraints</h3>
+<p>Each customer must be served by exactly one facility:
+</p>
+$$ \sum_{j \in J} a_{i,j} = 1 \quad \forall i \in I $$<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Customer constraint: Each customer is assigned to exactly one facility</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    MPConstraint constraint <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeConstraint</span>(1.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;customer_&#34;</span> <span style="color:#f92672">+</span> i);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        constraint.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, 1.<span style="color:#a6e22e">0</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Each facility must meet the demand of its assigned customers without exceeding its capacity:
+</p>
+$$ \sum_{i \in I} (d_i \cdot a_{i,j}) \leq c_j \cdot f_j \quad \forall j \in J $$<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Capacity constraint: Facility capacities</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    MPConstraint constraint <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeConstraint</span>(<span style="color:#f92672">-</span>MPSolver.<span style="color:#a6e22e">infinity</span>(), 0.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;capacity_&#34;</span> <span style="color:#f92672">+</span> j);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        constraint.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, customers<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>.<span style="color:#a6e22e">demand</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    constraint.<span style="color:#a6e22e">setCoefficient</span>(f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>, <span style="color:#f92672">-</span>facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">capacity</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="defining-the-objective">Defining the objective</h3>
+<p>Minimize the total cost, including setup and delivery costs:
+</p>
+$$ \sum_{j \in J} (f_j \cdot s_j + \sum_{i \in I} a_{i,j} \cdot dist_{i,j}) $$<p>This is implemented as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// Objective function: minimize total cost (including setup costs and delivery cost)</span>
+</span></span><span style="display:flex;"><span>MPObjective objective <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">objective</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Add setup cost for each facility</span>
+</span></span><span style="display:flex;"><span>    objective.<span style="color:#a6e22e">setCoefficient</span>(f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>, facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">setupCost</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Add delivery cost for assigning each customer to each facility</span>
+</span></span><span style="display:flex;"><span>        objective.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, dist<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>objective.<span style="color:#a6e22e">setMinimization</span>();
+</span></span></code></pre></div><hr>
+<h2 id="displaying-the-solution">Displaying the solution</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// checks solver output progress</span>
+</span></span><span style="display:flex;"><span>solver.<span style="color:#a6e22e">enableOutput</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// sets the max solving time in milliseconds</span>
+</span></span><span style="display:flex;"><span>solver.<span style="color:#a6e22e">setTimeLimit</span>(1200000);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// calls the solver</span>
+</span></span><span style="display:flex;"><span>MPSolver.<span style="color:#a6e22e">ResultStatus</span> resultStatus <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">solve</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Check that the problem has a feasible solution</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (resultStatus <span style="color:#f92672">==</span> MPSolver.<span style="color:#a6e22e">ResultStatus</span>.<span style="color:#a6e22e">OPTIMAL</span> <span style="color:#f92672">||</span> resultStatus <span style="color:#f92672">==</span> MPSolver.<span style="color:#a6e22e">ResultStatus</span>.<span style="color:#a6e22e">FEASIBLE</span>) {
+</span></span><span style="display:flex;"><span>    System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Total cost: &#34;</span> <span style="color:#f92672">+</span> objective.<span style="color:#a6e22e">value</span>() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\n&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; <span style="color:#f92672">++</span>j) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span> toatlCost <span style="color:#f92672">=</span> facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">setupCost</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>() <span style="color:#f92672">&gt;</span> 0.<span style="color:#a6e22e">5</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">double</span> totalDemand <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>() <span style="color:#f92672">&gt;</span> 0.<span style="color:#a6e22e">0</span>) {
+</span></span><span style="display:flex;"><span>                    totalDemand <span style="color:#f92672">+=</span> customers<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>.<span style="color:#a6e22e">demand</span>;
+</span></span><span style="display:flex;"><span>                    toatlCost <span style="color:#f92672">+=</span> dist<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Facility: &#34;</span> <span style="color:#f92672">+</span> j <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, capacity: &#34;</span> <span style="color:#f92672">+</span> facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">capacity</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, demand: &#34;</span> <span style="color:#f92672">+</span> totalDemand <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, cost: &#34;</span> <span style="color:#f92672">+</span> toatlCost);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;No solution found.&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="the-input-file">The input file</h2>
+<p>Sample input file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#ae81ff">3</span> <span style="color:#ae81ff">12</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">100</span> <span style="color:#ae81ff">100</span> <span style="color:#ae81ff">1065</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1065</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">100</span> <span style="color:#ae81ff">100</span> <span style="color:#ae81ff">1062</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1062</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">100</span> <span style="color:#ae81ff">500</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">50</span> <span style="color:#ae81ff">1397</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1397</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">50</span> <span style="color:#ae81ff">1398</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1398</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">75</span> <span style="color:#ae81ff">1399</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1399</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">75</span> <span style="color:#ae81ff">586</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">586</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">80</span> <span style="color:#ae81ff">900</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">900</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">80</span> <span style="color:#ae81ff">910</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">910</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">90</span> <span style="color:#ae81ff">1200</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1200</span>.<span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">90</span> <span style="color:#ae81ff">1210</span>.<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1210</span>.<span style="color:#ae81ff">0</span>
+</span></span></code></pre></div><p>Where</p>
+<ul>
+<li>Lines 2- 4 represent facilities (cost, capacity, coordinates)</li>
+<li>Lines 5 -12 represent customers (demand, coordinates)</li>
+</ul>
+<hr>
+<h2 id="the-solution">The solution</h2>
+<p>The <strong>FLPSolution.java</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Data</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Builder</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@AllArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@NoArgsConstructor</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Serdeable.Serializable</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FLPSolution</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">double</span> objectiveValue;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> Map<span style="color:#f92672">&lt;</span>String, Double<span style="color:#f92672">&gt;</span> variableValue;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> String status;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="micronaut-service-for-flp">Micronaut Service for FLP</h3>
+<p>The solve method in <strong>FLPService.java</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Singleton</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FLPService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>     FLPSolution <span style="color:#a6e22e">solve</span>(Facility<span style="color:#f92672">[]</span> facilities, Customer<span style="color:#f92672">[]</span> customers, <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> dist) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> numFacility <span style="color:#f92672">=</span> facilities.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> numCustomer <span style="color:#f92672">=</span> customers.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Loader.<span style="color:#a6e22e">loadNativeLibraries</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Create the linear solver with the SCIP backend</span>
+</span></span><span style="display:flex;"><span>        MPSolver solver <span style="color:#f92672">=</span> MPSolver.<span style="color:#a6e22e">createSolver</span>(<span style="color:#e6db74">&#34;SCIP&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (solver <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>            System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Could not create solver SCIP&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Define decision variables</span>
+</span></span><span style="display:flex;"><span>        MPVariable<span style="color:#f92672">[]</span> f <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeIntVarArray</span>(numFacility,0.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;f_&#34;</span>);
+</span></span><span style="display:flex;"><span>        MPVariable<span style="color:#f92672">[][]</span> a <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> MPVariable<span style="color:#f92672">[</span>numCustomer<span style="color:#f92672">][</span>numFacility<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            a<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeIntVarArray</span>(numFacility, 0.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;a_&#34;</span> <span style="color:#f92672">+</span> i);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Customer constraint: each customer is assigned to exactly one facility</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            MPConstraint constraint <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeConstraint</span>(1.<span style="color:#a6e22e">0</span>, 1.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;customer_&#34;</span> <span style="color:#f92672">+</span> i);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                constraint.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, 1.<span style="color:#a6e22e">0</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Capacity constraint: facility capacities</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            MPConstraint constraint <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">makeConstraint</span>(<span style="color:#f92672">-</span>MPSolver.<span style="color:#a6e22e">infinity</span>(), 0.<span style="color:#a6e22e">0</span>, <span style="color:#e6db74">&#34;capacity_&#34;</span> <span style="color:#f92672">+</span> j);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                constraint.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, customers<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>.<span style="color:#a6e22e">demand</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            constraint.<span style="color:#a6e22e">setCoefficient</span>(f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>, <span style="color:#f92672">-</span>facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">capacity</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Objective function: minimize total cost (including setup and delivery cost)</span>
+</span></span><span style="display:flex;"><span>        MPObjective objective <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">objective</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            objective.<span style="color:#a6e22e">setCoefficient</span>(f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>, facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">setupCost</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                objective.<span style="color:#a6e22e">setCoefficient</span>(a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>, dist<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        objective.<span style="color:#a6e22e">setMinimization</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Set solver parameters</span>
+</span></span><span style="display:flex;"><span>        solver.<span style="color:#a6e22e">enableOutput</span>();
+</span></span><span style="display:flex;"><span>        solver.<span style="color:#a6e22e">setTimeLimit</span>(1200000);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Solve the problem</span>
+</span></span><span style="display:flex;"><span>        MPSolver.<span style="color:#a6e22e">ResultStatus</span> resultStatus <span style="color:#f92672">=</span> solver.<span style="color:#a6e22e">solve</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Prepare the solution</span>
+</span></span><span style="display:flex;"><span>        Map<span style="color:#f92672">&lt;</span>String, Double<span style="color:#f92672">&gt;</span> variables <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (resultStatus <span style="color:#f92672">==</span> MPSolver.<span style="color:#a6e22e">ResultStatus</span>.<span style="color:#a6e22e">OPTIMAL</span> <span style="color:#f92672">||</span> resultStatus <span style="color:#f92672">==</span> MPSolver.<span style="color:#a6e22e">ResultStatus</span>.<span style="color:#a6e22e">FEASIBLE</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacility; <span style="color:#f92672">++</span>j) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>() <span style="color:#f92672">&gt;</span> 0.<span style="color:#a6e22e">5</span>) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomer; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">if</span> (a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>() <span style="color:#f92672">&gt;</span> 0.<span style="color:#a6e22e">0</span>) {
+</span></span><span style="display:flex;"><span>                             variables.<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;a_&#34;</span> <span style="color:#f92672">+</span> i <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;_&#34;</span> <span style="color:#f92672">+</span> j, a<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>());
+</span></span><span style="display:flex;"><span>                        }
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                    variables.<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;f_&#34;</span> <span style="color:#f92672">+</span> j, f<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>.<span style="color:#a6e22e">solutionValue</span>());
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> FLPSolution.<span style="color:#a6e22e">builder</span>()
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">objectiveValue</span>(objective.<span style="color:#a6e22e">value</span>())
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">variableValue</span>(variables)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">status</span>(resultStatus.<span style="color:#a6e22e">name</span>())
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This service finds the optimal facility locations, minimizing costs while ensuring each customer&rsquo;s demand is met.</p>
+<h3 id="micronaut-controller-for-flp">Micronaut Controller for FLP</h3>
+<p>The <strong>FLPController.java</strong> file is responsible for exposing an API endpoint that allows users to upload a file containing the input data for the FLP and then processes that data to find the optimal solution.</p>
+<p>Here&rsquo;s the implementation:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Controller</span>(<span style="color:#e6db74">&#34;/flp&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FLPController</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> FLPService flpService;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">FLPController</span>(FLPService flpService) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">flpService</span> <span style="color:#f92672">=</span> flpService;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Post</span>(value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/uploadAndSolve&#34;</span>, consumes <span style="color:#f92672">=</span> MediaType.<span style="color:#a6e22e">MULTIPART_FORM_DATA</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> FLPSolution <span style="color:#a6e22e">uploadAndSolve</span>(CompletedFileUpload file) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Read the contents of the file into a List of Strings</span>
+</span></span><span style="display:flex;"><span>            List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lines <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">try</span> (BufferedReader input <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BufferedReader(<span style="color:#66d9ef">new</span> InputStreamReader(file.<span style="color:#a6e22e">getInputStream</span>(), StandardCharsets.<span style="color:#a6e22e">UTF_8</span>))) {
+</span></span><span style="display:flex;"><span>                String line;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">while</span> ((line <span style="color:#f92672">=</span> input.<span style="color:#a6e22e">readLine</span>()) <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>                    lines.<span style="color:#a6e22e">add</span>(line);
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Process the lines to extract facilities, customers, and distances</span>
+</span></span><span style="display:flex;"><span>            Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> dataMap <span style="color:#f92672">=</span> flpService.<span style="color:#a6e22e">processLines</span>(lines);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> distances <span style="color:#f92672">=</span> (<span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span>) dataMap.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#34;distances&#34;</span>);
+</span></span><span style="display:flex;"><span>            Facility<span style="color:#f92672">[]</span> facilities <span style="color:#f92672">=</span> (Facility<span style="color:#f92672">[]</span>) dataMap.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#34;facilities&#34;</span>);
+</span></span><span style="display:flex;"><span>            Customer<span style="color:#f92672">[]</span> customers <span style="color:#f92672">=</span> (Customer<span style="color:#f92672">[]</span>) dataMap.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#34;customers&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Solve the FLP with the extracted data</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> flpService.<span style="color:#a6e22e">solve</span>(facilities, customers, distances);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">catch</span> (IOException e) {
+</span></span><span style="display:flex;"><span>            e.<span style="color:#a6e22e">printStackTrace</span>();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>; <span style="color:#75715e">// or handle error appropriately</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="the-service-method-to-process-input-lines">The Service Method to Process Input Lines</h3>
+<p>The <em>processLines</em> method in <strong>FLPService</strong> parses the input file lines and extracts the necessary data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Singleton</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FLPService</span> {
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> {
+</span></span><span style="display:flex;"><span>        Loader.<span style="color:#a6e22e">loadNativeLibraries</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">processLines</span>(List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lines) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Extract the number of facilities and customers from the first line</span>
+</span></span><span style="display:flex;"><span>        String<span style="color:#f92672">[]</span> firstLine <span style="color:#f92672">=</span> lines.<span style="color:#a6e22e">get</span>(0).<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34; &#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> numFacilities <span style="color:#f92672">=</span> Integer.<span style="color:#a6e22e">parseInt</span>(firstLine<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> numCustomers <span style="color:#f92672">=</span> Integer.<span style="color:#a6e22e">parseInt</span>(firstLine<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Create arrays for facilities and customers</span>
+</span></span><span style="display:flex;"><span>        Facility<span style="color:#f92672">[]</span> facilities <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Facility<span style="color:#f92672">[</span>numFacilities<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        Customer<span style="color:#f92672">[]</span> customers <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Customer<span style="color:#f92672">[</span>numCustomers<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Parse facility data</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1; i <span style="color:#f92672">&lt;</span> numFacilities <span style="color:#f92672">+</span> 1; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            String<span style="color:#f92672">[]</span> facilityData <span style="color:#f92672">=</span> lines.<span style="color:#a6e22e">get</span>(i).<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34; &#34;</span>);
+</span></span><span style="display:flex;"><span>            facilities<span style="color:#f92672">[</span>i <span style="color:#f92672">-</span> 1<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> Facility.<span style="color:#a6e22e">builder</span>()
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">setupCost</span>(Double.<span style="color:#a6e22e">parseDouble</span>(facilityData<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>)).
+</span></span><span style="display:flex;"><span>                    capacity(Integer.<span style="color:#a6e22e">parseInt</span>(facilityData<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>))
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">x</span>(Double.<span style="color:#a6e22e">parseDouble</span>(facilityData<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>)).
+</span></span><span style="display:flex;"><span>                    y(Double.<span style="color:#a6e22e">parseDouble</span>(facilityData<span style="color:#f92672">[</span>3<span style="color:#f92672">]</span>)).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Parse customer data</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> numFacilities <span style="color:#f92672">+</span> 1; i <span style="color:#f92672">&lt;</span> numFacilities <span style="color:#f92672">+</span> numCustomers <span style="color:#f92672">+</span> 1; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            String<span style="color:#f92672">[]</span> customerData <span style="color:#f92672">=</span> lines.<span style="color:#a6e22e">get</span>(i).<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34; &#34;</span>);
+</span></span><span style="display:flex;"><span>            customers<span style="color:#f92672">[</span>i <span style="color:#f92672">-</span> numFacilities <span style="color:#f92672">-</span> 1<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> Customer.<span style="color:#a6e22e">builder</span>()
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">demand</span>(Integer.<span style="color:#a6e22e">parseInt</span>(customerData<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>))
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">x</span>(Double.<span style="color:#a6e22e">parseDouble</span>(customerData<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>))
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">y</span>(Double.<span style="color:#a6e22e">parseDouble</span>(customerData<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>)).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Calculate distances</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span><span style="color:#f92672">[][]</span> distances <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">double</span><span style="color:#f92672">[</span>numCustomers<span style="color:#f92672">][</span>numFacilities<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> numCustomers; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0; j <span style="color:#f92672">&lt;</span> numFacilities; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                distances<span style="color:#f92672">[</span>i<span style="color:#f92672">][</span>j<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> calculateDistance(customers<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>, facilities<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Prepare the result map</span>
+</span></span><span style="display:flex;"><span>        Map<span style="color:#f92672">&lt;</span>String, Object<span style="color:#f92672">&gt;</span> dataMap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>        dataMap.<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;distances&#34;</span>, distances);
+</span></span><span style="display:flex;"><span>        dataMap.<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;facilities&#34;</span>, facilities);
+</span></span><span style="display:flex;"><span>        dataMap.<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;customers&#34;</span>, customers);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> dataMap;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">calculateDistance</span>(Customer customer, Facility facility) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span> dx <span style="color:#f92672">=</span> customer.<span style="color:#a6e22e">getX</span>() <span style="color:#f92672">-</span> facility.<span style="color:#a6e22e">getX</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span> dy <span style="color:#f92672">=</span> customer.<span style="color:#a6e22e">getY</span>() <span style="color:#f92672">-</span> facility.<span style="color:#a6e22e">getY</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Math.<span style="color:#a6e22e">sqrt</span>(dx <span style="color:#f92672">*</span> dx <span style="color:#f92672">+</span> dy <span style="color:#f92672">*</span> dy);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// The solve method remains the same as defined in the previous sections</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="summary">Summary</h2>
+<p>This Micronaut setup allows users to upload an input file to solve the Facility Location Problem using the provided FLP service. The controller processes the file, extracts data, and leverages OR-Tools to find the optimal solution.</p>
+<h3 id="testing-the-controller">Testing the Controller</h3>
+<p>To test the controller, you can use tools like Postman to send a POST request with a multipart/form-data containing the input file. The service will process the file and return the solution, which you can inspect in the response.</p>
+<h3 id="sample-solver-output">Sample Solver Output</h3>
+<p>Upon successful upload and processing, you will see the solver&rsquo;s output with the details of the selected facilities and assigned customers:</p>
+<p><img src="/images/flp/flp-upload-and-solve.png" alt="flp-upload-and-solve"></p>
+<p>And this is the sample solver output from micronaut:</p>
+<p><img src="/images/flp/flp-sample-solver-enable-output.png" alt="flp-sample-solver-enable-output"></p>
+<p>With this setup, you now have a fully functional Micronaut application that can solve the Facility Location Problem based on user-provided input files.</p>
+
+  
+  <hr>
+<div class="footer">
+    
+    
+    
+    <p>
+    This is a post in the <b><a href="//localhost:1313/series/combinatorial-optimization-problems">Combinatorial Optimization Problems</a></b> series.
+        <br>Other posts in this series:
+        <ul class="series">
+            
+            
+            
+            <li>
+                June 1, 2024 -
+                
+                    <a href="/2024/from-routing-models-to-mip-solving-capacitated-vehicle-routing-problem/">From Routing Models to MIP: Solving Capacitated Vehicle Routing Problem</a>
+                
+            </li>
+            
+            <li>
+                May 27, 2024 -
+                
+                    Solving Facility Location Problem with OR-Tools and Micronaut
+                
+            </li>
+            
+            <li>
+                May 23, 2024 -
+                
+                    <a href="/2024/optimizing-tsp-with-genetic-algorithms-in-micronaut/">Optimizing TSP with Genetic Algorithms in Micronaut</a>
+                
+            </li>
+            
+            <li>
+                April 27, 2024 -
+                
+                    <a href="/2024/efficient-tsp-solver-api-with-micronaut/">Efficient TSP Solver API with Micronaut</a>
+                
+            </li>
+            
+        </ul>
+    </p>
+    
+</div>
+
+  
+    <div class="comments">
+    
+        <div style="clear: both;">
+            <br>
+            <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "seehiong" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </div>
+    
+</div>
+
+  
+</div>
+            </main>
+            
+  
+    <div class="article-toc ">
+    <div class="toc-wrapper">
+      <h4 id="contents"></h4>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#problem-statement">Problem Statement</a></li>
+    <li><a href="#defining-the-solver">Defining the solver</a>
+      <ul>
+        <li><a href="#defining-the-variables">Defining the variables</a></li>
+        <li><a href="#defining-the-constraints">Defining the constraints</a></li>
+        <li><a href="#defining-the-objective">Defining the objective</a></li>
+      </ul>
+    </li>
+    <li><a href="#displaying-the-solution">Displaying the solution</a></li>
+    <li><a href="#the-input-file">The input file</a></li>
+    <li><a href="#the-solution">The solution</a>
+      <ul>
+        <li><a href="#micronaut-service-for-flp">Micronaut Service for FLP</a></li>
+        <li><a href="#micronaut-controller-for-flp">Micronaut Controller for FLP</a></li>
+        <li><a href="#the-service-method-to-process-input-lines">The Service Method to Process Input Lines</a></li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a>
+      <ul>
+        <li><a href="#testing-the-controller">Testing the Controller</a></li>
+        <li><a href="#sample-solver-output">Sample Solver Output</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+      
+        <hr>
+        
+              <div class="previous-post">
+                <a href="//localhost:1313/2024/optimizing-tsp-with-genetic-algorithms-in-micronaut/?ref=footer"><span style="font-weight:bold;">« Previous</span><br>Optimizing TSP with Genetic Algorithms in...</a>
+              </div>
+              <br><br>
+          
+        
+              <div class="next-post">
+                  <a href="//localhost:1313/2024/from-routing-models-to-mip-solving-capacitated-vehicle-routing-problem/?ref=footer"><span style="font-weight:bold;">Next »</span><br>From Routing Models to MIP: Solving Capacitated...</a>
+              </div>
+          
+      
+    </div>
+</div>
+  
+
+        </div>
+    </body>
+</html>
+
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>

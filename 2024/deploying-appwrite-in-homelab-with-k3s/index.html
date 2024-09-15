@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+<script defer language="javascript" type="text/javascript" src="/js/bundle.min.b989f0fdae3971a3effd81d6d0b27b3cb1023ff0b601ff43e2118b0d9d82ddb9.js"></script>
+
+
+
+
+
+
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="icon" href=/favicon.png>
+
+    
+    
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+
+
+<!-- Open Graph image and Twitter Card metadata -->
+
+<title itemprop="name">Tech Blog - Deploying Appwrite in HomeLab with K3s</title>
+<meta property="og:title" content=Tech&#32;Blog&#32;-&#32;Deploying&#32;Appwrite&#32;in&#32;HomeLab&#32;with&#32;K3s />
+<meta name="twitter:title" content=Tech&#32;Blog&#32;-&#32;Deploying&#32;Appwrite&#32;in&#32;HomeLab&#32;with&#32;K3s />
+<meta itemprop="name" content=Tech&#32;Blog&#32;-&#32;Deploying&#32;Appwrite&#32;in&#32;HomeLab&#32;with&#32;K3s />
+<meta name="application-name" content=Tech&#32;Blog&#32;-&#32;Deploying&#32;Appwrite&#32;in&#32;HomeLab&#32;with&#32;K3s />
+<meta property="og:site_name" content="See Hiong&#39;s Blog" />
+
+
+<meta name="description" content="Learn how to seamlessly integrate Appwrite, an open-source platform, into your HomeLab setup using K3s. Follow step-by-step instructions to deploy K3s with Portainer, prepare Appwrite volumes, and configure miscellaneous services like MariaDB and InfluxDB. Utilize Kompose to convert Docker Compose files to Kubernetes for efficient deployment. Ensure smooth installation by mapping necessary environment variables and applying all required deployments and services. Finally, witness the successful deployment of Appwrite services and access the login page to start building scalable applications. Master the art of HomeLab application deployment with Appwrite and K3s." />
+<meta itemprop="description" content="Learn how to seamlessly integrate Appwrite, an open-source platform, into your HomeLab setup using K3s. Follow step-by-step instructions to deploy K3s with Portainer, prepare Appwrite volumes, and configure miscellaneous services like MariaDB and InfluxDB. Utilize Kompose to convert Docker Compose files to Kubernetes for efficient deployment. Ensure smooth installation by mapping necessary environment variables and applying all required deployments and services. Finally, witness the successful deployment of Appwrite services and access the login page to start building scalable applications. Master the art of HomeLab application deployment with Appwrite and K3s." />
+<meta property="og:description" content="Learn how to seamlessly integrate Appwrite, an open-source platform, into your HomeLab setup using K3s. Follow step-by-step instructions to deploy K3s with Portainer, prepare Appwrite volumes, and configure miscellaneous services like MariaDB and InfluxDB. Utilize Kompose to convert Docker Compose files to Kubernetes for efficient deployment. Ensure smooth installation by mapping necessary environment variables and applying all required deployments and services. Finally, witness the successful deployment of Appwrite services and access the login page to start building scalable applications. Master the art of HomeLab application deployment with Appwrite and K3s." />
+<meta name="twitter:description" content="Learn how to seamlessly integrate Appwrite, an open-source platform, into your HomeLab setup using K3s. Follow step-by-step instructions to deploy K3s with Portainer, prepare Appwrite volumes, and configure miscellaneous services like MariaDB and InfluxDB. Utilize Kompose to convert Docker Compose files to Kubernetes for efficient deployment. Ensure smooth installation by mapping necessary environment variables and applying all required deployments and services. Finally, witness the successful deployment of Appwrite services and access the login page to start building scalable applications. Master the art of HomeLab application deployment with Appwrite and K3s." />
+
+
+<base href="//localhost:1313/2024/deploying-appwrite-in-homelab-with-k3s/" />
+<link rel="canonical" href="//localhost:1313/2024/deploying-appwrite-in-homelab-with-k3s/" itemprop="url" />
+<meta name="url" content="//localhost:1313/2024/deploying-appwrite-in-homelab-with-k3s/" />
+<meta name="twitter:url" content="//localhost:1313/2024/deploying-appwrite-in-homelab-with-k3s/" />
+<meta property="og:url" content="//localhost:1313/2024/deploying-appwrite-in-homelab-with-k3s/" />
+
+
+<meta property="og:updated_time" content="2024-02-16T20:00:00&#43;08:00" />
+
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href='//localhost:1313/sitemap.xml' />
+
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+
+
+<meta property="fb:admins" content="" />
+
+
+<meta name="apple-mobile-web-app-title" content="See Hiong&#39;s Blog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.134.1">
+
+
+    
+    
+
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.03b57bbaf31d739f14c95df7f05d1cefcfa60bbafa36ba47313afdeb325aeada.css">
+
+
+    
+    <style>
+    body {
+        --sidebar-bg-color: #202020;
+        --sidebar-img-border-color: #515151;
+        --sidebar-p-color: #909090;
+        --sidebar-h1-color: #FFF;
+        --sidebar-a-color: #FFF;
+        --sidebar-socials-color: #FFF;
+        --text-color: #222;
+        --bkg-color: #FAF9F6;
+        --post-title-color: #303030;
+        --list-color: #5a5a5a;
+        --link-color: #268bd2;
+        --date-color: #515151;
+        --table-border-color: #E5E5E5;
+        --table-stripe-color: #F9F9F9;
+        --code-color: #000;
+        --code-background-color: #E5E5E5;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+        --moon-sun-color: #FFF;
+        --moon-sun-background-color: #515151;
+    }
+    body.dark-theme {
+        --text-color: #eee;
+        --bkg-color: #121212;
+        --post-title-color: #DBE2E9;
+        --list-color: #9d9d9d;
+        --link-color: #268bd2;
+        --date-color: #9a9a9a;
+        --table-border-color: #515151;
+        --table-stripe-color: #202020;
+        --code-color: #fff;
+        --code-background-color: #515151;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+    }
+    body {
+        background-color: var(--bkg-color);
+    }
+</style>
+
+</head>
+
+    <body class="dark-theme">
+        <div class="wrapper">
+            <aside class="sidebar">
+    <div class="container sidebar-sticky">
+        <div class="light-dark" align="right">
+    <button class="btn-light-dark" title="Toggle light/dark mode">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6 .278a.768.768 0 0 1 .08.858a7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277c.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316a.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71C0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        </svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+    </button>
+</div>
+
+        <div class="sidebar-about">
+    <h1 class="brand">
+        
+        
+            <a href="//localhost:1313/">
+                <h1>Tech Blog</h1>
+            </a>
+        
+    </h1>
+    <p class="lead">
+    Chronicling my personal expedition of technology exploration and experimentation, facilitated by a home-based self-configured laboratory
+    </p>
+</div>
+
+        <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<style>
+    :root {
+        --pagefind-ui-primary: #eeeeee;
+        --pagefind-ui-text: #eeeeee;
+        --pagefind-ui-background: #152028;
+        --pagefind-ui-border: #152028;
+        --pagefind-ui-tag: #152028;
+    }
+</style>
+<script src="/pagefind/pagefind-ui.js"></script>
+<div style="max-width: 100%; margin: clamp(2px, 1vw, 10px) auto;">
+    <div id="search"></div>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true, showImages: false, excerptLength: 15 });
+        });
+    </script>
+</div>
+        <nav>
+    <ul class="sidebar-nav">
+
+        
+        
+        
+        
+            
+
+            
+                
+                
+                    <li class="heading">
+                        <a href="/2024/">2024</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            Recent
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/talos-linux-setting-up-a-secure-immutable-kubernetes-cluster/">Talos Linux: Setting Up a Secure, Immutable Kubernetes Cluster</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/audio-generation-with-nvidia-jetson-orin-nx/">Audio Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/unleashing-text-generation-with-nvidia-jetson-orin-nx/">Unleashing Text Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/scaling-kafka-workloads-with-keda-in-kubernetes/">Scaling Kafka Workloads with KEDA in Kubernetes</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/exploring-nvidia-jetson-orin-nx-flashing-and-setup-guide/">Exploring NVIDIA Jetson Orin NX: Flashing and Setup Guide</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/setting-up-kafka-with-microk8s-and-multipass/">Setting Up Kafka with MicroK8s and Multipass</a>
+                            </li>
+                        
+                    
+                
+            
+                
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/archives/">Archives</a>
+                    </li>
+                    
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+
+    </ul>
+</nav>
+
+        
+    <a target="_blank" class="social" title="GitHub" href="https://github.com/seehiong">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="-2 -2 24 24">
+            <path fill="currentColor" d="M18.88 1.099C18.147.366 17.265 0 16.233 0H3.746C2.714 0 1.832.366 1.099 1.099C.366 1.832 0 2.714 0 3.746v12.487c0 1.032.366 1.914 1.099 2.647c.733.733 1.615 1.099 2.647 1.099H6.66c.19 0 .333-.007.429-.02a.504.504 0 0 0 .286-.169c.095-.1.143-.245.143-.435l-.007-.885c-.004-.564-.006-1.01-.006-1.34l-.3.052c-.19.035-.43.05-.721.046a5.555 5.555 0 0 1-.904-.091a2.026 2.026 0 0 1-.872-.39a1.651 1.651 0 0 1-.572-.8l-.13-.3a3.25 3.25 0 0 0-.41-.663c-.186-.243-.375-.407-.566-.494l-.09-.065a.956.956 0 0 1-.17-.156a.723.723 0 0 1-.117-.182c-.026-.061-.004-.111.065-.15c.07-.04.195-.059.378-.059l.26.04c.173.034.388.138.643.311a2.1 2.1 0 0 1 .631.677c.2.355.44.626.722.813c.282.186.566.28.852.28c.286 0 .533-.022.742-.065a2.59 2.59 0 0 0 .585-.196c.078-.58.29-1.028.637-1.34a8.907 8.907 0 0 1-1.333-.234a5.314 5.314 0 0 1-1.223-.507a3.5 3.5 0 0 1-1.047-.872c-.277-.347-.505-.802-.683-1.365c-.177-.564-.266-1.215-.266-1.952c0-1.049.342-1.942 1.027-2.68c-.32-.788-.29-1.673.091-2.652c.252-.079.625-.02 1.119.175c.494.195.856.362 1.086.5c.23.14.414.257.553.352a9.233 9.233 0 0 1 2.497-.338c.859 0 1.691.113 2.498.338l.494-.312a6.997 6.997 0 0 1 1.197-.572c.46-.174.81-.221 1.054-.143c.39.98.424 1.864.103 2.653c.685.737 1.028 1.63 1.028 2.68c0 .737-.089 1.39-.267 1.957c-.177.568-.407 1.023-.689 1.366a3.65 3.65 0 0 1-1.053.865c-.42.234-.828.403-1.223.507a8.9 8.9 0 0 1-1.333.235c.45.39.676 1.005.676 1.846v3.11c0 .147.021.266.065.357a.36.36 0 0 0 .208.189c.096.034.18.056.254.064c.074.01.18.013.318.013h2.914c1.032 0 1.914-.366 2.647-1.099c.732-.732 1.099-1.615 1.099-2.647V3.746c0-1.032-.367-1.914-1.1-2.647z"/>
+        </svg>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a target="_blank" class="social" title="RSS Feed" href="/2024/index.xml">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 1280.000000 1280.000000">
+            <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="currentColor">
+                <path d="M2295 11929 c-284 -12 -642 -45 -707 -65 -17 -5 -18 -63 -18 -1039 0 -569 4 -1036 8 -1039 5 -3 74 6 153 19 510 86 1168 95 1789 25 1348 -153 2602 -677 3670 -1531 385 -308 820 -744 1126 -1129 842 -1060 1362 -2313 1514 -3650 70 -621 61 -1279 -25 -1789 -13 -79 -22 -148 -19 -153 3 -4 471 -8 1039 -8 l1035 0 5 23 c51 225 85 942 67 1419 -23 605 -77 1044 -198 1617 -294 1400 -927 2734 -1823 3846 -1043 1295 -2364 2259 -3909 2854 -1158 447 -2451 656 -3707 600z"/>
+                <path d="M2255 7845 c-269 -25 -620 -81 -667 -106 -17 -9 -18 -55 -18 -899 0 -706 3 -890 13 -890 6 0 66 18 132 41 130 44 288 79 467 105 154 21 577 30 749 15 1207 -107 2267 -823 2814 -1902 166 -327 268 -637 330 -1001 38 -227 48 -384 42 -662 -8 -348 -44 -590 -126 -831 -23 -66 -41 -126 -41 -132 0 -10 184 -13 890 -13 844 0 890 1 899 18 27 50 88 452 110 725 14 162 14 624 1 782 -59 703 -233 1323 -545 1945 -481 956 -1313 1788 -2270 2268 -620 310 -1239 483 -1940 542 -165 14 -669 10 -840 -5z"/>
+                <path d="M2519 3815 c-391 -66 -725 -336 -868 -703 -79 -201 -96 -462 -45 -677 83 -344 338 -641 666 -774 116 -47 205 -69 330 -80 412 -39 811 153 1040 500 193 292 240 648 128 981 -135 403 -492 699 -914 757 -100 14 -241 12 -337 -4z"/>
+            </g>
+        </svg>
+    </a>
+
+
+
+
+
+        <p class="footnote">
+powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a target="_blank" href="https://github.com/lukeorth/poison">poison</a>
+    <br>
+    &copy; 2024 See Hiong&#39;s Blog. All rights reserved.
+</p>
+
+  </div>
+</aside>
+
+            <main class="content container">
+                <div class="post" data-pagefind-body>
+  <div class="info">
+  <h1 class="post-title">
+    <a href="//localhost:1313/2024/deploying-appwrite-in-homelab-with-k3s/">Deploying Appwrite in HomeLab with K3s</a>
+  </h1>
+
+  <div class="headline" data-pagefind-ignore>
+    <div>
+      
+      
+      <time datetime=" 2024-02-16T20:00:00&#43;0800" class="post-date">
+        February 16, 2024
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>4 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-HomeLab">
+        <a href="//localhost:1313/tags/homelab">HomeLab</a>
+      </li>
+      
+      <li class="tag-K3s">
+        <a href="//localhost:1313/tags/k3s">K3s</a>
+      </li>
+      
+      <li class="tag-K8s">
+        <a href="//localhost:1313/tags/k8s">K8s</a>
+      </li>
+      
+      <li class="tag-Appwrite">
+        <a href="//localhost:1313/tags/appwrite">Appwrite</a>
+      </li>
+      
+      <li class="tag-Traefik">
+        <a href="//localhost:1313/tags/traefik">Traefik</a>
+      </li>
+      
+      <li class="tag-Portainer">
+        <a href="//localhost:1313/tags/portainer">Portainer</a>
+      </li>
+      
+      <li class="tag-Kompose">
+        <a href="//localhost:1313/tags/kompose">Kompose</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+  <p class="seriesname">
+    Series: <a href="//localhost:1313/series/appwrite-with-k3s">Appwrite with K3s</a>
+  </p>
+  
+
+  
+</div>
+
+  <p>In this post, we&rsquo;ll embark on installing <a href="https://appwrite.io/" target="_blank">Appwrite</a>, an open-source platform designed to facilitate the integration of authentication, databases, functions, and storage, enabling the development of scalable applications within our HomeLab setup.</p>
+<hr>
+<h2 id="prepartion">Prepartion</h2>
+<p>Referencing my <a href="//localhost:1313/archives/2023/setting-up-k3s/">previous K3s setup post</a>, let&rsquo;s initiate the installation process by deploying K3s server, this time with Traefik disabled:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;--disable traefik&#34;</span> K3S_KUBECONFIG_MODE<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;644&#34;</span> sh -
+</span></span></code></pre></div><p>As usual, we verify the status with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>kc get no
+</span></span></code></pre></div><p>Following that, we deploy Portainer to the K3s cluster:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir portainer
+</span></span><span style="display:flex;"><span>cd portainer
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Download Portainer and deploy it</span>
+</span></span><span style="display:flex;"><span>wget https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer.yaml -O deploy.yaml
+</span></span><span style="display:flex;"><span>kca deploy.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check the port to use</span>
+</span></span><span style="display:flex;"><span>kc get svc portainer -n portainer
+</span></span></code></pre></div><p>Navigate to the specified port (e.g., http://bee:30777) and sets portainer up. and set up Portainer. Next, proceed by clicking on <strong>Get started</strong>.</p>
+<p><img src="/images/appwrite/portainer-get-started.png" alt="portainer-get-started"></p>
+<hr>
+<h2 id="generating-appwrite-k8s-files">Generating Appwrite K8s Files</h2>
+<p>Referencing Appwrite&rsquo;s <a href="https://appwrite.io/docs/advanced/self-hosting#manual" target="_blank">Manual (Docker Compose)</a>, let&rsquo;s download the <em>docker-compose.yml</em> and <em>.env</em> files. We&rsquo;ll utilize <a href="https://kompose.io/" target="_blank">Kompose</a> to convert them from Docker Compose to Kubernetes.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Download Appwrite files</span>
+</span></span><span style="display:flex;"><span>wget https://appwrite.io/install/compose -O docker-compose.yml
+</span></span><span style="display:flex;"><span>wget https://appwrite.io/install/env -O env
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>curl -L https://github.com/kubernetes/kompose/releases/download/v1.32.0/kompose-linux-amd64 -o kompose
+</span></span><span style="display:flex;"><span>chmod +x kompose
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Convert to K8s files</span>
+</span></span><span style="display:flex;"><span>./kompose convert
+</span></span></code></pre></div><p><img src="/images/appwrite/appwrite-converted-k8s-files.png" alt="appwrite-converted-k8s-files"></p>
+<hr>
+<h2 id="preparing-appwrite-volumes">Preparing Appwrite Volumes</h2>
+<p>From my <a href="//localhost:1313/2024/integrating-nfs-for-improved-scalability/">previous NFS post</a>, let&rsquo;s prepare the files to be placed in <em>/var/lib/rancher/k3s/server/manifests</em>. We require a total of 9 storage classes. Refer to my public repository, <a href="https://github.com/seehiong/appwrite-k8s-deployment" target="_blank">appwrite-k8s-deployment</a> for all necessary Kubernetes files mentioned in this post.</p>
+<p>Below is an example for <em>appwrite-builds.yaml</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Example: appwrite-builds.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">helm.cattle.io/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">HelmChart</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">appwrite-builds</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">appwrite</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">chart</span>: <span style="color:#ae81ff">nfs-subdir-external-provisioner</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">repo</span>: <span style="color:#ae81ff">https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">set</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.server</span>: <span style="color:#ae81ff">tnas.local</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.path</span>: <span style="color:#ae81ff">/mnt/public/appwrite</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.name</span>: <span style="color:#ae81ff">appwrite-builds</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.reclaimPolicy</span>: <span style="color:#ae81ff">Retain</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">storageClass.accessModes</span>: <span style="color:#ae81ff">ReadWriteMany</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nfs.reclaimPolicy</span>: <span style="color:#ae81ff">Retain</span>
+</span></span></code></pre></div><p>Let&rsquo;s proceed to copying these 9 files to the auto-deployed folder:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ls appwrite-*.yaml
+</span></span><span style="display:flex;"><span>sudo cp appwrite-*.yaml /var/lib/rancher/k3s/server/manifests
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Verify files are copied correctly</span>
+</span></span><span style="display:flex;"><span>sudo ls /var/lib/rancher/k3s/server/manifests
+</span></span></code></pre></div><p>Similarly, create the corresponding persistent volume claims and apply them:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>kc create ns appwrite
+</span></span><span style="display:flex;"><span>kca pvc-appwrite-builds.yaml 
+</span></span><span style="display:flex;"><span>kca pvc-appwrite-cache.yaml 
+</span></span><span style="display:flex;"><span>kca pvc-appwrite-certificates.yaml
+</span></span><span style="display:flex;"><span>kca pvc-appwrite-config.yaml
+</span></span><span style="display:flex;"><span>kca pvc-appwrite-functions.yaml
+</span></span><span style="display:flex;"><span>kca pvc-appwrite-influxdb.yaml
+</span></span><span style="display:flex;"><span>kca pvc-appwrite-mariadb.yaml
+</span></span><span style="display:flex;"><span>kca pvc-appwrite-redis.yaml 
+</span></span><span style="display:flex;"><span>kca pvc-appwrite-uploads.yaml
+</span></span></code></pre></div><p><img src="/images/appwrite/appwrite-required-volumes.png" alt="appwrite-required-volumes"></p>
+<hr>
+<h2 id="preparing-misc-services">Preparing Misc Services</h2>
+<p>As Kompose do not include any required environment variables, we&rsquo;ll manually map them against the original Docker Compose files and merge values from the .env file. These are the items to note of:</p>
+<ol>
+<li>To add env var to all deployment files:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Example: mariadb-deployment.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">args</span>:
+</span></span><span style="display:flex;"><span>            - <span style="color:#ae81ff">mysqld</span>
+</span></span><span style="display:flex;"><span>            - --<span style="color:#ae81ff">innodb-flush-method=fsync</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e"># To include the required env</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>            - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">MYSQL_DATABASE</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">value</span>: <span style="color:#ae81ff">appwrite</span>
+</span></span><span style="display:flex;"><span>            - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">MYSQL_PASSWORD</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">value</span>: <span style="color:#ae81ff">password</span>
+</span></span><span style="display:flex;"><span>            - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">MYSQL_ROOT_PASSWORD</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">value</span>: <span style="color:#ae81ff">rootsecretpassword</span>
+</span></span><span style="display:flex;"><span>            - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">MYSQL_USER</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">value</span>: <span style="color:#ae81ff">user</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mariadb:10.7</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">appwrite-mariadb     </span>
+</span></span></code></pre></div><ol start="2">
+<li>To use hostPath to access host&rsquo;s <em>/var/run/docker.sock</em>:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Example: openruntimes-executor-deployment.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">hostname</span>: <span style="color:#ae81ff">appwrite-executor</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">restartPolicy</span>: <span style="color:#ae81ff">Always</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># To use hostPath to host&#39;s /var/run/docker.sock and tmp folder</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">openruntimes-executor-claim0</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">hostPath</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">path</span>: <span style="color:#ae81ff">/var/run/docker.sock</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">appwrite-builds</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">appwrite-builds</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">appwrite-functions</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">appwrite-functions</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">openruntimes-executor-claim3</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">hostPath</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">path</span>: <span style="color:#ae81ff">/tmp</span>
+</span></span></code></pre></div><ol start="3">
+<li>To use the fully qualified name for the DB and other services.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Example: appwrite-deployment.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">appwrite/appwrite:1.4.13</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">appwrite</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e"># To include the required env</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e"># Using the fully qualified name to DB host</span>
+</span></span><span style="display:flex;"><span>          - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">_APP_DB_HOST</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">value</span>: <span style="color:#ae81ff">mariadb-svc.appwrite.svc</span>
+</span></span></code></pre></div><p>Apply all necessary DB and services:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Deployments</span>
+</span></span><span style="display:flex;"><span>kca influxdb-deployment.yaml
+</span></span><span style="display:flex;"><span>kca mariadb-deployment.yaml
+</span></span><span style="display:flex;"><span>kca openruntimes-executor-deployment.yaml
+</span></span><span style="display:flex;"><span>kca redis-deployment.yaml
+</span></span><span style="display:flex;"><span>kca telegraf-deployment.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Services</span>
+</span></span><span style="display:flex;"><span>kca influxdb-svc.yaml
+</span></span><span style="display:flex;"><span>kca mariadb-svc.yaml
+</span></span><span style="display:flex;"><span>kca openruntimes-executor-svc.yaml
+</span></span><span style="display:flex;"><span>kca redis-svc.yaml
+</span></span><span style="display:flex;"><span>kca telegraf-svc.yaml
+</span></span></code></pre></div><p><img src="/images/appwrite/appwrite-used-volumes.png" alt="appwrite-used-volumes"></p>
+<p><img src="/images/appwrite/appwrite-applications.png" alt="appwrite-applications"></p>
+<hr>
+<h2 id="installing-appwrite-services">Installing Appwrite Services</h2>
+<p>Finally, apply the remaining items:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Deployments</span>
+</span></span><span style="display:flex;"><span>kca appwrite-worker-webhooks-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-worker-migrations-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-worker-messaging-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-worker-mails-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-worker-functions-deployment.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kca appwrite-worker-deletes-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-worker-databases-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-worker-certificates-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-worker-builds-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-worker-audits-deployment.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kca appwrite-usage-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-schedule-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-realtime-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-maintenance-deployment.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-deployment.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># You need to enter your own OPENAI API key for this to work</span>
+</span></span><span style="display:flex;"><span>kca appwrite-assistant-deployment.yaml
+</span></span></code></pre></div><p>Upon completion, all services should start normally:</p>
+<p><img src="/images/appwrite/appwrite-applications-2.png" alt="appwrite-applications-2"></p>
+<p><img src="/images/appwrite/appwrite-used-volumes-2.png" alt="appwrite-used-volumes-2"></p>
+<p>Additionally, apply the <em>appwrite-svc.yaml</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">appwrite-svc</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">appwrite</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>: 
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">io.kompose.service</span>: <span style="color:#ae81ff">appwrite</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">LoadBalancer</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">appwrite-port</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">80</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">80</span>
+</span></span></code></pre></div><p>Then apply it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>kca appwrite-svc.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check external-ip being assigned</span>
+</span></span><span style="display:flex;"><span>kc get svc -n appwrite
+</span></span></code></pre></div><p>Congratulations! By now, you should see the Appwrite login page:</p>
+<p><img src="/images/appwrite/appwrite-login.png" alt="appwrite-login"></p>
+<p><img src="/images/appwrite/appwrite-hello-world-app.png" alt="appwrite-hello-world-app"></p>
+<hr>
+<h2 id="optional">Optional</h2>
+<p>For those who wish to enable <em>traefik</em>, install k3s with this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;644&#34;</span> sh -
+</span></span></code></pre></div><p>Proceed with the rest of this post but to apply the following (instead of <em>appwrite-svc.yaml</em>):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>kca appwrite-svc-with-ing.yaml
+</span></span><span style="display:flex;"><span>kca appwrite-ing.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check your traefik loadbalancer external-ip</span>
+</span></span><span style="display:flex;"><span>kc get svc -n kube-system
+</span></span></code></pre></div><p>That&rsquo;s all for this post! Happy Appwriting!</p>
+
+  
+  <hr>
+<div class="footer">
+    
+    
+    
+    <p>
+    This is a post in the <b><a href="//localhost:1313/series/appwrite-with-k3s">Appwrite with K3s</a></b> series.
+        <br>Other posts in this series:
+        <ul class="series">
+            
+            
+            
+            <li>
+                March 10, 2024 -
+                
+                    <a href="/2024/configuring-appwrite-functions-with-k3s/">Configuring Appwrite Functions with K3s</a>
+                
+            </li>
+            
+            <li>
+                February 16, 2024 -
+                
+                    Deploying Appwrite in HomeLab with K3s
+                
+            </li>
+            
+        </ul>
+    </p>
+    
+</div>
+
+  
+    <div class="comments">
+    
+        <div style="clear: both;">
+            <br>
+            <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "seehiong" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </div>
+    
+</div>
+
+  
+</div>
+            </main>
+            
+  
+    <div class="article-toc ">
+    <div class="toc-wrapper">
+      <h4 id="contents"></h4>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#prepartion">Prepartion</a></li>
+    <li><a href="#generating-appwrite-k8s-files">Generating Appwrite K8s Files</a></li>
+    <li><a href="#preparing-appwrite-volumes">Preparing Appwrite Volumes</a></li>
+    <li><a href="#preparing-misc-services">Preparing Misc Services</a></li>
+    <li><a href="#installing-appwrite-services">Installing Appwrite Services</a></li>
+    <li><a href="#optional">Optional</a></li>
+  </ul>
+</nav>
+
+      
+        <hr>
+        
+              <div class="previous-post">
+                <a href="//localhost:1313/2024/text-to-image-with-stablediffusionpipeline/?ref=footer"><span style="font-weight:bold;">« Previous</span><br>Text-to-Image with StableDiffusionPipeline</a>
+              </div>
+              <br><br>
+          
+        
+              <div class="next-post">
+                  <a href="//localhost:1313/2024/deploying-budibase-in-homelab/?ref=footer"><span style="font-weight:bold;">Next »</span><br>Deploying Budibase in HomeLab</a>
+              </div>
+          
+      
+    </div>
+</div>
+  
+
+        </div>
+    </body>
+</html>
+
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>

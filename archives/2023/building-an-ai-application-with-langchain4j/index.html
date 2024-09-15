@@ -1,0 +1,2332 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+<script defer language="javascript" type="text/javascript" src="/js/bundle.min.b989f0fdae3971a3effd81d6d0b27b3cb1023ff0b601ff43e2118b0d9d82ddb9.js"></script>
+
+
+
+
+
+
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="icon" href=/favicon.png>
+
+    
+    
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+
+
+<!-- Open Graph image and Twitter Card metadata -->
+
+<title itemprop="name">Tech Blog - Building an AI Application with Langchain4j</title>
+<meta property="og:title" content=Tech&#32;Blog&#32;-&#32;Building&#32;an&#32;AI&#32;Application&#32;with&#32;Langchain4j />
+<meta name="twitter:title" content=Tech&#32;Blog&#32;-&#32;Building&#32;an&#32;AI&#32;Application&#32;with&#32;Langchain4j />
+<meta itemprop="name" content=Tech&#32;Blog&#32;-&#32;Building&#32;an&#32;AI&#32;Application&#32;with&#32;Langchain4j />
+<meta name="application-name" content=Tech&#32;Blog&#32;-&#32;Building&#32;an&#32;AI&#32;Application&#32;with&#32;Langchain4j />
+<meta property="og:site_name" content="See Hiong&#39;s Blog" />
+
+
+<meta name="description" content="I embarked on a journey to harness the capabilities of Langchain4j, crafting a powerful AI application in Java using the local language model. Utilizing Spring Boot, Postman, and various Langchain4j components, I explored setting up, implementing a chat service, integrating custom tools, embedding functionality with Chroma, translation, persistence, retrieval, and streaming services. The blog post serves as a comprehensive guide for building personalized AI applications, showcasing the versatility and potential of Langchain4j in Java development." />
+<meta itemprop="description" content="I embarked on a journey to harness the capabilities of Langchain4j, crafting a powerful AI application in Java using the local language model. Utilizing Spring Boot, Postman, and various Langchain4j components, I explored setting up, implementing a chat service, integrating custom tools, embedding functionality with Chroma, translation, persistence, retrieval, and streaming services. The blog post serves as a comprehensive guide for building personalized AI applications, showcasing the versatility and potential of Langchain4j in Java development." />
+<meta property="og:description" content="I embarked on a journey to harness the capabilities of Langchain4j, crafting a powerful AI application in Java using the local language model. Utilizing Spring Boot, Postman, and various Langchain4j components, I explored setting up, implementing a chat service, integrating custom tools, embedding functionality with Chroma, translation, persistence, retrieval, and streaming services. The blog post serves as a comprehensive guide for building personalized AI applications, showcasing the versatility and potential of Langchain4j in Java development." />
+<meta name="twitter:description" content="I embarked on a journey to harness the capabilities of Langchain4j, crafting a powerful AI application in Java using the local language model. Utilizing Spring Boot, Postman, and various Langchain4j components, I explored setting up, implementing a chat service, integrating custom tools, embedding functionality with Chroma, translation, persistence, retrieval, and streaming services. The blog post serves as a comprehensive guide for building personalized AI applications, showcasing the versatility and potential of Langchain4j in Java development." />
+
+
+<base href="//localhost:1313/archives/2023/building-an-ai-application-with-langchain4j/" />
+<link rel="canonical" href="//localhost:1313/archives/2023/building-an-ai-application-with-langchain4j/" itemprop="url" />
+<meta name="url" content="//localhost:1313/archives/2023/building-an-ai-application-with-langchain4j/" />
+<meta name="twitter:url" content="//localhost:1313/archives/2023/building-an-ai-application-with-langchain4j/" />
+<meta property="og:url" content="//localhost:1313/archives/2023/building-an-ai-application-with-langchain4j/" />
+
+
+<meta property="og:updated_time" content="2023-12-22T00:00:00Z" />
+
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href='//localhost:1313/sitemap.xml' />
+
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+
+
+<meta property="fb:admins" content="" />
+
+
+<meta name="apple-mobile-web-app-title" content="See Hiong&#39;s Blog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.134.1">
+
+
+    
+    
+
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.03b57bbaf31d739f14c95df7f05d1cefcfa60bbafa36ba47313afdeb325aeada.css">
+
+
+    
+    <style>
+    body {
+        --sidebar-bg-color: #202020;
+        --sidebar-img-border-color: #515151;
+        --sidebar-p-color: #909090;
+        --sidebar-h1-color: #FFF;
+        --sidebar-a-color: #FFF;
+        --sidebar-socials-color: #FFF;
+        --text-color: #222;
+        --bkg-color: #FAF9F6;
+        --post-title-color: #303030;
+        --list-color: #5a5a5a;
+        --link-color: #268bd2;
+        --date-color: #515151;
+        --table-border-color: #E5E5E5;
+        --table-stripe-color: #F9F9F9;
+        --code-color: #000;
+        --code-background-color: #E5E5E5;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+        --moon-sun-color: #FFF;
+        --moon-sun-background-color: #515151;
+    }
+    body.dark-theme {
+        --text-color: #eee;
+        --bkg-color: #121212;
+        --post-title-color: #DBE2E9;
+        --list-color: #9d9d9d;
+        --link-color: #268bd2;
+        --date-color: #9a9a9a;
+        --table-border-color: #515151;
+        --table-stripe-color: #202020;
+        --code-color: #fff;
+        --code-background-color: #515151;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+    }
+    body {
+        background-color: var(--bkg-color);
+    }
+</style>
+
+</head>
+
+    <body class="dark-theme">
+        <div class="wrapper">
+            <aside class="sidebar">
+    <div class="container sidebar-sticky">
+        <div class="light-dark" align="right">
+    <button class="btn-light-dark" title="Toggle light/dark mode">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6 .278a.768.768 0 0 1 .08.858a7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277c.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316a.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71C0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        </svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+    </button>
+</div>
+
+        <div class="sidebar-about">
+    <h1 class="brand">
+        
+        
+            <a href="//localhost:1313/">
+                <h1>Tech Blog</h1>
+            </a>
+        
+    </h1>
+    <p class="lead">
+    Chronicling my personal expedition of technology exploration and experimentation, facilitated by a home-based self-configured laboratory
+    </p>
+</div>
+
+        <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<style>
+    :root {
+        --pagefind-ui-primary: #eeeeee;
+        --pagefind-ui-text: #eeeeee;
+        --pagefind-ui-background: #152028;
+        --pagefind-ui-border: #152028;
+        --pagefind-ui-tag: #152028;
+    }
+</style>
+<script src="/pagefind/pagefind-ui.js"></script>
+<div style="max-width: 100%; margin: clamp(2px, 1vw, 10px) auto;">
+    <div id="search"></div>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true, showImages: false, excerptLength: 15 });
+        });
+    </script>
+</div>
+        <nav>
+    <ul class="sidebar-nav">
+
+        
+        
+        
+        
+            
+
+            
+                
+                
+                    <li class="heading">
+                        <a href="/2024/">2024</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            Recent
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/talos-linux-setting-up-a-secure-immutable-kubernetes-cluster/">Talos Linux: Setting Up a Secure, Immutable Kubernetes Cluster</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/audio-generation-with-nvidia-jetson-orin-nx/">Audio Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/unleashing-text-generation-with-nvidia-jetson-orin-nx/">Unleashing Text Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/scaling-kafka-workloads-with-keda-in-kubernetes/">Scaling Kafka Workloads with KEDA in Kubernetes</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/exploring-nvidia-jetson-orin-nx-flashing-and-setup-guide/">Exploring NVIDIA Jetson Orin NX: Flashing and Setup Guide</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/setting-up-kafka-with-microk8s-and-multipass/">Setting Up Kafka with MicroK8s and Multipass</a>
+                            </li>
+                        
+                    
+                
+            
+                
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/archives/">Archives</a>
+                    </li>
+                    
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+
+    </ul>
+</nav>
+
+        
+    <a target="_blank" class="social" title="GitHub" href="https://github.com/seehiong">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="-2 -2 24 24">
+            <path fill="currentColor" d="M18.88 1.099C18.147.366 17.265 0 16.233 0H3.746C2.714 0 1.832.366 1.099 1.099C.366 1.832 0 2.714 0 3.746v12.487c0 1.032.366 1.914 1.099 2.647c.733.733 1.615 1.099 2.647 1.099H6.66c.19 0 .333-.007.429-.02a.504.504 0 0 0 .286-.169c.095-.1.143-.245.143-.435l-.007-.885c-.004-.564-.006-1.01-.006-1.34l-.3.052c-.19.035-.43.05-.721.046a5.555 5.555 0 0 1-.904-.091a2.026 2.026 0 0 1-.872-.39a1.651 1.651 0 0 1-.572-.8l-.13-.3a3.25 3.25 0 0 0-.41-.663c-.186-.243-.375-.407-.566-.494l-.09-.065a.956.956 0 0 1-.17-.156a.723.723 0 0 1-.117-.182c-.026-.061-.004-.111.065-.15c.07-.04.195-.059.378-.059l.26.04c.173.034.388.138.643.311a2.1 2.1 0 0 1 .631.677c.2.355.44.626.722.813c.282.186.566.28.852.28c.286 0 .533-.022.742-.065a2.59 2.59 0 0 0 .585-.196c.078-.58.29-1.028.637-1.34a8.907 8.907 0 0 1-1.333-.234a5.314 5.314 0 0 1-1.223-.507a3.5 3.5 0 0 1-1.047-.872c-.277-.347-.505-.802-.683-1.365c-.177-.564-.266-1.215-.266-1.952c0-1.049.342-1.942 1.027-2.68c-.32-.788-.29-1.673.091-2.652c.252-.079.625-.02 1.119.175c.494.195.856.362 1.086.5c.23.14.414.257.553.352a9.233 9.233 0 0 1 2.497-.338c.859 0 1.691.113 2.498.338l.494-.312a6.997 6.997 0 0 1 1.197-.572c.46-.174.81-.221 1.054-.143c.39.98.424 1.864.103 2.653c.685.737 1.028 1.63 1.028 2.68c0 .737-.089 1.39-.267 1.957c-.177.568-.407 1.023-.689 1.366a3.65 3.65 0 0 1-1.053.865c-.42.234-.828.403-1.223.507a8.9 8.9 0 0 1-1.333.235c.45.39.676 1.005.676 1.846v3.11c0 .147.021.266.065.357a.36.36 0 0 0 .208.189c.096.034.18.056.254.064c.074.01.18.013.318.013h2.914c1.032 0 1.914-.366 2.647-1.099c.732-.732 1.099-1.615 1.099-2.647V3.746c0-1.032-.367-1.914-1.1-2.647z"/>
+        </svg>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a target="_blank" class="social" title="RSS Feed" href="/2024/index.xml">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 1280.000000 1280.000000">
+            <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="currentColor">
+                <path d="M2295 11929 c-284 -12 -642 -45 -707 -65 -17 -5 -18 -63 -18 -1039 0 -569 4 -1036 8 -1039 5 -3 74 6 153 19 510 86 1168 95 1789 25 1348 -153 2602 -677 3670 -1531 385 -308 820 -744 1126 -1129 842 -1060 1362 -2313 1514 -3650 70 -621 61 -1279 -25 -1789 -13 -79 -22 -148 -19 -153 3 -4 471 -8 1039 -8 l1035 0 5 23 c51 225 85 942 67 1419 -23 605 -77 1044 -198 1617 -294 1400 -927 2734 -1823 3846 -1043 1295 -2364 2259 -3909 2854 -1158 447 -2451 656 -3707 600z"/>
+                <path d="M2255 7845 c-269 -25 -620 -81 -667 -106 -17 -9 -18 -55 -18 -899 0 -706 3 -890 13 -890 6 0 66 18 132 41 130 44 288 79 467 105 154 21 577 30 749 15 1207 -107 2267 -823 2814 -1902 166 -327 268 -637 330 -1001 38 -227 48 -384 42 -662 -8 -348 -44 -590 -126 -831 -23 -66 -41 -126 -41 -132 0 -10 184 -13 890 -13 844 0 890 1 899 18 27 50 88 452 110 725 14 162 14 624 1 782 -59 703 -233 1323 -545 1945 -481 956 -1313 1788 -2270 2268 -620 310 -1239 483 -1940 542 -165 14 -669 10 -840 -5z"/>
+                <path d="M2519 3815 c-391 -66 -725 -336 -868 -703 -79 -201 -96 -462 -45 -677 83 -344 338 -641 666 -774 116 -47 205 -69 330 -80 412 -39 811 153 1040 500 193 292 240 648 128 981 -135 403 -492 699 -914 757 -100 14 -241 12 -337 -4z"/>
+            </g>
+        </svg>
+    </a>
+
+
+
+
+
+        <p class="footnote">
+powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a target="_blank" href="https://github.com/lukeorth/poison">poison</a>
+    <br>
+    &copy; 2024 See Hiong&#39;s Blog. All rights reserved.
+</p>
+
+  </div>
+</aside>
+
+            <main class="content container">
+                <div class="post" data-pagefind-body>
+  <div class="info">
+  <h1 class="post-title">
+    <a href="//localhost:1313/archives/2023/building-an-ai-application-with-langchain4j/">Building an AI Application with Langchain4j</a>
+  </h1>
+
+  <div class="headline" data-pagefind-ignore>
+    <div>
+      
+      
+      <time datetime=" 2023-11-07T20:00:00&#43;0800" class="post-date">
+        November 7, 2023
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>11 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-langchain4j">
+        <a href="//localhost:1313/tags/langchain4j">langchain4j</a>
+      </li>
+      
+      <li class="tag-LocalAI">
+        <a href="//localhost:1313/tags/localai">LocalAI</a>
+      </li>
+      
+      <li class="tag-Spring Boot">
+        <a href="//localhost:1313/tags/spring-boot">Spring Boot</a>
+      </li>
+      
+      <li class="tag-Java">
+        <a href="//localhost:1313/tags/java">Java</a>
+      </li>
+      
+      <li class="tag-Backend">
+        <a href="//localhost:1313/tags/backend">Backend</a>
+      </li>
+      
+      <li class="tag-BE">
+        <a href="//localhost:1313/tags/be">BE</a>
+      </li>
+      
+      <li class="tag-Chroma">
+        <a href="//localhost:1313/tags/chroma">Chroma</a>
+      </li>
+      
+      <li class="tag-GPT4All">
+        <a href="//localhost:1313/tags/gpt4all">GPT4All</a>
+      </li>
+      
+      <li class="tag-AI">
+        <a href="//localhost:1313/tags/ai">AI</a>
+      </li>
+      
+      <li class="tag-LLM">
+        <a href="//localhost:1313/tags/llm">LLM</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+
+  
+</div>
+
+  <p>In this blog post, I&rsquo;ll walk you through my journey of harnessing the capabilities of <a href="https://github.com/langchain4j/langchain4j/" target="_blank">langchain4j</a> to craft a powerful AI application using Java, specifically with a local language model. Unlike my previous exploration with Python, this post focuses on the Java implementation with Langchain4j.</p>
+<hr>
+<h2 id="getting-started">Getting Started</h2>
+<p>To kick things off, I&rsquo;ve chosen <a href="https://spring.io/tools" target="_blank">STS4</a> as my Integrated Development Environment (IDE) and opted for <a href="https://adoptium.net/temurin/archive/?version=17" target="_blank">Java 17</a> as my programming language. Leveraging <a href="https://www.postman.com/" target="_blank">Postman</a> as my API platform and <a href="https://spring.io/projects/spring-boot" target="_blank">Spring Boot</a> as the framework of choice, let&rsquo;s delve into the process.</p>
+<h3 id="setting-up-a-spring-boot-application">Setting up a Spring Boot Application</h3>
+<p>To initiate the project, I began by creating a Spring Starter Project and selecting the Spring Web option. Here&rsquo;s a snippet of the setup:</p>
+<p><img src="/images/langchain4j/spring-starter-project.png" alt="spring-starter-project"></p>
+<h3 id="spring-boot-application">Spring Boot Application</h3>
+<p>Here&rsquo;s my sprint boot application:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.boot.SpringApplication;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@SpringBootApplication</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiApplication</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span>(String<span style="color:#f92672">[]</span> args) {
+</span></span><span style="display:flex;"><span>		SpringApplication.<span style="color:#a6e22e">run</span>(AiApplication.<span style="color:#a6e22e">class</span>, args);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="gradle-build-configuration">Gradle Build Configuration</h3>
+<p>My <strong>build.gradle</strong> file outlines the dependencies, including Langchain4j components:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-groovy" data-lang="groovy"><span style="display:flex;"><span>plugins <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	id <span style="color:#e6db74">&#39;java&#39;</span>
+</span></span><span style="display:flex;"><span>	id <span style="color:#e6db74">&#39;org.springframework.boot&#39;</span> version <span style="color:#e6db74">&#39;3.1.5&#39;</span>
+</span></span><span style="display:flex;"><span>	id <span style="color:#e6db74">&#39;io.spring.dependency-management&#39;</span> version <span style="color:#e6db74">&#39;1.1.3&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>group <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;com.seehiong&#39;</span>
+</span></span><span style="display:flex;"><span>version <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;0.0.1-SNAPSHOT&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>java <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	sourceCompatibility <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;17&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>repositories <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	mavenCentral<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>dependencies <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;org.springframework.boot:spring-boot-starter-web&#39;</span>
+</span></span><span style="display:flex;"><span>	testImplementation <span style="color:#e6db74">&#39;org.springframework.boot:spring-boot-starter-test&#39;</span>
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#f92672">(</span><span style="color:#e6db74">&#39;dev.langchain4j:langchain4j:0.23.0&#39;</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		exclude group: <span style="color:#e6db74">&#34;commons-logging&#34;</span><span style="color:#f92672">,</span> module: <span style="color:#e6db74">&#34;commons-logging&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;dev.langchain4j:langchain4j-core:0.23.0&#39;</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;dev.langchain4j:langchain4j-chroma:0.23.0&#39;</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;dev.langchain4j:langchain4j-open-ai:0.23.0&#39;</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;dev.langchain4j:langchain4j-local-ai:0.23.0&#39;</span>
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:0.23.0&#39;</span>	
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	implementation <span style="color:#e6db74">&#39;org.mapdb:mapdb:3.0.10&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>tasks<span style="color:#f92672">.</span><span style="color:#a6e22e">named</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;test&#39;</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	useJUnitPlatform<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h3 id="application-configuration">Application Configuration</h3>
+<p>As a standard practice, I&rsquo;ve created an application.properties file in the src/main/resources directory to specify server configurations:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">server.port</span><span style="color:#f92672">:</span> <span style="color:#e6db74">8888</span>
+</span></span></code></pre></div><hr>
+<h2 id="setting-up-the-controller-and-service">Setting Up the Controller and Service</h2>
+<p>Let&rsquo;s continue our journey by establishing the controller and service components of our Java application, seamlessly integrating the power of Langchain4j.</p>
+<h3 id="controller-setup">Controller Setup</h3>
+<p>Begin by setting up your controller. Below is the skeleton of an empty controller ready to be infused with the capabilities of Langchain4j.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.controller;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.web.bind.annotation.RequestMapping;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.web.bind.annotation.RestController;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@RestController</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@RequestMapping</span>(value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/ai&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// We will add the services along the way</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="service-setup">Service Setup</h3>
+<p>In the service layer, let&rsquo;s explore the heart of our application. As highlight in the official langchain4j, we can now try out OpenAI&rsquo;s gpt-3.5-turbo and text-embedding-ada-002 models with LangChain4j for free by simply using the API key &ldquo;demo&rdquo;. Here&rsquo;s the sample model service for providing the demo model.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.openai.OpenAiChatModel;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ModelService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> ChatLanguageModel demoModel;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ChatLanguageModel <span style="color:#a6e22e">getDemoModel</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (demoModel <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>			demoModel <span style="color:#f92672">=</span> OpenAiChatModel.<span style="color:#a6e22e">withApiKey</span>(<span style="color:#e6db74">&#34;demo&#34;</span>);
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> demoModel;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// We will be adding more models here in the subsequent sections</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="1-implementing-chat-functionality">1. Implementing Chat Functionality</h3>
+<p>Building on the previous implementation, we&rsquo;ve now introduced a dedicated ChatService to handle the generation of chat responses. Here is the updated code:</p>
+<h4 id="chatservice-implementation">ChatService implementation:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ChatService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">generate</span>(ChatLanguageModel model, String text) {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> model.<span style="color:#a6e22e">generate</span>(text);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="updated-aicontroller">Updated AiController:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> ModelService modelSvc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> ChatService chatSvc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/chat&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">chat</span>(<span style="color:#a6e22e">@RequestParam</span>(<span style="color:#e6db74">&#34;text&#34;</span>) String text) {
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> chatSvc.<span style="color:#a6e22e">generate</span>(modelSvc.<span style="color:#a6e22e">getDemoModel</span>(), text);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;</span>(response, HttpStatus.<span style="color:#a6e22e">OK</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The <em>ChatService</em> is responsible for the generation of chat responses using the provided model. We&rsquo;ve introduced the <em>/chat</em> endpoint that accepts a query parameter <em>text</em> which represents the input for chat. For simplicity, <a href="https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html" target="_blank">input validation</a> has been omitted in the example.</p>
+<h4 id="postman-result">Postman Result:</h4>
+<p><img src="/images/langchain4j/langchain4j-chat.png" alt="langchain4j-chat"></p>
+<h4 id="spring-boot-output">Spring Boot Output:</h4>
+<p><img src="/images/langchain4j/langchain4j-spring-boot.png" alt="langchain4j-spring-boot"></p>
+<h3 id="2-introducing-custom-tools-in-the-controller">2. Introducing Custom Tools in the Controller</h3>
+<p>In this section, we&rsquo;re taking our AI application a step further by incorporating a custom tool through the CalculatorService. Here&rsquo;s the detailed code:</p>
+<h4 id="calculatorservice-implementation">CalculatorService implementation:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.agent.tool.Tool;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.memory.chat.MessageWindowChatMemory;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.AiServices;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CalculatorService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Calculator</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Tool</span>(<span style="color:#e6db74">&#34;Calculates the length of a string&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">stringLength</span>(String s) {
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> s.<span style="color:#a6e22e">length</span>();
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Tool</span>(<span style="color:#e6db74">&#34;Calculates the sum of two numbers&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">add</span>(<span style="color:#66d9ef">int</span> a, <span style="color:#66d9ef">int</span> b) {
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b;
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Tool</span>(<span style="color:#e6db74">&#34;Calculates the square root of a number&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">double</span> <span style="color:#a6e22e">sqrt</span>(<span style="color:#66d9ef">int</span> x) {
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> Math.<span style="color:#a6e22e">sqrt</span>(x);
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Assistant</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		String <span style="color:#a6e22e">chat</span>(String userMessage);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">calculate</span>(ChatLanguageModel model, String text) {
+</span></span><span style="display:flex;"><span>		Assistant assistant <span style="color:#f92672">=</span> AiServices.<span style="color:#a6e22e">builder</span>(Assistant.<span style="color:#a6e22e">class</span>).<span style="color:#a6e22e">chatLanguageModel</span>(model).<span style="color:#a6e22e">tools</span>(<span style="color:#66d9ef">new</span> Calculator())
+</span></span><span style="display:flex;"><span>				.<span style="color:#a6e22e">chatMemory</span>(MessageWindowChatMemory.<span style="color:#a6e22e">withMaxMessages</span>(10)).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> assistant.<span style="color:#a6e22e">chat</span>(text);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="updated-aicontroller-1">Updated AiController:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> {
+</span></span><span style="display:flex;"><span>	...
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> CalculatorService calculatorSvc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/calculate&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">calculate</span>(<span style="color:#a6e22e">@RequestParam</span>(<span style="color:#e6db74">&#34;text&#34;</span>) String text) {
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> calculatorSvc.<span style="color:#a6e22e">calculate</span>(modelSvc.<span style="color:#a6e22e">getDemoModel</span>(), text);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;</span>(response, HttpStatus.<span style="color:#a6e22e">OK</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The <em>CalculatorService</em> introduces the <em>Calculator</em> class with custom Tool annotation to calculate the length of a string, sum of two numbers, and the square root of a number. The <em>Assistant</em> interface facilitates the chat interation.</p>
+<h4 id="postman-result-1">Postman Result:</h4>
+<p><img src="/images/langchain4j/langchain4j-calculator.png" alt="langchain4j-calculator"></p>
+<h3 id="3-integrating-embedding-functionality-with-chroma">3. Integrating Embedding Functionality with Chroma</h3>
+<p>To enhance our AI application, we&rsquo;ve introduced embedding functionality using Chroma, following the <a href="https://github.com/langchain4j/langchain4j-examples/blob/main/chroma-example/src/main/java/ChromaEmbeddingStoreExample.java" target="_blank">Chroma embedding store example</a>. Prior to running spring boot, make sure to pull the Chroma image and run it with <a href="https://docs.docker.com/desktop/install/windows-install/" target="_blank">Docker Desktop</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker pull ghcr.io/chroma-core/chroma:0.4.6
+</span></span><span style="display:flex;"><span>docker run -d -p 8000:8000 ghcr.io/chroma-core/chroma:0.4.6
+</span></span></code></pre></div><h4 id="embeddingservice-implementation">EmbeddingService Implementation:</h4>
+<p>This service demonstrates the embedding functionality:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> dev.langchain4j.internal.Utils.randomUUID;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.List;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.embedding.Embedding;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.segment.TextSegment;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.embedding.EmbeddingModel;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.EmbeddingMatch;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.EmbeddingStore;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">EmbeddingService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> EmbeddingStore<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;</span> embeddingStore;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">embed</span>(EmbeddingModel embeddingModel, String text) {
+</span></span><span style="display:flex;"><span>		StringBuilder sb <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StringBuilder();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		Embedding inProcessEmbedding <span style="color:#f92672">=</span> embeddingModel.<span style="color:#a6e22e">embed</span>(text).<span style="color:#a6e22e">content</span>();
+</span></span><span style="display:flex;"><span>		sb.<span style="color:#a6e22e">append</span>(String.<span style="color:#a6e22e">valueOf</span>(inProcessEmbedding)).<span style="color:#a6e22e">append</span>(System.<span style="color:#a6e22e">lineSeparator</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		TextSegment segment1 <span style="color:#f92672">=</span> TextSegment.<span style="color:#a6e22e">from</span>(<span style="color:#e6db74">&#34;I like football.&#34;</span>);
+</span></span><span style="display:flex;"><span>		Embedding embedding1 <span style="color:#f92672">=</span> embeddingModel.<span style="color:#a6e22e">embed</span>(segment1).<span style="color:#a6e22e">content</span>();
+</span></span><span style="display:flex;"><span>		getEmbeddingStore().<span style="color:#a6e22e">add</span>(embedding1, segment1);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		TextSegment segment2 <span style="color:#f92672">=</span> TextSegment.<span style="color:#a6e22e">from</span>(<span style="color:#e6db74">&#34;The weather is good today.&#34;</span>);
+</span></span><span style="display:flex;"><span>		Embedding embedding2 <span style="color:#f92672">=</span> embeddingModel.<span style="color:#a6e22e">embed</span>(segment2).<span style="color:#a6e22e">content</span>();
+</span></span><span style="display:flex;"><span>		getEmbeddingStore().<span style="color:#a6e22e">add</span>(embedding2, segment2);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		Embedding queryEmbedding <span style="color:#f92672">=</span> embeddingModel.<span style="color:#a6e22e">embed</span>(<span style="color:#e6db74">&#34;What is your favourite sport?&#34;</span>).<span style="color:#a6e22e">content</span>();
+</span></span><span style="display:flex;"><span>		List<span style="color:#f92672">&lt;</span>EmbeddingMatch<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;&gt;</span> relevant <span style="color:#f92672">=</span> getEmbeddingStore().<span style="color:#a6e22e">findRelevant</span>(queryEmbedding, 1);
+</span></span><span style="display:flex;"><span>		EmbeddingMatch<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;</span> embeddingMatch <span style="color:#f92672">=</span> relevant.<span style="color:#a6e22e">get</span>(0);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		sb.<span style="color:#a6e22e">append</span>(String.<span style="color:#a6e22e">valueOf</span>(embeddingMatch.<span style="color:#a6e22e">score</span>())).<span style="color:#a6e22e">append</span>(System.<span style="color:#a6e22e">lineSeparator</span>()); <span style="color:#75715e">// 0.8144288493114709</span>
+</span></span><span style="display:flex;"><span>		sb.<span style="color:#a6e22e">append</span>(embeddingMatch.<span style="color:#a6e22e">embedded</span>().<span style="color:#a6e22e">text</span>()); <span style="color:#75715e">// I like football.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> sb.<span style="color:#a6e22e">toString</span>();
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> EmbeddingStore<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getEmbeddingStore</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (embeddingStore <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>			embeddingStore <span style="color:#f92672">=</span> ChromaEmbeddingStore.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">baseUrl</span>(<span style="color:#e6db74">&#34;http://127.0.0.1:8000&#34;</span>)
+</span></span><span style="display:flex;"><span>					.<span style="color:#a6e22e">collectionName</span>(randomUUID()).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> embeddingStore;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="updated-aicontroller-2">Updated AiController:</h4>
+<p>The AiController now includes the <em>/embed</em> endpoint to showcase the embedding functionality:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> {
+</span></span><span style="display:flex;"><span>	...
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> EmbeddingService embeddingSvc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/embed&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">embed</span>(<span style="color:#a6e22e">@RequestParam</span>(<span style="color:#e6db74">&#34;text&#34;</span>) String text) {
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> embeddingSvc.<span style="color:#a6e22e">embed</span>(modelSvc.<span style="color:#a6e22e">getEmbeddingModel</span>(), text);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;</span>(response, HttpStatus.<span style="color:#a6e22e">OK</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="postman-result-2">Postman Result:</h4>
+<p><img src="/images/langchain4j/langchain4j-embedding.png" alt="langchain4j-embedding"></p>
+<h3 id="4-integrating-translate-service">4. Integrating Translate Service</h3>
+<p>In this section, we&rsquo;ve integrated the Translate Service into our AI application. Below are the relevant implementations:</p>
+<h4 id="translateservice-implementation">TranslateService Implementation:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.AiServices;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.SystemMessage;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.UserMessage;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.V;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TranslatorService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Translator</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@SystemMessage</span>(<span style="color:#e6db74">&#34;You are a professional translator into {{language}}&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@UserMessage</span>(<span style="color:#e6db74">&#34;Translate the following text: {{text}}&#34;</span>)
+</span></span><span style="display:flex;"><span>		String <span style="color:#a6e22e">translate</span>(<span style="color:#a6e22e">@V</span>(<span style="color:#e6db74">&#34;text&#34;</span>) String text, <span style="color:#a6e22e">@V</span>(<span style="color:#e6db74">&#34;language&#34;</span>) String language);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">translate</span>(ChatLanguageModel model, String text, String language) {
+</span></span><span style="display:flex;"><span>		Translator translator <span style="color:#f92672">=</span> AiServices.<span style="color:#a6e22e">create</span>(Translator.<span style="color:#a6e22e">class</span>, model);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> translator.<span style="color:#a6e22e">translate</span>(text, language);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="updated-aicontroller-3">Updated AiController:</h4>
+<p>In the updated AiController, we have set the default language to Chinese, but users can override it and set it to any other language:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> {
+</span></span><span style="display:flex;"><span>	...
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> TranslatorService translatorSvc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/translate&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">translate</span>(<span style="color:#a6e22e">@RequestParam</span>(<span style="color:#e6db74">&#34;text&#34;</span>) String text,
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">@RequestParam</span>(defaultValue <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;chinese&#34;</span>) String language) {
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> translatorSvc.<span style="color:#a6e22e">translate</span>(modelSvc.<span style="color:#a6e22e">getDemoModel</span>(), text, language);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;</span>(response, HttpStatus.<span style="color:#a6e22e">OK</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="postman-result-3">Postman Result:</h4>
+<p><img src="/images/langchain4j/langchain4j-translate-to-chinese.png" alt="langchain4j-translate-to-chinese"></p>
+<h3 id="5-introducing-persistence-service">5. Introducing Persistence Service</h3>
+<p>In this section, we&rsquo;ve introduced a Persistence Service to add a persistence layer to our AI application. Below are the relevant implementations:</p>
+<h4 id="persistenceservice-implementation">PersistenceService Implementation:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> dev.langchain4j.data.message.ChatMessageDeserializer.messagesFromJson;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> dev.langchain4j.data.message.ChatMessageSerializer.messagesToJson;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> org.mapdb.Serializer.INTEGER;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> org.mapdb.Serializer.STRING;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.List;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.Map;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.mapdb.DB;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.mapdb.DBMaker;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.message.ChatMessage;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.memory.chat.ChatMemoryProvider;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.memory.chat.MessageWindowChatMemory;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.AiServices;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.MemoryId;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.service.UserMessage;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.memory.chat.ChatMemoryStore;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PersistenceService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> PersistentChatMemoryStore store <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PersistentChatMemoryStore();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Assistant</span> {
+</span></span><span style="display:flex;"><span>		String <span style="color:#a6e22e">chat</span>(<span style="color:#a6e22e">@MemoryId</span> <span style="color:#66d9ef">int</span> memoryId, <span style="color:#a6e22e">@UserMessage</span> String userMessage);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PersistentChatMemoryStore</span> <span style="color:#66d9ef">implements</span> ChatMemoryStore {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> DB db <span style="color:#f92672">=</span> DBMaker.<span style="color:#a6e22e">fileDB</span>(<span style="color:#e6db74">&#34;multi-user-chat-memory.db&#34;</span>).<span style="color:#a6e22e">closeOnJvmShutdown</span>().<span style="color:#a6e22e">transactionEnable</span>()
+</span></span><span style="display:flex;"><span>				.<span style="color:#a6e22e">make</span>();
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Map<span style="color:#f92672">&lt;</span>Integer, String<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> db.<span style="color:#a6e22e">hashMap</span>(<span style="color:#e6db74">&#34;messages&#34;</span>, INTEGER, STRING).<span style="color:#a6e22e">createOrOpen</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">public</span> List<span style="color:#f92672">&lt;</span>ChatMessage<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getMessages</span>(Object memoryId) {
+</span></span><span style="display:flex;"><span>			String json <span style="color:#f92672">=</span> map.<span style="color:#a6e22e">get</span>((<span style="color:#66d9ef">int</span>) memoryId);
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> messagesFromJson(json);
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">updateMessages</span>(Object memoryId, List<span style="color:#f92672">&lt;</span>ChatMessage<span style="color:#f92672">&gt;</span> messages) {
+</span></span><span style="display:flex;"><span>			String json <span style="color:#f92672">=</span> messagesToJson(messages);
+</span></span><span style="display:flex;"><span>			map.<span style="color:#a6e22e">put</span>((<span style="color:#66d9ef">int</span>) memoryId, json);
+</span></span><span style="display:flex;"><span>			db.<span style="color:#a6e22e">commit</span>();
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">deleteMessages</span>(Object memoryId) {
+</span></span><span style="display:flex;"><span>			map.<span style="color:#a6e22e">remove</span>((<span style="color:#66d9ef">int</span>) memoryId);
+</span></span><span style="display:flex;"><span>			db.<span style="color:#a6e22e">commit</span>();
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">demo</span>(ChatLanguageModel model, <span style="color:#66d9ef">boolean</span> showName) {
+</span></span><span style="display:flex;"><span>		StringBuilder sb <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StringBuilder();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		ChatMemoryProvider chatMemoryProvider <span style="color:#f92672">=</span> memoryId <span style="color:#f92672">-&gt;</span> MessageWindowChatMemory.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">id</span>(memoryId)
+</span></span><span style="display:flex;"><span>				.<span style="color:#a6e22e">maxMessages</span>(10).<span style="color:#a6e22e">chatMemoryStore</span>(store).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		Assistant assistant <span style="color:#f92672">=</span> AiServices.<span style="color:#a6e22e">builder</span>(Assistant.<span style="color:#a6e22e">class</span>).<span style="color:#a6e22e">chatLanguageModel</span>(model)
+</span></span><span style="display:flex;"><span>				.<span style="color:#a6e22e">chatMemoryProvider</span>(chatMemoryProvider).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (showName) {
+</span></span><span style="display:flex;"><span>			sb.<span style="color:#a6e22e">append</span>(assistant.<span style="color:#a6e22e">chat</span>(1, <span style="color:#e6db74">&#34;Hello, my name is Klaus&#34;</span>)).<span style="color:#a6e22e">append</span>(System.<span style="color:#a6e22e">lineSeparator</span>());
+</span></span><span style="display:flex;"><span>			sb.<span style="color:#a6e22e">append</span>(assistant.<span style="color:#a6e22e">chat</span>(2, <span style="color:#e6db74">&#34;Hi, my name is Francine&#34;</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>			sb.<span style="color:#a6e22e">append</span>(assistant.<span style="color:#a6e22e">chat</span>(1, <span style="color:#e6db74">&#34;What is my name?&#34;</span>)).<span style="color:#a6e22e">append</span>(System.<span style="color:#a6e22e">lineSeparator</span>());
+</span></span><span style="display:flex;"><span>			sb.<span style="color:#a6e22e">append</span>(assistant.<span style="color:#a6e22e">chat</span>(2, <span style="color:#e6db74">&#34;What is my name?&#34;</span>));
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> sb.<span style="color:#a6e22e">toString</span>();
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="updated-aicontroller-4">Updated AiController:</h4>
+<p>Here, we adapted from <a href="https://github.com/langchain4j/langchain4j-examples/blob/main/other-examples/src/main/java/ServiceWithPersistentMemoryForEachUserExample.java" target="_blank">persistent ChatMemory</a>. The AiController now includes an endpoint <em>/persistDemo</em> to showcase the Persistence Service. Users can set the showName parameter to true on the first run and false on the second run:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> {
+</span></span><span style="display:flex;"><span>	...
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> PersistenceService persistenceSvc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/persistDemo&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">persistDemo</span>(<span style="color:#a6e22e">@RequestParam</span>(<span style="color:#e6db74">&#34;showName&#34;</span>) String showName) {
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> persistenceSvc.<span style="color:#a6e22e">demo</span>(modelSvc.<span style="color:#a6e22e">getDemoModel</span>(), Boolean.<span style="color:#a6e22e">valueOf</span>(showName));
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;</span>(response, HttpStatus.<span style="color:#a6e22e">OK</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="postman-result-1-shownametrue">Postman Result 1 (showName=true):</h4>
+<p><img src="/images/langchain4j/langchain4j-persistence-show-name.png" alt="langchain4j-persistence-show-name"></p>
+<h4 id="postman-result-2-shownamefalse">Postman Result 2 (showName=false):</h4>
+<p><img src="/images/langchain4j/langchain4j-persistence-hide-name.png" alt="langchain4j-persistence-hide-name"></p>
+<h3 id="6-introducing-retrieval-service-via-local-llm">6. Introducing Retrieval Service via Local LLM</h3>
+<p>In this section, we&rsquo;ve introduced a Retrieval Service utilizing a local Language Model (LLM) through <a href="https://localai.io/" target="_blank">LocalAI</a>. Here are the key components and implementations:</p>
+<h4 id="setting-up-local-ai">Setting up Local AI</h4>
+<p>Before running the Spring Boot application, set up Local AI using the following commands within <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank">WSL</a>. Please <em>note</em> that for below example, the docker container will download or use the models under the models folder:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker pull quay.io/go-skynet/local-ai:v2.0.0
+</span></span><span style="display:flex;"><span>docker run -p 8080:8080 -v $PWD/models:/models -ti --rm quay.io/go-skynet/local-ai:v2.0.0 --models-path /models --context-size <span style="color:#ae81ff">2000</span> --threads <span style="color:#ae81ff">8</span> --debug<span style="color:#f92672">=</span>true
+</span></span></code></pre></div><p>By setting to debug on, you should be seeing something like this:
+<img src="/images/langchain4j/langchain4j-local-ai.png" alt="langchain4j-local-ai"></p>
+<p>Next, try to download a model with the command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://127.0.0.1:8080/models/apply -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> -d <span style="color:#e6db74">&#39;{&#34;url&#34;: &#34;github:go-skynet/model-gallery/gpt4all-j.yaml&#34;}&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Using the similar curl command, replacing the actual job ID to check if the model has been downloaded successfully</span>
+</span></span><span style="display:flex;"><span>curl http://127.0.0.1:8080/models/jobs/b5141f97-7bb8-11ee-aa82-0242ac110003
+</span></span></code></pre></div><p>You may verify the list of downloaded models with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://127.0.0.1:8080/models/ | jq
+</span></span></code></pre></div><p>Make sure Local AI is running successfully, and models are downloaded.
+<img src="/images/langchain4j/langchain4j-local-ai-models.png" alt="langchain4j-local-ai-models"></p>
+<h4 id="modelservice-modification">ModelService Modification</h4>
+<p>In the <em>ModelService</em> class, we added the configuration for the local model and an embedding model for retrieval augmented generation. Additionally, the timeout was extended to 5 minutes to account for the expected longer referencing time.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ModelService</span> {
+</span></span><span style="display:flex;"><span>	...
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String MODEL_NAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;gpt4all-j&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String LOCAL_AI_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://127.0.0.1:8080&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> ChatLanguageModel localModel;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> AllMiniLmL6V2EmbeddingModel embeddingModel;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ChatLanguageModel <span style="color:#a6e22e">getLocalModel</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (localModel <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>			localModel <span style="color:#f92672">=</span> LocalAiChatModel.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">baseUrl</span>(LOCAL_AI_URL).<span style="color:#a6e22e">timeout</span>(Duration.<span style="color:#a6e22e">ofMinutes</span>(5))
+</span></span><span style="display:flex;"><span>					.<span style="color:#a6e22e">modelName</span>(MODEL_NAME).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> localModel;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> EmbeddingModel <span style="color:#a6e22e">getEmbeddingModel</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (embeddingModel <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>			embeddingModel <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AllMiniLmL6V2EmbeddingModel();
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> embeddingModel;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}	
+</span></span></code></pre></div><h4 id="retrievalservice-implementation">RetrievalService Implementation:</h4>
+<p>Following <a href="https://github.com/langchain4j/langchain4j-examples/blob/main/other-examples/src/main/java/ChatWithDocumentsExamples.java" target="_blank">Chat with Documents</a>, the <em>RetrievalService</em> now includes functionality for retrieving information based on a given question and a document:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> dev.langchain4j.data.document.FileSystemDocumentLoader.loadDocument;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.net.URISyntaxException;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.net.URL;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.nio.file.Path;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.nio.file.Paths;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> com.seehiong.ai.AiApplication;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.chain.ConversationalRetrievalChain;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.document.Document;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.document.splitter.DocumentSplitters;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.data.segment.TextSegment;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.chat.ChatLanguageModel;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.embedding.EmbeddingModel;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.retriever.EmbeddingStoreRetriever;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.EmbeddingStore;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RetrievalService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> EmbeddingStore<span style="color:#f92672">&lt;</span>TextSegment<span style="color:#f92672">&gt;</span> embeddingStore <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> InMemoryEmbeddingStore<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> Path <span style="color:#a6e22e">toPath</span>(String fileName) {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>			URL fileUrl <span style="color:#f92672">=</span> AiApplication.<span style="color:#a6e22e">class</span>.<span style="color:#a6e22e">getResource</span>(fileName);
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> Paths.<span style="color:#a6e22e">get</span>(fileUrl.<span style="color:#a6e22e">toURI</span>());
+</span></span><span style="display:flex;"><span>		} <span style="color:#66d9ef">catch</span> (URISyntaxException e) {
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> RuntimeException(e);
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">retrieve</span>(ChatLanguageModel model, EmbeddingModel embeddingModel, String fileName, String question) {
+</span></span><span style="display:flex;"><span>		EmbeddingStoreIngestor ingestor <span style="color:#f92672">=</span> EmbeddingStoreIngestor.<span style="color:#a6e22e">builder</span>()
+</span></span><span style="display:flex;"><span>				.<span style="color:#a6e22e">documentSplitter</span>(DocumentSplitters.<span style="color:#a6e22e">recursive</span>(500, 0)).<span style="color:#a6e22e">embeddingModel</span>(embeddingModel)
+</span></span><span style="display:flex;"><span>				.<span style="color:#a6e22e">embeddingStore</span>(embeddingStore).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		Document document <span style="color:#f92672">=</span> loadDocument(toPath(fileName));
+</span></span><span style="display:flex;"><span>		ingestor.<span style="color:#a6e22e">ingest</span>(document);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		ConversationalRetrievalChain chain <span style="color:#f92672">=</span> ConversationalRetrievalChain.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">chatLanguageModel</span>(model)
+</span></span><span style="display:flex;"><span>				.<span style="color:#a6e22e">retriever</span>(EmbeddingStoreRetriever.<span style="color:#a6e22e">from</span>(embeddingStore, embeddingModel)).<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> chain.<span style="color:#a6e22e">execute</span>(question);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="updated-aicontroller-5">Updated AiController:</h4>
+<p>In the AiController class, the components are brought together to create the <em>/retrieve</em> endpoint. Users can utilize this endpoint to interact with the Retrieval Service, providing a file (document) and a text (question) to retrieve relevant information:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> {
+</span></span><span style="display:flex;"><span>	...
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> RetrievalService retrievalSvc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/retrieve&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">retrieve</span>(<span style="color:#a6e22e">@RequestParam</span>(<span style="color:#e6db74">&#34;file&#34;</span>) String file, <span style="color:#a6e22e">@RequestParam</span>(<span style="color:#e6db74">&#34;text&#34;</span>) String text) {
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> retrievalSvc.<span style="color:#a6e22e">retrieve</span>(modelSvc.<span style="color:#a6e22e">getLocalModel</span>(), modelSvc.<span style="color:#a6e22e">getEmbeddingModel</span>(), file, text);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;</span>(response, HttpStatus.<span style="color:#a6e22e">OK</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>To ensure the code and sample work seamlessly, the document (story-about-happy-carrot.txt) is placed in the same package as AiApplication.txt.</p>
+<p><img src="/images/langchain4j/langchain4j-directory-structure.png" alt="langchain4j-directory-structure"></p>
+<p>This is the sample result (notice that it takes about 1 min):</p>
+<p><img src="/images/langchain4j/langchain4j-retrieval.png" alt="langchain4j-retrieval"></p>
+<h3 id="7-integrating-streaming-service-through-local-llm">7. Integrating Streaming Service through local LLM</h3>
+<p>In this final section, we explored the integration of a streaming service via a local Language Model (LLM). The Streaming Service implementation allows for the generation of responses in a streaming fashion, providing flexibility for handling large responses or real-time interactions.</p>
+<h4 id="streamingservice-implementation">StreamingService Implementation:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#f92672">package</span> com.seehiong.ai.service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import static</span> java.util.concurrent.TimeUnit.SECONDS;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.concurrent.CompletableFuture;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.concurrent.ExecutionException;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.concurrent.TimeoutException;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.springframework.stereotype.Service;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.StreamingResponseHandler;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.language.StreamingLanguageModel;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> dev.langchain4j.model.output.Response;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">StreamingService</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">generate</span>(StreamingLanguageModel model, String message) {
+</span></span><span style="display:flex;"><span>		StringBuilder answerBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StringBuilder();
+</span></span><span style="display:flex;"><span>		CompletableFuture<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> futureAnswer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CompletableFuture<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		model.<span style="color:#a6e22e">generate</span>(message, <span style="color:#66d9ef">new</span> StreamingResponseHandler<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span>() {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onNext</span>(String token) {
+</span></span><span style="display:flex;"><span>				answerBuilder.<span style="color:#a6e22e">append</span>(token);
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onComplete</span>(Response<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> response) {
+</span></span><span style="display:flex;"><span>				futureAnswer.<span style="color:#a6e22e">complete</span>(answerBuilder.<span style="color:#a6e22e">toString</span>());
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onError</span>(Throwable error) {
+</span></span><span style="display:flex;"><span>				futureAnswer.<span style="color:#a6e22e">completeExceptionally</span>(error);
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> futureAnswer.<span style="color:#a6e22e">get</span>(30, SECONDS);
+</span></span><span style="display:flex;"><span>		} <span style="color:#66d9ef">catch</span> (InterruptedException <span style="color:#f92672">|</span> ExecutionException <span style="color:#f92672">|</span> TimeoutException e) {
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Unable to generate response: &#34;</span> <span style="color:#f92672">+</span> message;
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="modelservice-modification-1">ModelService Modification</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ModelService</span> {
+</span></span><span style="display:flex;"><span>	...
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> StreamingLanguageModel streamingModel;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> StreamingLanguageModel <span style="color:#a6e22e">getStreamingModel</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (streamingModel <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>			streamingModel <span style="color:#f92672">=</span> LocalAiStreamingLanguageModel.<span style="color:#a6e22e">builder</span>().<span style="color:#a6e22e">baseUrl</span>(LOCAL_AI_URL).<span style="color:#a6e22e">modelName</span>(MODEL_NAME)
+</span></span><span style="display:flex;"><span>					.<span style="color:#a6e22e">build</span>();
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> streamingModel;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}	
+</span></span></code></pre></div><h4 id="updated-aicontroller-6">Updated AiController:</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AiController</span> {
+</span></span><span style="display:flex;"><span>	...
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Autowired</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> StreamingService streamingSvc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@GetMapping</span>(<span style="color:#e6db74">&#34;/streaming&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> ResponseEntity<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">streaming</span>(<span style="color:#a6e22e">@RequestParam</span>(<span style="color:#e6db74">&#34;text&#34;</span>) String text) {
+</span></span><span style="display:flex;"><span>		String response <span style="color:#f92672">=</span> streamingSvc.<span style="color:#a6e22e">generate</span>(modelSvc.<span style="color:#a6e22e">getStreamingModel</span>(), text);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ResponseEntity<span style="color:#f92672">&lt;&gt;</span>(response, HttpStatus.<span style="color:#a6e22e">OK</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="postman-result-4">Postman Result:</h4>
+<p><img src="/images/langchain4j/langchain4j-streaming.png" alt="langchain4j-streaming"></p>
+<p>With the addition of the streaming service, this comprehensive blog post has covered various aspects of integrating LangChain4j into a Java-based AI application. It serves as a starting point for creating personalized AI applications, and I hope it has been a helpful guide for your exploration in this field.</p>
+<p>Feel free to experiment further and build upon these foundations to create even more sophisticated AI applications!</p>
+
+  
+  <hr>
+<div class="footer">
+    
+	    
+            <a class="previous-post" href="//localhost:1313/archives/2023/unlocking-the-power-of-machine-learning-with-mlc-llm/?ref=footer"><span style="font-weight:bold;">« Previous</span><br>Unlocking the Power of Machine Learning with MLC...</a>
+        
+	    
+            <div class="next-post">
+                <a href="//localhost:1313/archives/2023/rag-over-java-code-with-langchain4j/?ref=footer"><span style="font-weight:bold;">Next »</span><br>RAG over Java code with Langchain4j</a>
+            </div>
+        
+    
+</div>
+
+  
+    <div class="comments">
+    
+        <div style="clear: both;">
+            <br>
+            <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "seehiong" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </div>
+    
+</div>
+
+  
+</div>
+            </main>
+            
+  
+    <div class="article-toc ">
+    <div class="toc-wrapper">
+      <h4 id="contents"></h4>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#setting-up-a-spring-boot-application">Setting up a Spring Boot Application</a></li>
+        <li><a href="#spring-boot-application">Spring Boot Application</a></li>
+        <li><a href="#gradle-build-configuration">Gradle Build Configuration</a></li>
+        <li><a href="#application-configuration">Application Configuration</a></li>
+      </ul>
+    </li>
+    <li><a href="#setting-up-the-controller-and-service">Setting Up the Controller and Service</a>
+      <ul>
+        <li><a href="#controller-setup">Controller Setup</a></li>
+        <li><a href="#service-setup">Service Setup</a></li>
+        <li><a href="#1-implementing-chat-functionality">1. Implementing Chat Functionality</a></li>
+        <li><a href="#2-introducing-custom-tools-in-the-controller">2. Introducing Custom Tools in the Controller</a></li>
+        <li><a href="#3-integrating-embedding-functionality-with-chroma">3. Integrating Embedding Functionality with Chroma</a></li>
+        <li><a href="#4-integrating-translate-service">4. Integrating Translate Service</a></li>
+        <li><a href="#5-introducing-persistence-service">5. Introducing Persistence Service</a></li>
+        <li><a href="#6-introducing-retrieval-service-via-local-llm">6. Introducing Retrieval Service via Local LLM</a></li>
+        <li><a href="#7-integrating-streaming-service-through-local-llm">7. Integrating Streaming Service through local LLM</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+      
+    </div>
+</div>
+  
+
+        </div>
+    </body>
+</html>
+
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>

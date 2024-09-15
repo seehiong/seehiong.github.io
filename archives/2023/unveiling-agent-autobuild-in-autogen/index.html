@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+<script defer language="javascript" type="text/javascript" src="/js/bundle.min.b989f0fdae3971a3effd81d6d0b27b3cb1023ff0b601ff43e2118b0d9d82ddb9.js"></script>
+
+
+
+
+
+
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="icon" href=/favicon.png>
+
+    
+    
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+
+
+<!-- Open Graph image and Twitter Card metadata -->
+
+<title itemprop="name">Tech Blog - Unveiling Agent AutoBuild in Autogen</title>
+<meta property="og:title" content=Tech&#32;Blog&#32;-&#32;Unveiling&#32;Agent&#32;AutoBuild&#32;in&#32;Autogen />
+<meta name="twitter:title" content=Tech&#32;Blog&#32;-&#32;Unveiling&#32;Agent&#32;AutoBuild&#32;in&#32;Autogen />
+<meta itemprop="name" content=Tech&#32;Blog&#32;-&#32;Unveiling&#32;Agent&#32;AutoBuild&#32;in&#32;Autogen />
+<meta name="application-name" content=Tech&#32;Blog&#32;-&#32;Unveiling&#32;Agent&#32;AutoBuild&#32;in&#32;Autogen />
+<meta property="og:site_name" content="See Hiong&#39;s Blog" />
+
+
+<meta name="description" content="In this blog, I explored Autogen&#39;s Agent AutoBuild and experimented with the Mixtral 8x7B model. I configured Autogen, envisioning a software academy project for coding novices. Through code snippets, I showcased AutoBuild&#39;s multi-agent system creation and tailored a task that wrote a General Paper article on art and courage. The Mixtral 8x7B model in LM Studio brought excitement but posed challenges with duplicate content. Check out the blog for a firsthand look at the dynamic interplay between Autogen and cutting-edge AI, complete with code snippets and images." />
+<meta itemprop="description" content="In this blog, I explored Autogen&#39;s Agent AutoBuild and experimented with the Mixtral 8x7B model. I configured Autogen, envisioning a software academy project for coding novices. Through code snippets, I showcased AutoBuild&#39;s multi-agent system creation and tailored a task that wrote a General Paper article on art and courage. The Mixtral 8x7B model in LM Studio brought excitement but posed challenges with duplicate content. Check out the blog for a firsthand look at the dynamic interplay between Autogen and cutting-edge AI, complete with code snippets and images." />
+<meta property="og:description" content="In this blog, I explored Autogen&#39;s Agent AutoBuild and experimented with the Mixtral 8x7B model. I configured Autogen, envisioning a software academy project for coding novices. Through code snippets, I showcased AutoBuild&#39;s multi-agent system creation and tailored a task that wrote a General Paper article on art and courage. The Mixtral 8x7B model in LM Studio brought excitement but posed challenges with duplicate content. Check out the blog for a firsthand look at the dynamic interplay between Autogen and cutting-edge AI, complete with code snippets and images." />
+<meta name="twitter:description" content="In this blog, I explored Autogen&#39;s Agent AutoBuild and experimented with the Mixtral 8x7B model. I configured Autogen, envisioning a software academy project for coding novices. Through code snippets, I showcased AutoBuild&#39;s multi-agent system creation and tailored a task that wrote a General Paper article on art and courage. The Mixtral 8x7B model in LM Studio brought excitement but posed challenges with duplicate content. Check out the blog for a firsthand look at the dynamic interplay between Autogen and cutting-edge AI, complete with code snippets and images." />
+
+
+<base href="//localhost:1313/archives/2023/unveiling-agent-autobuild-in-autogen/" />
+<link rel="canonical" href="//localhost:1313/archives/2023/unveiling-agent-autobuild-in-autogen/" itemprop="url" />
+<meta name="url" content="//localhost:1313/archives/2023/unveiling-agent-autobuild-in-autogen/" />
+<meta name="twitter:url" content="//localhost:1313/archives/2023/unveiling-agent-autobuild-in-autogen/" />
+<meta property="og:url" content="//localhost:1313/archives/2023/unveiling-agent-autobuild-in-autogen/" />
+
+
+<meta property="og:updated_time" content="2023-12-17T20:00:00&#43;08:00" />
+
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href='//localhost:1313/sitemap.xml' />
+
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+
+
+<meta property="fb:admins" content="" />
+
+
+<meta name="apple-mobile-web-app-title" content="See Hiong&#39;s Blog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.134.1">
+
+
+    
+    
+
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.03b57bbaf31d739f14c95df7f05d1cefcfa60bbafa36ba47313afdeb325aeada.css">
+
+
+    
+    <style>
+    body {
+        --sidebar-bg-color: #202020;
+        --sidebar-img-border-color: #515151;
+        --sidebar-p-color: #909090;
+        --sidebar-h1-color: #FFF;
+        --sidebar-a-color: #FFF;
+        --sidebar-socials-color: #FFF;
+        --text-color: #222;
+        --bkg-color: #FAF9F6;
+        --post-title-color: #303030;
+        --list-color: #5a5a5a;
+        --link-color: #268bd2;
+        --date-color: #515151;
+        --table-border-color: #E5E5E5;
+        --table-stripe-color: #F9F9F9;
+        --code-color: #000;
+        --code-background-color: #E5E5E5;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+        --moon-sun-color: #FFF;
+        --moon-sun-background-color: #515151;
+    }
+    body.dark-theme {
+        --text-color: #eee;
+        --bkg-color: #121212;
+        --post-title-color: #DBE2E9;
+        --list-color: #9d9d9d;
+        --link-color: #268bd2;
+        --date-color: #9a9a9a;
+        --table-border-color: #515151;
+        --table-stripe-color: #202020;
+        --code-color: #fff;
+        --code-background-color: #515151;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+    }
+    body {
+        background-color: var(--bkg-color);
+    }
+</style>
+
+</head>
+
+    <body class="dark-theme">
+        <div class="wrapper">
+            <aside class="sidebar">
+    <div class="container sidebar-sticky">
+        <div class="light-dark" align="right">
+    <button class="btn-light-dark" title="Toggle light/dark mode">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6 .278a.768.768 0 0 1 .08.858a7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277c.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316a.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71C0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        </svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+    </button>
+</div>
+
+        <div class="sidebar-about">
+    <h1 class="brand">
+        
+        
+            <a href="//localhost:1313/">
+                <h1>Tech Blog</h1>
+            </a>
+        
+    </h1>
+    <p class="lead">
+    Chronicling my personal expedition of technology exploration and experimentation, facilitated by a home-based self-configured laboratory
+    </p>
+</div>
+
+        <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<style>
+    :root {
+        --pagefind-ui-primary: #eeeeee;
+        --pagefind-ui-text: #eeeeee;
+        --pagefind-ui-background: #152028;
+        --pagefind-ui-border: #152028;
+        --pagefind-ui-tag: #152028;
+    }
+</style>
+<script src="/pagefind/pagefind-ui.js"></script>
+<div style="max-width: 100%; margin: clamp(2px, 1vw, 10px) auto;">
+    <div id="search"></div>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true, showImages: false, excerptLength: 15 });
+        });
+    </script>
+</div>
+        <nav>
+    <ul class="sidebar-nav">
+
+        
+        
+        
+        
+            
+
+            
+                
+                
+                    <li class="heading">
+                        <a href="/2024/">2024</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            Recent
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/talos-linux-setting-up-a-secure-immutable-kubernetes-cluster/">Talos Linux: Setting Up a Secure, Immutable Kubernetes Cluster</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/audio-generation-with-nvidia-jetson-orin-nx/">Audio Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/unleashing-text-generation-with-nvidia-jetson-orin-nx/">Unleashing Text Generation with NVIDIA Jetson Orin NX</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/scaling-kafka-workloads-with-keda-in-kubernetes/">Scaling Kafka Workloads with KEDA in Kubernetes</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/exploring-nvidia-jetson-orin-nx-flashing-and-setup-guide/">Exploring NVIDIA Jetson Orin NX: Flashing and Setup Guide</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="//localhost:1313/2024/setting-up-kafka-with-microk8s-and-multipass/">Setting Up Kafka with MicroK8s and Multipass</a>
+                            </li>
+                        
+                    
+                
+            
+                
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/archives/">Archives</a>
+                    </li>
+                    
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+
+    </ul>
+</nav>
+
+        
+    <a target="_blank" class="social" title="GitHub" href="https://github.com/seehiong">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="-2 -2 24 24">
+            <path fill="currentColor" d="M18.88 1.099C18.147.366 17.265 0 16.233 0H3.746C2.714 0 1.832.366 1.099 1.099C.366 1.832 0 2.714 0 3.746v12.487c0 1.032.366 1.914 1.099 2.647c.733.733 1.615 1.099 2.647 1.099H6.66c.19 0 .333-.007.429-.02a.504.504 0 0 0 .286-.169c.095-.1.143-.245.143-.435l-.007-.885c-.004-.564-.006-1.01-.006-1.34l-.3.052c-.19.035-.43.05-.721.046a5.555 5.555 0 0 1-.904-.091a2.026 2.026 0 0 1-.872-.39a1.651 1.651 0 0 1-.572-.8l-.13-.3a3.25 3.25 0 0 0-.41-.663c-.186-.243-.375-.407-.566-.494l-.09-.065a.956.956 0 0 1-.17-.156a.723.723 0 0 1-.117-.182c-.026-.061-.004-.111.065-.15c.07-.04.195-.059.378-.059l.26.04c.173.034.388.138.643.311a2.1 2.1 0 0 1 .631.677c.2.355.44.626.722.813c.282.186.566.28.852.28c.286 0 .533-.022.742-.065a2.59 2.59 0 0 0 .585-.196c.078-.58.29-1.028.637-1.34a8.907 8.907 0 0 1-1.333-.234a5.314 5.314 0 0 1-1.223-.507a3.5 3.5 0 0 1-1.047-.872c-.277-.347-.505-.802-.683-1.365c-.177-.564-.266-1.215-.266-1.952c0-1.049.342-1.942 1.027-2.68c-.32-.788-.29-1.673.091-2.652c.252-.079.625-.02 1.119.175c.494.195.856.362 1.086.5c.23.14.414.257.553.352a9.233 9.233 0 0 1 2.497-.338c.859 0 1.691.113 2.498.338l.494-.312a6.997 6.997 0 0 1 1.197-.572c.46-.174.81-.221 1.054-.143c.39.98.424 1.864.103 2.653c.685.737 1.028 1.63 1.028 2.68c0 .737-.089 1.39-.267 1.957c-.177.568-.407 1.023-.689 1.366a3.65 3.65 0 0 1-1.053.865c-.42.234-.828.403-1.223.507a8.9 8.9 0 0 1-1.333.235c.45.39.676 1.005.676 1.846v3.11c0 .147.021.266.065.357a.36.36 0 0 0 .208.189c.096.034.18.056.254.064c.074.01.18.013.318.013h2.914c1.032 0 1.914-.366 2.647-1.099c.732-.732 1.099-1.615 1.099-2.647V3.746c0-1.032-.367-1.914-1.1-2.647z"/>
+        </svg>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a target="_blank" class="social" title="RSS Feed" href="/2024/index.xml">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 1280.000000 1280.000000">
+            <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="currentColor">
+                <path d="M2295 11929 c-284 -12 -642 -45 -707 -65 -17 -5 -18 -63 -18 -1039 0 -569 4 -1036 8 -1039 5 -3 74 6 153 19 510 86 1168 95 1789 25 1348 -153 2602 -677 3670 -1531 385 -308 820 -744 1126 -1129 842 -1060 1362 -2313 1514 -3650 70 -621 61 -1279 -25 -1789 -13 -79 -22 -148 -19 -153 3 -4 471 -8 1039 -8 l1035 0 5 23 c51 225 85 942 67 1419 -23 605 -77 1044 -198 1617 -294 1400 -927 2734 -1823 3846 -1043 1295 -2364 2259 -3909 2854 -1158 447 -2451 656 -3707 600z"/>
+                <path d="M2255 7845 c-269 -25 -620 -81 -667 -106 -17 -9 -18 -55 -18 -899 0 -706 3 -890 13 -890 6 0 66 18 132 41 130 44 288 79 467 105 154 21 577 30 749 15 1207 -107 2267 -823 2814 -1902 166 -327 268 -637 330 -1001 38 -227 48 -384 42 -662 -8 -348 -44 -590 -126 -831 -23 -66 -41 -126 -41 -132 0 -10 184 -13 890 -13 844 0 890 1 899 18 27 50 88 452 110 725 14 162 14 624 1 782 -59 703 -233 1323 -545 1945 -481 956 -1313 1788 -2270 2268 -620 310 -1239 483 -1940 542 -165 14 -669 10 -840 -5z"/>
+                <path d="M2519 3815 c-391 -66 -725 -336 -868 -703 -79 -201 -96 -462 -45 -677 83 -344 338 -641 666 -774 116 -47 205 -69 330 -80 412 -39 811 153 1040 500 193 292 240 648 128 981 -135 403 -492 699 -914 757 -100 14 -241 12 -337 -4z"/>
+            </g>
+        </svg>
+    </a>
+
+
+
+
+
+        <p class="footnote">
+powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a target="_blank" href="https://github.com/lukeorth/poison">poison</a>
+    <br>
+    &copy; 2024 See Hiong&#39;s Blog. All rights reserved.
+</p>
+
+  </div>
+</aside>
+
+            <main class="content container">
+                <div class="post" data-pagefind-body>
+  <div class="info">
+  <h1 class="post-title">
+    <a href="//localhost:1313/archives/2023/unveiling-agent-autobuild-in-autogen/">Unveiling Agent AutoBuild in Autogen</a>
+  </h1>
+
+  <div class="headline" data-pagefind-ignore>
+    <div>
+      
+      
+      <time datetime=" 2023-12-17T20:00:00&#43;0800" class="post-date">
+        December 17, 2023
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>7 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-Autogen">
+        <a href="//localhost:1313/tags/autogen">Autogen</a>
+      </li>
+      
+      <li class="tag-LM Studio">
+        <a href="//localhost:1313/tags/lm-studio">LM Studio</a>
+      </li>
+      
+      <li class="tag-LLM">
+        <a href="//localhost:1313/tags/llm">LLM</a>
+      </li>
+      
+      <li class="tag-Java">
+        <a href="//localhost:1313/tags/java">Java</a>
+      </li>
+      
+      <li class="tag-AI">
+        <a href="//localhost:1313/tags/ai">AI</a>
+      </li>
+      
+      <li class="tag-Dolphin">
+        <a href="//localhost:1313/tags/dolphin">Dolphin</a>
+      </li>
+      
+      <li class="tag-Mixtral">
+        <a href="//localhost:1313/tags/mixtral">Mixtral</a>
+      </li>
+      
+      <li class="tag-Multi-Agent">
+        <a href="//localhost:1313/tags/multi-agent">Multi-Agent</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+
+  
+</div>
+
+  <p>Discover the capabilities of <a href="https://microsoft.github.io/autogen/blog/2023/11/26/Agent-AutoBuild/" target="_blank">Agent AutoBuild</a> in my recent exploration with Autogen using <em>app.py</em>.</p>
+<hr>
+<h2 id="setup-configuration">Setup Configuration</h2>
+<p>In my model setup configuration, defined in <em>OAI_CONFIG_LIST</em>, I&rsquo;m leveraging the latest version of Autogen (<em>pyautogen==0.2.2</em>) with the following specifications:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>[
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;model&#34;</span>: <span style="color:#e6db74">&#34;gpt-4&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;api_key&#34;</span>: <span style="color:#e6db74">&#34;NULL&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;base_url&#34;</span>: <span style="color:#e6db74">&#34;http://192.168.68.114:1234/v1&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>Envisioning a groundbreaking initiative, I&rsquo;ve embedded my vision within the instruction:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>custom_task <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">I&#39;m enthusiastic about launching an innovative project – a software academy tailored for children aged 7 to 16 with no prior coding experience. 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">The focus is on AI and introductory Python programming to impart essential technical skills crucial for their future. 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">To bring this vision to life, I&#39;d like the language model&#39;s assistance in detailing the course agenda, developing a comprehensive curriculum, and establishing a step-by-step approach towards our goal. 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Together, we aim to create a compelling plan that not only educates but also inspires the next generation of tech enthusiasts. 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Let&#39;s embark on this exciting journey by shaping the foundation of our software academy.&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</span></span></code></pre></div><hr>
+<h2 id="apppy-overview">App.py Overview</h2>
+<p>The impressive AutoBuild functionality streamlines the automated creation of multi-agent systems designed for intricate tasks. Leveraging the <a href="https://huggingface.co/TheBloke/dolphin-2.2.1-mistral-7B-GPTQ" target="_blank">Dolphin 2.2.1 Mistral 7B model</a> through <a href="https://lmstudio.ai/" target="_blank">LM Studio</a>, here is the entirety of my <em>app.py</em>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> autogen
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> autogen.agentchat.contrib.agent_builder <span style="color:#f92672">import</span> AgentBuilder
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>config_path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;OAI_CONFIG_LIST&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>default_llm_config <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;temperature&#39;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;timeout&#39;</span>: <span style="color:#ae81ff">600</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>builder <span style="color:#f92672">=</span> AgentBuilder(config_path<span style="color:#f92672">=</span>config_path, builder_model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4&#39;</span>, agent_model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>custom_task <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">I&#39;m enthusiastic about launching an innovative project – a software academy tailored for children aged 7 to 16 with no prior coding experience. 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">The focus is on AI and introductory Python programming to impart essential technical skills crucial for their future. 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">To bring this vision to life, I&#39;d like the language model&#39;s assistance in detailing the course agenda, developing a comprehensive curriculum, and establishing a step-by-step approach towards our goal. 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Together, we aim to create a compelling plan that not only educates but also inspires the next generation of tech enthusiasts. 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Let&#39;s embark on this exciting journey by shaping the foundation of our software academy.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>agent_list, agent_configs <span style="color:#f92672">=</span> builder<span style="color:#f92672">.</span>build(custom_task <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Only identify the agent name and separate them with comma.&#39;</span>, default_llm_config)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">start_task</span>(execution_task: str, agent_list: list, llm_config: dict):
+</span></span><span style="display:flex;"><span>    config_list <span style="color:#f92672">=</span> autogen<span style="color:#f92672">.</span>config_list_from_json(config_path, filter_dict<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;model&#34;</span>: [<span style="color:#e6db74">&#34;gpt-4&#34;</span>]})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    group_chat <span style="color:#f92672">=</span> autogen<span style="color:#f92672">.</span>GroupChat(agents<span style="color:#f92672">=</span>agent_list, messages<span style="color:#f92672">=</span>[], max_round<span style="color:#f92672">=</span><span style="color:#ae81ff">12</span>)
+</span></span><span style="display:flex;"><span>    manager <span style="color:#f92672">=</span> autogen<span style="color:#f92672">.</span>GroupChatManager(
+</span></span><span style="display:flex;"><span>        groupchat<span style="color:#f92672">=</span>group_chat, llm_config<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;config_list&#34;</span>: config_list, <span style="color:#f92672">**</span>llm_config}
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    agent_list[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>initiate_chat(manager, message<span style="color:#f92672">=</span>execution_task)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>start_task(
+</span></span><span style="display:flex;"><span>    execution_task<span style="color:#f92672">=</span>custom_task,
+</span></span><span style="display:flex;"><span>    agent_list<span style="color:#f92672">=</span>agent_list,
+</span></span><span style="display:flex;"><span>    llm_config<span style="color:#f92672">=</span>default_llm_config
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><hr>
+<h2 id="output-showcase">Output Showcase</h2>
+<p>Autogen seamlessly organizes the different agents as required:</p>
+<p><img src="/images/autogen-autobuild/autogen-autobuild-agents.png" alt="autogen-autobuild-agents"></p>
+<p>Explore snippets from the discussion rounds:</p>
+<h3 id="1st-set">1st Set</h3>
+<p><img src="/images/autogen-autobuild/autogen-autobuild-1st-round-discussion.png" alt="autogen-autobuild-1st-round-discussion"></p>
+<h3 id="2nd-set">2nd Set</h3>
+<p><img src="/images/autogen-autobuild/autogen-autobuild-2nd-round-discussion.png" alt="autogen-autobuild-2nd-round-discussion"></p>
+<h3 id="3rd-set">3rd Set</h3>
+<p><img src="/images/autogen-autobuild/autogen-autobuild-3rd-round-discussion.png" alt="autogen-autobuild-3rd-round-discussion"></p>
+<h3 id="final-set-specified-that-the-maximum-is-12">Final Set (specified that the maximum is 12)</h3>
+<p><img src="/images/autogen-autobuild/autogen-autobuild-final-round-discussion.png" alt="autogen-autobuild-final-round-discussion"></p>
+<hr>
+<h2 id="agent-autobuild-approach">Agent AutoBuild Approach</h2>
+<p>Referring back to my <a href="//localhost:1313/archives/2023/multi-agent-conservation-autogen/">previous post</a>, I seamlessly incorporated the AutoBuild agent into addressing my previous question. Continuing with this approach, I&rsquo;ve refined my task to seek insights into the intricacies of debating the statement, <strong>All art requires courage. Do you agree?</strong>. These are the modified python code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>autogen<span style="color:#f92672">.</span>AssistantAgent<span style="color:#f92672">.</span>DEFAULT_SYSTEM_MESSAGE <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;You are a helpful AI assistant.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Define traits for the assigned position to complete the task.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">You will assume this position and do not derail from the assigned task.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Reply in less than 100 words.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Reply &#34;TERMINATE&#34; in the end when everything is done.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>custom_task <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">I am preparing for my General Paper examination article on the topic &#39;Does all art require courage?&#39;.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Craft an introduction, provide a structure for the subsequent content with examples to substantiate the points and end with a conclusion.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">The article must be less than 1000 words, no infographics or programming is needed.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>agent_list, agent_configs <span style="color:#f92672">=</span> builder<span style="color:#f92672">.</span>build(
+</span></span><span style="display:flex;"><span>    custom_task <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">[INST]Provide the agent name and nothing else, separete them with comma.[/INST]&#39;</span>, 
+</span></span><span style="display:flex;"><span>    default_llm_config, 
+</span></span><span style="display:flex;"><span>    code_execution_config<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">start_task</span>(execution_task: str, agent_list: list, llm_config: dict):
+</span></span><span style="display:flex;"><span>    config_list <span style="color:#f92672">=</span> autogen<span style="color:#f92672">.</span>config_list_from_json(config_path, filter_dict<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;model&#34;</span>: [<span style="color:#e6db74">&#34;gpt-4&#34;</span>]})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    group_chat <span style="color:#f92672">=</span> autogen<span style="color:#f92672">.</span>GroupChat(agents<span style="color:#f92672">=</span>agent_list, messages<span style="color:#f92672">=</span>[], max_round<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>, speaker_selection_method<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;round_robin&#34;</span>)
+</span></span><span style="display:flex;"><span>    manager <span style="color:#f92672">=</span> autogen<span style="color:#f92672">.</span>GroupChatManager(
+</span></span><span style="display:flex;"><span>        groupchat<span style="color:#f92672">=</span>group_chat, llm_config<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;config_list&#34;</span>: config_list, <span style="color:#f92672">**</span>llm_config}
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    agent_list[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>initiate_chat(manager, message<span style="color:#f92672">=</span>execution_task)  
+</span></span></code></pre></div><p>Upon executing this refined task, the output provides a unique perspective generated by the AutoBuild agents. This dynamic approach not only enhances the depth of the discussion but also introduces a fresh dimension to the exploration of diverse viewpoints. This is the output:</p>
+<pre tabindex="0"><code>I. The Definition of Art and Courage
+A. Understanding the nature of art and its role in society
+Art, in its broadest sense, is a form of human expression that can take various forms such as visual arts,
+performing arts, literature, and more. Throughout history, art has played an essential role in societies by 
+reflecting cultural values, documenting historical events, and providing emotional catharsis for individuals.
+
+B. Defining courage in the context of art creation
+Courage in art creation refers to the willingness of artists to take risks, challenge societal norms, and confront 
+difficult subjects through their work. This may involve exploring controversial themes, experimenting with 
+unconventional techniques, or pushing boundaries within their chosen medium.
+
+C. Exploring the relationship between art and risk-taking
+Artists often face criticism and rejection for their work, which can be seen as a form of risk-taking. However, 
+some artists choose to embrace these challenges and use them as fuel for their creative process. By taking risks 
+and pushing boundaries, they are able to create unique and thought-provoking pieces that resonate with audiences on 
+a deeper level.
+
+II. Examples of Courageous Artists
+A. Pablo Picasso&#39;s Guernica: A political statement amidst war
+Picasso&#39;s famous painting, Guernica, is an example of courageous art creation. Created in response to the bombing of 
+the Spanish town of Guernica during the Spanish Civil War, this powerful work serves as a stark reminder of the horrors 
+of war and the suffering it causes.
+
+B. Frida Kahlo&#39;s Self-Portraits: Expressing personal pain and identity
+Frida Kahlo&#39;s self-portraits are another example of courageous art creation. These paintings often depict her 
+physical and emotional struggles, including her chronic pain and tumultuous relationships. By sharing these intimate 
+details of her life, Kahlo was able to connect with viewers on a deeply personal level and challenge societal 
+expectations surrounding female identity.
+
+C. Banksy&#39;s Street Art: Challenging societal norms through anonymous expression
+Banksy, a renowned street artist known for his anonymous identity, creates thought-provoking pieces that critique 
+consumerism, war, and other social issues. His courageous acts of graffiti art challenge conventional notions of what 
+constitutes &#34;art&#34; while also sparking conversations about important topics.
+
+III. The Role of Context in Courageous Art Creation
+A. Historical events that have inspired courageous artworks
+Throughout history, various events such as wars, revolutions, and social upheavals have inspired artists to create 
+courageous works that reflect the times. For example, during World War II, many artists used their talents to raise 
+awareness about the atrocities of war and promote peace.
+
+B. Cultural influences on artistic bravery
+Cultural factors can also play a significant role in shaping an artist&#39;s willingness to take risks and create 
+courageous artworks. In some cultures, there may be greater acceptance and encouragement for artists who challenge 
+societal norms, while in others, such acts may be met with resistance or even persecution.
+
+C. Societal pressures and expectations shaping artists&#39; choices
+Artists often face pressure from society to conform to certain standards or expectations when creating their work. 
+However, those who choose to embrace courageous art creation may find themselves at odds with these societal norms. 
+By challenging these expectations, they are able to create unique and thought-provoking pieces that resonate with 
+audiences on a deeper level.
+
+IV. Conclusion: Does All Art Require Courage?
+A. Summarizing the key points discussed in the article
+This article has explored the concept of courageous art creation by examining various examples from throughout 
+history. We have seen how artists like Picasso, Kahlo, and Banksy have used their talents to challenge societal norms 
+and create meaningful works that resonate with audiences across generations.
+
+B. Reflecting on the importance of courage in art creation
+Courageous art creation plays an essential role in society by pushing boundaries, sparking conversations, and 
+inspiring change. By embracing risk-taking and challenging conventional notions of what constitutes &#34;art,&#34; these 
+brave individuals help us to see the world through new eyes and encourage us to question our own beliefs and values.
+
+C. Encouraging readers to consider their own perspectives on this topic
+As we continue to explore the world of art, it is essential that we recognize and appreciate the courageous acts of 
+those who dare to push boundaries and create meaningful works that resonate with audiences across generations. We 
+encourage our readers to reflect on their own experiences with art and consider how they might approach creative 
+expression in a more courageous manner. By embracing risk-taking and challenging conventional notions of what 
+constitutes &#34;art,&#34; we can all contribute to a richer, more diverse artistic landscape that inspires change and 
+promotes understanding among people from all walks of life.
+</code></pre><p><img src="/images/autogen-autobuild/autogen-autobuild-on-does-all-art-requires-courage.png" alt="autogen-autobuild-on-does-all-art-requires-courage"></p>
+<hr>
+<h2 id="latest-mixtral-8x7b-model">Latest Mixtral 8x7B model</h2>
+<p>With the latest release of Mixtral 8x7B model from <a href="https://mistral.ai/news/mixtral-of-experts/" target="_blank">Mistral AI</a>, I decided to <a href="https://huggingface.co/TheBloke/Mixtral-8x7B-Instruct-v0.1-GGUF" target="_blank">it</a> a try in LM Studio. However, there seems to be duplicate contents and incoherent output; I may have to tune my prompts further:</p>
+<p><img src="/images/autogen-autobuild/autogen-autobuild-mixtral-8x7b-model.png" alt="autogen-autobuild-mixtral-8x7b-model"></p>
+<p>Feel encouraged to delve into the in-depth article for a holistic perspective on the produced content, skillfully interconnecting insights from AutoBuild agents!</p>
+
+  
+  <hr>
+<div class="footer">
+    
+	    
+            <a class="previous-post" href="//localhost:1313/archives/2023/empowering-autogen-enabling-seamless-java-code-execution/?ref=footer"><span style="font-weight:bold;">« Previous</span><br>Empowering Autogen: Enabling Seamless Java Code...</a>
+        
+	    
+            <div class="next-post">
+                <a href="//localhost:1313/archives/2023/deploying-openai-compatible-llama-cpp-server-with-k3s/?ref=footer"><span style="font-weight:bold;">Next »</span><br>Deploying OpenAI-Compatible LLAMA CPP Server with...</a>
+            </div>
+        
+    
+</div>
+
+  
+    <div class="comments">
+    
+        <div style="clear: both;">
+            <br>
+            <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "seehiong" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </div>
+    
+</div>
+
+  
+</div>
+            </main>
+            
+  
+    <div class="article-toc ">
+    <div class="toc-wrapper">
+      <h4 id="contents"></h4>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#setup-configuration">Setup Configuration</a></li>
+    <li><a href="#apppy-overview">App.py Overview</a></li>
+    <li><a href="#output-showcase">Output Showcase</a>
+      <ul>
+        <li><a href="#1st-set">1st Set</a></li>
+        <li><a href="#2nd-set">2nd Set</a></li>
+        <li><a href="#3rd-set">3rd Set</a></li>
+        <li><a href="#final-set-specified-that-the-maximum-is-12">Final Set (specified that the maximum is 12)</a></li>
+      </ul>
+    </li>
+    <li><a href="#agent-autobuild-approach">Agent AutoBuild Approach</a></li>
+    <li><a href="#latest-mixtral-8x7b-model">Latest Mixtral 8x7B model</a></li>
+  </ul>
+</nav>
+
+      
+    </div>
+</div>
+  
+
+        </div>
+    </body>
+</html>
+
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>
