@@ -1749,16 +1749,43 @@ The process involves interacting with the database, running queries, and generat
     <script>
         const getStoredTheme = () => localStorage.getItem("pref-theme") === "dark" ? "dark" : "light";
 
+        const setStoredTheme = (theme) => {
+            localStorage.setItem("pref-theme", theme);
+        };
+
+        const getSystemTheme = () => {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
+        };
+
+        const applyTheme = (theme) => {
+            document.documentElement.setAttribute("data-theme", theme);
+            syncThemeSwitcherIcon(theme);  
+        };
+
+        const syncThemeSwitcherIcon = (theme) => {
+            const themeSwitcher = document.querySelector(".btn-light-dark");
+            if (themeSwitcher) {
+                const isDark = theme === "dark";
+                themeSwitcher.querySelector(".moon").style.display = isDark ? "none" : "inline";
+                themeSwitcher.querySelector(".sun").style.display = isDark ? "inline" : "none";
+            }
+        };
+
         const setGiscusTheme = () => {
             const theme = getStoredTheme();
             const sendMessage = (message) => {
                 const iframe = document.querySelector('iframe.giscus-frame');
-                iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+                if (iframe) {
+                    iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+                }
             };
             sendMessage({ setConfig: { theme: theme } });
         };
 
         document.addEventListener("DOMContentLoaded", () => {
+            const initialTheme = getStoredTheme();
+            applyTheme(initialTheme);
+
             const giscusAttributes = {
                 "src": "https://giscus.app/client.js",
                 "data-repo": "seehiong/seehiong.github.io",
@@ -1789,7 +1816,8 @@ The process involves interacting with the database, running queries, and generat
                 themeSwitcher.addEventListener("click", () => {
                     const currentTheme = getStoredTheme();
                     const newTheme = currentTheme === "dark" ? "light" : "dark";
-                    localStorage.setItem("pref-theme", newTheme);
+                    setStoredTheme(newTheme);
+                    applyTheme(newTheme);
                     setGiscusTheme();
                 });
             }
