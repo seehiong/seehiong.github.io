@@ -1815,19 +1815,16 @@ This is the <em>chroma-deploy.yaml</em> file to be deployed to our Home Lab:</p>
   <br>
 <div class="comments">
     <script>
-        const getStoredTheme = () => localStorage.getItem("pref-theme") === "dark" ? "dark" : "light";
-
+        const getStoredTheme = () => localStorage.getItem("pref-theme") || "dark";
+        
         const setStoredTheme = (theme) => {
             localStorage.setItem("pref-theme", theme);
         };
 
-        const getSystemTheme = () => {
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
-        };
-
         const applyTheme = (theme) => {
             document.documentElement.setAttribute("data-theme", theme);
-            syncThemeSwitcherIcon(theme);  
+            syncThemeSwitcherIcon(theme);
+            setGiscusTheme();
         };
 
         const syncThemeSwitcherIcon = (theme) => {
@@ -1886,7 +1883,6 @@ This is the <em>chroma-deploy.yaml</em> file to be deployed to our Home Lab:</p>
                     const newTheme = currentTheme === "dark" ? "light" : "dark";
                     setStoredTheme(newTheme);
                     applyTheme(newTheme);
-                    setGiscusTheme();
                 });
             }
         });

@@ -2036,19 +2036,16 @@ $$ \sum_{j \in J} (f_j \cdot s_j + \sum_{i \in I} a_{i,j} \cdot dist_{i,j}) $$<p
   <br>
 <div class="comments">
     <script>
-        const getStoredTheme = () => localStorage.getItem("pref-theme") === "dark" ? "dark" : "light";
-
+        const getStoredTheme = () => localStorage.getItem("pref-theme") || "dark";
+        
         const setStoredTheme = (theme) => {
             localStorage.setItem("pref-theme", theme);
         };
 
-        const getSystemTheme = () => {
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
-        };
-
         const applyTheme = (theme) => {
             document.documentElement.setAttribute("data-theme", theme);
-            syncThemeSwitcherIcon(theme);  
+            syncThemeSwitcherIcon(theme);
+            setGiscusTheme();
         };
 
         const syncThemeSwitcherIcon = (theme) => {
@@ -2107,7 +2104,6 @@ $$ \sum_{j \in J} (f_j \cdot s_j + \sum_{i \in I} a_{i,j} \cdot dist_{i,j}) $$<p
                     const newTheme = currentTheme === "dark" ? "light" : "dark";
                     setStoredTheme(newTheme);
                     applyTheme(newTheme);
-                    setGiscusTheme();
                 });
             }
         });

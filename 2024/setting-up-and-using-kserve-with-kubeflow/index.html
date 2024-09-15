@@ -1927,19 +1927,16 @@ curl --user user@example.com:12341234 -v -H &#34;Host: ${SERVICE_HOSTNAME}&#34; 
   <br>
 <div class="comments">
     <script>
-        const getStoredTheme = () => localStorage.getItem("pref-theme") === "dark" ? "dark" : "light";
-
+        const getStoredTheme = () => localStorage.getItem("pref-theme") || "dark";
+        
         const setStoredTheme = (theme) => {
             localStorage.setItem("pref-theme", theme);
         };
 
-        const getSystemTheme = () => {
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
-        };
-
         const applyTheme = (theme) => {
             document.documentElement.setAttribute("data-theme", theme);
-            syncThemeSwitcherIcon(theme);  
+            syncThemeSwitcherIcon(theme);
+            setGiscusTheme();
         };
 
         const syncThemeSwitcherIcon = (theme) => {
@@ -1998,7 +1995,6 @@ curl --user user@example.com:12341234 -v -H &#34;Host: ${SERVICE_HOSTNAME}&#34; 
                     const newTheme = currentTheme === "dark" ? "light" : "dark";
                     setStoredTheme(newTheme);
                     applyTheme(newTheme);
-                    setGiscusTheme();
                 });
             }
         });
