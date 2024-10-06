@@ -231,6 +231,10 @@
                         </li>
                         
                             <li class="bullet">
+                                <a href="https://seehiong.github.io/2024/controlling-roarm-m2-s-with-ros2/">Controlling RoArm-M2-S with ROS2</a>
+                            </li>
+                        
+                            <li class="bullet">
                                 <a href="https://seehiong.github.io/2024/wave-rover-with-raspberry-pi-4/">Wave Rover with Raspberry Pi 4</a>
                             </li>
                         
@@ -248,10 +252,6 @@
                         
                             <li class="bullet">
                                 <a href="https://seehiong.github.io/2024/unleashing-text-generation-with-nvidia-jetson-orin-nx/">Unleashing Text Generation with NVIDIA Jetson Orin NX</a>
-                            </li>
-                        
-                            <li class="bullet">
-                                <a href="https://seehiong.github.io/2024/scaling-kafka-workloads-with-keda-in-kubernetes/">Scaling Kafka Workloads with KEDA in Kubernetes</a>
                             </li>
                         
                     
@@ -286,6 +286,14 @@
                 
             
                 
+                
+                        
+                
+                        
+                
+                        
+                
+                        
                 
                         
                 
@@ -1139,6 +1147,14 @@
                 
                         
                 
+                        
+                
+                        
+                
+                        
+                
+                        
+                
             
         
         
@@ -1182,6 +1198,14 @@
                 
             
                 
+                
+                        
+                
+                        
+                
+                        
+                
+                        
                 
                         
                 
@@ -1783,7 +1807,7 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 </span></span></code></pre></div><p><img src="/images/rover2/ugv-rpi-image-transmission-based-on-flask.png" alt="ugv-rpi-image-transmission-based-on-flask"></p>
 <hr>
 <h2 id="picam-and-movement-test">PiCam and Movement Test</h2>
-<p>Due to the import issue, I created a virtual environment to isolate dependencies:</p>
+<p>For this test, I created a new virtual environment:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd ugv_rpi/tutorial_en/12
 </span></span><span style="display:flex;"><span>python -m venv --system-site-packages picam
 </span></span><span style="display:flex;"><span>source picam/bin/activate
@@ -1916,7 +1940,7 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 </span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
 </span></span><span style="display:flex;"><span>    app<span style="color:#f92672">.</span>run(host<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;0.0.0.0&#39;</span>, port<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span>, debug<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span></code></pre></div><p>Run the script and access the interface at <em>http://rasfi:5000</em>. You can use the arrow keys or on-screen buttons to control the rover, while the PiCam feed is displayed on the right:</p>
+</span></span></code></pre></div><p>Run the script via <em>python flask_camera.py</em> and access the interface at <em>http://rasfi:5000</em>. You can use the arrow keys or on-screen buttons to control the rover, while the PiCam feed is displayed on the right:</p>
 <p><img src="/images/rover2/ugv-rpi-picam-view-with-control-buttons.png" alt="ugv-rpi-picam-view-with-control-buttons"></p>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
@@ -1925,11 +1949,27 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 <details>
     <summary>ImportError: cannot import name 'V4L2_CID_MPEG_VIDEO_H264_PROFILE' from 'v4l2'</summary>
-   <p>If you encounter encoder errors when using Picamera2, upgrading the v4l2 library might help, though in my case the error persisted:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>pip install --upgrade v4l2
-</span></span></code></pre></div><p>I tried commenting out the cron job that starts <em>app.py</em> to avoid conflicts with PiCam resources, but the import error persisted since it&rsquo;s unrelated to camera usage and likely a dependency issue.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#@reboot XDG_RUNTIME_DIR=/run/user/1000 ~/ugv_rpi/ugv-env/bin/python ~/ugv_rpi/app.py &gt;&gt; ~/ugv.log 2&gt;&amp;1</span>
-</span></span></code></pre></div><p><img src="/images/rover2/ugv-rpi-cannot-import-name-v4l2-cid-mpeg-video-h264-profile.png" alt="ugv-rpi-cannot-import-name-v4l2-cid-mpeg-video-h264-profile"></p>
+   <p>If you encounter encoder errors when using Picamera2, you may follow these steps:</p>
+<ol>
+<li>Remove the previous python environment folder:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd ugv_rpi
+</span></span><span style="display:flex;"><span>sudo rm -rf ugv-env
+</span></span></code></pre></div><ol start="2">
+<li>Comment or remove the following resources from <em>requirements.txt</em>:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># picamera2==0.3.17</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># v4l2-python3==0.3.2</span>
+</span></span></code></pre></div><ol start="3">
+<li>Re-install the python requirements:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Re-installs the app</span>
+</span></span><span style="display:flex;"><span>sudo ./setup.sh
+</span></span></code></pre></div><ol start="4">
+<li>Comment the cron job via <em>crontab -e</em> that starts <em>app.py</em> (to avoid conflicts with PiCam resources) and reboot:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># @reboot XDG_RUNTIME_DIR=/run/user/1000 ~/ugv_rpi/ugv-env/bin/python ~/ugv_rpi/app.py &gt;&gt; ~/ugv.log 2&gt;&amp;1</span>
+</span></span></code></pre></div><p>sud</p>
 
 </details>
 
@@ -1942,6 +1982,10 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
             <a class="previous-post" href="https://seehiong.github.io/2024/wave-rover-setup-guide-and-troubleshooting-tips/?ref=footer"><span style="font-weight:bold;">« Previous</span><br>Wave Rover: Setup Guide and Troubleshooting Tips</a>
         
 	    
+            <div class="next-post">
+                <a href="https://seehiong.github.io/2024/controlling-roarm-m2-s-with-ros2/?ref=footer"><span style="font-weight:bold;">Next »</span><br>Controlling RoArm-M2-S with ROS2</a>
+            </div>
+        
     
 </div>
 
