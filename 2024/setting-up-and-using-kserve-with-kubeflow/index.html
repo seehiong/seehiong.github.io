@@ -114,7 +114,7 @@
     
     
 
-<link type="text/css" rel="stylesheet" href="/css/bundle.min.03b57bbaf31d739f14c95df7f05d1cefcfa60bbafa36ba47313afdeb325aeada.css">
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.95cc0677a25232434df79a1cf0ee059633a97da88b4235a87f2a69bea2c1e24d.css">
 
 
     
@@ -231,6 +231,10 @@
                         </li>
                         
                             <li class="bullet">
+                                <a href="https://seehiong.github.io/2024/raspberry-pi/">Exploring AI with Raspberry Pi 5</a>
+                            </li>
+                        
+                            <li class="bullet">
                                 <a href="https://seehiong.github.io/2024/gpt-2-training-guide/">GPT-2 Training Guide</a>
                             </li>
                         
@@ -248,10 +252,6 @@
                         
                             <li class="bullet">
                                 <a href="https://seehiong.github.io/2024/controlling-roarm-m2-s-with-ros2/">Controlling RoArm-M2-S with ROS2</a>
-                            </li>
-                        
-                            <li class="bullet">
-                                <a href="https://seehiong.github.io/2024/wave-rover-with-raspberry-pi-4/">Wave Rover with Raspberry Pi 4</a>
                             </li>
                         
                     
@@ -286,6 +286,12 @@
                 
             
                 
+                
+                        
+                
+                        
+                
+                        
                 
                         
                 
@@ -1179,6 +1185,12 @@
                 
                         
                 
+                        
+                
+                        
+                
+                        
+                
             
         
         
@@ -1222,6 +1234,12 @@
                 
             
                 
+                
+                        
+                
+                        
+                
+                        
                 
                         
                 
@@ -2007,23 +2025,19 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 </span></span><span style="display:flex;"><span>    [<span style="color:#ae81ff">6.0</span>,  <span style="color:#ae81ff">3.4</span>,  <span style="color:#ae81ff">4.5</span>,  <span style="color:#ae81ff">1.6</span>]
 </span></span><span style="display:flex;"><span>  ]
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><blockquote class="note"><p>With or without the Istio sidecar for the inference service, by authenticating through the service access token, I am faced with this 302 issue:</p>
+</span></span></code></pre></div><p>With or without the Istio sidecar for the inference service, I still see this 302 issue with these commands (authenticating through the service access token):</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80 
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>SERVICE_HOSTNAME<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>kubectl get inferenceservice sklearn-iris -n kubeflow-user-example-com -o jsonpath<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{.status.url}&#39;</span> | cut -d <span style="color:#e6db74">&#34;/&#34;</span> -f 3<span style="color:#66d9ef">)</span>
 </span></span><span style="display:flex;"><span>INGRESS_HOST<span style="color:#f92672">=</span>localhost
 </span></span><span style="display:flex;"><span>INGRESS_PORT<span style="color:#f92672">=</span><span style="color:#ae81ff">8080</span>
-</span></span></code></pre></div></blockquote>
-<p>TOKEN=$(kubectl create token default-editor -n kubeflow-user-example-com &ndash;audience=istio-ingressgateway.istio-system.svc.cluster.local &ndash;duration=24h)
-curl -v -H &ldquo;Host: ${SERVICE_HOSTNAME}&rdquo; -H &ldquo;Authorization: Bearer $TOKEN&rdquo; -H &ldquo;Content-Type: application/json&rdquo; &ldquo;http://${INGRESS_HOST}:${INGRESS_PORT}/v1/models/sklearn-iris:predict&rdquo; -d @./iris-input.json</p>
-<pre tabindex="0"><code>
-![kserve-with-token-inference-error](/images/kserve/kserve-with-token-inference-error.png)
-
-With basic authentication, it fails too:
-
-```bash
-curl --user user@example.com:12341234 -v -H &#34;Host: ${SERVICE_HOSTNAME}&#34; -H &#34;Content-Type: application/json&#34; &#34;http://${INGRESS_HOST}:${INGRESS_PORT}/v1/models/sklearn-iris:predict&#34; -d @./iris-input.json
-</code></pre><p><img src="/images/kserve/kserve-with-basic-auth-error.png" alt="kserve-with-basic-auth-error"></p>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TOKEN<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>kubectl create token default-editor -n kubeflow-user-example-com --audience<span style="color:#f92672">=</span>istio-ingressgateway.istio-system.svc.cluster.local --duration<span style="color:#f92672">=</span>24h<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>curl -v -H <span style="color:#e6db74">&#34;Host: </span><span style="color:#e6db74">${</span>SERVICE_HOSTNAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -H <span style="color:#e6db74">&#34;Authorization: Bearer </span>$TOKEN<span style="color:#e6db74">&#34;</span> -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#e6db74">&#34;http://</span><span style="color:#e6db74">${</span>INGRESS_HOST<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">${</span>INGRESS_PORT<span style="color:#e6db74">}</span><span style="color:#e6db74">/v1/models/sklearn-iris:predict&#34;</span> -d @./iris-input.json
+</span></span></code></pre></div><p><img src="/images/kserve/kserve-with-token-inference-error.png" alt="kserve-with-token-inference-error"></p>
+<p>This fails too, for the basic authentication as such:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl --user user@example.com:12341234 -v -H <span style="color:#e6db74">&#34;Host: </span><span style="color:#e6db74">${</span>SERVICE_HOSTNAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#e6db74">&#34;http://</span><span style="color:#e6db74">${</span>INGRESS_HOST<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">${</span>INGRESS_PORT<span style="color:#e6db74">}</span><span style="color:#e6db74">/v1/models/sklearn-iris:predict&#34;</span> -d @./iris-input.json
+</span></span></code></pre></div><p><img src="/images/kserve/kserve-with-basic-auth-error.png" alt="kserve-with-basic-auth-error"></p>
 <p>Using cookies also fails:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl --cookie <span style="color:#e6db74">&#34;authservice_session=None&#34;</span> -v -H <span style="color:#e6db74">&#34;Host: </span><span style="color:#e6db74">${</span>SERVICE_HOSTNAME<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#e6db74">&#34;http://</span><span style="color:#e6db74">${</span>INGRESS_HOST<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">${</span>INGRESS_PORT<span style="color:#e6db74">}</span><span style="color:#e6db74">/v1/models/sklearn-iris:predict&#34;</span> -d @./iris-input.json
 </span></span></code></pre></div><p><img src="/images/kserve/kserve-with-cookie-error.png" alt="kserve-with-cookie-error"></p>
@@ -2043,6 +2057,13 @@ curl --user user@example.com:12341234 -v -H &#34;Host: ${SERVICE_HOSTNAME}&#34; 
         <ul class="series">
             
             
+            
+            <li>
+                October 20, 2024 -
+                
+                    <a href="/2024/integrating-mlflow-and-kubeflow-on-talos/">Integrating MLflow and Kubeflow on Talos</a>
+                
+            </li>
             
             <li>
                 July 20, 2024 -
