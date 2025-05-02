@@ -1,0 +1,2860 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head>
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+<script defer language="javascript" type="text/javascript" src="/js/bundle.min.b989f0fdae3971a3effd81d6d0b27b3cb1023ff0b601ff43e2118b0d9d82ddb9.js"></script>
+
+
+
+
+
+  
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="icon" href=/favicon.png>
+
+    
+    
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+
+
+<!-- Open Graph image and Twitter Card metadata -->
+
+<title itemprop="name">Tech Blog - Building a Recommender System</title>
+<meta property="og:title" content=Tech&#32;Blog&#32;-&#32;Building&#32;a&#32;Recommender&#32;System />
+<meta name="twitter:title" content=Tech&#32;Blog&#32;-&#32;Building&#32;a&#32;Recommender&#32;System />
+<meta itemprop="name" content=Tech&#32;Blog&#32;-&#32;Building&#32;a&#32;Recommender&#32;System />
+<meta name="application-name" content=Tech&#32;Blog&#32;-&#32;Building&#32;a&#32;Recommender&#32;System />
+<meta property="og:site_name" content="See Hiong&#39;s Blog" />
+
+
+<meta name="description" content="" />
+<meta itemprop="description" content="" />
+<meta property="og:description" content="" />
+<meta name="twitter:description" content="" />
+
+
+<base href="https://seehiong.github.io/2025/building-a-recommender-system/" />
+<link rel="canonical" href="https://seehiong.github.io/2025/building-a-recommender-system/" itemprop="url" />
+<meta name="url" content="https://seehiong.github.io/2025/building-a-recommender-system/" />
+<meta name="twitter:url" content="https://seehiong.github.io/2025/building-a-recommender-system/" />
+<meta property="og:url" content="https://seehiong.github.io/2025/building-a-recommender-system/" />
+
+
+<meta property="og:updated_time" content="2025-05-02T10:00:00&#43;08:00" />
+
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href='https://seehiong.github.io/sitemap.xml' />
+
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+
+
+<meta property="fb:admins" content="" />
+
+
+<meta name="apple-mobile-web-app-title" content="See Hiong&#39;s Blog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.134.1">
+
+
+    
+    
+
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.95cc0677a25232434df79a1cf0ee059633a97da88b4235a87f2a69bea2c1e24d.css">
+
+
+    
+    <style>
+    body {
+        --sidebar-bg-color: #202020;
+        --sidebar-img-border-color: #515151;
+        --sidebar-p-color: #909090;
+        --sidebar-h1-color: #FFF;
+        --sidebar-a-color: #FFF;
+        --sidebar-socials-color: #FFF;
+        --text-color: #222;
+        --bkg-color: #FAF9F6;
+        --post-title-color: #303030;
+        --list-color: #5a5a5a;
+        --link-color: #268bd2;
+        --date-color: #515151;
+        --table-border-color: #E5E5E5;
+        --table-stripe-color: #F9F9F9;
+        --code-color: #000;
+        --code-background-color: #E5E5E5;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+        --moon-sun-color: #FFF;
+        --moon-sun-background-color: #515151;
+    }
+    body.dark-theme {
+        --text-color: #eee;
+        --bkg-color: #121212;
+        --post-title-color: #DBE2E9;
+        --list-color: #9d9d9d;
+        --link-color: #268bd2;
+        --date-color: #9a9a9a;
+        --table-border-color: #515151;
+        --table-stripe-color: #202020;
+        --code-color: #fff;
+        --code-background-color: #515151;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+    }
+    body {
+        background-color: var(--bkg-color);
+    }
+</style>
+
+</head>
+
+    <body class="dark-theme">
+        <div class="wrapper">
+            <aside class="sidebar">
+    <div class="container sidebar-sticky">
+        <div class="light-dark" align="right">
+    <button class="btn-light-dark" title="Toggle light/dark mode">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6 .278a.768.768 0 0 1 .08.858a7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277c.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316a.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71C0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        </svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+    </button>
+</div>
+
+        <div class="sidebar-about">
+    <h1 class="brand">
+        
+        
+            <a href="https://seehiong.github.io/">
+                <h1>Tech Blog</h1>
+            </a>
+        
+    </h1>
+    <p class="lead">
+    Chronicling my personal expedition of technology exploration and experimentation, facilitated by a home-based self-configured laboratory
+    </p>
+</div>
+
+        <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<style>
+    :root {
+        --pagefind-ui-primary: #eeeeee;
+        --pagefind-ui-text: #eeeeee;
+        --pagefind-ui-background: #152028;
+        --pagefind-ui-border: #152028;
+        --pagefind-ui-tag: #152028;
+    }
+</style>
+<script src="/pagefind/pagefind-ui.js"></script>
+<div style="max-width: 100%; margin: clamp(2px, 1vw, 10px) auto;">
+    <div id="search"></div>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true, showImages: false });
+        });
+    </script>
+</div>
+        <nav>
+    <ul class="sidebar-nav">
+
+        
+        
+        
+        
+            
+
+            
+                
+                
+                    <li class="heading">
+                        <a href="/2025/">2025</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            Recent
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="https://seehiong.github.io/2025/building-a-recommender-system/">Building a Recommender System</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="https://seehiong.github.io/2025/from-model-to-hdb-app/">From Model to HDB App</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="https://seehiong.github.io/2025/feature-impact-on-hdb-predictions/">Feature Impact on HDB predictions</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="https://seehiong.github.io/2025/mnist-digit-classifier-in-tensorflow/">MNIST Digit Classifier in TensorFlow</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="https://seehiong.github.io/2025/chat-driven-insights-with-chartjs/">Chat-Driven Insights with Chart.js</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="https://seehiong.github.io/2025/jmc-java-performance-profiling-simplified/">JMC: Java Performance Profiling Simplified</a>
+                            </li>
+                        
+                    
+                
+            
+                
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/archives/">Archives</a>
+                    </li>
+                    
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+
+    </ul>
+</nav>
+
+        
+    <a target="_blank" class="social" title="GitHub" href="https://github.com/seehiong">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="-2 -2 24 24">
+            <path fill="currentColor" d="M18.88 1.099C18.147.366 17.265 0 16.233 0H3.746C2.714 0 1.832.366 1.099 1.099C.366 1.832 0 2.714 0 3.746v12.487c0 1.032.366 1.914 1.099 2.647c.733.733 1.615 1.099 2.647 1.099H6.66c.19 0 .333-.007.429-.02a.504.504 0 0 0 .286-.169c.095-.1.143-.245.143-.435l-.007-.885c-.004-.564-.006-1.01-.006-1.34l-.3.052c-.19.035-.43.05-.721.046a5.555 5.555 0 0 1-.904-.091a2.026 2.026 0 0 1-.872-.39a1.651 1.651 0 0 1-.572-.8l-.13-.3a3.25 3.25 0 0 0-.41-.663c-.186-.243-.375-.407-.566-.494l-.09-.065a.956.956 0 0 1-.17-.156a.723.723 0 0 1-.117-.182c-.026-.061-.004-.111.065-.15c.07-.04.195-.059.378-.059l.26.04c.173.034.388.138.643.311a2.1 2.1 0 0 1 .631.677c.2.355.44.626.722.813c.282.186.566.28.852.28c.286 0 .533-.022.742-.065a2.59 2.59 0 0 0 .585-.196c.078-.58.29-1.028.637-1.34a8.907 8.907 0 0 1-1.333-.234a5.314 5.314 0 0 1-1.223-.507a3.5 3.5 0 0 1-1.047-.872c-.277-.347-.505-.802-.683-1.365c-.177-.564-.266-1.215-.266-1.952c0-1.049.342-1.942 1.027-2.68c-.32-.788-.29-1.673.091-2.652c.252-.079.625-.02 1.119.175c.494.195.856.362 1.086.5c.23.14.414.257.553.352a9.233 9.233 0 0 1 2.497-.338c.859 0 1.691.113 2.498.338l.494-.312a6.997 6.997 0 0 1 1.197-.572c.46-.174.81-.221 1.054-.143c.39.98.424 1.864.103 2.653c.685.737 1.028 1.63 1.028 2.68c0 .737-.089 1.39-.267 1.957c-.177.568-.407 1.023-.689 1.366a3.65 3.65 0 0 1-1.053.865c-.42.234-.828.403-1.223.507a8.9 8.9 0 0 1-1.333.235c.45.39.676 1.005.676 1.846v3.11c0 .147.021.266.065.357a.36.36 0 0 0 .208.189c.096.034.18.056.254.064c.074.01.18.013.318.013h2.914c1.032 0 1.914-.366 2.647-1.099c.732-.732 1.099-1.615 1.099-2.647V3.746c0-1.032-.367-1.914-1.1-2.647z"/>
+        </svg>
+    </a>
+
+
+
+    <a target="_blank" class="social" title="LinkedIn" href="https://www.linkedin.com/in/seehiong">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 448 512">
+            <path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5c0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7c-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5c67.2 0 79.7 44.3 79.7 101.9V416z"/>
+        </svg>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a target="_blank" class="social" title="RSS Feed" href="/2025/index.xml">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 1280.000000 1280.000000">
+            <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="currentColor">
+                <path d="M2295 11929 c-284 -12 -642 -45 -707 -65 -17 -5 -18 -63 -18 -1039 0 -569 4 -1036 8 -1039 5 -3 74 6 153 19 510 86 1168 95 1789 25 1348 -153 2602 -677 3670 -1531 385 -308 820 -744 1126 -1129 842 -1060 1362 -2313 1514 -3650 70 -621 61 -1279 -25 -1789 -13 -79 -22 -148 -19 -153 3 -4 471 -8 1039 -8 l1035 0 5 23 c51 225 85 942 67 1419 -23 605 -77 1044 -198 1617 -294 1400 -927 2734 -1823 3846 -1043 1295 -2364 2259 -3909 2854 -1158 447 -2451 656 -3707 600z"/>
+                <path d="M2255 7845 c-269 -25 -620 -81 -667 -106 -17 -9 -18 -55 -18 -899 0 -706 3 -890 13 -890 6 0 66 18 132 41 130 44 288 79 467 105 154 21 577 30 749 15 1207 -107 2267 -823 2814 -1902 166 -327 268 -637 330 -1001 38 -227 48 -384 42 -662 -8 -348 -44 -590 -126 -831 -23 -66 -41 -126 -41 -132 0 -10 184 -13 890 -13 844 0 890 1 899 18 27 50 88 452 110 725 14 162 14 624 1 782 -59 703 -233 1323 -545 1945 -481 956 -1313 1788 -2270 2268 -620 310 -1239 483 -1940 542 -165 14 -669 10 -840 -5z"/>
+                <path d="M2519 3815 c-391 -66 -725 -336 -868 -703 -79 -201 -96 -462 -45 -677 83 -344 338 -641 666 -774 116 -47 205 -69 330 -80 412 -39 811 153 1040 500 193 292 240 648 128 981 -135 403 -492 699 -914 757 -100 14 -241 12 -337 -4z"/>
+            </g>
+        </svg>
+    </a>
+
+
+
+
+
+        <p class="footnote">
+powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a target="_blank" href="https://github.com/lukeorth/poison">poison</a>
+    <br>
+    &copy; 2025 See Hiong. All rights reserved.
+</p>
+
+  </div>
+</aside>
+
+            <main class="content container">
+                <div class="post" data-pagefind-body>
+  <div class="info">
+  <h1 class="post-title">
+    <a href="https://seehiong.github.io/2025/building-a-recommender-system/">Building a Recommender System</a>
+  </h1>
+
+  <div class="headline" data-pagefind-ignore>
+    <div>
+      
+      
+      <time datetime=" 2025-05-02T10:00:00&#43;0800" class="post-date">
+        May 2, 2025
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>14 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-Recommenders">
+        <a href="https://seehiong.github.io/tags/recommenders">Recommenders</a>
+      </li>
+      
+      <li class="tag-MovieLens">
+        <a href="https://seehiong.github.io/tags/movielens">MovieLens</a>
+      </li>
+      
+      <li class="tag-Applied Machine Learning">
+        <a href="https://seehiong.github.io/tags/applied-machine-learning">Applied Machine Learning</a>
+      </li>
+      
+      <li class="tag-Artificial Neural Networks">
+        <a href="https://seehiong.github.io/tags/artificial-neural-networks">Artificial Neural Networks</a>
+      </li>
+      
+      <li class="tag-PostgreSQL">
+        <a href="https://seehiong.github.io/tags/postgresql">PostgreSQL</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+  <p class="author">
+    Author: <i>See Hiong</i>
+  </p>
+  
+
+  
+
+  
+</div>
+
+  <p>As I continue the <a href="https://www.coursera.org/learn/unsupervised-learning-recommenders-reinforcement-learning" target="_blank">Unsupervised Learning, Recommenders, and Reinforcement Learning course</a> — which combines theory with hands-on labs — I’m applying what I learn to solidify my understanding. This post walks through building a movie recommender system using the MovieLens dataset. From data loading and feature engineering to generating embeddings and performing similarity search with pgvector in PostgreSQL, the goal is to bring the course material to life through a practical, end-to-end example. The dataset is based on <a href="https://dl.acm.org/doi/10.1145/2827872" target="_blank">The MovieLens Datasets: History and Context</a>.</p>
+<hr>
+<h2 id="environment-setup">Environment Setup</h2>
+<h3 id="postgresql-installation">PostgreSQL Installation</h3>
+<p>I installed the Bitnami PostgreSQL Helm chart in my homelab environment:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm install my-release oci://registry-1.docker.io/bitnamicharts/postgresql
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To get password</span>
+</span></span><span style="display:flex;"><span>export POSTGRES_PASSWORD<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>kubectl get secret --namespace postgres postgres-postgresql -o jsonpath<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{.data.postgres-password}&#34;</span> | base64 -d<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>echo $POSTGRES_PASSWORD
+</span></span></code></pre></div><h3 id="database-schema-preparation">Database Schema Preparation</h3>
+<p>Here’s the schema I created for storing movie-related data and embeddings. I also enabled the <code>vector</code> extension for future use in vector-based operations.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- Create schema and enable vector extension
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">SCHEMA</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> movie_recommender;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> EXTENSION <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> vector;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Drop tables if they exist (clean start)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span> movie_recommender.movie_embeddings;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span> movie_recommender.ratings;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span> movie_recommender.links;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span> movie_recommender.tags;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span> movie_recommender.movies;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Define core tables
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> movie_recommender.movies (
+</span></span><span style="display:flex;"><span>    movieId INT <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    title VARCHAR(<span style="color:#ae81ff">255</span>),
+</span></span><span style="display:flex;"><span>    genres VARCHAR(<span style="color:#ae81ff">255</span>)
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> movie_recommender.ratings (
+</span></span><span style="display:flex;"><span>    userId INT,
+</span></span><span style="display:flex;"><span>    movieId INT,
+</span></span><span style="display:flex;"><span>    rating FLOAT,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">timestamp</span> BIGINT,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span> (userId, movieId),
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOREIGN</span> <span style="color:#66d9ef">KEY</span> (movieId) <span style="color:#66d9ef">REFERENCES</span> movie_recommender.movies(movieId)
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> movie_recommender.links (
+</span></span><span style="display:flex;"><span>    movieId INT <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    imdbId VARCHAR(<span style="color:#ae81ff">20</span>),
+</span></span><span style="display:flex;"><span>    tmdbId INT,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOREIGN</span> <span style="color:#66d9ef">KEY</span> (movieId) <span style="color:#66d9ef">REFERENCES</span> movie_recommender.movies(movieId)
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> movie_recommender.tags (
+</span></span><span style="display:flex;"><span>    userId INT,
+</span></span><span style="display:flex;"><span>    movieId INT,
+</span></span><span style="display:flex;"><span>    tag VARCHAR(<span style="color:#ae81ff">255</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">timestamp</span> BIGINT,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOREIGN</span> <span style="color:#66d9ef">KEY</span> (movieId) <span style="color:#66d9ef">REFERENCES</span> movie_recommender.movies(movieId)
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Embeddings table
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> movie_recommender.movie_embeddings (
+</span></span><span style="display:flex;"><span>    movieid INT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    embedding <span style="color:#66d9ef">public</span>.vector <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CONSTRAINT</span> movie_embeddings_pkey <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span> (movieid),
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOREIGN</span> <span style="color:#66d9ef">KEY</span> (movieid) <span style="color:#66d9ef">REFERENCES</span> movie_recommender.movies(movieId)
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><hr>
+<h2 id="load-data-from-csv">Load Data from CSV</h2>
+<h3 id="1-database-configuration-in-jupyter">1. Database Configuration in Jupyter</h3>
+<p><strong>Note</strong>: For production, consider using environment variables or a secrets manager for credentials.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># File paths</span>
+</span></span><span style="display:flex;"><span>ratings_file <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;ratings.csv&#39;</span>
+</span></span><span style="display:flex;"><span>movies_file <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;movies.csv&#39;</span>
+</span></span><span style="display:flex;"><span>links_file <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;links.csv&#39;</span>
+</span></span><span style="display:flex;"><span>tags_file <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;tags.csv&#39;</span> 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Database credentials</span>
+</span></span><span style="display:flex;"><span>db_params <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;database&#39;</span>: <span style="color:#e6db74">&#39;postgres&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;user&#39;</span>: <span style="color:#e6db74">&#39;postgres&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;password&#39;</span>: <span style="color:#e6db74">&#39;W8oMlEyhq9&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;host&#39;</span>: <span style="color:#e6db74">&#39;postgres-postgresql.postgres&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;port&#39;</span>: <span style="color:#e6db74">&#39;5432&#39;</span>  
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>target_schema <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;movie_recommender&#34;</span>
+</span></span></code></pre></div><h3 id="2-writing-csv-to-postgresql">2. Writing CSV to PostgreSQL</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> psycopg2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Function to bulk copy data</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">copy_data_to_postgres</span>(csv_path, schema_name, table_name, columns, connection):
+</span></span><span style="display:flex;"><span>    qualified_table_name <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>schema_name<span style="color:#e6db74">}</span><span style="color:#e6db74">.</span><span style="color:#e6db74">{</span>table_name<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">with</span> open(csv_path, <span style="color:#e6db74">&#39;r&#39;</span>, encoding<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;utf-8&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>            next(f)
+</span></span><span style="display:flex;"><span>            cursor <span style="color:#f92672">=</span> connection<span style="color:#f92672">.</span>cursor()
+</span></span><span style="display:flex;"><span>            copy_sql <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;COPY </span><span style="color:#e6db74">{</span>qualified_table_name<span style="color:#e6db74">}</span><span style="color:#e6db74"> (</span><span style="color:#e6db74">{</span><span style="color:#e6db74">&#39;,&#39;</span><span style="color:#f92672">.</span>join(columns)<span style="color:#e6db74">}</span><span style="color:#e6db74">) FROM STDIN WITH (FORMAT CSV, DELIMITER &#39;,&#39;, HEADER FALSE)&#34;</span>
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Attempting to copy data to </span><span style="color:#e6db74">{</span>qualified_table_name<span style="color:#e6db74">}</span><span style="color:#e6db74">...&#34;</span>)
+</span></span><span style="display:flex;"><span>            cursor<span style="color:#f92672">.</span>copy_expert(sql<span style="color:#f92672">=</span>copy_sql, file<span style="color:#f92672">=</span>f)
+</span></span><span style="display:flex;"><span>            connection<span style="color:#f92672">.</span>commit()
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Successfully copied data from </span><span style="color:#e6db74">{</span>csv_path<span style="color:#e6db74">}</span><span style="color:#e6db74"> to </span><span style="color:#e6db74">{</span>qualified_table_name<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> (<span style="color:#a6e22e">Exception</span>, psycopg2<span style="color:#f92672">.</span>DatabaseError) <span style="color:#66d9ef">as</span> error:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Error copying data to </span><span style="color:#e6db74">{</span>qualified_table_name<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>error<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>        connection<span style="color:#f92672">.</span>rollback()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">finally</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> cursor:
+</span></span><span style="display:flex;"><span>            cursor<span style="color:#f92672">.</span>close()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Establish DB connection</span>
+</span></span><span style="display:flex;"><span>conn <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Attempting to connect to PostgreSQL database &#39;</span><span style="color:#e6db74">{</span>db_params[<span style="color:#e6db74">&#39;database&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39; on </span><span style="color:#e6db74">{</span>db_params[<span style="color:#e6db74">&#39;host&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">...&#34;</span>)
+</span></span><span style="display:flex;"><span>    conn <span style="color:#f92672">=</span> psycopg2<span style="color:#f92672">.</span>connect(<span style="color:#f92672">**</span>db_params)
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;PostgreSQL connection successful.&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Copy datasets</span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">-- Copying data into tables in schema &#39;</span><span style="color:#e6db74">{</span>target_schema<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39; --&#34;</span>)
+</span></span><span style="display:flex;"><span>    movies_cols <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;movieId&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;genres&#39;</span>]
+</span></span><span style="display:flex;"><span>    links_cols <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;movieId&#39;</span>, <span style="color:#e6db74">&#39;imdbId&#39;</span>, <span style="color:#e6db74">&#39;tmdbId&#39;</span>]
+</span></span><span style="display:flex;"><span>    ratings_cols <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;userId&#39;</span>, <span style="color:#e6db74">&#39;movieId&#39;</span>, <span style="color:#e6db74">&#39;rating&#39;</span>, <span style="color:#e6db74">&#39;timestamp&#39;</span>]
+</span></span><span style="display:flex;"><span>    tags_cols <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;userId&#39;</span>, <span style="color:#e6db74">&#39;movieId&#39;</span>, <span style="color:#e6db74">&#39;tag&#39;</span>, <span style="color:#e6db74">&#39;timestamp&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    copy_data_to_postgres(movies_file, target_schema, <span style="color:#e6db74">&#39;movies&#39;</span>, movies_cols, conn)
+</span></span><span style="display:flex;"><span>    copy_data_to_postgres(links_file, target_schema, <span style="color:#e6db74">&#39;links&#39;</span>, links_cols, conn)
+</span></span><span style="display:flex;"><span>    copy_data_to_postgres(ratings_file, target_schema, <span style="color:#e6db74">&#39;ratings&#39;</span>, ratings_cols, conn)
+</span></span><span style="display:flex;"><span>    copy_data_to_postgres(tags_file, target_schema, <span style="color:#e6db74">&#39;tags&#39;</span>, tags_cols, conn)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Unexpected DB error: </span><span style="color:#e6db74">{</span>e<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> conn:
+</span></span><span style="display:flex;"><span>        conn<span style="color:#f92672">.</span>rollback()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">finally</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> conn:
+</span></span><span style="display:flex;"><span>        conn<span style="color:#f92672">.</span>close()
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;DB connection closed.&#34;</span>)
+</span></span></code></pre></div><p><img src="/images/movies/movies-dataset-saved-to-postgres.png" alt="movies-dataset-saved-to-postgres"></p>
+<hr>
+<h2 id="load-data-from-postgresql">Load Data from PostgreSQL</h2>
+<p>Now let’s read the ingested data back into Pandas for inspection and processing.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sqlalchemy <span style="color:#f92672">import</span> create_engine, text
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Setup SQLAlchemy engine</span>
+</span></span><span style="display:flex;"><span>db_url <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;postgresql+psycopg2://</span><span style="color:#e6db74">{</span>db_params[<span style="color:#e6db74">&#39;user&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{</span>db_params[<span style="color:#e6db74">&#39;password&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">@</span><span style="color:#e6db74">{</span>db_params[<span style="color:#e6db74">&#39;host&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{</span>db_params[<span style="color:#e6db74">&#39;port&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">/</span><span style="color:#e6db74">{</span>db_params[<span style="color:#e6db74">&#39;database&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>engine <span style="color:#f92672">=</span> create_engine(db_url)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Load data</span>
+</span></span><span style="display:flex;"><span>query_ratings <span style="color:#f92672">=</span> text(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;SELECT userid, movieid, rating FROM </span><span style="color:#e6db74">{</span>target_schema<span style="color:#e6db74">}</span><span style="color:#e6db74">.ratings&#39;</span>)
+</span></span><span style="display:flex;"><span>ratings_df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_sql(query_ratings, engine)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>query_movies <span style="color:#f92672">=</span> text(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;SELECT movieid, title, genres FROM </span><span style="color:#e6db74">{</span>target_schema<span style="color:#e6db74">}</span><span style="color:#e6db74">.movies&#39;</span>)
+</span></span><span style="display:flex;"><span>movies_df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_sql(query_movies, engine)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pd<span style="color:#f92672">.</span>set_option(<span style="color:#e6db74">&#39;display.width&#39;</span>, <span style="color:#ae81ff">200</span>)   
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Loaded </span><span style="color:#e6db74">{</span>len(ratings_df)<span style="color:#e6db74">}</span><span style="color:#e6db74"> ratings and </span><span style="color:#e6db74">{</span>len(movies_df)<span style="color:#e6db74">}</span><span style="color:#e6db74"> movies.&#34;</span>)
+</span></span><span style="display:flex;"><span>print(ratings_df<span style="color:#f92672">.</span>head())
+</span></span><span style="display:flex;"><span>print(movies_df<span style="color:#f92672">.</span>head())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>engine<span style="color:#f92672">.</span>dispose()
+</span></span></code></pre></div><p><img src="/images/movies/movies-load-from-postgres.png" alt="movies-load-from-postgres"></p>
+<hr>
+<h2 id="feature-engineering">Feature Engineering</h2>
+<h3 id="movie-features">Movie Features</h3>
+<p>We&rsquo;ll perform the following preprocessing steps:</p>
+<ul>
+<li>Extract year from the movie title</li>
+<li>One-hot encode genres</li>
+<li>Calculate the average rating per movie</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.preprocessing <span style="color:#f92672">import</span> MultiLabelBinarizer
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> re
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Extract Year</span>
+</span></span><span style="display:flex;"><span>movies_df[<span style="color:#e6db74">&#39;year&#39;</span>] <span style="color:#f92672">=</span> movies_df[<span style="color:#e6db74">&#39;title&#39;</span>]<span style="color:#f92672">.</span>str<span style="color:#f92672">.</span>extract(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;\((\d</span><span style="color:#e6db74">{4}</span><span style="color:#e6db74">)\)&#39;</span>, expand<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>movies_df[<span style="color:#e6db74">&#39;year&#39;</span>] <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>to_numeric(movies_df[<span style="color:#e6db74">&#39;year&#39;</span>], errors<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;coerce&#39;</span>)
+</span></span><span style="display:flex;"><span>median_year <span style="color:#f92672">=</span> movies_df[<span style="color:#e6db74">&#39;year&#39;</span>]<span style="color:#f92672">.</span>median()
+</span></span><span style="display:flex;"><span>movies_df[<span style="color:#e6db74">&#39;year&#39;</span>] <span style="color:#f92672">=</span> movies_df[<span style="color:#e6db74">&#39;year&#39;</span>]<span style="color:#f92672">.</span>fillna(median_year)<span style="color:#f92672">.</span>astype(int)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Drop entries with no genres</span>
+</span></span><span style="display:flex;"><span>movies_df <span style="color:#f92672">=</span> movies_df[movies_df[<span style="color:#e6db74">&#39;genres&#39;</span>] <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#39;(no genres listed)&#39;</span>]<span style="color:#f92672">.</span>copy()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># One-hot encode genres</span>
+</span></span><span style="display:flex;"><span>movies_df[<span style="color:#e6db74">&#39;genres_list&#39;</span>] <span style="color:#f92672">=</span> movies_df[<span style="color:#e6db74">&#39;genres&#39;</span>]<span style="color:#f92672">.</span>str<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39;|&#39;</span>)
+</span></span><span style="display:flex;"><span>mlb <span style="color:#f92672">=</span> MultiLabelBinarizer()
+</span></span><span style="display:flex;"><span>genre_df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame(
+</span></span><span style="display:flex;"><span>    mlb<span style="color:#f92672">.</span>fit_transform(movies_df[<span style="color:#e6db74">&#39;genres_list&#39;</span>]),
+</span></span><span style="display:flex;"><span>    columns<span style="color:#f92672">=</span>mlb<span style="color:#f92672">.</span>classes_,
+</span></span><span style="display:flex;"><span>    index<span style="color:#f92672">=</span>movies_df<span style="color:#f92672">.</span>index
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Compute average rating</span>
+</span></span><span style="display:flex;"><span>movie_avg_ratings <span style="color:#f92672">=</span> ratings_df<span style="color:#f92672">.</span>groupby(<span style="color:#e6db74">&#39;movieid&#39;</span>)[<span style="color:#e6db74">&#39;rating&#39;</span>]<span style="color:#f92672">.</span>mean()<span style="color:#f92672">.</span>reset_index()
+</span></span><span style="display:flex;"><span>movie_avg_ratings<span style="color:#f92672">.</span>rename(columns<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#39;rating&#39;</span>: <span style="color:#e6db74">&#39;movie_avg_rating&#39;</span>}, inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Final item feature dataframe</span>
+</span></span><span style="display:flex;"><span>item_features_df <span style="color:#f92672">=</span> movies_df[[<span style="color:#e6db74">&#39;movieid&#39;</span>, <span style="color:#e6db74">&#39;year&#39;</span>]]<span style="color:#f92672">.</span>join(genre_df)
+</span></span><span style="display:flex;"><span>item_features_df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>merge(item_features_df, movie_avg_ratings, on<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;movieid&#39;</span>, how<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;left&#39;</span>)
+</span></span><span style="display:flex;"><span>item_features_df[<span style="color:#e6db74">&#39;movie_avg_rating&#39;</span>] <span style="color:#f92672">=</span> item_features_df[<span style="color:#e6db74">&#39;movie_avg_rating&#39;</span>]<span style="color:#f92672">.</span>fillna(ratings_df[<span style="color:#e6db74">&#39;rating&#39;</span>]<span style="color:#f92672">.</span>mean())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(item_features_df<span style="color:#f92672">.</span>head(<span style="color:#ae81ff">2</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Sample Output</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#    movieid  year  Action  Adventure  Animation  Children  Comedy  Crime  Documentary  Drama  ...  Horror  IMAX  Musical  Mystery  Romance  Sci-Fi  Thriller  War  Western  movie_avg_rating</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 0        1  1995       0          1          1         1       1      0            0      0  ...       0     0        0        0        0       0         0    0        0          3.920930</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1        2  1995       0          1          0         1       0      0            0      0  ...       0     0        0        0        0       0         0    0        0          3.431818</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># [2 rows x 22 columns]</span>
+</span></span></code></pre></div><h3 id="user-features">User Features</h3>
+<p>Now that we’ve engineered item-level features, let’s shift our focus to the users. A personalized recommendation system must understand user preferences—and what better way to do that than by analyzing how users rate movies across different genres?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Mapping Users to Genres</span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Merging ratings with genres...&#34;</span>)
+</span></span><span style="display:flex;"><span>genre_cols <span style="color:#f92672">=</span> list(mlb<span style="color:#f92672">.</span>classes_)
+</span></span><span style="display:flex;"><span>item_genres_for_merge <span style="color:#f92672">=</span> item_features_df[[<span style="color:#e6db74">&#39;movieid&#39;</span>] <span style="color:#f92672">+</span> genre_cols]<span style="color:#f92672">.</span>copy()
+</span></span><span style="display:flex;"><span>ratings_with_genres <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>merge(
+</span></span><span style="display:flex;"><span>    ratings_df[[<span style="color:#e6db74">&#39;userid&#39;</span>, <span style="color:#e6db74">&#39;movieid&#39;</span>, <span style="color:#e6db74">&#39;rating&#39;</span>]],
+</span></span><span style="display:flex;"><span>    item_genres_for_merge,
+</span></span><span style="display:flex;"><span>    on<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;movieid&#39;</span>,
+</span></span><span style="display:flex;"><span>    how<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;inner&#39;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Shape after merging ratings with genres: </span><span style="color:#e6db74">{</span>ratings_with_genres<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Reshaping Data for Aggregation</span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Melting genre data...&#34;</span>)
+</span></span><span style="display:flex;"><span>melted_genres <span style="color:#f92672">=</span> ratings_with_genres<span style="color:#f92672">.</span>melt(
+</span></span><span style="display:flex;"><span>    id_vars<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;userid&#39;</span>, <span style="color:#e6db74">&#39;rating&#39;</span>],
+</span></span><span style="display:flex;"><span>    value_vars<span style="color:#f92672">=</span>genre_cols, 
+</span></span><span style="display:flex;"><span>    var_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;genre&#39;</span>, 
+</span></span><span style="display:flex;"><span>    value_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;has_genre&#39;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Shape after melting: </span><span style="color:#e6db74">{</span>melted_genres<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Filtering Valid Genre Associations</span>
+</span></span><span style="display:flex;"><span>user_genre_ratings <span style="color:#f92672">=</span> melted_genres[melted_genres[<span style="color:#e6db74">&#39;has_genre&#39;</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>copy()
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Shape after filtering for has_genre=1: </span><span style="color:#e6db74">{</span>user_genre_ratings<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Computing Genre-Based Averages Per User</span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Calculating average rating per user per genre...&#34;</span>)
+</span></span><span style="display:flex;"><span>user_genre_avg_ratings <span style="color:#f92672">=</span> user_genre_ratings<span style="color:#f92672">.</span>groupby([<span style="color:#e6db74">&#39;userid&#39;</span>, <span style="color:#e6db74">&#39;genre&#39;</span>])[<span style="color:#e6db74">&#39;rating&#39;</span>]<span style="color:#f92672">.</span>mean()<span style="color:#f92672">.</span>reset_index()
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Shape after grouping user/genre: </span><span style="color:#e6db74">{</span>user_genre_avg_ratings<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Pivoting to a Feature Matrix</span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Pivoting table...&#34;</span>)
+</span></span><span style="display:flex;"><span>user_genre_features_df <span style="color:#f92672">=</span> user_genre_avg_ratings<span style="color:#f92672">.</span>pivot(index<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;userid&#39;</span>, columns<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;genre&#39;</span>, values<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;rating&#39;</span>)
+</span></span><span style="display:flex;"><span>print(user_genre_features_df<span style="color:#f92672">.</span>head(<span style="color:#ae81ff">2</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Rename columns for clarity</span>
+</span></span><span style="display:flex;"><span>user_genre_feature_cols <span style="color:#f92672">=</span> [<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;genre_avg_</span><span style="color:#e6db74">{</span>col<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span> <span style="color:#66d9ef">for</span> col <span style="color:#f92672">in</span> user_genre_features_df<span style="color:#f92672">.</span>columns]
+</span></span><span style="display:flex;"><span>user_genre_features_df<span style="color:#f92672">.</span>columns <span style="color:#f92672">=</span> user_genre_feature_cols
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Created </span><span style="color:#e6db74">{</span>len(user_genre_feature_cols)<span style="color:#e6db74">}</span><span style="color:#e6db74"> user-genre average features.&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Sample Output</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Merging ratings with genres...</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Shape after merging ratings with genres: (100789, 22)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Melting genre data...</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Shape after melting: (1914991, 4)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Shape after filtering for has_genre=1: (274433, 4)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Calculating average rating per user per genre...</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Shape after grouping user/genre: (10001, 3)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Pivoting table...</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># genre     Action  Adventure  Animation  Children    Comedy     Crime  Documentary     Drama   Fantasy  Film-Noir    Horror  IMAX   Musical   Mystery   Romance  Sci-Fi  Thriller  War   Western</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># userid                                                                                                                                                                                         </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1       4.322222   4.388235   4.689655  4.547619  4.277108  4.355556          NaN  4.529412  4.297872        5.0  3.470588   NaN  4.681818  4.166667  4.307692   4.225  4.145455  4.5  4.285714</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2       3.954545   4.166667        NaN       NaN  4.000000  3.800000     4.333333  3.882353       NaN        NaN  3.000000  3.75       NaN  4.000000  4.500000   3.875  3.700000  4.5  3.500000</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Created 19 user-genre average features.</span>
+</span></span></code></pre></div><h3 id="final-feature-assembly">Final Feature Assembly</h3>
+<p>With both item-level and user-level features constructed, we now assemble the final dataset that will feed into our model.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.preprocessing <span style="color:#f92672">import</span> StandardScaler, MinMaxScaler
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.model_selection <span style="color:#f92672">import</span> train_test_split
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Start with the original ratings data (userid, movieid, rating)</span>
+</span></span><span style="display:flex;"><span>ratings_with_features <span style="color:#f92672">=</span> ratings_df[[<span style="color:#e6db74">&#39;userid&#39;</span>, <span style="color:#e6db74">&#39;movieid&#39;</span>, <span style="color:#e6db74">&#39;rating&#39;</span>]]<span style="color:#f92672">.</span>copy()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Merge item features</span>
+</span></span><span style="display:flex;"><span>cols_to_merge_item <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;movieid&#39;</span>, <span style="color:#e6db74">&#39;year&#39;</span>, <span style="color:#e6db74">&#39;movie_avg_rating&#39;</span>] <span style="color:#f92672">+</span> genre_cols
+</span></span><span style="display:flex;"><span>ratings_with_features <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>merge(
+</span></span><span style="display:flex;"><span>    ratings_with_features,
+</span></span><span style="display:flex;"><span>    item_features_df[cols_to_merge_item],
+</span></span><span style="display:flex;"><span>    on<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;movieid&#39;</span>,
+</span></span><span style="display:flex;"><span>    how<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;inner&#39;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Shape after merging item features: </span><span style="color:#e6db74">{</span>ratings_with_features<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Merge user features</span>
+</span></span><span style="display:flex;"><span>ratings_with_features <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>merge(
+</span></span><span style="display:flex;"><span>    ratings_with_features,
+</span></span><span style="display:flex;"><span>    user_genre_features_df,
+</span></span><span style="display:flex;"><span>    on<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;userid&#39;</span>,
+</span></span><span style="display:flex;"><span>    how<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;inner&#39;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>ratings_with_features<span style="color:#f92672">.</span>dropna(inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>) 
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Shape after merging user features: </span><span style="color:#e6db74">{</span>ratings_with_features<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Feature splitting</span>
+</span></span><span style="display:flex;"><span>item_feature_cols <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;year&#39;</span>, <span style="color:#e6db74">&#39;movie_avg_rating&#39;</span>] <span style="color:#f92672">+</span> genre_cols 
+</span></span><span style="display:flex;"><span>X_user_features <span style="color:#f92672">=</span> ratings_with_features[user_genre_feature_cols]
+</span></span><span style="display:flex;"><span>X_item_features <span style="color:#f92672">=</span> ratings_with_features[item_feature_cols]
+</span></span><span style="display:flex;"><span>y_target <span style="color:#f92672">=</span> ratings_with_features[<span style="color:#e6db74">&#39;rating&#39;</span>]
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">User feature matrix shape (before split): </span><span style="color:#e6db74">{</span>X_user_features<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Item feature matrix shape (before split): </span><span style="color:#e6db74">{</span>X_item_features<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Target vector shape (before split): </span><span style="color:#e6db74">{</span>y_target<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Train-Test split</span>
+</span></span><span style="display:flex;"><span>X_user_train_unscaled, X_user_test_unscaled, X_item_train_unscaled, X_item_test_unscaled, y_train_unscaled, y_test_unscaled <span style="color:#f92672">=</span> train_test_split(
+</span></span><span style="display:flex;"><span>    X_user_features, X_item_features, y_target,
+</span></span><span style="display:flex;"><span>    test_size<span style="color:#f92672">=</span><span style="color:#ae81ff">0.2</span>,
+</span></span><span style="display:flex;"><span>    random_state<span style="color:#f92672">=</span><span style="color:#ae81ff">42</span> 
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Training shapes (before scaling): User=</span><span style="color:#e6db74">{</span>X_user_train_unscaled<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">, Item=</span><span style="color:#e6db74">{</span>X_item_train_unscaled<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">, Target=</span><span style="color:#e6db74">{</span>y_train_unscaled<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Testing shapes (before scaling):  User=</span><span style="color:#e6db74">{</span>X_user_test_unscaled<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">, Item=</span><span style="color:#e6db74">{</span>X_item_test_unscaled<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">, Target=</span><span style="color:#e6db74">{</span>y_test_unscaled<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Feature scaling</span>
+</span></span><span style="display:flex;"><span>scalerUser <span style="color:#f92672">=</span> StandardScaler()
+</span></span><span style="display:flex;"><span>user_train <span style="color:#f92672">=</span> scalerUser<span style="color:#f92672">.</span>fit_transform(X_user_train_unscaled)
+</span></span><span style="display:flex;"><span>user_test <span style="color:#f92672">=</span> scalerUser<span style="color:#f92672">.</span>transform(X_user_test_unscaled)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Scaled user features matrix. Train shape: </span><span style="color:#e6db74">{</span>user_train<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">, Test shape: </span><span style="color:#e6db74">{</span>user_test<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>scalerItem <span style="color:#f92672">=</span> StandardScaler()
+</span></span><span style="display:flex;"><span>item_train <span style="color:#f92672">=</span> scalerItem<span style="color:#f92672">.</span>fit_transform(X_item_train_unscaled)
+</span></span><span style="display:flex;"><span>item_test <span style="color:#f92672">=</span> scalerItem<span style="color:#f92672">.</span>transform(X_item_test_unscaled)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Scaled item features matrix. Train shape: </span><span style="color:#e6db74">{</span>item_train<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">, Test shape: </span><span style="color:#e6db74">{</span>item_test<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>scalerTarget <span style="color:#f92672">=</span> MinMaxScaler((<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span>y_train <span style="color:#f92672">=</span> scalerTarget<span style="color:#f92672">.</span>fit_transform(y_train_unscaled<span style="color:#f92672">.</span>values<span style="color:#f92672">.</span>reshape(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span>y_test <span style="color:#f92672">=</span> scalerTarget<span style="color:#f92672">.</span>transform(y_test_unscaled<span style="color:#f92672">.</span>values<span style="color:#f92672">.</span>reshape(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Scaled target variable (y). Train shape: </span><span style="color:#e6db74">{</span>y_train<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">, Test shape: </span><span style="color:#e6db74">{</span>y_test<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>num_user_features <span style="color:#f92672">=</span> user_train<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>num_item_features <span style="color:#f92672">=</span> item_train<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Final dataset shapes</span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">user_train: </span><span style="color:#e6db74">{</span>user_train<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;item_train: </span><span style="color:#e6db74">{</span>item_train<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;y_train:    </span><span style="color:#e6db74">{</span>y_train<span style="color:#f92672">.</span>shape<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Sample Output</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Shape after merging item features: (100789, 24)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Shape after merging user features: (53434, 43)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># User feature matrix shape (before split): (53434, 19)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Item feature matrix shape (before split): (53434, 21)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Target vector shape (before split): (53434,)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Training shapes (before scaling): User=(42747, 19), Item=(42747, 21), Target=(42747,)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Testing shapes (before scaling):  User=(10687, 19), Item=(10687, 21), Target=(10687,)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Scaled user features matrix. Train shape: (42747, 19), Test shape: (10687, 19)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Scaled item features matrix. Train shape: (42747, 21), Test shape: (10687, 21)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Scaled target variable (y). Train shape: (42747, 1), Test shape: (10687, 1)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># user_train: (42747, 19)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># item_train: (42747, 21)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># y_train:    (42747, 1)</span>
+</span></span></code></pre></div><hr>
+<h2 id="define-the-model">Define the Model</h2>
+<p>Following the course lab, we design a content-based filtering neural network using the Keras Functional API. The model learns user and item embeddings from their respective features and uses the dot product to compute similarity between them.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> tensorflow <span style="color:#66d9ef">as</span> tf
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> tensorflow <span style="color:#f92672">import</span> keras
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set a fixed seed for reproducibility</span>
+</span></span><span style="display:flex;"><span>tf<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>set_seed(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Define the size of the final embedding space</span>
+</span></span><span style="display:flex;"><span>num_outputs <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Define the user sub-network</span>
+</span></span><span style="display:flex;"><span>user_NN <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>models<span style="color:#f92672">.</span>Sequential([
+</span></span><span style="display:flex;"><span>    tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">256</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;user_dense_1&#39;</span>),
+</span></span><span style="display:flex;"><span>    tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">128</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;user_dense_2&#39;</span>),
+</span></span><span style="display:flex;"><span>    tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(num_outputs, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;user_embedding_output&#39;</span>),
+</span></span><span style="display:flex;"><span>], name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;user_sequential_network&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Define the item sub-network</span>
+</span></span><span style="display:flex;"><span>item_NN <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>models<span style="color:#f92672">.</span>Sequential([
+</span></span><span style="display:flex;"><span>    tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">256</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;item_dense_1&#39;</span>),
+</span></span><span style="display:flex;"><span>    tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">128</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;item_dense_2&#39;</span>),
+</span></span><span style="display:flex;"><span>    tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(num_outputs, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;item_embedding_output&#39;</span>),
+</span></span><span style="display:flex;"><span>], name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;item_sequential_network&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># User input and embedding pipeline</span>
+</span></span><span style="display:flex;"><span>input_user <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Input(shape<span style="color:#f92672">=</span>(num_user_features,), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;user_input&#39;</span>)
+</span></span><span style="display:flex;"><span>vu <span style="color:#f92672">=</span> user_NN(input_user)
+</span></span><span style="display:flex;"><span>vu_normalized <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Lambda(<span style="color:#66d9ef">lambda</span> x: tf<span style="color:#f92672">.</span>linalg<span style="color:#f92672">.</span>l2_normalize(x, axis<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;user_embedding_normalized&#39;</span>)(vu)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Item input and embedding pipeline</span>
+</span></span><span style="display:flex;"><span>input_item <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Input(shape<span style="color:#f92672">=</span>(num_item_features,), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;item_input&#39;</span>)
+</span></span><span style="display:flex;"><span>vm <span style="color:#f92672">=</span> item_NN(input_item)
+</span></span><span style="display:flex;"><span>vm_normalized <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Lambda(<span style="color:#66d9ef">lambda</span> x: tf<span style="color:#f92672">.</span>linalg<span style="color:#f92672">.</span>l2_normalize(x, axis<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;item_embedding_normalized&#39;</span>)(vm)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Compute similarity using dot product</span>
+</span></span><span style="display:flex;"><span>dot_product <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dot(axes<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;dot_product&#39;</span>)([vu_normalized, vm_normalized])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Define the full model</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>Model(inputs<span style="color:#f92672">=</span>[input_user, input_item], outputs<span style="color:#f92672">=</span>dot_product, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;ContentBasedFilteringNN_DotProduct&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Model Created using Functional API.&#34;</span>)
+</span></span><span style="display:flex;"><span>model<span style="color:#f92672">.</span>summary()
+</span></span></code></pre></div><p><img src="/images/movies/movies-content-based-filtering-model.png" alt="movies-content-based-filtering-model"></p>
+<hr>
+<h2 id="compile-the-model">Compile the Model</h2>
+<p>We compile the model using the Mean Squared Error (MSE) loss function and the Adam optimizer, suitable for learning continuous similarity scores.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Compiling Model...&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>tf<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>set_seed(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>cost_fn <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>losses<span style="color:#f92672">.</span>MeanSquaredError()
+</span></span><span style="display:flex;"><span>opt <span style="color:#f92672">=</span> keras<span style="color:#f92672">.</span>optimizers<span style="color:#f92672">.</span>Adam(learning_rate<span style="color:#f92672">=</span><span style="color:#ae81ff">0.01</span>)
+</span></span><span style="display:flex;"><span>model<span style="color:#f92672">.</span>compile(optimizer<span style="color:#f92672">=</span>opt, loss<span style="color:#f92672">=</span>cost_fn)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Model Compiled.&#34;</span>)
+</span></span></code></pre></div><h2 id="train-the-model">Train the Model</h2>
+<p>We now train the model using <code>model.fit()</code>, passing in both user and item features as inputs and the target similarity scores (<code>y_train</code>) as labels.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Starting Model Training...&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Define training parameters</span>
+</span></span><span style="display:flex;"><span>EPOCHS <span style="color:#f92672">=</span> <span style="color:#ae81ff">30</span>
+</span></span><span style="display:flex;"><span>tf<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>set_seed(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>history <span style="color:#f92672">=</span> model<span style="color:#f92672">.</span>fit(
+</span></span><span style="display:flex;"><span>    x<span style="color:#f92672">=</span>[user_train, item_train],  <span style="color:#75715e"># Inputs: user and item features</span>
+</span></span><span style="display:flex;"><span>    y<span style="color:#f92672">=</span>y_train,                   <span style="color:#75715e"># Target: similarity score (e.g., scaled rating)</span>
+</span></span><span style="display:flex;"><span>    epochs<span style="color:#f92672">=</span>EPOCHS,
+</span></span><span style="display:flex;"><span>    verbose<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Model Training Complete.&#34;</span>)
+</span></span></code></pre></div><p><img src="/images/movies/movies-content-based-filtering-model-training.png" alt="movies-content-based-filtering-model-training"></p>
+<h2 id="evaluate-the-model">Evaluate the Model</h2>
+<p>Finally, we evaluate the model on a separate test dataset and compute both the MSE and RMSE for interpretability.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">-- Evaluating the Model on SCALED Test Data --&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>test_loss <span style="color:#f92672">=</span> model<span style="color:#f92672">.</span>evaluate([user_test, item_test], y_test, verbose<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Compute RMSE for easier interpretation</span>
+</span></span><span style="display:flex;"><span>test_rmse <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>sqrt(test_loss)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Test Loss (MSE on scaled data): </span><span style="color:#e6db74">{</span>test_loss<span style="color:#e6db74">:</span><span style="color:#e6db74">.4f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Test RMSE (calculated from MSE): </span><span style="color:#e6db74">{</span>test_rmse<span style="color:#e6db74">:</span><span style="color:#e6db74">.4f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Sample Output</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># -- Evaluating the Model on SCALED Test Data --</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 334/334 ━━━━━━━━━━━━━━━━━━━━ 0s 728us/step - loss: 0.1056</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Test Loss (MSE on scaled data): 0.1052</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Test RMSE (calculated from MSE): 0.3244</span>
+</span></span></code></pre></div><hr>
+<h2 id="predicting-ratings-for-an-existing-user">Predicting Ratings for an Existing User</h2>
+<p>This section walks through how we generate personalized movie recommendations for a specific user using our trained neural network model.</p>
+<p>We apply the following process:</p>
+<ul>
+<li>Find unrated movies for the selected user.</li>
+<li>Prepare the feature vectors for both the user and unrated items.</li>
+<li>Make predictions using the scaled input features.</li>
+<li>Rescale the predictions to match the original rating scale.</li>
+<li>Display recommendations sorted by predicted rating and popularity.</li>
+<li>Evaluate prediction performance for items the user has already rated.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.preprocessing <span style="color:#f92672">import</span> StandardScaler
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">predict_and_display_for_user</span>(uid, model, user_features_df, item_features_df, 
+</span></span><span style="display:flex;"><span>                                ratings_df, movies_df, scalerUser, scalerItem, 
+</span></span><span style="display:flex;"><span>                                scalerTarget, maxcount<span style="color:#f92672">=</span><span style="color:#ae81ff">15</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Fetch all ratings made by this user</span>
+</span></span><span style="display:flex;"><span>    user_actuals <span style="color:#f92672">=</span> ratings_df[ratings_df[<span style="color:#e6db74">&#39;userid&#39;</span>] <span style="color:#f92672">==</span> uid]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Identify movies not yet rated by the user</span>
+</span></span><span style="display:flex;"><span>    unrated_movies <span style="color:#f92672">=</span> item_features_df[<span style="color:#f92672">~</span>item_features_df[<span style="color:#e6db74">&#39;movieid&#39;</span>]<span style="color:#f92672">.</span>isin(user_actuals[<span style="color:#e6db74">&#39;movieid&#39;</span>])]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> len(unrated_movies) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;User </span><span style="color:#e6db74">{</span>uid<span style="color:#e6db74">}</span><span style="color:#e6db74"> has rated all available movies.&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Repeat the user&#39;s feature vector to match the unrated movie count</span>
+</span></span><span style="display:flex;"><span>    user_vec <span style="color:#f92672">=</span> user_features_df[user_features_df[<span style="color:#e6db74">&#39;userid&#39;</span>] <span style="color:#f92672">==</span> uid][scalerUser<span style="color:#f92672">.</span>feature_names_in_]
+</span></span><span style="display:flex;"><span>    user_vecs <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>concat([user_vec] <span style="color:#f92672">*</span> len(unrated_movies), ignore_index<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Scale both user and item feature vectors</span>
+</span></span><span style="display:flex;"><span>    suser_vecs <span style="color:#f92672">=</span> scalerUser<span style="color:#f92672">.</span>transform(user_vecs)
+</span></span><span style="display:flex;"><span>    sitem_vecs <span style="color:#f92672">=</span> scalerItem<span style="color:#f92672">.</span>transform(unrated_movies[scalerItem<span style="color:#f92672">.</span>feature_names_in_])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Predict scaled ratings, then inverse transform to original scale</span>
+</span></span><span style="display:flex;"><span>    scaled_preds <span style="color:#f92672">=</span> model<span style="color:#f92672">.</span>predict([suser_vecs, sitem_vecs])
+</span></span><span style="display:flex;"><span>    predictions <span style="color:#f92672">=</span> scalerTarget<span style="color:#f92672">.</span>inverse_transform(scaled_preds)<span style="color:#f92672">.</span>flatten()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Build result DataFrame</span>
+</span></span><span style="display:flex;"><span>    results <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame({
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;movieid&#39;</span>: unrated_movies[<span style="color:#e6db74">&#39;movieid&#39;</span>],
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;predicted_raw&#39;</span>: predictions,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;title&#39;</span>: unrated_movies[<span style="color:#e6db74">&#39;movieid&#39;</span>]<span style="color:#f92672">.</span>map(dict(zip(movies_df[<span style="color:#e6db74">&#39;movieid&#39;</span>], movies_df[<span style="color:#e6db74">&#39;title&#39;</span>])))
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Join with movie rating stats</span>
+</span></span><span style="display:flex;"><span>    movie_stats <span style="color:#f92672">=</span> ratings_df<span style="color:#f92672">.</span>groupby(<span style="color:#e6db74">&#39;movieid&#39;</span>)<span style="color:#f92672">.</span>agg(
+</span></span><span style="display:flex;"><span>        avg_rating<span style="color:#f92672">=</span>(<span style="color:#e6db74">&#39;rating&#39;</span>, <span style="color:#e6db74">&#39;mean&#39;</span>),
+</span></span><span style="display:flex;"><span>        rating_count<span style="color:#f92672">=</span>(<span style="color:#e6db74">&#39;rating&#39;</span>, <span style="color:#e6db74">&#39;count&#39;</span>)
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    results <span style="color:#f92672">=</span> results<span style="color:#f92672">.</span>merge(movie_stats, on<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;movieid&#39;</span>, how<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;left&#39;</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Clip predictions to valid rating range</span>
+</span></span><span style="display:flex;"><span>    results[<span style="color:#e6db74">&#39;predicted&#39;</span>] <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>clip(results[<span style="color:#e6db74">&#39;predicted&#39;</span>], <span style="color:#ae81ff">0.5</span>, <span style="color:#ae81ff">5.0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Filter by movies with enough votes and sort</span>
+</span></span><span style="display:flex;"><span>    results <span style="color:#f92672">=</span> results[
+</span></span><span style="display:flex;"><span>        (results[<span style="color:#e6db74">&#39;rating_count&#39;</span>] <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>    ]<span style="color:#f92672">.</span>sort_values(
+</span></span><span style="display:flex;"><span>        by<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;predicted&#39;</span>, <span style="color:#e6db74">&#39;rating_count&#39;</span>], 
+</span></span><span style="display:flex;"><span>        ascending<span style="color:#f92672">=</span>[<span style="color:#66d9ef">False</span>, <span style="color:#66d9ef">False</span>]
+</span></span><span style="display:flex;"><span>    )<span style="color:#f92672">.</span>head(maxcount)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Print the final top-N recommendations</span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Top </span><span style="color:#e6db74">{</span>maxcount<span style="color:#e6db74">}</span><span style="color:#e6db74"> Recommendations for User </span><span style="color:#e6db74">{</span>uid<span style="color:#e6db74">}</span><span style="color:#e6db74">:&#34;</span>)
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{:&lt;50}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{:&lt;8}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{:&lt;8}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{:&lt;8}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{:&lt;10}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;Title&#34;</span>, <span style="color:#e6db74">&#34;Pred&#34;</span>, <span style="color:#e6db74">&#34;Avg&#34;</span>, <span style="color:#e6db74">&#34;Votes&#34;</span>, <span style="color:#e6db74">&#34;Δ&#34;</span>))
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;-&#34;</span><span style="color:#f92672">*</span><span style="color:#ae81ff">85</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> _, row <span style="color:#f92672">in</span> results<span style="color:#f92672">.</span>iterrows():
+</span></span><span style="display:flex;"><span>        delta <span style="color:#f92672">=</span> row[<span style="color:#e6db74">&#39;predicted&#39;</span>] <span style="color:#f92672">-</span> row[<span style="color:#e6db74">&#39;avg_rating&#39;</span>]
+</span></span><span style="display:flex;"><span>        reliability <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> row[<span style="color:#e6db74">&#39;rating_count&#39;</span>] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">100</span>:
+</span></span><span style="display:flex;"><span>            reliability <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;✓✓✓&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">elif</span> row[<span style="color:#e6db74">&#39;rating_count&#39;</span>] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">50</span>:
+</span></span><span style="display:flex;"><span>            reliability <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;✓✓&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">elif</span> row[<span style="color:#e6db74">&#39;rating_count&#39;</span>] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">20</span>:
+</span></span><span style="display:flex;"><span>            reliability <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;✓&#34;</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{:&lt;50}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{:&lt;8.2f}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{:&lt;8.2f}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{:&lt;8}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{:&lt;+8.2f}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(
+</span></span><span style="display:flex;"><span>            row[<span style="color:#e6db74">&#39;title&#39;</span>][:<span style="color:#ae81ff">48</span>], 
+</span></span><span style="display:flex;"><span>            row[<span style="color:#e6db74">&#39;predicted&#39;</span>],
+</span></span><span style="display:flex;"><span>            row[<span style="color:#e6db74">&#39;avg_rating&#39;</span>],
+</span></span><span style="display:flex;"><span>            int(row[<span style="color:#e6db74">&#39;rating_count&#39;</span>]),
+</span></span><span style="display:flex;"><span>            delta,
+</span></span><span style="display:flex;"><span>            reliability))
+</span></span></code></pre></div><h3 id="evaluating-predictions-on-previously-rated-movies">Evaluating Predictions on Previously Rated Movies</h3>
+<p>We also assess how well the model performs by comparing predictions against the user’s actual ratings:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>    rated_predictions <span style="color:#f92672">=</span> get_rated_predictions(
+</span></span><span style="display:flex;"><span>        uid, model, user_features_df, item_features_df,
+</span></span><span style="display:flex;"><span>        ratings_df, scalerUser, scalerItem, scalerTarget
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> rated_predictions<span style="color:#f92672">.</span>empty:
+</span></span><span style="display:flex;"><span>        mse <span style="color:#f92672">=</span> ((rated_predictions[<span style="color:#e6db74">&#39;predicted&#39;</span>] <span style="color:#f92672">-</span> rated_predictions[<span style="color:#e6db74">&#39;actual&#39;</span>])<span style="color:#f92672">**</span><span style="color:#ae81ff">2</span>)<span style="color:#f92672">.</span>mean()
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Model Performance on Rated Movies:&#34;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;- RMSE: </span><span style="color:#e6db74">{</span>np<span style="color:#f92672">.</span>sqrt(mse)<span style="color:#e6db74">:</span><span style="color:#e6db74">.4f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;- Correlation: </span><span style="color:#e6db74">{</span>rated_predictions[<span style="color:#e6db74">&#39;predicted&#39;</span>]<span style="color:#f92672">.</span>corr(rated_predictions[<span style="color:#e6db74">&#39;actual&#39;</span>])<span style="color:#e6db74">:</span><span style="color:#e6db74">.4f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Rating Scale Guide:&#34;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;4.5+     : Very likely to enjoy&#34;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;4.0–4.5  : Probably will enjoy&#34;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;3.5–4.0  : Might enjoy&#34;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;&lt;3.5     : Less likely to enjoy&#34;</span>)
+</span></span></code></pre></div><h3 id="supporting-function---get_rated_predictions">Supporting Function - get_rated_predictions()</h3>
+<p>This helper function returns model predictions for items the user has already rated, so we can compare against ground truth.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_rated_predictions</span>(uid, model, user_features_df, item_features_df, 
+</span></span><span style="display:flex;"><span>                         ratings_df, scalerUser, scalerItem, scalerTarget):
+</span></span><span style="display:flex;"><span>    user_ratings <span style="color:#f92672">=</span> ratings_df[ratings_df[<span style="color:#e6db74">&#39;userid&#39;</span>] <span style="color:#f92672">==</span> uid]
+</span></span><span style="display:flex;"><span>    rated_items <span style="color:#f92672">=</span> item_features_df[item_features_df[<span style="color:#e6db74">&#39;movieid&#39;</span>]<span style="color:#f92672">.</span>isin(user_ratings[<span style="color:#e6db74">&#39;movieid&#39;</span>])]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> len(rated_items) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> pd<span style="color:#f92672">.</span>DataFrame()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    user_vec <span style="color:#f92672">=</span> user_features_df[user_features_df[<span style="color:#e6db74">&#39;userid&#39;</span>] <span style="color:#f92672">==</span> uid][scalerUser<span style="color:#f92672">.</span>feature_names_in_]
+</span></span><span style="display:flex;"><span>    user_vecs <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>concat([user_vec] <span style="color:#f92672">*</span> len(rated_items), ignore_index<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    suser_vecs <span style="color:#f92672">=</span> scalerUser<span style="color:#f92672">.</span>transform(user_vecs)
+</span></span><span style="display:flex;"><span>    sitem_vecs <span style="color:#f92672">=</span> scalerItem<span style="color:#f92672">.</span>transform(rated_items[scalerItem<span style="color:#f92672">.</span>feature_names_in_])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    scaled_preds <span style="color:#f92672">=</span> model<span style="color:#f92672">.</span>predict([suser_vecs, sitem_vecs])
+</span></span><span style="display:flex;"><span>    predictions <span style="color:#f92672">=</span> scalerTarget<span style="color:#f92672">.</span>inverse_transform(scaled_preds)<span style="color:#f92672">.</span>flatten()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> pd<span style="color:#f92672">.</span>DataFrame({
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;movieid&#39;</span>: rated_items[<span style="color:#e6db74">&#39;movieid&#39;</span>]<span style="color:#f92672">.</span>values,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;actual&#39;</span>: user_ratings[<span style="color:#e6db74">&#39;rating&#39;</span>]<span style="color:#f92672">.</span>values,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;predicted&#39;</span>: predictions
+</span></span><span style="display:flex;"><span>    })
+</span></span></code></pre></div><h3 id="example--output">Example  Output</h3>
+<p>Let’s test this by generating recommendations for User 2:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>user_genre_features_df <span style="color:#f92672">=</span> user_genre_features_df<span style="color:#f92672">.</span>reset_index()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assert</span> <span style="color:#e6db74">&#39;userid&#39;</span> <span style="color:#f92672">in</span> user_genre_features_df<span style="color:#f92672">.</span>columns
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>predict_and_display_for_user(
+</span></span><span style="display:flex;"><span>    uid<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>    model<span style="color:#f92672">=</span>model,
+</span></span><span style="display:flex;"><span>    user_features_df<span style="color:#f92672">=</span>user_genre_features_df,
+</span></span><span style="display:flex;"><span>    item_features_df<span style="color:#f92672">=</span>item_features_df,
+</span></span><span style="display:flex;"><span>    ratings_df<span style="color:#f92672">=</span>ratings_df,
+</span></span><span style="display:flex;"><span>    movies_df<span style="color:#f92672">=</span>movies_df,
+</span></span><span style="display:flex;"><span>    scalerUser<span style="color:#f92672">=</span>scalerUser,
+</span></span><span style="display:flex;"><span>    scalerItem<span style="color:#f92672">=</span>scalerItem,
+</span></span><span style="display:flex;"><span>    scalerTarget<span style="color:#f92672">=</span>scalerTarget,
+</span></span><span style="display:flex;"><span>    maxcount<span style="color:#f92672">=</span><span style="color:#ae81ff">15</span>
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p><img src="/images/movies/movies-content-based-filtering-model-prediction.png" alt="movies-content-based-filtering-model-prediction"></p>
+<hr>
+<h2 id="pgvector-embedding-based-movie-recommendations">PgVector: Embedding-Based Movie Recommendations</h2>
+<h3 id="1-insert-embedding">1. Insert Embedding</h3>
+<p>To enable similarity search with <code>pgvector</code>, we first generate embeddings using a previously trained model. These embeddings are then stored in a PostgreSQL table with the vector extension enabled.</p>
+<p>The following <code>VectorRecommender</code> class handles embedding generation, storage, and querying for similar items and personalized recommendations:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> psycopg2
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> psycopg2.extras <span style="color:#f92672">import</span> execute_values
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.preprocessing <span style="color:#f92672">import</span> StandardScaler, MinMaxScaler
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sqlalchemy <span style="color:#f92672">import</span> create_engine, text
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> tensorflow <span style="color:#66d9ef">as</span> tf
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> tqdm <span style="color:#f92672">import</span> tqdm
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">VectorRecommender</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, db_config, target_schema<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;movie_recommender&#34;</span>):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>db_config <span style="color:#f92672">=</span> db_config
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>target_schema <span style="color:#f92672">=</span> target_schema
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>embedding_table <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;movie_embeddings&#34;</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>engine <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>embedding_dim <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>_initialize_connection() 
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_initialize_connection</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>engine <span style="color:#f92672">=</span> create_engine(
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;postgresql+psycopg2://</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>db_config[<span style="color:#e6db74">&#39;user&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>db_config[<span style="color:#e6db74">&#39;password&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">@&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>db_config[<span style="color:#e6db74">&#39;host&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>db_config[<span style="color:#e6db74">&#39;port&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">/</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>db_config[<span style="color:#e6db74">&#39;database&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">with</span> self<span style="color:#f92672">.</span>engine<span style="color:#f92672">.</span>connect() <span style="color:#66d9ef">as</span> conn:
+</span></span><span style="display:flex;"><span>                conn<span style="color:#f92672">.</span>execute(text(<span style="color:#e6db74">&#34;SELECT 1&#34;</span>))
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;Database connection established&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Connection failed: </span><span style="color:#e6db74">{</span>e<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>engine <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">setup_embeddings</span>(self, model, item_features_df, scalerItem):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>            item_nn <span style="color:#f92672">=</span> model<span style="color:#f92672">.</span>get_layer(<span style="color:#e6db74">&#39;item_sequential_network&#39;</span>)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            input_item <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Input(shape<span style="color:#f92672">=</span>(item_features_df<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,))
+</span></span><span style="display:flex;"><span>            vm <span style="color:#f92672">=</span> item_nn(input_item)
+</span></span><span style="display:flex;"><span>            vm <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Lambda(<span style="color:#66d9ef">lambda</span> x: tf<span style="color:#f92672">.</span>linalg<span style="color:#f92672">.</span>l2_normalize(x, axis<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>))(vm)
+</span></span><span style="display:flex;"><span>            embedding_model <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>Model(inputs<span style="color:#f92672">=</span>input_item, outputs<span style="color:#f92672">=</span>vm)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            item_features <span style="color:#f92672">=</span> item_features_df<span style="color:#f92672">.</span>iloc[:, <span style="color:#ae81ff">1</span>:]<span style="color:#f92672">.</span>values 
+</span></span><span style="display:flex;"><span>            scaled_features <span style="color:#f92672">=</span> scalerItem<span style="color:#f92672">.</span>transform(item_features)
+</span></span><span style="display:flex;"><span>            embeddings <span style="color:#f92672">=</span> embedding_model<span style="color:#f92672">.</span>predict(scaled_features, batch_size<span style="color:#f92672">=</span><span style="color:#ae81ff">512</span>, verbose<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>embedding_dim <span style="color:#f92672">=</span> embeddings<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            movie_ids <span style="color:#f92672">=</span> item_features_df[<span style="color:#e6db74">&#39;movieid&#39;</span>]<span style="color:#f92672">.</span>values
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_store_embeddings(movie_ids, embeddings)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Embedding setup failed: </span><span style="color:#e6db74">{</span>e<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_store_embeddings</span>(self, movie_ids, embeddings):
+</span></span><span style="display:flex;"><span>        data <span style="color:#f92672">=</span> [(int(mid), [float(x) <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> emb]) 
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">for</span> mid, emb <span style="color:#f92672">in</span> zip(movie_ids, embeddings)]
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">with</span> psycopg2<span style="color:#f92672">.</span>connect(<span style="color:#f92672">**</span>self<span style="color:#f92672">.</span>db_config) <span style="color:#66d9ef">as</span> conn:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">with</span> conn<span style="color:#f92672">.</span>cursor() <span style="color:#66d9ef">as</span> cursor:
+</span></span><span style="display:flex;"><span>                print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Storing </span><span style="color:#e6db74">{</span>len(data)<span style="color:#e6db74">}</span><span style="color:#e6db74"> embeddings...&#34;</span>)
+</span></span><span style="display:flex;"><span>                execute_values(
+</span></span><span style="display:flex;"><span>                    cursor,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                    INSERT INTO </span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>target_schema<span style="color:#e6db74">}</span><span style="color:#e6db74">.</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>embedding_table<span style="color:#e6db74">}</span><span style="color:#e6db74"> (movieid, embedding)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                    VALUES %s
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                    ON CONFLICT (movieid) DO UPDATE 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                    SET embedding = EXCLUDED.embedding;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                    &#34;&#34;&#34;</span>,
+</span></span><span style="display:flex;"><span>                    data,
+</span></span><span style="display:flex;"><span>                    page_size<span style="color:#f92672">=</span><span style="color:#ae81ff">500</span>
+</span></span><span style="display:flex;"><span>                )
+</span></span><span style="display:flex;"><span>                conn<span style="color:#f92672">.</span>commit()
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;Embeddings stored successfully&#34;</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_similar_movies</span>(self, movie_id, top_n<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">with</span> self<span style="color:#f92672">.</span>engine<span style="color:#f92672">.</span>connect() <span style="color:#66d9ef">as</span> conn:
+</span></span><span style="display:flex;"><span>            result <span style="color:#f92672">=</span> conn<span style="color:#f92672">.</span>execute(text(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                SELECT m.movieid, m.title, m.genres, 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                       e.embedding &lt;-&gt; (SELECT embedding FROM </span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>target_schema<span style="color:#e6db74">}</span><span style="color:#e6db74">.</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>embedding_table<span style="color:#e6db74">}</span><span style="color:#e6db74"> 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                                       WHERE movieid = :movie_id) AS distance
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                FROM </span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>target_schema<span style="color:#e6db74">}</span><span style="color:#e6db74">.</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>embedding_table<span style="color:#e6db74">}</span><span style="color:#e6db74"> e
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                JOIN </span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>target_schema<span style="color:#e6db74">}</span><span style="color:#e6db74">.movies m ON e.movieid = m.movieid
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                WHERE e.movieid != :movie_id
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                ORDER BY distance ASC
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                LIMIT :top_n;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;&#34;&#34;</span>), {<span style="color:#e6db74">&#39;movie_id&#39;</span>: movie_id, <span style="color:#e6db74">&#39;top_n&#39;</span>: top_n})
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> result<span style="color:#f92672">.</span>fetchall()
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_user_recommendations</span>(self, user_id, top_n<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">with</span> self<span style="color:#f92672">.</span>engine<span style="color:#f92672">.</span>connect() <span style="color:#66d9ef">as</span> conn:
+</span></span><span style="display:flex;"><span>            top_rated <span style="color:#f92672">=</span> conn<span style="color:#f92672">.</span>execute(text(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                SELECT movieid FROM </span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>target_schema<span style="color:#e6db74">}</span><span style="color:#e6db74">.ratings
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                WHERE userid = :user_id
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                ORDER BY rating DESC
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                LIMIT 3;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;&#34;&#34;</span>), {<span style="color:#e6db74">&#39;user_id&#39;</span>: user_id})<span style="color:#f92672">.</span>fetchall()
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> top_rated:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>            recommendations <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (movie_id,) <span style="color:#f92672">in</span> top_rated:
+</span></span><span style="display:flex;"><span>                similar <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>get_similar_movies(movie_id, top_n)
+</span></span><span style="display:flex;"><span>                recommendations<span style="color:#f92672">.</span>extend(similar)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            recs_formatted <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> rec <span style="color:#f92672">in</span> recommendations:
+</span></span><span style="display:flex;"><span>                recs_formatted<span style="color:#f92672">.</span>append({
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;movieid&#39;</span>: rec<span style="color:#f92672">.</span>movieid,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;title&#39;</span>: rec<span style="color:#f92672">.</span>title,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;genres&#39;</span>: rec<span style="color:#f92672">.</span>genres,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;distance&#39;</span>: rec<span style="color:#f92672">.</span>distance
+</span></span><span style="display:flex;"><span>                })
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># Deduplicate by closest distance</span>
+</span></span><span style="display:flex;"><span>            unique_recs <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> rec <span style="color:#f92672">in</span> recs_formatted:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> rec[<span style="color:#e6db74">&#39;movieid&#39;</span>] <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> unique_recs <span style="color:#f92672">or</span> rec[<span style="color:#e6db74">&#39;distance&#39;</span>] <span style="color:#f92672">&lt;</span> unique_recs[rec[<span style="color:#e6db74">&#39;movieid&#39;</span>]][<span style="color:#e6db74">&#39;distance&#39;</span>]:
+</span></span><span style="display:flex;"><span>                    unique_recs[rec[<span style="color:#e6db74">&#39;movieid&#39;</span>]] <span style="color:#f92672">=</span> rec
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> sorted(unique_recs<span style="color:#f92672">.</span>values(), key<span style="color:#f92672">=</span><span style="color:#66d9ef">lambda</span> x: x[<span style="color:#e6db74">&#39;distance&#39;</span>])[:top_n]   
+</span></span></code></pre></div><p><strong>Example Usage</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Database configuration</span>
+</span></span><span style="display:flex;"><span>db_config <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;database&#39;</span>: <span style="color:#e6db74">&#39;postgres&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;user&#39;</span>: <span style="color:#e6db74">&#39;postgres&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;password&#39;</span>: <span style="color:#e6db74">&#39;W8oMlEyhq9&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;host&#39;</span>: <span style="color:#e6db74">&#39;postgres-postgresql.postgres&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;port&#39;</span>: <span style="color:#e6db74">&#39;5432&#39;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Initialize recommender</span>
+</span></span><span style="display:flex;"><span>recommender <span style="color:#f92672">=</span> VectorRecommender(db_config)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Run only once to populate the embeddings</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#66d9ef">False</span>: 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> recommender<span style="color:#f92672">.</span>setup_embeddings(model, item_features_df, scalerItem):
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;Failed to setup embeddings&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get personalized recommendations</span>
+</span></span><span style="display:flex;"><span>user_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Recommendations for user </span><span style="color:#e6db74">{</span>user_id<span style="color:#e6db74">}</span><span style="color:#e6db74">:&#34;</span>)
+</span></span><span style="display:flex;"><span>recs <span style="color:#f92672">=</span> recommender<span style="color:#f92672">.</span>get_user_recommendations(user_id)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> recs:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> rec <span style="color:#f92672">in</span> recs:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;- </span><span style="color:#e6db74">{</span>rec[<span style="color:#e6db74">&#39;title&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74"> (</span><span style="color:#e6db74">{</span>rec[<span style="color:#e6db74">&#39;genres&#39;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">) [similarity: </span><span style="color:#e6db74">{</span>rec[<span style="color:#e6db74">&#39;distance&#39;</span>]<span style="color:#e6db74">:</span><span style="color:#e6db74">.3f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">]&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;No recommendations found&#34;</span>)    
+</span></span></code></pre></div><p><img src="/images/movies/movies-recommendation-for-existing-user.png" alt="movies-recommendation-for-existing-user"></p>
+<h3 id="2-finding-similar-items">2. Finding Similar Items</h3>
+<p>Once embeddings are stored in PostgreSQL with <code>pgvector</code>, you can quickly find similar items using the &lt;-&gt; operator for cosine distance:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Find similar movies</span>
+</span></span><span style="display:flex;"><span>movie_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>  <span style="color:#75715e"># Toy Story</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Movies similar to ID </span><span style="color:#e6db74">{</span>movie_id<span style="color:#e6db74">}</span><span style="color:#e6db74">:&#34;</span>)
+</span></span><span style="display:flex;"><span>similar <span style="color:#f92672">=</span> recommender<span style="color:#f92672">.</span>get_similar_movies(movie_id)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> similar:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> movie <span style="color:#f92672">in</span> similar:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;- </span><span style="color:#e6db74">{</span>movie<span style="color:#f92672">.</span>title<span style="color:#e6db74">}</span><span style="color:#e6db74"> (</span><span style="color:#e6db74">{</span>movie<span style="color:#f92672">.</span>genres<span style="color:#e6db74">}</span><span style="color:#e6db74">) [distance: </span><span style="color:#e6db74">{</span>movie<span style="color:#f92672">.</span>distance<span style="color:#e6db74">:</span><span style="color:#e6db74">.3f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">]&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;No similar movies found&#34;</span>)
+</span></span></code></pre></div><p><img src="/images/movies/finding-similar-movies-from-pgvector.png" alt="finding-similar-movies-from-pgvector"></p>
+
+  
+  <hr>
+<div class="footer">
+    
+	    
+            <a class="previous-post" href="https://seehiong.github.io/2025/from-model-to-hdb-app/?ref=footer"><span style="font-weight:bold;">« Previous</span><br>From Model to HDB App</a>
+        
+	    
+    
+</div>
+
+  
+  <br>
+<div class="comments">
+    <script>
+        const getStoredTheme = () => {
+            const themeFromLS = localStorage.getItem("theme");
+            const themeFromHugo = document.body.classList.contains("dark-theme") ? "dark" : "light";
+            const currentTheme = themeFromLS ? themeFromLS : themeFromHugo;
+            return currentTheme;
+        };
+
+        const setGiscusTheme = (theme) => {
+            const sendMessage = (message) => {
+                const iframe = document.querySelector('iframe.giscus-frame');
+                if (iframe) {
+                    iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+                }
+            };
+            sendMessage({ setConfig: { theme } });
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            setGiscusTheme(getStoredTheme());
+
+            const giscusAttributes = {
+                "src": "https://giscus.app/client.js",
+                "data-repo": "seehiong/seehiong.github.io",
+                "data-repo-id": "R_kgDOJg7Puw",
+                "data-category": "General",
+                "data-category-id": "DIC_kwDOJg7Pu84Cbyhc",
+                "data-mapping": "url",
+                "data-strict": "0",
+                "data-reactions-enabled": "1",
+                "data-emit-metadata": "0",
+                "data-input-position": "top",
+                "data-theme": getStoredTheme(),
+                "data-lang": "en",
+                "data-loading": "lazy",
+                "crossorigin": "anonymous",
+                "async": "",
+            };
+
+            
+            const giscusScript = document.createElement("script");
+            Object.entries(giscusAttributes).forEach(
+                ([key, value]) => giscusScript.setAttribute(key, value));
+            document.querySelector(".comments").appendChild(giscusScript);
+
+            
+            const themeSwitcher = document.querySelector(".btn-light-dark");
+            if (themeSwitcher) {
+                themeSwitcher.addEventListener("click", () => {
+                    const currentTheme = getStoredTheme();
+                    document.documentElement.classList.toggle("dark", currentTheme);
+                    setGiscusTheme(currentTheme);
+                });
+            }
+        });
+    </script>
+</div>
+</div>
+            </main>
+            
+  
+    <div class="article-toc ">
+    <div class="toc-wrapper">
+      <h4 id="contents"></h4>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#environment-setup">Environment Setup</a>
+      <ul>
+        <li><a href="#postgresql-installation">PostgreSQL Installation</a></li>
+        <li><a href="#database-schema-preparation">Database Schema Preparation</a></li>
+      </ul>
+    </li>
+    <li><a href="#load-data-from-csv">Load Data from CSV</a>
+      <ul>
+        <li><a href="#1-database-configuration-in-jupyter">1. Database Configuration in Jupyter</a></li>
+        <li><a href="#2-writing-csv-to-postgresql">2. Writing CSV to PostgreSQL</a></li>
+      </ul>
+    </li>
+    <li><a href="#load-data-from-postgresql">Load Data from PostgreSQL</a></li>
+    <li><a href="#feature-engineering">Feature Engineering</a>
+      <ul>
+        <li><a href="#movie-features">Movie Features</a></li>
+        <li><a href="#user-features">User Features</a></li>
+        <li><a href="#final-feature-assembly">Final Feature Assembly</a></li>
+      </ul>
+    </li>
+    <li><a href="#define-the-model">Define the Model</a></li>
+    <li><a href="#compile-the-model">Compile the Model</a></li>
+    <li><a href="#train-the-model">Train the Model</a></li>
+    <li><a href="#evaluate-the-model">Evaluate the Model</a></li>
+    <li><a href="#predicting-ratings-for-an-existing-user">Predicting Ratings for an Existing User</a>
+      <ul>
+        <li><a href="#evaluating-predictions-on-previously-rated-movies">Evaluating Predictions on Previously Rated Movies</a></li>
+        <li><a href="#supporting-function---get_rated_predictions">Supporting Function - get_rated_predictions()</a></li>
+        <li><a href="#example--output">Example  Output</a></li>
+      </ul>
+    </li>
+    <li><a href="#pgvector-embedding-based-movie-recommendations">PgVector: Embedding-Based Movie Recommendations</a>
+      <ul>
+        <li><a href="#1-insert-embedding">1. Insert Embedding</a></li>
+        <li><a href="#2-finding-similar-items">2. Finding Similar Items</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+      
+    </div>
+</div>
+  
+
+        </div>
+    </body>
+</html>
+
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\\(', '\\)']]                  
+    }
+  };
+</script>
