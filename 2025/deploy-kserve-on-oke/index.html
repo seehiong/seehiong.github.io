@@ -1924,7 +1924,7 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
           
         
 
-        <span>3 mins read</span>
+        <span>4 mins read</span>
       </span>
     </div>
 
@@ -1945,6 +1945,10 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
       
       <li class="tag-Istio">
         <a href="https://seehiong.github.io/tags/istio">Istio</a>
+      </li>
+      
+      <li class="tag-Streamlit">
+        <a href="https://seehiong.github.io/tags/streamlit">Streamlit</a>
       </li>
       
     </ul>
@@ -1978,6 +1982,7 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 <p><img src="/images/oke/oke-create-cluster.png" alt="oke-create-cluster"></p>
 <p>For this demo, I created a 1-node basic cluster and waited until the node status changed to <strong>Ready</strong> and <strong>Active</strong>:</p>
 <p><img src="/images/oke/oke-create-cluster-quick.png" alt="oke-create-cluster-quick"></p>
+<hr>
 <h2 id="step-2-oci-command-line-interface-cli">Step 2: OCI Command Line Interface (CLI)</h2>
 <p>Follow the <a href="https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/climanualinst.htm" target="_blank">official OCI CLI guide</a> to install the CLI. I extracted the <a href="https://github.com/oracle/oci-cli/releases/download/v3.55.0/oci-cli-3.55.0.zip" target="_blank">oci-cli-3.55.0.zip</a> to <code>F:\oci-cli</code>. The API key setup is covered in the Oracle documentation, so I’ll skip it here.</p>
 <p>Set up the environment:</p>
@@ -1996,12 +2001,13 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># (oracle-cli) F:\oci-cli&gt;kubectl get no</span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># NAME          STATUS   ROLES   AGE   VERSION</span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># 10.0.10.184   Ready    node    40s   v1.33.0</span>
-</span></span></code></pre></div><h2 id="step-3-install-kserve-and-dependencies">Step 3: Install KServe and Dependencies</h2>
-<h3 id="1-install-cert-manager">1. Install Cert Manager</h3>
+</span></span></code></pre></div><hr>
+<h2 id="step-3-install-kserve-and-dependencies">Step 3: Install KServe and Dependencies</h2>
+<h3 id="31-install-cert-manager">3.1 Install Cert Manager</h3>
 <p>Follow the <a href="https://kserve.github.io/website/0.15/admin/kubernetes_deployment/" target="_blank">KServe 0.15 setup guide</a>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.2/cert-manager.yaml
 </span></span><span style="display:flex;"><span>kubectl get deployments -n cert-manager
-</span></span></code></pre></div><h3 id="2-install-istio-via-helm">2. Install Istio via Helm</h3>
+</span></span></code></pre></div><h3 id="32-install-istio-via-helm">3.2 Install Istio via Helm</h3>
 <p>Referencing <a href="https://istio.io/latest/docs/setup/install/helm/" target="_blank">Istio&rsquo;s Helm installation guide</a>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>helm repo add istio https://istio-release.storage.googleapis.com/charts
 </span></span><span style="display:flex;"><span>helm repo update
@@ -2021,7 +2027,7 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 </span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">controller</span>: <span style="color:#ae81ff">istio.io/ingress-controller</span>
 </span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f istio-ingressclass.yaml
-</span></span></code></pre></div><h3 id="3-install-kserve">3. Install KServe</h3>
+</span></span></code></pre></div><h3 id="33-install-kserve">3.3 Install KServe</h3>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>helm install kserve-crd oci://ghcr.io/kserve/charts/kserve-crd --version v0.15.0 -n kserve --create-namespace
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>helm install kserve oci://ghcr.io/kserve/charts/kserve --version v0.15.0 --set kserve.controller.deploymentMode<span style="color:#f92672">=</span>RawDeployment --set kserve.controller.gateway.ingressGateway.className<span style="color:#f92672">=</span>istio -n kserve --create-namespace
@@ -2057,8 +2063,28 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># SERVICE_HOSTNAME</span>
 </span></span><span style="display:flex;"><span>kubectl get inferenceservice sklearn-iris -n kserve-test -o jsonpath<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{.status.url}&#39;</span> | cut -d <span style="color:#e6db74">&#34;/&#34;</span> -f <span style="color:#ae81ff">3</span>
-</span></span></code></pre></div><h2 id="step-5-deploy-hdb-price-predictor">Step 5: Deploy HDB Price Predictor</h2>
-<p>Use the following sample input for prediction:</p>
+</span></span></code></pre></div><hr>
+<h2 id="step-5-deploy-hdb-price-predictor">Step 5: Deploy HDB Price Predictor</h2>
+<p>With the model files downloaded from my homelab MinIO, as shared in my <a href="https://seehiong.github.io/2025/from-model-to-hdb-app/" target="_blank">previous post</a>, we now upload the <code>price-predictor-model.bst</code> to an Oracle Cloud Object Storage bucket. Once uploaded, define an <code>InferenceService</code> to deploy the XGBoost model:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># price-predictor-xgboost.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#e6db74">&#34;serving.kserve.io/v1beta1&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#e6db74">&#34;InferenceService&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#e6db74">&#34;hdb-resale-xgb&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">kserve-test</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">predictor</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">model</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">modelFormat</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">name</span>: <span style="color:#ae81ff">xgboost</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">runtime</span>: <span style="color:#e6db74">&#34;kserve-xgbserver&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">protocolVersion</span>: <span style="color:#ae81ff">v2</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">storageUri</span>: <span style="color:#e6db74">&#34;https://objectstorage...oraclecloud.com/.../price-predictor-model.bst&#34;</span>   
+</span></span></code></pre></div><p>Apply the manifest and check the deployment status:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl apply -f price-predictor-xgboost.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kubectl get inferenceservices hdb-resale-xgb -n kserve-test
+</span></span></code></pre></div><p>Use the following input JSON for prediction:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{<span style="color:#f92672">&#34;inputs&#34;</span>:[
 </span></span><span style="display:flex;"><span>    {<span style="color:#f92672">&#34;name&#34;</span>:<span style="color:#e6db74">&#34;input-0&#34;</span>,
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;shape&#34;</span>:[<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">59</span>],
@@ -2068,13 +2094,24 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 </span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">0.2844036817550659</span>,<span style="color:#ae81ff">0.8858381509780884</span>,<span style="color:#ae81ff">0.125</span>,<span style="color:#ae81ff">0.5</span>,<span style="color:#ae81ff">0.8181818127632141</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">1.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">1.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">1.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>
 </span></span><span style="display:flex;"><span>    ]}
 </span></span><span style="display:flex;"><span>]}
-</span></span></code></pre></div><p>Send a prediction request to your model endpoint using curl, similar to the sklearn example above.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># SERVICE_HOSTNAME</span>
-</span></span><span style="display:flex;"><span>kubectl get inferenceservice hdb-resale-xgb -n kserve-test -o jsonpath<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{.status.url}&#39;</span> | cut -d <span style="color:#e6db74">&#34;/&#34;</span> -f <span style="color:#ae81ff">3</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>curl -v -H <span style="color:#e6db74">&#34;Host: hdb-resale-xgb-kserve-test.example.com&#34;</span> -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#e6db74">&#34;http://217.142.185.27:80/v2/models/hdb-resale-xgb/infer&#34;</span> -d @inference-input.json
+</span></span></code></pre></div><p>To send the inference request, first retrieve the service hostname:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl get inferenceservice hdb-resale-xgb -n kserve-test -o jsonpath<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{.status.url}&#39;</span> | cut -d <span style="color:#e6db74">&#34;/&#34;</span> -f <span style="color:#ae81ff">3</span>
+</span></span></code></pre></div><p>Then send the prediction using <code>curl</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl -v -H <span style="color:#e6db74">&#34;Host: hdb-resale-xgb-kserve-test.example.com&#34;</span> -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#e6db74">&#34;http://217.142.185.27:80/v2/models/hdb-resale-xgb/infer&#34;</span> -d @inference-input.json
 </span></span></code></pre></div><p><img src="/images/oke/oke-price-predictor-output.png" alt="oke-price-predictor-output"></p>
-<p>This setup demonstrates how you can deploy and serve ML models on Oracle Kubernetes Engine using KServe with Istio.</p>
+<hr>
+<h2 id="step-6-connect-streamlit-app-to-kserve-inference-endpoint">Step 6: Connect Streamlit App to KServe Inference Endpoint</h2>
+<p>Instead of deploying the frontend app in-cluster, the <strong>HDB Resale Price Predictor</strong> is hosted on <a href="https://hdb-resale-price-xgb-predictor.streamlit.app/" target="_blank">Streamlit Community Cloud</a>. It interacts with the XGBoost model served on Oracle Kubernetes Engine (OKE) via KServe and Istio.</p>
+<p>The app sends prediction requests to the public inference endpoint exposed through Istio Gateway. The request includes appropriate headers to route traffic correctly using the Host field, as shown below:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>KSERVE_URL <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>environ<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;KSERVE_URL&#34;</span>, <span style="color:#e6db74">&#34;http://&lt;public-ip&gt;:80/v2/models/hdb-resale-xgb/infer&#34;</span>)
+</span></span><span style="display:flex;"><span>KSERVE_HOST <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>environ<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;KSERVE_HOST&#34;</span>, <span style="color:#e6db74">&#34;hdb-resale-xgb-kserve-test.example.com&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>headers <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;Content-Type&#34;</span>: <span style="color:#e6db74">&#34;application/json&#34;</span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> KSERVE_HOST:
+</span></span><span style="display:flex;"><span>    headers[<span style="color:#e6db74">&#34;Host&#34;</span>] <span style="color:#f92672">=</span> KSERVE_HOST
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>response <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>post(KSERVE_URL, headers<span style="color:#f92672">=</span>headers, json<span style="color:#f92672">=</span>payload, timeout<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>)
+</span></span></code></pre></div><p>You can explore the complete Streamlit source code on GitHub: <a href="https://github.com/seehiong/hdb-price-predictor" target="_blank">https://github.com/seehiong/hdb-price-predictor</a></p>
 
   
   <hr>
@@ -2161,13 +2198,14 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
     <li><a href="#step-2-oci-command-line-interface-cli">Step 2: OCI Command Line Interface (CLI)</a></li>
     <li><a href="#step-3-install-kserve-and-dependencies">Step 3: Install KServe and Dependencies</a>
       <ul>
-        <li><a href="#1-install-cert-manager">1. Install Cert Manager</a></li>
-        <li><a href="#2-install-istio-via-helm">2. Install Istio via Helm</a></li>
-        <li><a href="#3-install-kserve">3. Install KServe</a></li>
+        <li><a href="#31-install-cert-manager">3.1 Install Cert Manager</a></li>
+        <li><a href="#32-install-istio-via-helm">3.2 Install Istio via Helm</a></li>
+        <li><a href="#33-install-kserve">3.3 Install KServe</a></li>
       </ul>
     </li>
     <li><a href="#step-4-deploy-your-first-inferenceservice">Step 4: Deploy Your First InferenceService</a></li>
     <li><a href="#step-5-deploy-hdb-price-predictor">Step 5: Deploy HDB Price Predictor</a></li>
+    <li><a href="#step-6-connect-streamlit-app-to-kserve-inference-endpoint">Step 6: Connect Streamlit App to KServe Inference Endpoint</a></li>
   </ul>
 </nav>
 
