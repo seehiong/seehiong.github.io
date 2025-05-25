@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2024/10/gpt-2-training-guide/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="GPT-2 Training Guide">
+  <meta property="og:description" content="This post documents my journey training GPT-2 on the Tiny Shakespeare dataset, inspired by Andrej Karpathy’s instructional video and nanoGPT repository. Following each step, I detail the setup process, from encoding data and optimizing the model with AdamW, to improving training stability with mixed precision and flash attention. The post includes practical insights on using pretrained weights, weight sharing, and efficient data handling, concluding with sample outputs from training and sampling a “baby” GPT model.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-10-31T10:00:00+08:00">
+    <meta property="article:modified_time" content="2024-10-31T10:00:00+08:00">
+    <meta property="article:tag" content="AI">
+    <meta property="article:tag" content="GPT">
+    <meta property="article:tag" content="PyTorch">
+    <meta property="article:tag" content="LLM">
+    <meta property="article:tag" content="NanoGPT">
+    <meta property="article:tag" content="MLflow">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="GPT-2 Training Guide">
+  <meta name="twitter:description" content="This post documents my journey training GPT-2 on the Tiny Shakespeare dataset, inspired by Andrej Karpathy’s instructional video and nanoGPT repository. Following each step, I detail the setup process, from encoding data and optimizing the model with AdamW, to improving training stability with mixed precision and flash attention. The post includes practical insights on using pretrained weights, weight sharing, and efficient data handling, concluding with sample outputs from training and sampling a “baby” GPT model.">
+
+  <meta itemprop="name" content="GPT-2 Training Guide">
+  <meta itemprop="description" content="This post documents my journey training GPT-2 on the Tiny Shakespeare dataset, inspired by Andrej Karpathy’s instructional video and nanoGPT repository. Following each step, I detail the setup process, from encoding data and optimizing the model with AdamW, to improving training stability with mixed precision and flash attention. The post includes practical insights on using pretrained weights, weight sharing, and efficient data handling, concluding with sample outputs from training and sampling a “baby” GPT model.">
+  <meta itemprop="datePublished" content="2024-10-31T10:00:00+08:00">
+  <meta itemprop="dateModified" content="2024-10-31T10:00:00+08:00">
+  <meta itemprop="wordCount" content="3652">
+  <meta itemprop="keywords" content="AI,GPT,PyTorch,LLM,NanoGPT,MLflow"><title>GPT-2 Training Guide | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2024/10/gpt-2-training-guide/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          
+          
+          <img src="/images/blog_logo.png" alt="See Hiong&#39;s Blog Logo" class="nav-logo-image">
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">GPT-2 Training Guide</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2024-10-31T10:00:00&#43;08:00">October 31, 2024</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/ai">AI</a>
+            
+              , <a href="/tags/gpt">GPT</a>
+            
+              , <a href="/tags/pytorch">PyTorch</a>
+            
+              , <a href="/tags/llm">LLM</a>
+            
+              , <a href="/tags/nanogpt">nanoGPT</a>
+            
+              , <a href="/tags/mlflow">MLflow</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/train-llm2/gpt-2-training-guide.png');"></div>
+          <img src="/images/train-llm2/gpt-2-training-guide.png" alt="GPT-2 Training Guide cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>In this post, I’ll build on my 
+
+
+
+
+
+
+  <a href="/posts/2024/10/gpt-2-setup-and-pretraining-guide/" >previous post</a>
+, where we set up GPT-2. Following Andrej Karpathy’s instructional video, I’ll walk through each step for training GPT-2 on a small dataset—Tiny Shakespeare. This post is a documentation of my learning journey with GPT-2, closely following Karpathy&rsquo;s approach.</p>
+<h2 id="training">Training</h2>
+<p>We&rsquo;ll use the Tiny Shakespeare dataset to get started:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">with</span> <span style="color:#6639ba">open</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;input.txt&#39;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;r&#39;</span><span style="color:#1f2328">)</span> <span style="color:#cf222e">as</span> f<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#0550ae">=</span> f<span style="color:#0550ae">.</span>read<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>data <span style="color:#0550ae">=</span> text<span style="color:#1f2328">[:</span><span style="color:#0550ae">1000</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>data<span style="color:#1f2328">[:</span><span style="color:#0550ae">100</span><span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Sample output:</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># First Citizen:</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Before we proceed any further, hear me speak.</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># All:</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Speak, speak.</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># First Citizen:</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># You</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>To verify the data size, we can use a word count tool in WSL:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>wc input.txt
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Output:</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 40000  202651 1115394 input.txt</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol>
+<li>Encoding the Dataset with tiktoken</li>
+</ol>
+<p>Using tiktoken to encode the dataset (GPT-2&rsquo;s tokenizer), we can observe that 198 represents the newline character:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">tiktoken</span>
+</span></span><span style="display:flex;"><span>enc <span style="color:#0550ae">=</span> tiktoken<span style="color:#0550ae">.</span>get_encoding<span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;gpt2&#39;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>tokens <span style="color:#0550ae">=</span> enc<span style="color:#0550ae">.</span>encode<span style="color:#1f2328">(</span>data<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>tokens<span style="color:#1f2328">[:</span><span style="color:#0550ae">24</span><span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># [5962, 22307, 25, 198, 8421, 356, 5120, 597, 2252, 11, 3285, 502, 2740, 13, 198, 198, 3237, 25, 198, 5248, 461, 11, 2740, 13]</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>To break this into sequences, we convert the encoded data into B x T tensors for batching.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">torch</span>
+</span></span><span style="display:flex;"><span>buf <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>tensor<span style="color:#1f2328">(</span>tokens<span style="color:#1f2328">[:</span><span style="color:#0550ae">24</span> <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>x <span style="color:#0550ae">=</span> buf<span style="color:#1f2328">[:</span><span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">]</span><span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span><span style="color:#0550ae">4</span><span style="color:#1f2328">,</span><span style="color:#0550ae">6</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>y <span style="color:#0550ae">=</span> buf<span style="color:#1f2328">[</span><span style="color:#0550ae">1</span><span style="color:#1f2328">:]</span><span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span><span style="color:#0550ae">4</span><span style="color:#1f2328">,</span><span style="color:#0550ae">6</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>x<span style="color:#1f2328">)</span> <span style="color:#57606a"># input tensor</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>y<span style="color:#1f2328">)</span> <span style="color:#57606a"># label tensor</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># tensor([[ 5962, 22307,    25,   198,  8421,   356],</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a">#         [ 5120,   597,  2252,    11,  3285,   502],</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a">#         [ 2740,    13,   198,   198,  3237,    25],</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a">#         [  198,  5248,   461,    11,  2740,    13]])</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># tensor([[22307,    25,   198,  8421,   356,  5120],</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a">#         [  597,  2252,    11,  3285,   502,  2740],</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a">#         [   13,   198,   198,  3237,    25,   198],</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a">#         [ 5248,   461,    11,  2740,    13,   198]])</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="2">
+<li>Adding a Loss Function</li>
+</ol>
+<p>Let&rsquo;s define a loss function in the custom GPT model:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">GPT</span><span style="color:#1f2328">(</span>nn<span style="color:#0550ae">.</span>Module<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0550ae">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">forward</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> idx<span style="color:#1f2328">,</span> targets<span style="color:#0550ae">=</span><span style="color:#cf222e">None</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># idx is of shape (B, T)</span>
+</span></span><span style="display:flex;"><span>        B<span style="color:#1f2328">,</span> T <span style="color:#0550ae">=</span> idx<span style="color:#0550ae">.</span>size<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">assert</span> T <span style="color:#0550ae">&lt;=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>config<span style="color:#0550ae">.</span>block_size<span style="color:#1f2328">,</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Cannot forward sequence of length </span><span style="color:#0a3069">{</span>t<span style="color:#0a3069">}</span><span style="color:#0a3069">, block size is only </span><span style="color:#0a3069">{</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>config<span style="color:#0550ae">.</span>block_size<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># forward the token and position embeddings</span>
+</span></span><span style="display:flex;"><span>        pos <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>arange<span style="color:#1f2328">(</span><span style="color:#0550ae">0</span><span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> dtype<span style="color:#0550ae">=</span>torch<span style="color:#0550ae">.</span>long<span style="color:#1f2328">,</span> device<span style="color:#0550ae">=</span>idx<span style="color:#0550ae">.</span>device<span style="color:#1f2328">)</span> <span style="color:#57606a"># shape (t)</span>
+</span></span><span style="display:flex;"><span>        pos_emb <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>transformer<span style="color:#0550ae">.</span>wpe<span style="color:#1f2328">(</span>pos<span style="color:#1f2328">)</span> <span style="color:#57606a"># position embeddings of shape (t, n_embd)</span>
+</span></span><span style="display:flex;"><span>        tok_emb <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>transformer<span style="color:#0550ae">.</span>wte<span style="color:#1f2328">(</span>idx<span style="color:#1f2328">)</span> <span style="color:#57606a"># token embeddings of shape (b, t, n_embd)</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#0550ae">=</span> tok_emb <span style="color:#0550ae">+</span> pos_emb
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># forward the blocks of the transformer</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">for</span> block <span style="color:#0550ae">in</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>transformer<span style="color:#0550ae">.</span>h<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            x <span style="color:#0550ae">=</span> block<span style="color:#1f2328">(</span>x<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># forward the final layernorm and the classifier</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>transformer<span style="color:#0550ae">.</span>ln_f<span style="color:#1f2328">(</span>x<span style="color:#1f2328">)</span>        
+</span></span><span style="display:flex;"><span>        logits <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>lm_head<span style="color:#1f2328">(</span>x<span style="color:#1f2328">)</span> <span style="color:#57606a"># (B, T, vocab_size)</span>
+</span></span><span style="display:flex;"><span>        loss <span style="color:#0550ae">=</span> <span style="color:#cf222e">None</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> targets <span style="color:#0550ae">is</span> <span style="color:#0550ae">not</span> <span style="color:#cf222e">None</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            loss <span style="color:#0550ae">=</span> F<span style="color:#0550ae">.</span>cross_entropy<span style="color:#1f2328">(</span>logits<span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span><span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> logits<span style="color:#0550ae">.</span>size<span style="color:#1f2328">(</span><span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">)),</span> targets<span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span><span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> logits<span style="color:#1f2328">,</span> loss
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>device <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;cpu&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">if</span> torch<span style="color:#0550ae">.</span>cuda<span style="color:#0550ae">.</span>is_available<span style="color:#1f2328">():</span>
+</span></span><span style="display:flex;"><span>    device <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;cuda&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">elif</span> <span style="color:#6639ba">hasattr</span><span style="color:#1f2328">(</span>torch<span style="color:#0550ae">.</span>backends<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;mps&#34;</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">and</span> torch<span style="color:#0550ae">.</span>backends<span style="color:#0550ae">.</span>mps<span style="color:#0550ae">.</span>is_available<span style="color:#1f2328">():</span>
+</span></span><span style="display:flex;"><span>    device <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;mps&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;using device: </span><span style="color:#0a3069">{</span>device<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># get a data batch</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">tiktoken</span>
+</span></span><span style="display:flex;"><span>enc <span style="color:#0550ae">=</span> tiktoken<span style="color:#0550ae">.</span>get_encoding<span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;gpt2&#39;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">with</span> <span style="color:#6639ba">open</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;input.txt&#39;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;r&#39;</span><span style="color:#1f2328">)</span> <span style="color:#cf222e">as</span> f<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>    text <span style="color:#0550ae">=</span> f<span style="color:#0550ae">.</span>read<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>text <span style="color:#0550ae">=</span> text<span style="color:#1f2328">[:</span><span style="color:#0550ae">1000</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>tokens <span style="color:#0550ae">=</span> enc<span style="color:#0550ae">.</span>encode<span style="color:#1f2328">(</span>text<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>B<span style="color:#1f2328">,</span> T <span style="color:#0550ae">=</span> <span style="color:#0550ae">4</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">32</span>
+</span></span><span style="display:flex;"><span>buf <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>tensor<span style="color:#1f2328">(</span>tokens<span style="color:#1f2328">[:</span>B<span style="color:#0550ae">*</span>T <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>buf <span style="color:#0550ae">=</span> buf<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span> <span style="color:#57606a"># move buf to same device</span>
+</span></span><span style="display:flex;"><span>x <span style="color:#0550ae">=</span> buf<span style="color:#1f2328">[:</span><span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">]</span><span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>y <span style="color:#0550ae">=</span> buf<span style="color:#1f2328">[</span><span style="color:#0550ae">1</span><span style="color:#1f2328">:]</span><span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># get logits</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#0550ae">=</span> GPT<span style="color:#1f2328">(</span>GPTConfig<span style="color:#1f2328">())</span>
+</span></span><span style="display:flex;"><span>model<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>logits<span style="color:#1f2328">,</span> loss <span style="color:#0550ae">=</span> model<span style="color:#1f2328">(</span>x<span style="color:#1f2328">,</span> y<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>loss<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># using device: cuda</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># tensor(11.0591, device=&#39;cuda:0&#39;, grad_fn=&lt;NllLossBackward0&gt;)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># expected loss at initialization</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">input</span> <span style="color:#0550ae">=</span> <span style="color:#0550ae">-</span>math<span style="color:#0550ae">.</span>log<span style="color:#1f2328">(</span><span style="color:#0550ae">1</span><span style="color:#0550ae">/</span><span style="color:#0550ae">50257</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#6639ba">input</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 10.82490511970208</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="3">
+<li>Optimizing the Model</li>
+</ol>
+<p>We&rsquo;ll use the AdamW optimizer, which is typically effective for initial GPT training:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># optimize!</span>
+</span></span><span style="display:flex;"><span>optimizer <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>optim<span style="color:#0550ae">.</span>AdamW<span style="color:#1f2328">(</span>model<span style="color:#0550ae">.</span>parameters<span style="color:#1f2328">(),</span> lr<span style="color:#0550ae">=</span><span style="color:#0550ae">3e-4</span><span style="color:#1f2328">)</span> <span style="color:#57606a"># good learning rate for most at the beginning</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">for</span> i <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span><span style="color:#0550ae">50</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>zero_grad<span style="color:#1f2328">()</span> <span style="color:#57606a"># to always start zero gradient</span>
+</span></span><span style="display:flex;"><span>    logits<span style="color:#1f2328">,</span> loss <span style="color:#0550ae">=</span> model<span style="color:#1f2328">(</span>x<span style="color:#1f2328">,</span> y<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    loss<span style="color:#0550ae">.</span>backward<span style="color:#1f2328">()</span> <span style="color:#57606a"># deposits or add the gradient </span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>step<span style="color:#1f2328">()</span> <span style="color:#57606a"># update parameters, decrease loss</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;step: </span><span style="color:#0a3069">{</span>i<span style="color:#0a3069">}</span><span style="color:#0a3069">, loss: </span><span style="color:#0a3069">{</span>loss<span style="color:#0550ae">.</span>item<span style="color:#1f2328">()</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 0, loss: 11.059085845947266</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 1, loss: 6.672627925872803</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 2, loss: 4.326003074645996</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 47, loss: 0.003014578018337488</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 48, loss: 0.002937569282948971</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 49, loss: 0.002866392722353339</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="4">
+<li>Adding a Simple DataLoader</li>
+</ol>
+<p>A lightweight data loader simplifies the batching process by iterating over the encoded data:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">tiktoken</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">DataLoaderLite</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">__init__</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>B <span style="color:#0550ae">=</span> B
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>T <span style="color:#0550ae">=</span> T
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">with</span> <span style="color:#6639ba">open</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;input.txt&#39;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;r&#39;</span><span style="color:#1f2328">)</span> <span style="color:#cf222e">as</span> f<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            text <span style="color:#0550ae">=</span> f<span style="color:#0550ae">.</span>read<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        enc <span style="color:#0550ae">=</span> tiktoken<span style="color:#0550ae">.</span>get_encoding<span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;gpt2&#39;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        tokens <span style="color:#0550ae">=</span> enc<span style="color:#0550ae">.</span>encode<span style="color:#1f2328">(</span>text<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>tokens <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>tensor<span style="color:#1f2328">(</span>tokens<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;loaded </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>tokens<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> tokens&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;1 epoch = </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>tokens<span style="color:#1f2328">)</span> <span style="color:#0550ae">//</span> <span style="color:#1f2328">(</span>B <span style="color:#0550ae">*</span> T<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> batches&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>current_position <span style="color:#0550ae">=</span> <span style="color:#0550ae">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">next_batch</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        B<span style="color:#1f2328">,</span> T <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>B<span style="color:#1f2328">,</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>T
+</span></span><span style="display:flex;"><span>        buf <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>tokens<span style="color:#1f2328">[</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>current_position <span style="color:#1f2328">:</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>current_position<span style="color:#0550ae">+</span>B<span style="color:#0550ae">*</span>T<span style="color:#0550ae">+</span><span style="color:#0550ae">1</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#0550ae">=</span> buf<span style="color:#1f2328">[:</span><span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">]</span><span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">)</span> <span style="color:#57606a"># inputs</span>
+</span></span><span style="display:flex;"><span>        y <span style="color:#0550ae">=</span> buf<span style="color:#1f2328">[</span><span style="color:#0550ae">1</span><span style="color:#1f2328">:]</span><span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">)</span> <span style="color:#57606a"># targets</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># advance the position in the tensor</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>current_position <span style="color:#0550ae">+=</span> B <span style="color:#0550ae">*</span> T
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># if loading the next batch would be out of bounds, reset</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>current_position <span style="color:#0550ae">+</span> <span style="color:#1f2328">(</span>B <span style="color:#0550ae">*</span> T <span style="color:#0550ae">+</span><span style="color:#0550ae">1</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">&gt;</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>tokens<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>current_position <span style="color:#0550ae">=</span> <span style="color:#0550ae">0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> x<span style="color:#1f2328">,</span> y
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>train_loader <span style="color:#0550ae">=</span> DataLoaderLite<span style="color:#1f2328">(</span>B<span style="color:#0550ae">=</span><span style="color:#0550ae">4</span><span style="color:#1f2328">,</span> T<span style="color:#0550ae">=</span><span style="color:#0550ae">32</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># get logits</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#0550ae">=</span> GPT<span style="color:#1f2328">(</span>GPTConfig<span style="color:#1f2328">())</span>
+</span></span><span style="display:flex;"><span>model<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># optimize!</span>
+</span></span><span style="display:flex;"><span>optimizer <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>optim<span style="color:#0550ae">.</span>AdamW<span style="color:#1f2328">(</span>model<span style="color:#0550ae">.</span>parameters<span style="color:#1f2328">(),</span> lr<span style="color:#0550ae">=</span><span style="color:#0550ae">3e-4</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">for</span> i <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span><span style="color:#0550ae">50</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> train_loader<span style="color:#0550ae">.</span>next_batch<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> x<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">),</span> y<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span> <span style="color:#57606a"># move tensor to device</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>zero_grad<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    logits<span style="color:#1f2328">,</span> loss <span style="color:#0550ae">=</span> model<span style="color:#1f2328">(</span>x<span style="color:#1f2328">,</span> y<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    loss<span style="color:#0550ae">.</span>backward<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>step<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;step: </span><span style="color:#0a3069">{</span>i<span style="color:#0a3069">}</span><span style="color:#0a3069">, loss: </span><span style="color:#0a3069">{</span>loss<span style="color:#0550ae">.</span>item<span style="color:#1f2328">()</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># loaded 338025 tokens</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 1 epoch = 2640 batches</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 0, loss: 11.003260612487793</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 1, loss: 9.66711139678955</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 2, loss: 8.685151100158691    </span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 47, loss: 5.960447311401367</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 48, loss: 6.783339500427246</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 49, loss: 6.529984474182129</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="5">
+<li>Using Pretrained GPT-2 Parameters</li>
+</ol>
+<p>Leveraging pretrained weights can enhance performance. Here, we validate that GPT-2&rsquo;s top and bottom layers share weights:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">transformers</span> <span style="color:#cf222e">import</span> GPT2LMHeadModel
+</span></span><span style="display:flex;"><span>model_hf <span style="color:#0550ae">=</span> GPT2LMHeadModel<span style="color:#0550ae">.</span>from_pretrained<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;gpt2&#34;</span><span style="color:#1f2328">)</span> <span style="color:#57606a">#124M</span>
+</span></span><span style="display:flex;"><span>sd_hf <span style="color:#0550ae">=</span> model_hf<span style="color:#0550ae">.</span>state_dict<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>sd_hf<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;lm_head.weight&#34;</span><span style="color:#1f2328">]</span><span style="color:#0550ae">.</span>shape<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>sd_hf<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;transformer.wte.weight&#34;</span><span style="color:#1f2328">]</span><span style="color:#0550ae">.</span>shape<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>result <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span>sd_hf<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;lm_head.weight&#34;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">==</span> sd_hf<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;transformer.wte.weight&#34;</span><span style="color:#1f2328">])</span><span style="color:#0550ae">.</span>all<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>sd_hf<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;transformer.wte.weight&#34;</span><span style="color:#1f2328">]</span><span style="color:#0550ae">.</span>data_ptr<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>sd_hf<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;transformer.wte.weight&#34;</span><span style="color:#1f2328">]</span><span style="color:#0550ae">.</span>data_ptr<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># torch.Size([50257, 768])</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># torch.Size([50257, 768])</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># tensor(True)</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># &lt;built-in method data_ptr of Tensor object at 0x00000254ECD982D0&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># &lt;built-in method data_ptr of Tensor object at 0x00000254ECD982D0&gt;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="6">
+<li>Implementing Weight Sharing in Our Model</li>
+</ol>
+<p>To enable weight sharing, we set the embedding and head layers to use the same weights:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">GPT</span><span style="color:#1f2328">(</span>nn<span style="color:#0550ae">.</span>Module<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">__init__</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> config<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">super</span><span style="color:#1f2328">()</span><span style="color:#0550ae">.</span><span style="color:#6639ba">__init__</span><span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>config <span style="color:#0550ae">=</span> config
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>transformer <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>ModuleDict<span style="color:#1f2328">(</span><span style="color:#6639ba">dict</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            wte <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>Embedding<span style="color:#1f2328">(</span>config<span style="color:#0550ae">.</span>vocab_size<span style="color:#1f2328">,</span> config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">),</span>
+</span></span><span style="display:flex;"><span>            wpe <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>Embedding<span style="color:#1f2328">(</span>config<span style="color:#0550ae">.</span>block_size<span style="color:#1f2328">,</span> config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">),</span>
+</span></span><span style="display:flex;"><span>            h <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>ModuleList<span style="color:#1f2328">([</span>Block<span style="color:#1f2328">(</span>config<span style="color:#1f2328">)</span> <span style="color:#cf222e">for</span> _ <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span>config<span style="color:#0550ae">.</span>n_layer<span style="color:#1f2328">)]),</span>
+</span></span><span style="display:flex;"><span>            ln_f <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>LayerNorm<span style="color:#1f2328">(</span>config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">),</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>lm_head <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>Linear<span style="color:#1f2328">(</span>config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">,</span> config<span style="color:#0550ae">.</span>vocab_size<span style="color:#1f2328">,</span> bias<span style="color:#0550ae">=</span><span style="color:#cf222e">False</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># weight sharing scheme</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>transformer<span style="color:#0550ae">.</span>wte<span style="color:#0550ae">.</span>weight <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>lm_head<span style="color:#0550ae">.</span>weight
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">...</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="7">
+<li>Initializing Parameters</li>
+</ol>
+<p>Proper initialization of parameters, such as in self-attention blocks, is crucial to stable training.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">CausalSelfAttention</span><span style="color:#1f2328">(</span>nn<span style="color:#0550ae">.</span>Module<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">__init__</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> config<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">super</span><span style="color:#1f2328">()</span><span style="color:#0550ae">.</span><span style="color:#6639ba">__init__</span><span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">assert</span> config<span style="color:#0550ae">.</span>n_embd <span style="color:#0550ae">%</span> config<span style="color:#0550ae">.</span>n_head <span style="color:#0550ae">==</span> <span style="color:#0550ae">0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># key, query, value projections for all heads, but in a batch</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_attn <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>Linear<span style="color:#1f2328">(</span>config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">,</span> <span style="color:#0550ae">3</span> <span style="color:#0550ae">*</span> config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># output projection</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_proj <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>Linear<span style="color:#1f2328">(</span>config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">,</span> config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_proj<span style="color:#0550ae">.</span>NANOGPT_SCALE_INIT <span style="color:#0550ae">=</span> <span style="color:#0550ae">1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># regularization</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head <span style="color:#0550ae">=</span> config<span style="color:#0550ae">.</span>n_head
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_embd <span style="color:#0550ae">=</span> config<span style="color:#0550ae">.</span>n_embd
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>register_buffer<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;bias&#34;</span><span style="color:#1f2328">,</span> torch<span style="color:#0550ae">.</span>tril<span style="color:#1f2328">(</span>torch<span style="color:#0550ae">.</span>ones<span style="color:#1f2328">(</span>config<span style="color:#0550ae">.</span>block_size<span style="color:#1f2328">,</span> config<span style="color:#0550ae">.</span>block_size<span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>                                    <span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span><span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> config<span style="color:#0550ae">.</span>block_size<span style="color:#1f2328">,</span> config<span style="color:#0550ae">.</span>block_size<span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">forward</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> x<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> C <span style="color:#0550ae">=</span> x<span style="color:#0550ae">.</span>size<span style="color:#1f2328">()</span> <span style="color:#57606a"># batch size, sequence length, embedding dimensionality (n_embd)</span>
+</span></span><span style="display:flex;"><span>        qkv  <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_attn<span style="color:#1f2328">(</span>x<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        q<span style="color:#1f2328">,</span> k<span style="color:#1f2328">,</span> v <span style="color:#0550ae">=</span> qkv<span style="color:#0550ae">.</span>split<span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">,</span> dim<span style="color:#0550ae">=</span><span style="color:#0550ae">2</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        k <span style="color:#0550ae">=</span> k<span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">,</span> C <span style="color:#0550ae">//</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>transpose<span style="color:#1f2328">(</span><span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">)</span> <span style="color:#57606a"># (B, nh, T, hs)</span>
+</span></span><span style="display:flex;"><span>        q <span style="color:#0550ae">=</span> q<span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">,</span> C <span style="color:#0550ae">//</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>transpose<span style="color:#1f2328">(</span><span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">)</span> <span style="color:#57606a"># (B, nh, T, hs)</span>
+</span></span><span style="display:flex;"><span>        v <span style="color:#0550ae">=</span> v<span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">,</span> C <span style="color:#0550ae">//</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>transpose<span style="color:#1f2328">(</span><span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">)</span> <span style="color:#57606a"># (B, nh, T, hs)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># attention (materializes the large (T,T) matrix for all the queries and keys)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        att <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span>q <span style="color:#0550ae">@</span> k<span style="color:#0550ae">.</span>transpose<span style="color:#1f2328">(</span><span style="color:#0550ae">-</span><span style="color:#0550ae">2</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">))</span> <span style="color:#0550ae">*</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">1.0</span> <span style="color:#0550ae">/</span> math<span style="color:#0550ae">.</span>sqrt<span style="color:#1f2328">(</span>k<span style="color:#0550ae">.</span>size<span style="color:#1f2328">(</span><span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">)))</span>
+</span></span><span style="display:flex;"><span>        att <span style="color:#0550ae">=</span> att<span style="color:#0550ae">.</span>masked_fill<span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>bias<span style="color:#1f2328">[:,:,:</span>T<span style="color:#1f2328">,:</span>T<span style="color:#1f2328">]</span> <span style="color:#0550ae">==</span> <span style="color:#0550ae">0</span><span style="color:#1f2328">,</span> <span style="color:#6639ba">float</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;-inf&#39;</span><span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>        att <span style="color:#0550ae">=</span> F<span style="color:#0550ae">.</span>softmax<span style="color:#1f2328">(</span>att<span style="color:#1f2328">,</span> dim<span style="color:#0550ae">=-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        y <span style="color:#0550ae">=</span> att <span style="color:#0550ae">@</span> v <span style="color:#57606a"># (B, nh, T, T) x (B, nh, T, hs) -&gt; (B, nh, T, hs)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        y <span style="color:#0550ae">=</span> y<span style="color:#0550ae">.</span>transpose<span style="color:#1f2328">(</span><span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>contiguous<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> C<span style="color:#1f2328">)</span> <span style="color:#57606a"># re-assemble all head outputs side by side</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># output projection</span>
+</span></span><span style="display:flex;"><span>        y <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_proj<span style="color:#1f2328">(</span>y<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> y
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">MLP</span><span style="color:#1f2328">(</span>nn<span style="color:#0550ae">.</span>Module<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">__init__</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> config<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">super</span><span style="color:#1f2328">()</span><span style="color:#0550ae">.</span><span style="color:#6639ba">__init__</span><span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_fc    <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>Linear<span style="color:#1f2328">(</span>config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">,</span> <span style="color:#0550ae">4</span> <span style="color:#0550ae">*</span> config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>gelu    <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>GELU<span style="color:#1f2328">(</span>approximate<span style="color:#0550ae">=</span><span style="color:#0a3069">&#39;tanh&#39;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_proj  <span style="color:#0550ae">=</span> nn<span style="color:#0550ae">.</span>Linear<span style="color:#1f2328">(</span><span style="color:#0550ae">4</span> <span style="color:#0550ae">*</span> config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">,</span> config<span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_proj<span style="color:#0550ae">.</span>NANOGPT_SCALE_INIT <span style="color:#0550ae">=</span> <span style="color:#0550ae">1</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">forward</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> x<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_fc<span style="color:#1f2328">(</span>x<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>gelu<span style="color:#1f2328">(</span>x<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_proj<span style="color:#1f2328">(</span>x<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> x
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">GPT</span><span style="color:#1f2328">(</span>nn<span style="color:#0550ae">.</span>Module<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">__init__</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> config<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0550ae">...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># init all weights</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>apply<span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>_init_weights<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">_init_weights</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> module<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>module<span style="color:#1f2328">,</span> nn<span style="color:#0550ae">.</span>Linear<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>            std <span style="color:#0550ae">=</span> <span style="color:#0550ae">0.02</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> <span style="color:#6639ba">hasattr</span><span style="color:#1f2328">(</span>module<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;NANOGPT_SCALE_INIT&#39;</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                std <span style="color:#0550ae">*=</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">2</span> <span style="color:#0550ae">*</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>config<span style="color:#0550ae">.</span>n_layer<span style="color:#1f2328">)</span> <span style="color:#0550ae">**</span> <span style="color:#0550ae">-</span><span style="color:#0550ae">0.5</span>
+</span></span><span style="display:flex;"><span>            torch<span style="color:#0550ae">.</span>nn<span style="color:#0550ae">.</span>init<span style="color:#0550ae">.</span>normal_<span style="color:#1f2328">(</span>module<span style="color:#0550ae">.</span>weight<span style="color:#1f2328">,</span> mean<span style="color:#0550ae">=</span><span style="color:#0550ae">0.0</span><span style="color:#1f2328">,</span> std<span style="color:#0550ae">=</span>std<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> module<span style="color:#0550ae">.</span>bias <span style="color:#0550ae">is</span> <span style="color:#0550ae">not</span> <span style="color:#cf222e">None</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                torch<span style="color:#0550ae">.</span>nn<span style="color:#0550ae">.</span>init<span style="color:#0550ae">.</span>zeros_<span style="color:#1f2328">(</span>module<span style="color:#0550ae">.</span>bias<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">elif</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>module<span style="color:#1f2328">,</span> nn<span style="color:#0550ae">.</span>Embedding<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>            torch<span style="color:#0550ae">.</span>nn<span style="color:#0550ae">.</span>init<span style="color:#0550ae">.</span>normal_<span style="color:#1f2328">(</span>module<span style="color:#0550ae">.</span>weight<span style="color:#1f2328">,</span> mean<span style="color:#0550ae">=</span><span style="color:#0550ae">0.0</span><span style="color:#1f2328">,</span> std<span style="color:#0550ae">=</span><span style="color:#0550ae">0.02</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0550ae">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>torch<span style="color:#0550ae">.</span>manual_seed<span style="color:#1f2328">(</span><span style="color:#0550ae">1337</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">if</span> torch<span style="color:#0550ae">.</span>cuda<span style="color:#0550ae">.</span>is_available<span style="color:#1f2328">():</span>
+</span></span><span style="display:flex;"><span>    torch<span style="color:#0550ae">.</span>cuda<span style="color:#0550ae">.</span>manual_seed<span style="color:#1f2328">(</span><span style="color:#0550ae">1337</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>train_loader <span style="color:#0550ae">=</span> DataLoaderLite<span style="color:#1f2328">(</span>B<span style="color:#0550ae">=</span><span style="color:#0550ae">4</span><span style="color:#1f2328">,</span> T<span style="color:#0550ae">=</span><span style="color:#0550ae">32</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># get logits</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#0550ae">=</span> GPT<span style="color:#1f2328">(</span>GPTConfig<span style="color:#1f2328">())</span>
+</span></span><span style="display:flex;"><span>model<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># optimize!</span>
+</span></span><span style="display:flex;"><span>optimizer <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>optim<span style="color:#0550ae">.</span>AdamW<span style="color:#1f2328">(</span>model<span style="color:#0550ae">.</span>parameters<span style="color:#1f2328">(),</span> lr<span style="color:#0550ae">=</span><span style="color:#0550ae">3e-4</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">for</span> i <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span><span style="color:#0550ae">50</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> train_loader<span style="color:#0550ae">.</span>next_batch<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> x<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">),</span> y<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span> <span style="color:#57606a"># move tensor to device</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>zero_grad<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    logits<span style="color:#1f2328">,</span> loss <span style="color:#0550ae">=</span> model<span style="color:#1f2328">(</span>x<span style="color:#1f2328">,</span> y<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    loss<span style="color:#0550ae">.</span>backward<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>step<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;step: </span><span style="color:#0a3069">{</span>i<span style="color:#0a3069">}</span><span style="color:#0a3069">, loss: </span><span style="color:#0a3069">{</span>loss<span style="color:#0550ae">.</span>item<span style="color:#1f2328">()</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># loaded 338025 tokens</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 1 epoch = 2640 batches</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 0, loss: 10.960028648376465</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 1, loss: 9.68770694732666</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 2, loss: 9.082900047302246</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 48, loss: 6.953257083892822</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 49, loss: 6.799217224121094</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="training-performance-insights">Training Performance Insights</h2>
+<h3 id="understanding-the-hardware">Understanding the Hardware</h3>
+<p>The Jetson Orin NX 16GB boasts 100 TOPS (INT8) and 32 tensor cores, making it ideal for inferencing over training. Thus, for training, I will leverage my 6GB RTX A2000, which delivers a single-precision performance of 8 TFLOPS and 104 tensor cores.</p>
+<ol>
+<li>Data type inspection: Using torch.float32 by default</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">code</span><span style="color:#1f2328">;</span> code<span style="color:#0550ae">.</span>interact<span style="color:#1f2328">(</span>local<span style="color:#0550ae">=</span><span style="color:#6639ba">locals</span><span style="color:#1f2328">())</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># enter below in the interactive prompt for inspection</span>
+</span></span><span style="display:flex;"><span>logits<span style="color:#0550ae">.</span>dtype</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="2">
+<li>To clear cache:</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># empty cache</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">gc</span>
+</span></span><span style="display:flex;"><span>gc<span style="color:#0550ae">.</span>collect<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>torch<span style="color:#0550ae">.</span>cuda<span style="color:#0550ae">.</span>empty_cache<span style="color:#1f2328">()</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="3">
+<li>To watch NVIDIA memory usage in WSL:</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>watch -n 0.1 nvidia-smi</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="booast-training-performance">Booast Training Performance</h3>
+<ol>
+<li><strong>Automatic Mixed Precision Training</strong>: Leverage torch.autocast for efficient mixed precision training</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">time</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>train_loader <span style="color:#0550ae">=</span> DataLoaderLite<span style="color:#1f2328">(</span>B<span style="color:#0550ae">=</span><span style="color:#0550ae">16</span><span style="color:#1f2328">,</span> T<span style="color:#0550ae">=</span><span style="color:#0550ae">1024</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>torch<span style="color:#0550ae">.</span>set_float32_matmul_precision<span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;high&#39;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># get logits</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#0550ae">=</span> GPT<span style="color:#1f2328">(</span>GPTConfig<span style="color:#1f2328">())</span>
+</span></span><span style="display:flex;"><span>model<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># optimize!</span>
+</span></span><span style="display:flex;"><span>optimizer <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>optim<span style="color:#0550ae">.</span>AdamW<span style="color:#1f2328">(</span>model<span style="color:#0550ae">.</span>parameters<span style="color:#1f2328">(),</span> lr<span style="color:#0550ae">=</span><span style="color:#0550ae">3e-4</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">for</span> i <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span><span style="color:#0550ae">50</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    t0 <span style="color:#0550ae">=</span> time<span style="color:#0550ae">.</span>time<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> train_loader<span style="color:#0550ae">.</span>next_batch<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> x<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">),</span> y<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>zero_grad<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">with</span> torch<span style="color:#0550ae">.</span>autocast<span style="color:#1f2328">(</span>device_type<span style="color:#0550ae">=</span>device<span style="color:#1f2328">,</span> dtype<span style="color:#0550ae">=</span>torch<span style="color:#0550ae">.</span>bfloat16<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        logits<span style="color:#1f2328">,</span> loss <span style="color:#0550ae">=</span> model<span style="color:#1f2328">(</span>x<span style="color:#1f2328">,</span> y<span style="color:#1f2328">)</span>     
+</span></span><span style="display:flex;"><span>    loss<span style="color:#0550ae">.</span>backward<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>step<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    torch<span style="color:#0550ae">.</span>cuda<span style="color:#0550ae">.</span>synchronize<span style="color:#1f2328">()</span> <span style="color:#57606a"># wait for GPU to finish work</span>
+</span></span><span style="display:flex;"><span>    t1 <span style="color:#0550ae">=</span> time<span style="color:#0550ae">.</span>time<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    dt <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span>t1 <span style="color:#0550ae">-</span> t0<span style="color:#1f2328">)</span><span style="color:#0550ae">*</span><span style="color:#0550ae">1000</span>
+</span></span><span style="display:flex;"><span>    tokens_per_sec <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span>train_loader<span style="color:#0550ae">.</span>B <span style="color:#0550ae">*</span> train_loader<span style="color:#0550ae">.</span>T<span style="color:#1f2328">)</span> <span style="color:#0550ae">/</span> <span style="color:#1f2328">(</span>t1 <span style="color:#0550ae">-</span> t0<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;step: </span><span style="color:#0a3069">{</span>i<span style="color:#0a3069">}</span><span style="color:#0a3069"> | loss: </span><span style="color:#0a3069">{</span>loss<span style="color:#0550ae">.</span>item<span style="color:#1f2328">()</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | norm: </span><span style="color:#0a3069">{</span>norm<span style="color:#0a3069">:</span><span style="color:#0a3069">.4f</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | dt: </span><span style="color:#0a3069">{</span>dt<span style="color:#0a3069">:</span><span style="color:#0a3069">.2f</span><span style="color:#0a3069">}</span><span style="color:#0a3069">ms, tok/sec: </span><span style="color:#0a3069">{</span>tokens_per_sec<span style="color:#0a3069">:</span><span style="color:#0a3069">.2f</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="2">
+<li><strong>Compile Optimization</strong>: Use torch.compile to accelerate code execution</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># get logits</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#0550ae">=</span> GPT<span style="color:#1f2328">(</span>GPTConfig<span style="color:#1f2328">())</span>
+</span></span><span style="display:flex;"><span>model<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">torch._dynamo</span>
+</span></span><span style="display:flex;"><span>torch<span style="color:#0550ae">.</span>_dynamo<span style="color:#0550ae">.</span>config<span style="color:#0550ae">.</span>suppress_errors <span style="color:#0550ae">=</span> <span style="color:#cf222e">True</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>compile<span style="color:#1f2328">(</span>model<span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="3">
+<li><strong>Flash Attention</strong>: Integrate flash attention to enhance your model&rsquo;s attention mechanism</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">CausalSelfAttention</span><span style="color:#1f2328">(</span>nn<span style="color:#0550ae">.</span>Module<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0550ae">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">forward</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> x<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> C <span style="color:#0550ae">=</span> x<span style="color:#0550ae">.</span>size<span style="color:#1f2328">()</span> <span style="color:#57606a"># batch size, sequence length, embedding dimensionality (n_embd)</span>
+</span></span><span style="display:flex;"><span>        qkv  <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_attn<span style="color:#1f2328">(</span>x<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        q<span style="color:#1f2328">,</span> k<span style="color:#1f2328">,</span> v <span style="color:#0550ae">=</span> qkv<span style="color:#0550ae">.</span>split<span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_embd<span style="color:#1f2328">,</span> dim<span style="color:#0550ae">=</span><span style="color:#0550ae">2</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        k <span style="color:#0550ae">=</span> k<span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">,</span> C <span style="color:#0550ae">//</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>transpose<span style="color:#1f2328">(</span><span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">)</span> <span style="color:#57606a"># (B, nh, T, hs)</span>
+</span></span><span style="display:flex;"><span>        q <span style="color:#0550ae">=</span> q<span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">,</span> C <span style="color:#0550ae">//</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>transpose<span style="color:#1f2328">(</span><span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">)</span> <span style="color:#57606a"># (B, nh, T, hs)</span>
+</span></span><span style="display:flex;"><span>        v <span style="color:#0550ae">=</span> v<span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">,</span> C <span style="color:#0550ae">//</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>n_head<span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>transpose<span style="color:#1f2328">(</span><span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">)</span> <span style="color:#57606a"># (B, nh, T, hs)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># attention (materializes the large (T,T) matrix for all the queries and keys)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># att = att.masked_fill(self.bias[:,:,:T,:T] == 0, float(&#39;-inf&#39;))</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># att = F.softmax(att, dim=-1)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># y = att @ v # (B, nh, T, T) x (B, nh, T, hs) -&gt; (B, nh, T, hs)</span>
+</span></span><span style="display:flex;"><span>        y <span style="color:#0550ae">=</span> F<span style="color:#0550ae">.</span>scaled_dot_product_attention<span style="color:#1f2328">(</span>q<span style="color:#1f2328">,</span> k<span style="color:#1f2328">,</span> v<span style="color:#1f2328">,</span> is_causal<span style="color:#0550ae">=</span><span style="color:#cf222e">True</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        y <span style="color:#0550ae">=</span> y<span style="color:#0550ae">.</span>transpose<span style="color:#1f2328">(</span><span style="color:#0550ae">1</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>contiguous<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>view<span style="color:#1f2328">(</span>B<span style="color:#1f2328">,</span> T<span style="color:#1f2328">,</span> C<span style="color:#1f2328">)</span> <span style="color:#57606a"># re-assemble all head outputs side by side</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># output projection</span>
+</span></span><span style="display:flex;"><span>        y <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>c_proj<span style="color:#1f2328">(</span>y<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> y</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="4">
+<li><strong>Utilize Efficient Numbers</strong>: Optimize computations by using nice numbers</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># get logits</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#0550ae">=</span> GPT<span style="color:#1f2328">(</span>GPTConfig<span style="color:#1f2328">(</span>vocab_size<span style="color:#0550ae">=</span><span style="color:#0550ae">50304</span><span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>model<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># loaded 338025 tokens</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 1 epoch = 20 batches</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 0 | loss: 11.026554107666016 | norm: 27.6531 | dt: 4550.37ms, tok/sec: 3600.59</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 1 | loss: 9.354239463806152 | norm: 6.2953 | dt: 7496.54ms, tok/sec: 2185.54</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 2 | loss: 8.961758613586426 | norm: 2.2035 | dt: 7598.34ms, tok/sec: 2156.26</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="5">
+<li><strong>Gradient Clipping</strong>: Clip the global norm of gradients to 1.0 to stabilize training</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># optimize!</span>
+</span></span><span style="display:flex;"><span>optimizer <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>optim<span style="color:#0550ae">.</span>AdamW<span style="color:#1f2328">(</span>model<span style="color:#0550ae">.</span>parameters<span style="color:#1f2328">(),</span> lr<span style="color:#0550ae">=</span><span style="color:#0550ae">3e-4</span><span style="color:#1f2328">,</span> betas<span style="color:#0550ae">=</span><span style="color:#1f2328">(</span><span style="color:#0550ae">0.9</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">0.95</span><span style="color:#1f2328">),</span> eps<span style="color:#0550ae">=</span><span style="color:#0550ae">1e-8</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">for</span> i <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span><span style="color:#0550ae">50</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    t0 <span style="color:#0550ae">=</span> time<span style="color:#0550ae">.</span>time<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> train_loader<span style="color:#0550ae">.</span>next_batch<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> x<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">),</span> y<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>zero_grad<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">with</span> torch<span style="color:#0550ae">.</span>autocast<span style="color:#1f2328">(</span>device_type<span style="color:#0550ae">=</span>device<span style="color:#1f2328">,</span> dtype<span style="color:#0550ae">=</span>torch<span style="color:#0550ae">.</span>bfloat16<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        logits<span style="color:#1f2328">,</span> loss <span style="color:#0550ae">=</span> model<span style="color:#1f2328">(</span>x<span style="color:#1f2328">,</span> y<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    loss<span style="color:#0550ae">.</span>backward<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    norm <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>nn<span style="color:#0550ae">.</span>utils<span style="color:#0550ae">.</span>clip_grad_norm_<span style="color:#1f2328">(</span>model<span style="color:#0550ae">.</span>parameters<span style="color:#1f2328">(),</span> <span style="color:#0550ae">1.0</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>step<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    torch<span style="color:#0550ae">.</span>cuda<span style="color:#0550ae">.</span>synchronize<span style="color:#1f2328">()</span> <span style="color:#57606a"># wait for GPU to finish work</span>
+</span></span><span style="display:flex;"><span>    t1 <span style="color:#0550ae">=</span> time<span style="color:#0550ae">.</span>time<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    dt <span style="color:#0550ae">=</span> t1 <span style="color:#0550ae">-</span> t0 <span style="color:#57606a"># time difference in seconds</span>
+</span></span><span style="display:flex;"><span>    tokens_per_sec <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span>train_loader<span style="color:#0550ae">.</span>B <span style="color:#0550ae">*</span> train_loader<span style="color:#0550ae">.</span>T<span style="color:#1f2328">)</span> <span style="color:#0550ae">/</span> <span style="color:#1f2328">(</span>t1 <span style="color:#0550ae">-</span> t0<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;step: </span><span style="color:#0a3069">{</span>i<span style="color:#0a3069">}</span><span style="color:#0a3069"> | loss: </span><span style="color:#0a3069">{</span>loss<span style="color:#0550ae">.</span>item<span style="color:#1f2328">()</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | norm: </span><span style="color:#0a3069">{</span>norm<span style="color:#0a3069">:</span><span style="color:#0a3069">.4f</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | dt: </span><span style="color:#0a3069">{</span>dt<span style="color:#0550ae">*</span><span style="color:#0550ae">1000</span><span style="color:#0a3069">:</span><span style="color:#0a3069">.2f</span><span style="color:#0a3069">}</span><span style="color:#0a3069">ms, tok/sec: </span><span style="color:#0a3069">{</span>tokens_per_sec<span style="color:#0a3069">:</span><span style="color:#0a3069">.2f</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 0 | loss: 6.1148786544799805 | norm: 5.3749 | dt: 5243.35ms, tok/sec: 3124.72</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 1 | loss: 5.990167617797852 | norm: 2.5040 | dt: 5465.20ms, tok/sec: 2997.88</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step: 2 | loss: 6.073593616485596 | norm: 1.6870 | dt: 7355.99ms, tok/sec: 2227.30</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="6">
+<li><strong>Learning Rate Setting</strong>: Adjust and set an appropriate learning rate for your model</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>max_lr <span style="color:#0550ae">=</span> <span style="color:#0550ae">6e-4</span>
+</span></span><span style="display:flex;"><span>min_lr <span style="color:#0550ae">=</span> max_lr <span style="color:#0550ae">*</span> <span style="color:#0550ae">0.1</span>
+</span></span><span style="display:flex;"><span>warmup_steps <span style="color:#0550ae">=</span> <span style="color:#0550ae">10</span>
+</span></span><span style="display:flex;"><span>max_steps <span style="color:#0550ae">=</span> <span style="color:#0550ae">50</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">get_lr</span><span style="color:#1f2328">(</span>it<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># linear warmup for warmup_iters steps</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> it <span style="color:#0550ae">&lt;</span> warmup_steps<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> max_lr <span style="color:#0550ae">*</span> <span style="color:#1f2328">(</span>it<span style="color:#0550ae">+</span><span style="color:#0550ae">1</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">/</span> warmup_steps
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># if it &gt; lr_decay_iters, return min learning rate</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> it <span style="color:#0550ae">&gt;</span> max_steps<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> min_lr
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># in between, use cosine decay down to min learning rate</span>
+</span></span><span style="display:flex;"><span>    decay_ratio <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span>it <span style="color:#0550ae">-</span> warmup_steps<span style="color:#1f2328">)</span> <span style="color:#0550ae">/</span> <span style="color:#1f2328">(</span>max_steps <span style="color:#0550ae">-</span> warmup_steps<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">assert</span> <span style="color:#0550ae">0</span> <span style="color:#0550ae">&lt;=</span> decay_ratio <span style="color:#0550ae">&lt;=</span> <span style="color:#0550ae">1</span>
+</span></span><span style="display:flex;"><span>    coeff <span style="color:#0550ae">=</span> <span style="color:#0550ae">0.5</span> <span style="color:#0550ae">*</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">1.0</span> <span style="color:#0550ae">+</span> math<span style="color:#0550ae">.</span>cos<span style="color:#1f2328">(</span>math<span style="color:#0550ae">.</span>pi <span style="color:#0550ae">*</span> decay_ratio<span style="color:#1f2328">))</span> <span style="color:#57606a"># coeff starts at 1 and goes to 0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> min_lr <span style="color:#0550ae">+</span> coeff <span style="color:#0550ae">*</span> <span style="color:#1f2328">(</span>max_lr <span style="color:#0550ae">-</span> min_lr<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># optimize!</span>
+</span></span><span style="display:flex;"><span>optimizer <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>optim<span style="color:#0550ae">.</span>AdamW<span style="color:#1f2328">(</span>model<span style="color:#0550ae">.</span>parameters<span style="color:#1f2328">(),</span> lr<span style="color:#0550ae">=</span><span style="color:#0550ae">3e-4</span><span style="color:#1f2328">,</span> betas<span style="color:#0550ae">=</span><span style="color:#1f2328">(</span><span style="color:#0550ae">0.9</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">0.95</span><span style="color:#1f2328">),</span> eps<span style="color:#0550ae">=</span><span style="color:#0550ae">1e-8</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">for</span> step <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span>max_steps<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    t0 <span style="color:#0550ae">=</span> time<span style="color:#0550ae">.</span>time<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> train_loader<span style="color:#0550ae">.</span>next_batch<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> x<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">),</span> y<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>zero_grad<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">with</span> torch<span style="color:#0550ae">.</span>autocast<span style="color:#1f2328">(</span>device_type<span style="color:#0550ae">=</span>device<span style="color:#1f2328">,</span> dtype<span style="color:#0550ae">=</span>torch<span style="color:#0550ae">.</span>bfloat16<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        logits<span style="color:#1f2328">,</span> loss <span style="color:#0550ae">=</span> model<span style="color:#1f2328">(</span>x<span style="color:#1f2328">,</span> y<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    loss<span style="color:#0550ae">.</span>backward<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    norm <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>nn<span style="color:#0550ae">.</span>utils<span style="color:#0550ae">.</span>clip_grad_norm_<span style="color:#1f2328">(</span>model<span style="color:#0550ae">.</span>parameters<span style="color:#1f2328">(),</span> <span style="color:#0550ae">1.0</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># determine and set the learning rate for this iteration</span>
+</span></span><span style="display:flex;"><span>    lr <span style="color:#0550ae">=</span> get_lr<span style="color:#1f2328">(</span>step<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> param_group <span style="color:#0550ae">in</span> optimizer<span style="color:#0550ae">.</span>param_groups<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        param_group<span style="color:#1f2328">[</span><span style="color:#0a3069">&#39;lr&#39;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> lr
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>step<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    torch<span style="color:#0550ae">.</span>cuda<span style="color:#0550ae">.</span>synchronize<span style="color:#1f2328">()</span> <span style="color:#57606a"># wait for GPU to finish work</span>
+</span></span><span style="display:flex;"><span>    t1 <span style="color:#0550ae">=</span> time<span style="color:#0550ae">.</span>time<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    dt <span style="color:#0550ae">=</span> t1 <span style="color:#0550ae">-</span> t0 <span style="color:#57606a"># time difference in seconds</span>
+</span></span><span style="display:flex;"><span>    tokens_per_sec <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span>train_loader<span style="color:#0550ae">.</span>B <span style="color:#0550ae">*</span> train_loader<span style="color:#0550ae">.</span>T<span style="color:#1f2328">)</span> <span style="color:#0550ae">/</span> <span style="color:#1f2328">(</span>t1 <span style="color:#0550ae">-</span> t0<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;step: </span><span style="color:#0a3069">{</span>step<span style="color:#0a3069">:</span><span style="color:#0a3069">4d</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | loss: </span><span style="color:#0a3069">{</span>loss<span style="color:#0550ae">.</span>item<span style="color:#1f2328">()</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | norm: </span><span style="color:#0a3069">{</span>norm<span style="color:#0a3069">:</span><span style="color:#0a3069">.4f</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | dt: </span><span style="color:#0a3069">{</span>dt<span style="color:#0550ae">*</span><span style="color:#0550ae">1000</span><span style="color:#0a3069">:</span><span style="color:#0a3069">.2f</span><span style="color:#0a3069">}</span><span style="color:#0a3069">ms, tok/sec: </span><span style="color:#0a3069">{</span>tokens_per_sec<span style="color:#0a3069">:</span><span style="color:#0a3069">.2f</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    0 | loss: 10.976452 | lr: 0.0001 | norm: 29.3385 | dt: 5638.74ms, tok/sec: 2905.61</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    1 | loss: 9.567224 | lr: 0.0001 | norm: 11.2004 | dt: 7997.90ms, tok/sec: 2048.54</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    2 | loss: 9.393660 | lr: 0.0002 | norm: 11.4306 | dt: 7960.79ms, tok/sec: 2058.09</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="7">
+<li><strong>Weight Decay</strong>: Apply weight decay to regularize your model and prevent overfitting</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">GPT</span><span style="color:#1f2328">(</span>nn<span style="color:#0550ae">.</span>Module<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0550ae">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">configure_optimizers</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> weight_decay<span style="color:#1f2328">,</span> learning_rate<span style="color:#1f2328">,</span> device<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># start with all of the candidate parameters (that require grad)</span>
+</span></span><span style="display:flex;"><span>        param_dict <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span>pn<span style="color:#1f2328">:</span> p <span style="color:#cf222e">for</span> pn<span style="color:#1f2328">,</span> p <span style="color:#0550ae">in</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>named_parameters<span style="color:#1f2328">()}</span>
+</span></span><span style="display:flex;"><span>        param_dict <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span>pn<span style="color:#1f2328">:</span> p <span style="color:#cf222e">for</span> pn<span style="color:#1f2328">,</span> p <span style="color:#0550ae">in</span> param_dict<span style="color:#0550ae">.</span>items<span style="color:#1f2328">()</span> <span style="color:#cf222e">if</span> p<span style="color:#0550ae">.</span>requires_grad<span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># create optim groups. Any parameters that is 2D will be weight decayed, otherwise no.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># i.e. all weight tensors in matmuls + embeddings decay, all biases and layernorms don&#39;t.</span>
+</span></span><span style="display:flex;"><span>        decay_params <span style="color:#0550ae">=</span> <span style="color:#1f2328">[</span>p <span style="color:#cf222e">for</span> n<span style="color:#1f2328">,</span> p <span style="color:#0550ae">in</span> param_dict<span style="color:#0550ae">.</span>items<span style="color:#1f2328">()</span> <span style="color:#cf222e">if</span> p<span style="color:#0550ae">.</span>dim<span style="color:#1f2328">()</span> <span style="color:#0550ae">&gt;=</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        nodecay_params <span style="color:#0550ae">=</span> <span style="color:#1f2328">[</span>p <span style="color:#cf222e">for</span> n<span style="color:#1f2328">,</span> p <span style="color:#0550ae">in</span> param_dict<span style="color:#0550ae">.</span>items<span style="color:#1f2328">()</span> <span style="color:#cf222e">if</span> p<span style="color:#0550ae">.</span>dim<span style="color:#1f2328">()</span> <span style="color:#0550ae">&lt;</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        optim_groups <span style="color:#0550ae">=</span> <span style="color:#1f2328">[</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span><span style="color:#0a3069">&#39;params&#39;</span><span style="color:#1f2328">:</span> decay_params<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;weight_decay&#39;</span><span style="color:#1f2328">:</span> weight_decay<span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span><span style="color:#0a3069">&#39;params&#39;</span><span style="color:#1f2328">:</span> nodecay_params<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;weight_decay&#39;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">0.0</span><span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        num_decay_params <span style="color:#0550ae">=</span> <span style="color:#6639ba">sum</span><span style="color:#1f2328">(</span>p<span style="color:#0550ae">.</span>numel<span style="color:#1f2328">()</span> <span style="color:#cf222e">for</span> p <span style="color:#0550ae">in</span> decay_params<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        num_nodecay_params <span style="color:#0550ae">=</span> <span style="color:#6639ba">sum</span><span style="color:#1f2328">(</span>p<span style="color:#0550ae">.</span>numel<span style="color:#1f2328">()</span> <span style="color:#cf222e">for</span> p <span style="color:#0550ae">in</span> nodecay_params<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;num decayed parameter tensors: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>decay_params<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069">, with </span><span style="color:#0a3069">{</span>num_decay_params<span style="color:#0a3069">:</span><span style="color:#0a3069">,</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> parameters&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;num non-decayed parameter tensors: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>nodecay_params<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069">, with </span><span style="color:#0a3069">{</span>num_nodecay_params<span style="color:#0a3069">:</span><span style="color:#0a3069">,</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> parameters&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># Create AdamW optimizer and use the fused version if it is available</span>
+</span></span><span style="display:flex;"><span>        fused_available <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;fused&#39;</span> <span style="color:#0550ae">in</span> inspect<span style="color:#0550ae">.</span>signature<span style="color:#1f2328">(</span>torch<span style="color:#0550ae">.</span>optim<span style="color:#0550ae">.</span>AdamW<span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>parameters
+</span></span><span style="display:flex;"><span>        use_fused <span style="color:#0550ae">=</span> fused_available <span style="color:#0550ae">and</span> <span style="color:#0a3069">&#39;cuda&#39;</span> <span style="color:#0550ae">in</span> device
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;using fused AdamW: </span><span style="color:#0a3069">{</span>use_fused<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        optimizer <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>optim<span style="color:#0550ae">.</span>AdamW<span style="color:#1f2328">(</span>optim_groups<span style="color:#1f2328">,</span> lr<span style="color:#0550ae">=</span>learning_rate<span style="color:#1f2328">,</span> betas<span style="color:#0550ae">=</span><span style="color:#1f2328">(</span><span style="color:#0550ae">0.9</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">0.95</span><span style="color:#1f2328">),</span> eps<span style="color:#0550ae">=</span><span style="color:#0550ae">1e-8</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> optimizer
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># optimize!</span>
+</span></span><span style="display:flex;"><span>optimizer <span style="color:#0550ae">=</span> model<span style="color:#0550ae">.</span>configure_optimizers<span style="color:#1f2328">(</span>weight_decay<span style="color:#0550ae">=</span><span style="color:#0550ae">0.1</span><span style="color:#1f2328">,</span> learning_rate<span style="color:#0550ae">=</span><span style="color:#0550ae">6e-4</span><span style="color:#1f2328">,</span> device<span style="color:#0550ae">=</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#0550ae">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># num decayed parameter tensors: 50, with 124,354,560 parameters</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># num non-decayed parameter tensors: 98, with 121,344 parameters</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># using fused AdamW: True</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol start="8">
+<li><strong>Simulated Batch Accumulation</strong>: Effectively using smaller batch sizes when memory is limited by accumulating gradients</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">for</span> step <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span>max_steps<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    t0 <span style="color:#0550ae">=</span> time<span style="color:#0550ae">.</span>time<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>zero_grad<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    loss_accum <span style="color:#0550ae">=</span> <span style="color:#0550ae">0.0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> micro_step <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span>grad_accum_steps<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> train_loader<span style="color:#0550ae">.</span>next_batch<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> x<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">),</span> y<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">with</span> torch<span style="color:#0550ae">.</span>autocast<span style="color:#1f2328">(</span>device_type<span style="color:#0550ae">=</span>device<span style="color:#1f2328">,</span> dtype<span style="color:#0550ae">=</span>torch<span style="color:#0550ae">.</span>bfloat16<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>            logits<span style="color:#1f2328">,</span> loss <span style="color:#0550ae">=</span> model<span style="color:#1f2328">(</span>x<span style="color:#1f2328">,</span> y<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># we have to scale the loss to account for gradient accumulation,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># because the gradients just add on each successive backward(),</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># addition of gradients corresponds to a SUM in the objective, but</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># instead of a SUM we want MEAN. Scale the loss here so it comes out right</span>
+</span></span><span style="display:flex;"><span>        loss <span style="color:#0550ae">=</span> loss <span style="color:#0550ae">/</span> grad_accum_steps
+</span></span><span style="display:flex;"><span>        loss_accum <span style="color:#0550ae">+=</span> loss<span style="color:#0550ae">.</span>detach<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        loss<span style="color:#0550ae">.</span>backward<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    norm <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>nn<span style="color:#0550ae">.</span>utils<span style="color:#0550ae">.</span>clip_grad_norm_<span style="color:#1f2328">(</span>model<span style="color:#0550ae">.</span>parameters<span style="color:#1f2328">(),</span> <span style="color:#0550ae">1.0</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># determine and set the learning rate for this iteration</span>
+</span></span><span style="display:flex;"><span>    lr <span style="color:#0550ae">=</span> get_lr<span style="color:#1f2328">(</span>step<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> param_group <span style="color:#0550ae">in</span> optimizer<span style="color:#0550ae">.</span>param_groups<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        param_group<span style="color:#1f2328">[</span><span style="color:#0a3069">&#39;lr&#39;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> lr
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>step<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    torch<span style="color:#0550ae">.</span>cuda<span style="color:#0550ae">.</span>synchronize<span style="color:#1f2328">()</span> <span style="color:#57606a"># wait for GPU to finish work</span>
+</span></span><span style="display:flex;"><span>    t1 <span style="color:#0550ae">=</span> time<span style="color:#0550ae">.</span>time<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    dt <span style="color:#0550ae">=</span> t1 <span style="color:#0550ae">-</span> t0 <span style="color:#57606a"># time difference in seconds</span>
+</span></span><span style="display:flex;"><span>    tokens_processed <span style="color:#0550ae">=</span> train_loader<span style="color:#0550ae">.</span>B <span style="color:#0550ae">*</span> train_loader<span style="color:#0550ae">.</span>T <span style="color:#0550ae">*</span> grad_accum_steps
+</span></span><span style="display:flex;"><span>    tokens_per_sec <span style="color:#0550ae">=</span> tokens_processed <span style="color:#0550ae">/</span> dt
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;step: </span><span style="color:#0a3069">{</span>step<span style="color:#0a3069">:</span><span style="color:#0a3069">4d</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | loss: </span><span style="color:#0a3069">{</span>loss_accum<span style="color:#0550ae">.</span>item<span style="color:#1f2328">()</span><span style="color:#0a3069">:</span><span style="color:#0a3069">.6f</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | lr: </span><span style="color:#0a3069">{</span>lr<span style="color:#0a3069">:</span><span style="color:#0a3069">.4f</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | norm: </span><span style="color:#0a3069">{</span>norm<span style="color:#0a3069">:</span><span style="color:#0a3069">.4f</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | dt: </span><span style="color:#0a3069">{</span>dt<span style="color:#0550ae">*</span><span style="color:#0550ae">1000</span><span style="color:#0a3069">:</span><span style="color:#0a3069">.2f</span><span style="color:#0a3069">}</span><span style="color:#0a3069">ms, tok/sec: </span><span style="color:#0a3069">{</span>tokens_per_sec<span style="color:#0a3069">:</span><span style="color:#0a3069">.2f</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Output for micro batch size, B = 4</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># using device: cuda</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># total desired batch size: 524288</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># =&gt; calculated gradient accumulation steps: 128</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># loaded 338025 tokens</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 1 epoch = 82 batches</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># num decayed parameter tensors: 50, with 124,354,560 parameters</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># num non-decayed parameter tensors: 98, with 121,344 parameters</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># using fused AdamW: True</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    0 | loss: 10.939045 | lr: 0.0001 | norm: 27.0274 | dt: 40582.00ms | tok/sec: 12919.22</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    1 | loss: 9.647425 | lr: 0.0001 | norm: 9.5036 | dt: 37164.44ms | tok/sec: 14107.25</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    2 | loss: 9.226212 | lr: 0.0002 | norm: 5.7323 | dt: 37072.59ms | tok/sec: 14142.20</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:   48 | loss: 5.837780 | lr: 0.0001 | norm: 0.1336 | dt: 36719.26ms | tok/sec: 14278.28</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:   49 | loss: 5.839324 | lr: 0.0001 | norm: 0.1318 | dt: 36749.97ms | tok/sec: 14266.35</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The code at this stage is extracted from 
+
+
+
+
+
+
+  <a href="https://raw.githubusercontent.com/karpathy/build-nanogpt/01be6b358941cb1c7561a56353423eba1cc7fe80/train_gpt2.py" target="_blank" rel="noopener noreferrer" >train_gpt2.py</a>
+.</p>
+<h2 id="nanogpt">nanoGPT</h2>
+<p>
+
+
+
+
+
+
+  <a href="https://github.com/karpathy/nanoGPT" target="_blank" rel="noopener noreferrer" >nanoGPT</a>
+ is an efficient, streamlined repository for training and fine-tuning medium-sized GPT models.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#57606a"># Clone the repository</span>
+</span></span><span style="display:flex;"><span>git clone https://github.com/karpathy/nanoGPT.git
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Install required packages</span>
+</span></span><span style="display:flex;"><span>pip install torch numpy transformers datasets tiktoken wandb tqdm
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Prepare the dataset</span>
+</span></span><span style="display:flex;"><span>python data/shakespeare_char/prepare.py
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Output:</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># length of dataset in characters: 1,115,394</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># all the unique characters:</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a">#  !$&amp;&#39;,-.3:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># vocab size: 65</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># train has 1,003,854 tokens</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># val has 111,540 tokens</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="training-a-baby-gpt-model">Training a Baby GPT Model</h3>
+<p>The training process for the baby GPT model on my setup:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python train.py config/train_shakespeare_char.py
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a">## Sample Output:</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># iter 0: loss 4.2659, time 16.77s, mfu -100.00%</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># iter 10: loss 3.2412, time 0.75s, mfu 0.02%</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># iter 20: loss 2.7942, time 0.99s, mfu 0.07%</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step 1750: train loss 1.1015, val loss 1.4632</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># saving checkpoint to out-shakespeare-char</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># iter 1750: loss 1.1848, time 14.39s, mfu 0.36%</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># iter 4990: loss 0.8243, time 1.03s, mfu 0.36%</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step 5000: train loss 0.6277, val loss 1.6922</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># iter 5000: loss 0.8236, time 14.28s, mfu 0.36%</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/train-llm2/train-llm2-baby-gpt-model.png"   alt="train-llm2-baby-gpt-model" class="sc-image sc-image-default"
+       >
+
+
+<p>Below are the modifications I applied to the repository:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>diff --git a/train.py b/train.py
+</span></span><span style="display:flex;"><span>index 951bda9..b4b386c <span style="color:#0550ae">100644</span>
+</span></span><span style="display:flex;"><span>--- a/train.py
+</span></span><span style="display:flex;"><span>+++ b/train.py
+</span></span><span style="display:flex;"><span>@@ -205,6 +205,8 @@ <span style="color:#953800">checkpoint</span> <span style="color:#0550ae">=</span> None <span style="color:#57606a"># free up memory</span>
+</span></span><span style="display:flex;"><span> <span style="color:#cf222e">if</span> compile:
+</span></span><span style="display:flex;"><span>     print<span style="color:#0550ae">(</span><span style="color:#0a3069">&#34;compiling the model... (takes a ~minute)&#34;</span><span style="color:#0550ae">)</span>
+</span></span><span style="display:flex;"><span>     <span style="color:#953800">unoptimized_model</span> <span style="color:#0550ae">=</span> model
+</span></span><span style="display:flex;"><span>+    import torch._dynamo
+</span></span><span style="display:flex;"><span>+    torch._dynamo.config.suppress_errors <span style="color:#0550ae">=</span> True
+</span></span><span style="display:flex;"><span>     <span style="color:#953800">model</span> <span style="color:#0550ae">=</span> torch.compile<span style="color:#0550ae">(</span>model<span style="color:#0550ae">)</span> <span style="color:#57606a"># requires PyTorch 2.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#57606a"># wrap model into DDP container</span>
+</span></span><span style="display:flex;"><span>@@ -315,8 +317,6 @@ <span style="color:#cf222e">while</span> True:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>     <span style="color:#57606a"># timing and logging</span>
+</span></span><span style="display:flex;"><span>     <span style="color:#953800">t1</span> <span style="color:#0550ae">=</span> time.time<span style="color:#0550ae">()</span>
+</span></span><span style="display:flex;"><span>-    <span style="color:#953800">dt</span> <span style="color:#0550ae">=</span> t1 - t0
+</span></span><span style="display:flex;"><span>-    <span style="color:#953800">t0</span> <span style="color:#0550ae">=</span> t1
+</span></span><span style="display:flex;"><span>     <span style="color:#cf222e">if</span> iter_num % <span style="color:#953800">log_interval</span> <span style="color:#0550ae">==</span> <span style="color:#0550ae">0</span> and master_process:
+</span></span><span style="display:flex;"><span>         <span style="color:#57606a"># get loss as float. note: this is a CPU-GPU sync point</span>
+</span></span><span style="display:flex;"><span>         <span style="color:#57606a"># scale up to undo the division above, approximating the true total loss (exact would have been a sum)</span>
+</span></span><span style="display:flex;"><span>@@ -324,7 +324,9 @@ <span style="color:#cf222e">while</span> True:
+</span></span><span style="display:flex;"><span>         <span style="color:#cf222e">if</span> local_iter_num &gt;<span style="color:#0550ae">=</span> 5: <span style="color:#57606a"># let the training loop settle a bit</span>
+</span></span><span style="display:flex;"><span>             <span style="color:#953800">mfu</span> <span style="color:#0550ae">=</span> raw_model.estimate_mfu<span style="color:#0550ae">(</span>batch_size * gradient_accumulation_steps, dt<span style="color:#0550ae">)</span>
+</span></span><span style="display:flex;"><span>             <span style="color:#953800">running_mfu</span> <span style="color:#0550ae">=</span> mfu <span style="color:#cf222e">if</span> <span style="color:#953800">running_mfu</span> <span style="color:#0550ae">==</span> -1.0 <span style="color:#cf222e">else</span> 0.9*running_mfu + 0.1*mfu
+</span></span><span style="display:flex;"><span>-        print<span style="color:#0550ae">(</span>f<span style="color:#0a3069">&#34;iter {iter_num}: loss {lossf:.4f}, time {dt*1000:.2f}ms, mfu {running_mfu*100:.2f}%&#34;</span><span style="color:#0550ae">)</span>
+</span></span><span style="display:flex;"><span>+        <span style="color:#953800">dt</span> <span style="color:#0550ae">=</span> t1 - t0
+</span></span><span style="display:flex;"><span>+        <span style="color:#953800">t0</span> <span style="color:#0550ae">=</span> t1
+</span></span><span style="display:flex;"><span>+        print<span style="color:#0550ae">(</span>f<span style="color:#0a3069">&#34;iter {iter_num}: loss {lossf:.4f}, time {dt:.2f}s, mfu {running_mfu*100:.2f}%&#34;</span><span style="color:#0550ae">)</span>
+</span></span><span style="display:flex;"><span>     <span style="color:#953800">iter_num</span> <span style="color:#0550ae">+=</span> <span style="color:#0550ae">1</span>
+</span></span><span style="display:flex;"><span>     <span style="color:#953800">local_iter_num</span> <span style="color:#0550ae">+=</span> <span style="color:#0550ae">1</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="sampling-with-baby-gpt">Sampling with Baby GPT</h3>
+<p>I ran a sampling script to test the model:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python sample.py --out_dir<span style="color:#0550ae">=</span>out-shakespeare-char</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/train-llm2/train-llm2-sample-baby-gpt-model.png"   alt="train-llm2-sample-baby-gpt-model" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="optional---integrating-with-mlflow">Optional - Integrating with MLflow</h2>
+<p>For a detailed overview of setting up MLflow alongside Kubeflow, refer to my 
+
+
+
+
+
+
+  <a href="/posts/2024/10/integrating-mlflow-and-kubeflow-on-talos/" >MLflow integration post</a>
+. Here’s an example of how I publish training metrics to MLflow:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># optimize!</span>
+</span></span><span style="display:flex;"><span>optimizer <span style="color:#0550ae">=</span> model<span style="color:#0550ae">.</span>configure_optimizers<span style="color:#1f2328">(</span>weight_decay<span style="color:#0550ae">=</span><span style="color:#0550ae">0.1</span><span style="color:#1f2328">,</span> learning_rate<span style="color:#0550ae">=</span><span style="color:#0550ae">6e-4</span><span style="color:#1f2328">,</span> device<span style="color:#0550ae">=</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">mlflow</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">os</span> 
+</span></span><span style="display:flex;"><span>os<span style="color:#0550ae">.</span>environ<span style="color:#1f2328">[</span><span style="color:#0a3069">&#39;MLFLOW_TRACKING_USERNAME&#39;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;user&#39;</span> 
+</span></span><span style="display:flex;"><span>os<span style="color:#0550ae">.</span>environ<span style="color:#1f2328">[</span><span style="color:#0a3069">&#39;MLFLOW_TRACKING_PASSWORD&#39;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;39VpDZdVLr&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#0550ae">.</span>set_tracking_uri<span style="color:#1f2328">(</span>uri<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;http://192.168.68.220&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#0550ae">.</span>set_experiment<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;nanoGPT-shakespeare&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#0550ae">.</span>log_param<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Micro Batch Size&#34;</span><span style="color:#1f2328">,</span> B<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#0550ae">.</span>log_param<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Block Size&#34;</span><span style="color:#1f2328">,</span> T<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#0550ae">.</span>log_param<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Batch Size&#34;</span><span style="color:#1f2328">,</span> total_batch_size<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#0550ae">.</span>log_param<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Gradient Accumulation Steps&#34;</span><span style="color:#1f2328">,</span> grad_accum_steps<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">for</span> step <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span>max_steps<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    t0 <span style="color:#0550ae">=</span> time<span style="color:#0550ae">.</span>time<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>zero_grad<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    loss_accum <span style="color:#0550ae">=</span> <span style="color:#0550ae">0.0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> micro_step <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span>grad_accum_steps<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> train_loader<span style="color:#0550ae">.</span>next_batch<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        x<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> x<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">),</span> y<span style="color:#0550ae">.</span>to<span style="color:#1f2328">(</span>device<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        scaler <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>amp<span style="color:#0550ae">.</span>GradScaler<span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;cuda&#39;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">with</span> torch<span style="color:#0550ae">.</span>autocast<span style="color:#1f2328">(</span>device_type<span style="color:#0550ae">=</span>device<span style="color:#1f2328">,</span> dtype<span style="color:#0550ae">=</span>torch<span style="color:#0550ae">.</span>bfloat16<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>            logits<span style="color:#1f2328">,</span> loss <span style="color:#0550ae">=</span> model<span style="color:#1f2328">(</span>x<span style="color:#1f2328">,</span> y<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># we have to scale the loss to account for gradient accumulation,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># because the gradients just add on each successive backward(),</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># addition of gradients corresponds to a SUM in the objective, but</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># instead of a SUM we want MEAN. Scale the loss here so it comes out right</span>
+</span></span><span style="display:flex;"><span>        loss <span style="color:#0550ae">=</span> loss <span style="color:#0550ae">/</span> grad_accum_steps
+</span></span><span style="display:flex;"><span>        loss_accum <span style="color:#0550ae">+=</span> loss<span style="color:#0550ae">.</span>detach<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        loss<span style="color:#0550ae">.</span>backward<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    norm <span style="color:#0550ae">=</span> torch<span style="color:#0550ae">.</span>nn<span style="color:#0550ae">.</span>utils<span style="color:#0550ae">.</span>clip_grad_norm_<span style="color:#1f2328">(</span>model<span style="color:#0550ae">.</span>parameters<span style="color:#1f2328">(),</span> <span style="color:#0550ae">1.0</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># determine and set the learning rate for this iteration</span>
+</span></span><span style="display:flex;"><span>    lr <span style="color:#0550ae">=</span> get_lr<span style="color:#1f2328">(</span>step<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> param_group <span style="color:#0550ae">in</span> optimizer<span style="color:#0550ae">.</span>param_groups<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        param_group<span style="color:#1f2328">[</span><span style="color:#0a3069">&#39;lr&#39;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> lr
+</span></span><span style="display:flex;"><span>    optimizer<span style="color:#0550ae">.</span>step<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    torch<span style="color:#0550ae">.</span>cuda<span style="color:#0550ae">.</span>synchronize<span style="color:#1f2328">()</span> <span style="color:#57606a"># wait for GPU to finish work</span>
+</span></span><span style="display:flex;"><span>    t1 <span style="color:#0550ae">=</span> time<span style="color:#0550ae">.</span>time<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    dt <span style="color:#0550ae">=</span> t1 <span style="color:#0550ae">-</span> t0 <span style="color:#57606a"># time difference in seconds</span>
+</span></span><span style="display:flex;"><span>    tokens_processed <span style="color:#0550ae">=</span> train_loader<span style="color:#0550ae">.</span>B <span style="color:#0550ae">*</span> train_loader<span style="color:#0550ae">.</span>T <span style="color:#0550ae">*</span> grad_accum_steps
+</span></span><span style="display:flex;"><span>    tokens_per_sec <span style="color:#0550ae">=</span> tokens_processed <span style="color:#0550ae">/</span> dt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    mlflow<span style="color:#0550ae">.</span>log_metric<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Loss&#34;</span><span style="color:#1f2328">,</span> loss_accum<span style="color:#0550ae">.</span>item<span style="color:#1f2328">())</span>
+</span></span><span style="display:flex;"><span>    mlflow<span style="color:#0550ae">.</span>log_metric<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Learning Rate&#34;</span><span style="color:#1f2328">,</span> lr<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    mlflow<span style="color:#0550ae">.</span>log_metric<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Norm&#34;</span><span style="color:#1f2328">,</span> norm<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    mlflow<span style="color:#0550ae">.</span>log_metric<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Time per Iteration&#34;</span><span style="color:#1f2328">,</span> dt<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    mlflow<span style="color:#0550ae">.</span>log_metric<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Tokens per Second&#34;</span><span style="color:#1f2328">,</span> tokens_per_sec<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;step: </span><span style="color:#0a3069">{</span>step<span style="color:#0a3069">:</span><span style="color:#0a3069">4d</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | loss: </span><span style="color:#0a3069">{</span>loss_accum<span style="color:#0550ae">.</span>item<span style="color:#1f2328">()</span><span style="color:#0a3069">:</span><span style="color:#0a3069">.6f</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | lr: </span><span style="color:#0a3069">{</span>lr<span style="color:#0a3069">:</span><span style="color:#0a3069">.4f</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | norm: </span><span style="color:#0a3069">{</span>norm<span style="color:#0a3069">:</span><span style="color:#0a3069">.4f</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | dt: </span><span style="color:#0a3069">{</span>dt<span style="color:#0550ae">*</span><span style="color:#0550ae">1000</span><span style="color:#0a3069">:</span><span style="color:#0a3069">.2f</span><span style="color:#0a3069">}</span><span style="color:#0a3069">ms | tok/sec: </span><span style="color:#0a3069">{</span>tokens_per_sec<span style="color:#0a3069">:</span><span style="color:#0a3069">.2f</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>For comparison purpose, these are my settings for the 2 runs:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># 1st run</span>
+</span></span><span style="display:flex;"><span>total_batch_size <span style="color:#0550ae">=</span> <span style="color:#0550ae">262144</span>
+</span></span><span style="display:flex;"><span>B <span style="color:#0550ae">=</span> <span style="color:#0550ae">4</span>
+</span></span><span style="display:flex;"><span>T <span style="color:#0550ae">=</span> <span style="color:#0550ae">512</span>
+</span></span><span style="display:flex;"><span>warmup_steps <span style="color:#0550ae">=</span> <span style="color:#0550ae">15</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># GPU usage around 4821MiB / 6138MiB</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    0 | loss: 10.940472 | lr: 0.0001 | norm: 26.5947 | dt: 23285.35ms | tok/sec: 11257.89</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    1 | loss: 9.651522 | lr: 0.0001 | norm: 9.2193 | dt: 14724.37ms | tok/sec: 17803.41</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    2 | loss: 9.175361 | lr: 0.0002 | norm: 4.7185 | dt: 14595.11ms | tok/sec: 17961.08</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:   48 | loss: 5.898010 | lr: 0.0001 | norm: 0.2110 | dt: 15174.01ms | tok/sec: 17275.85</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:   49 | loss: 5.887230 | lr: 0.0001 | norm: 0.2155 | dt: 15391.68ms | tok/sec: 17031.53</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 2nd run</span>
+</span></span><span style="display:flex;"><span>total_batch_size <span style="color:#0550ae">=</span> <span style="color:#0550ae">262144</span>
+</span></span><span style="display:flex;"><span>B <span style="color:#0550ae">=</span> <span style="color:#0550ae">8</span>
+</span></span><span style="display:flex;"><span>T <span style="color:#0550ae">=</span> <span style="color:#0550ae">256</span>
+</span></span><span style="display:flex;"><span>warmup_steps <span style="color:#0550ae">=</span> <span style="color:#0550ae">20</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># GPU usage around 4821MiB / 6138MiB</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    0 | loss: 10.936398 | lr: 0.0001 | norm: 26.1147 | dt: 22972.23ms | tok/sec: 11411.34</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    1 | loss: 9.640186 | lr: 0.0001 | norm: 8.7945 | dt: 14762.45ms | tok/sec: 17757.48</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:    2 | loss: 9.145591 | lr: 0.0002 | norm: 3.6486 | dt: 14683.03ms | tok/sec: 17853.53</span>
+</span></span><span style="display:flex;"><span><span style="color:#0550ae">...</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:   48 | loss: 5.813196 | lr: 0.0001 | norm: 0.3081 | dt: 15273.17ms | tok/sec: 17163.70</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># step:   49 | loss: 5.800667 | lr: 0.0001 | norm: 0.2381 | dt: 15022.11ms | tok/sec: 17450.55</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/train-llm2/train-llm2-mlflow-compare-runs.png"   alt="train-llm2-mlflow-compare-runs" class="sc-image sc-image-default"
+       >
+
+
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2024/10/gpt-2-setup-and-pretraining-guide/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">GPT-2 Setup and Pretraining Guide</span>
+            </a>
+          </div>
+        
+        
+          <div class="nav-next">
+            <a href="/posts/2024/11/exploring-ai-with-raspberry-pi-5/" rel="next">
+              <span class="meta-nav">Next →</span>
+              <span class="post-title">Exploring AI with Raspberry Pi 5</span>
+            </a>
+          </div>
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2025 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>

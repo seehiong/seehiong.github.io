@@ -1,0 +1,140 @@
+/* Code Blocks */
+/* General styling for <pre> elements within post content */
+.post-content pre {
+  padding: 1em;
+  padding-right: 4.5em; /* Space for copy button */
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-top: 0; /* Reset from potential browser defaults */
+  margin-bottom: 1.5em;
+  font-size: 0.9em;
+  line-height: 1.5;
+  border: 1px solid var(--code-block-border); /* Use specific code block border */
+  background-color: var(--code-block-bg);
+  color: var(--code-block-text);
+}
+
+/* Styling for <code> elements inside any <pre> in post-content */
+.post-content pre code {
+  font-family: "SF Mono", "Consolas", "Menlo", "Courier", monospace;
+  padding: 0;
+  background-color: transparent !important; /* Ensure no overriding background */
+  border: none;
+  font-size: 1em; /* Inherit from pre */
+  color: inherit; /* Inherit from pre */
+  white-space: pre; /* Preserve whitespace */
+}
+
+
+/* Wrapper for Hugo's Chroma-highlighted code blocks */
+.code-block-wrapper {
+  position: relative;
+  margin-bottom: 1.5em; /* Consistent with .post-content pre */
+  border-radius: 6px;
+  border-left-width: 4px;
+  border-left-style: solid;
+  padding-left: 0.8em; /* Space for the left border */
+
+  background-color: var(--code-plain-bg-light);
+  color: var(--code-plain-text-light);
+  border: 1px solid var(--code-border-light);
+  border-left-color: var(--code-left-border-light);
+}
+
+html.dark-mode .code-block-wrapper {
+  background-color: var(--code-plain-bg-dark);
+  color: var(--code-plain-text-dark);
+  border: 1px solid var(--code-border-dark);
+  border-left-color: var(--code-left-border-dark);
+}
+
+/* Styles for the .highlight div (Chroma output) inside the wrapper */
+.code-block-wrapper .highlight {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: var(--code-highlight-bg-light) !important;
+  border-radius: 0 3px 3px 0; /* Adjust to fit within wrapper */
+}
+
+html.dark-mode .code-block-wrapper .highlight {
+  background-color: var(--code-highlight-bg-dark) !important;
+}
+
+/* Styles for <pre> elements inside .highlight (Chroma output) */
+.code-block-wrapper .highlight pre {
+    color: var(--code-highlight-text-light);
+    background-color: transparent !important; /* Chroma pre itself is transparent */
+    border: none !important;
+    margin: 0 !important;
+    padding: 1em !important; /* Internal padding for code */
+    padding-right: 4.5em !important; /* Space for copy button */
+    overflow-x: auto;
+    font-size: 0.9em; /* Consistent sizing */
+    line-height: 1.5; /* Consistent line height */
+    border-radius: 0; /* No radius for pre itself, wrapper handles it */
+}
+html.dark-mode .code-block-wrapper .highlight pre {
+    color: var(--code-highlight-text-dark);
+}
+
+/* Styles for plain <pre> tags (not .highlight) directly inside .code-block-wrapper */
+.code-block-wrapper > pre:not(.chroma):not(.highlight pre) { /* Ensure it's not the Chroma pre */
+  background-color: transparent; /* Inherits from wrapper or uses its own variables if needed */
+  color: inherit; /* Inherits from wrapper */
+  border: none;
+  margin: 0;
+  padding: 1em;
+  padding-right: 4.5em; /* Space for copy button */
+  overflow-x: auto;
+  font-size: 0.9em;
+  line-height: 1.5;
+  border-radius: 0;
+}
+
+/* Copy Code Button */
+.copy-code-button {
+  position: absolute;
+  top: 0.75em;
+  right: 0.75em;
+  padding: 6px 10px;
+  background-color: var(--copy-btn-bg);
+  color: var(--copy-btn-text);
+  border: 1px solid var(--copy-btn-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8em;
+  font-weight: 500;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 10; /* Ensure it's above the code */
+}
+
+.copy-code-button:hover {
+  opacity: 1;
+  background-color: var(--copy-btn-hover-bg);
+  color: var(--copy-btn-hover-text);
+  border-color: var(--copy-btn-hover-border);
+}
+
+.copy-code-button:active {
+  transform: translateY(1px);
+}
+
+.copy-code-button .copy-icon,
+.copy-code-button .check-icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.copy-code-button.copied {
+  background-color: #4CAF50; /* Success green */
+  color: white;
+  border-color: #4CAF50;
+}
+html.dark-mode .copy-code-button.copied {
+  background-color: #388E3C; /* Darker success green */
+  border-color: #388E3C;
+}

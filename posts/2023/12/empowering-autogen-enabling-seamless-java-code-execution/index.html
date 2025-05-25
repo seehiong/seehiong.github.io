@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2023/12/empowering-autogen-enabling-seamless-java-code-execution/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Empowering Autogen: Enabling Seamless Java Code Execution">
+  <meta property="og:description" content="In this post, I explored enhancing Autogen’s capabilities by enabling seamless Java code execution. Drawing inspiration from 0xlws’ fork supporting JavaScript, I embarked on modifying Autogen to robustly support Java. I detailed the setup process, including installing Java on Windows Subsystem for Linux (WSL) and modifying key files. The post includes code snippets showcasing the changes, recompilation steps, and instructions for generating Java code. I extended functionality to additional test cases, seamlessly switching between Java and Python code execution. Docker integration for Java code execution was also optimized, showcasing Autogen’s versatility and robust development experience.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-12-10T20:00:00+08:00">
+    <meta property="article:modified_time" content="2023-12-10T20:00:00+08:00">
+    <meta property="article:tag" content="Autogen">
+    <meta property="article:tag" content="LM Studio">
+    <meta property="article:tag" content="LLM">
+    <meta property="article:tag" content="Java">
+    <meta property="article:tag" content="AI">
+    <meta property="article:tag" content="WSL">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Empowering Autogen: Enabling Seamless Java Code Execution">
+  <meta name="twitter:description" content="In this post, I explored enhancing Autogen’s capabilities by enabling seamless Java code execution. Drawing inspiration from 0xlws’ fork supporting JavaScript, I embarked on modifying Autogen to robustly support Java. I detailed the setup process, including installing Java on Windows Subsystem for Linux (WSL) and modifying key files. The post includes code snippets showcasing the changes, recompilation steps, and instructions for generating Java code. I extended functionality to additional test cases, seamlessly switching between Java and Python code execution. Docker integration for Java code execution was also optimized, showcasing Autogen’s versatility and robust development experience.">
+
+  <meta itemprop="name" content="Empowering Autogen: Enabling Seamless Java Code Execution">
+  <meta itemprop="description" content="In this post, I explored enhancing Autogen’s capabilities by enabling seamless Java code execution. Drawing inspiration from 0xlws’ fork supporting JavaScript, I embarked on modifying Autogen to robustly support Java. I detailed the setup process, including installing Java on Windows Subsystem for Linux (WSL) and modifying key files. The post includes code snippets showcasing the changes, recompilation steps, and instructions for generating Java code. I extended functionality to additional test cases, seamlessly switching between Java and Python code execution. Docker integration for Java code execution was also optimized, showcasing Autogen’s versatility and robust development experience.">
+  <meta itemprop="datePublished" content="2023-12-10T20:00:00+08:00">
+  <meta itemprop="dateModified" content="2023-12-10T20:00:00+08:00">
+  <meta itemprop="wordCount" content="1191">
+  <meta itemprop="keywords" content="Autogen,LM Studio,LLM,Java,AI,WSL,Docker,Dolphin,Mistral"><title>Empowering Autogen: Enabling Seamless Java Code Execution | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2023/12/empowering-autogen-enabling-seamless-java-code-execution/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          
+          
+          <img src="/images/blog_logo.png" alt="See Hiong&#39;s Blog Logo" class="nav-logo-image">
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Empowering Autogen: Enabling Seamless Java Code Execution</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2023-12-10T20:00:00&#43;08:00">December 10, 2023</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/autogen">Autogen</a>
+            
+              , <a href="/tags/lm-studio">LM Studio</a>
+            
+              , <a href="/tags/llm">LLM</a>
+            
+              , <a href="/tags/java">Java</a>
+            
+              , <a href="/tags/ai">AI</a>
+            
+              , <a href="/tags/wsl">WSL</a>
+            
+              , <a href="/tags/docker">Docker</a>
+            
+              , <a href="/tags/dolphin">Dolphin</a>
+            
+              , <a href="/tags/mistral">Mistral</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/autogen-java/empowering-autogen-enabling-seamless-java-code-execution.png');"></div>
+          <img src="/images/autogen-java/empowering-autogen-enabling-seamless-java-code-execution.png" alt="Empowering Autogen: Enabling Seamless Java Code Execution cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>In the pursuit of enhancing Autogen&rsquo;s capabilities, I drew inspiration from 
+
+
+
+
+
+
+  <a href="https://github.com/0xlws/autogen" target="_blank" rel="noopener noreferrer" >0xlws&rsquo; fork</a>
+ supporting JavaScript. This led me to embark on a journey to modify Autogen, enabling robust support for Java code execution.</p>
+<h2 id="setting-up">Setting up</h2>
+<p>Begin by ensuring that Java is installed on your Windows Subsystem for Linux (WSL) using the following command:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt install openjdk-17-jdk-headless</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="modifying-autogen">Modifying Autogen</h2>
+<p>Clone the latest changes from Autogen&rsquo;s repository:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/microsoft/autogen.git</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Key modifications were made to <em>code_utils.py</em> and <em>conversable_agent.py</em> to seamlessly integrate Java support. Here&rsquo;s a snippet of the changes:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># conversable_agent.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># @@ -1088,6 +1088,19 @@ class ConversableAgent(Agent):</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">elif</span> lang <span style="color:#0550ae">in</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;java&#34;</span><span style="color:#1f2328">]:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">if</span> code<span style="color:#0550ae">.</span>startswith<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;// filename: &#34;</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                    filename <span style="color:#0550ae">=</span> code<span style="color:#1f2328">[</span><span style="color:#0550ae">12</span> <span style="color:#1f2328">:</span> code<span style="color:#0550ae">.</span>find<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)]</span><span style="color:#0550ae">.</span>strip<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                    filename <span style="color:#0550ae">=</span> <span style="color:#cf222e">None</span>
+</span></span><span style="display:flex;"><span>                exitcode<span style="color:#1f2328">,</span> logs<span style="color:#1f2328">,</span> image <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>run_code<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>                    code<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                    lang<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;java&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                    filename<span style="color:#0550ae">=</span>filename<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#0550ae">**</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>_code_execution_config<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">elif</span> lang <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#39;unknown&#39;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                exitcode<span style="color:#1f2328">,</span> logs<span style="color:#1f2328">,</span> image <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">0</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;Language is unknown.&#34;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">None</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># code_utils.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># @@ -83,7 +83,8 @@ def infer_lang(code):</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">infer_lang</span><span style="color:#1f2328">(</span>code<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;infer the language for the code.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    TODO: make it robust.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    valid_prefixes <span style="color:#0550ae">=</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;python &#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;pip&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;python3 &#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;java &#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;javac &#34;</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#6639ba">any</span><span style="color:#1f2328">(</span>code<span style="color:#0550ae">.</span>startswith<span style="color:#1f2328">(</span>prefix<span style="color:#1f2328">)</span> <span style="color:#cf222e">for</span> prefix <span style="color:#0550ae">in</span> valid_prefixes<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#0a3069">&#34;sh&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># @@ -215,7 +216,7 @@ def timeout_handler(signum, frame):</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">_cmd</span><span style="color:#1f2328">(</span>lang<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> lang<span style="color:#0550ae">.</span>startswith<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;python&#34;</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">or</span> lang <span style="color:#0550ae">in</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;bash&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;sh&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;powershell&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;java&#34;</span><span style="color:#1f2328">]:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> lang
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> lang <span style="color:#0550ae">in</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;shell&#34;</span><span style="color:#1f2328">]:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#0a3069">&#34;sh&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> lang <span style="color:#0550ae">in</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;ps1&#34;</span><span style="color:#1f2328">]:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#0a3069">&#34;powershell&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">raise</span> NotImplementedError<span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">{</span>lang<span style="color:#0a3069">}</span><span style="color:#0a3069"> not recognized in code execution&#34;</span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>For detailed changes, refer to the full <em>git diff</em> output.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/autogen-java/autogen-code-modification-to-support-java.png"   alt="autogen-code-modification-to-support-java" class="sc-image sc-image-default"
+       >
+
+
+<p>Recompile the modified changes:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>pip install .</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="generating-java-code">Generating Java code</h2>
+<p>To incorporate Java code execution, additional instructions have been added to the SYSTEM_MESSAGE:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code>For Java-specific code:
+- If you want the user to save the code in a file before executing it, put // filename: &lt;filename&gt; inside the code block as the first line.
+- Ensure that the filename matches the class name and has the same capitalization.</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Here&rsquo;s the entire <em>app.py</em> showcasing the integration:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">autogen</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>config_list <span style="color:#0550ae">=</span> <span style="color:#1f2328">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#39;api_key&#39;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#39;NULL&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#39;base_url&#39;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#39;http://192.168.68.114:1234/v1&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>llm_config <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;cache_seed&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">42</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;temperature&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">0</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;config_list&#34;</span><span style="color:#1f2328">:</span> config_list
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>SYSTEM_MESSAGE <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;&#34;&#34;You are a helpful AI assistant.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Solve tasks using your coding and language skills.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">For Java-specific code:
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- If you want the user to save the code in a file before executing it, put // filename: &lt;filename&gt; inside the code block as the first line.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- Ensure that the filename matches the class name and has the same capitalization.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">In the following cases, suggest python code (in a python coding block) or shell script (in a sh coding block) for the user to execute.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    1. When you need to collect info, use the code to output the info you need, for example, browse or search the web, download/read a file, print the content of a webpage or a file, get the current date/time, check the operating system. After sufficient info is printed and the task is ready to be solved based on your language skill, you can solve the task by yourself.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    2. When you need to perform some task with code, use the code to perform the task and output the result. Finish the task smartly.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Solve the task step by step if you need to. If a plan is not provided, explain your plan first. Be clear which step uses code, and which step uses your language skill.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">When using code, you must indicate the script type in the code block. The user cannot provide any other feedback or perform any other action beyond executing the code you suggest. The user can&#39;t modify your code. So do not suggest incomplete code which requires users to modify. Don&#39;t use a code block if it&#39;s not intended to be executed by the user.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">If you want the user to save the code in a file before executing it, put # filename: &lt;filename&gt; inside the code block as the first line. Don&#39;t include multiple code blocks in one response. Do not ask users to copy and paste the result. Instead, use &#39;print&#39; function for the output when relevant. Check the execution result returned by the user.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">If the result indicates there is an error, fix the error and output the code again. Suggest the full code instead of partial code or code changes. If the error can&#39;t be fixed or if the task is not solved even after the code is executed successfully, analyze the problem, revisit your assumption, collect additional info you need, and think of a different approach to try.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">When you find an answer, verify the answer carefully. Include verifiable evidence in your response if possible.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Reply &#34;TERMINATE&#34; in the end when everything is done.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>assistant <span style="color:#0550ae">=</span> autogen<span style="color:#0550ae">.</span>AssistantAgent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    name<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;assistant&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    system_message<span style="color:#0550ae">=</span>SYSTEM_MESSAGE<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    llm_config<span style="color:#0550ae">=</span>llm_config<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    is_termination_msg <span style="color:#0550ae">=</span> <span style="color:#cf222e">lambda</span> x<span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;TERMINATE&#34;</span> <span style="color:#0550ae">in</span> x<span style="color:#0550ae">.</span>get<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;content&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;</span><span style="color:#1f2328">),</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>user_proxy <span style="color:#0550ae">=</span> autogen<span style="color:#0550ae">.</span>UserProxyAgent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    name<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;user_proxy&#34;</span><span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>    human_input_mode<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;NEVER&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    max_consecutive_auto_reply<span style="color:#0550ae">=</span><span style="color:#0550ae">3</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    llm_config<span style="color:#0550ae">=</span>llm_config<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    code_execution_config<span style="color:#0550ae">=</span><span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;work_dir&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;coding&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;use_docker&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;openjdk&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    system_message<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;&#34;&#34;&#34;Reply TERMINATE if the task has been solved at full satisfaction or the code executed without issue.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Otherwise, reply CONTINUE, or the reason why the task is not solved yet.&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>user_proxy<span style="color:#0550ae">.</span>initiate_chat<span style="color:#1f2328">(</span>assistant<span style="color:#1f2328">,</span> message<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;Write a Hello World application in java&#34;</span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Similar to 
+
+
+
+
+
+
+  <a href="/posts/2023/12/multi-agent-conservation-with-autogen/" >my previous post</a>
+, I am using the latest version of autogen (requirements.txt: <code>pyautogen==0.2.1</code>) and the 
+
+
+
+
+
+
+  <a href="https://huggingface.co/TheBloke/dolphin-2.2.1-mistral-7B-GPTQ" target="_blank" rel="noopener noreferrer" >Dolphin 2.2.1 Mistral 7B model</a>
+.</p>
+<p>This is the sample run result:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/autogen-java/autogen-hello-world-in-java.png"   alt="autogen-hello-world-in-java" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="extending-functionality-to-additional-test-cases">Extending Functionality to Additional Test Cases</h2>
+<p>Discover the versatility of Autogen by effortlessly switching between Java and Python code execution based on your specific requirements.</p>
+<h3 id="switching-to-python-requirements">Switching to Python Requirements</h3>
+<p>Witness Autogen seamlessly transition to Python code execution:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>user_proxy<span style="color:#0550ae">.</span>initiate_chat<span style="color:#1f2328">(</span>assistant<span style="color:#1f2328">,</span> message<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;Write a Hello World application in python&#34;</span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/autogen-java/autogen-hello-world-in-python.png"   alt="autogen-hello-world-in-python" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="handling-fibonacci-sequences-in-java">Handling Fibonacci Sequences in Java</h3>
+<p>Explore Autogen&rsquo;s flexibility in generating a Fibonacci sequence using Java:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>user_proxy<span style="color:#0550ae">.</span>initiate_chat<span style="color:#1f2328">(</span>assistant<span style="color:#1f2328">,</span> message<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;Calculate the first 10 terms of a Fibonacci sequence. Write the java code to generate and print these terms.&#34;</span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/autogen-java/autogen-fibonacci-sequence-in-java.png"   alt="autogen-fibonacci-sequence-in-java" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="docker-integration-for-java-code-execution">Docker Integration for Java Code Execution</h2>
+<p>Ensure a streamlined execution process by utilizing Docker for Java code execution. The following steps were taken to optimize Autogen for Docker integration:</p>
+<h3 id="1-removed-openjdk-from-the-wsl-environment">1. Removed openjdk from the WSL environment:</h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code>sudo apt remove openjdk-17-jdk-headless</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="2-modified-autogen-to-support-java-code-execution-within-docker">2. Modified Autogen to support Java code execution within Docker</h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># code_utils.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># @@ -348,13 +349,20 @@ def execute_code(</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Prepare image_list based on language and use_docker preference</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> use_docker <span style="color:#0550ae">is</span> <span style="color:#cf222e">True</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        lang <span style="color:#0550ae">=</span> lang<span style="color:#0550ae">.</span>lower<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> lang <span style="color:#0550ae">in</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;java&#34;</span><span style="color:#1f2328">]:</span>
+</span></span><span style="display:flex;"><span>            image_list <span style="color:#0550ae">=</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;openjdk:22-slim-bulleye&#34;</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">elif</span> lang <span style="color:#0550ae">in</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;python&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;py&#34;</span><span style="color:#1f2328">]:</span>
+</span></span><span style="display:flex;"><span>            image_list <span style="color:#0550ae">=</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;python:3-alpine&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;python:3&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;python:3-windowsservercore&#34;</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a"># Add more languages or a default image list if needed</span>
+</span></span><span style="display:flex;"><span>            image_list <span style="color:#0550ae">=</span> <span style="color:#1f2328">[]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">elif</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>use_docker<span style="color:#1f2328">,</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        image_list <span style="color:#0550ae">=</span> <span style="color:#1f2328">[</span>use_docker<span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        image_list <span style="color:#0550ae">=</span> use_docker
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># @@ -399,7 +407,8 @@ def execute_code(</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># tag image based on the lang</span>
+</span></span><span style="display:flex;"><span>    container<span style="color:#0550ae">.</span>commit<span style="color:#1f2328">(</span>repository<span style="color:#0550ae">=</span>lang<span style="color:#1f2328">,</span> tag<span style="color:#0550ae">=</span>tag<span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>View the complete changes in the <em>git diff</em> output:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/autogen-java/autogen-code-modification-to-support-java-in-docker.png"   alt="autogen-code-modification-to-support-java-in-docker" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="3-configure-docker-usage-in-the-code_">3. Configure Docker usage in the <em>code_execution_config</em></h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>    code_execution_config<span style="color:#0550ae">=</span><span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;work_dir&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;coding&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;use_docker&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;openjdk&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="4-ensure-proper-docker-integration-in-the-user_proxy-configuration">4. Ensure proper Docker integration in the user_proxy configuration</h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>user_proxy <span style="color:#0550ae">=</span> autogen<span style="color:#0550ae">.</span>UserProxyAgent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    name<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;user_proxy&#34;</span><span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>    human_input_mode<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;NEVER&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    max_consecutive_auto_reply<span style="color:#0550ae">=</span><span style="color:#0550ae">3</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    llm_config<span style="color:#0550ae">=</span>llm_config<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    code_execution_config<span style="color:#0550ae">=</span><span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;work_dir&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;coding&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;use_docker&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;openjdk&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    system_message<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;&#34;&#34;&#34;Reply TERMINATE if the task has been solved at full satisfaction or the code executed without issue.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Otherwise, reply CONTINUE, or the reason why the task is not solved yet.&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This is the result of the <em>docker image ls</em>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/autogen-java/autogen-java-code-execution-in-docker.png"   alt="autogen-java-code-execution-in-docker" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="conclusion-showcasing-java-code-execution-in-autogen">Conclusion: Showcasing Java Code Execution in Autogen</h2>
+<p>This showcase exemplifies Autogen&rsquo;s capabilities in executing Java codes seamlessly. The integration of Docker further optimizes the workflow, providing a robust development experience.</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2023/12/multi-agent-conservation-with-autogen/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Multi-agent Conservation with Autogen</span>
+            </a>
+          </div>
+        
+        
+          <div class="nav-next">
+            <a href="/posts/2023/12/unveiling-agent-autobuild-in-autogen/" rel="next">
+              <span class="meta-nav">Next →</span>
+              <span class="post-title">Unveiling Agent AutoBuild in Autogen</span>
+            </a>
+          </div>
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2025 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>

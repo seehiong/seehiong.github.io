@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2020/08/ha-k8s-pi-cluster-i/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="HA K8s Pi Cluster (I)">
+  <meta property="og:description" content="In this special guide, I celebrate Singapore’s 55th National Day by setting up a Highly Available Kubernetes Pi Cluster using 2x Raspberry Pi Model B 8GB. With a total setup time of 25 minutes, I configure an external etcd key-value store, laying the foundation for high availability. I detail OS preparation, creating a virtual IP with Keepalived, generating certificates for etcd, and setting up etcd on each master node. Troubleshooting tips are provided, including addressing cluster ID mismatches and replacing faulty members. Stay tuned for the next article covering the continuation of the HA configuration.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2020-08-09T20:00:00+08:00">
+    <meta property="article:modified_time" content="2020-08-09T20:00:00+08:00">
+    <meta property="article:tag" content="Raspberry Pi">
+    <meta property="article:tag" content="K8s">
+    <meta property="article:tag" content="Cluster">
+    <meta property="article:tag" content="HA">
+    <meta property="article:tag" content="KeepedAlive">
+    <meta property="article:tag" content="Etcd">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="HA K8s Pi Cluster (I)">
+  <meta name="twitter:description" content="In this special guide, I celebrate Singapore’s 55th National Day by setting up a Highly Available Kubernetes Pi Cluster using 2x Raspberry Pi Model B 8GB. With a total setup time of 25 minutes, I configure an external etcd key-value store, laying the foundation for high availability. I detail OS preparation, creating a virtual IP with Keepalived, generating certificates for etcd, and setting up etcd on each master node. Troubleshooting tips are provided, including addressing cluster ID mismatches and replacing faulty members. Stay tuned for the next article covering the continuation of the HA configuration.">
+
+  <meta itemprop="name" content="HA K8s Pi Cluster (I)">
+  <meta itemprop="description" content="In this special guide, I celebrate Singapore’s 55th National Day by setting up a Highly Available Kubernetes Pi Cluster using 2x Raspberry Pi Model B 8GB. With a total setup time of 25 minutes, I configure an external etcd key-value store, laying the foundation for high availability. I detail OS preparation, creating a virtual IP with Keepalived, generating certificates for etcd, and setting up etcd on each master node. Troubleshooting tips are provided, including addressing cluster ID mismatches and replacing faulty members. Stay tuned for the next article covering the continuation of the HA configuration.">
+  <meta itemprop="datePublished" content="2020-08-09T20:00:00+08:00">
+  <meta itemprop="dateModified" content="2020-08-09T20:00:00+08:00">
+  <meta itemprop="wordCount" content="1372">
+  <meta itemprop="keywords" content="Raspberry Pi,K8s,Cluster,HA,KeepedAlive,Etcd"><title>HA K8s Pi Cluster (I) | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2020/08/ha-k8s-pi-cluster-i/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          
+          
+          <img src="/images/blog_logo.png" alt="See Hiong&#39;s Blog Logo" class="nav-logo-image">
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">HA K8s Pi Cluster (I)</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2020-08-09T20:00:00&#43;08:00">August 9, 2020</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/raspberry-pi">Raspberry Pi</a>
+            
+              , <a href="/tags/k8s">K8s</a>
+            
+              , <a href="/tags/cluster">Cluster</a>
+            
+              , <a href="/tags/ha">HA</a>
+            
+              , <a href="/tags/keepedalive">KeepedAlive</a>
+            
+              , <a href="/tags/etcd">Etcd</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/ha-k8s1/highly-available-kubernetes-pi-cluster.png');"></div>
+          <img src="/images/ha-k8s1/highly-available-kubernetes-pi-cluster.png" alt="HA K8s Pi Cluster (I) cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>By having a Highly Available Kubernetes Pi Cluster, you will have full control over your production grade environment on-premise</p>
+<h1 id="ha-kubernetes-pi-cluster-part-i">HA Kubernetes Pi Cluster (Part I)</h1>
+<p><em>(Total Setup Time: 25 mins)</em></p>
+<p>On this special day, I will like to wish all Singaporeans and Singapore a Happy 55th 
+
+
+
+
+
+
+  <a href="https://www.ndp.gov.sg/" target="_blank" rel="noopener noreferrer" >National Day</a>
+!</p>
+<p>With the newly purchase 2x Raspberry Pi Model B 8GB and 64GB SD card to my collection, I will setup a Highly Available Kubernetes Pi Cluster. In this guide, I will setup an 
+
+
+
+
+
+
+  <a href="https://etcd.io/" target="_blank" rel="noopener noreferrer" >external etcd</a>
+ key-value store. In the 
+
+
+
+
+
+
+  <a href="/posts/2020/08/ha-k8s-pi-cluster-ii/" >next article</a>
+, I will continue with the HA configuration.</p>
+<h2 id="preparing-os">Preparing OS</h2>
+<p><em>(10 mins)</em></p>
+<p>First, I am using 
+
+
+
+
+
+
+  <a href="https://ubuntu.com/download/raspberry-pi" target="_blank" rel="noopener noreferrer" >Ubuntu Server (64-bit)</a>
+ as my OS. After burning the image onto my 64GB SD card, create an empty file <strong>ssh</strong> in d:/boot. This section is required for each master nodes.</p>
+<p>Second, change the default password <em>ubuntu</em> for the default ubuntu user. Upgrade the OS:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>sudo apt upgrade</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Third, change the hostname by running:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/hostname
+</span></span><span style="display:flex;"><span>sudo vi /etc/hosts</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Fourth, letting iptables to see 
+
+
+
+
+
+
+  <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/" target="_blank" rel="noopener noreferrer" >bridged traffic</a>
+:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#57606a"># Checks if br_netfilter is loaded</span>
+</span></span><span style="display:flex;"><span>lsmod <span style="color:#1f2328">|</span> grep br_netfilter
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Loads its explicitly</span>
+</span></span><span style="display:flex;"><span>sudo modprobe br_netfilter
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Sees bridged traffic</span>
+</span></span><span style="display:flex;"><span>cat <span style="color:#0a3069">&lt;&lt;EOF | sudo tee /etc/sysctl.d/k8s.conf
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">net.bridge.bridge-nf-call-ip6tables = 1
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">net.bridge.bridge-nf-call-iptables = 1
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sudo sysctl --system</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Fifth, enable memory cgroup, by adding the following to <em>/boot/firmware/cmdline.txt</em>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#1f2328">cgroup</span><span style="color:#1f2328">=</span><span style="color:#1f2328">cpuset</span> <span style="color:#1f2328">cgroup_enable</span><span style="color:#1f2328">=</span><span style="color:#1f2328">memory</span> <span style="color:#1f2328">cgroup_memory</span><span style="color:#1f2328">=</span><span style="color:#0550ae">1</span> <span style="color:#1f2328">swapaccount</span><span style="color:#1f2328">=</span><span style="color:#0550ae">1</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Finally, add the following to <em>/boot/firmware/usercfg.txt</em> for 
+
+
+
+
+
+
+  <a href="https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README" target="_blank" rel="noopener noreferrer" >disabling WiFi and Bluetooth</a>
+:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#1f2328">dtoverlay</span><span style="color:#1f2328">=</span><span style="color:#1f2328">disable</span><span style="color:#1f2328">-</span><span style="color:#1f2328">wifi</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">dtoverlay</span><span style="color:#1f2328">=</span><span style="color:#1f2328">disable</span><span style="color:#1f2328">-</span><span style="color:#1f2328">bt</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Memory</span> <span style="color:#1f2328">group</span> <span style="color:#1f2328">should</span> <span style="color:#1f2328">be</span> <span style="color:#0550ae">1</span> <span style="color:#1f2328">after</span> <span style="color:#1f2328">reboot</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">sudo</span> <span style="color:#1f2328">reboot</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">grep</span> <span style="color:#1f2328">mem</span> <span style="color:#0a3069">/proc/</span><span style="color:#1f2328">cgroups</span> <span style="color:#1f2328">|</span> <span style="color:#1f2328">awk</span> <span style="color:#0a3069">&#39;{ print $4 }&#39;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="creating-virtual-ip">Creating Virtual IP</h2>
+<p><em>(5 mins)</em></p>
+<p>First, install 
+
+
+
+
+
+
+  <a href="https://www.keepalived.org/manpage.html" target="_blank" rel="noopener noreferrer" >keepalived</a>
+ referencing from 
+
+
+
+
+
+
+  <a href="https://keepalived.org/LVS-NAT-Keepalived-HOWTO.html" target="_blank" rel="noopener noreferrer" >LVS-NAT-Keepalived</a>
+ for all master nodes.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#57606a">#Installs keepalived</span>
+</span></span><span style="display:flex;"><span>sudo apt install keepalived
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Configures keepalived</span>
+</span></span><span style="display:flex;"><span>sudo vi /etc/keepalived/keepalived.conf</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>#<span style="color:#1f2328">VRRP</span> <span style="color:#1f2328">Instances</span> <span style="color:#1f2328">definitions</span>
+</span></span><span style="display:flex;"><span>#<span style="color:#1f2328">state</span> <span style="color:#1f2328">MASTER</span> <span style="color:#1f2328">for</span> <span style="color:#1f2328">first</span> <span style="color:#1f2328">master</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">BACKUP</span> <span style="color:#1f2328">for</span> <span style="color:#1f2328">other</span> <span style="color:#1f2328">master</span> <span style="color:#1f2328">nodes</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">vrrp_instance</span> <span style="color:#1f2328">VI_1</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">state</span> <span style="color:#1f2328">MASTER</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">interface</span> <span style="color:#1f2328">eth0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">virtual_router_id</span> <span style="color:#0550ae">51</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">priority</span> <span style="color:#0550ae">150</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">authentication</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">auth_type</span> <span style="color:#1f2328">PASS</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">auth_pass</span> <span style="color:#1f2328">seehiong</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">virtual_ipaddress</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">200</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Virtual</span> <span style="color:#1f2328">Servers</span> <span style="color:#1f2328">definitions</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">virtual_server</span> <span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">200</span> <span style="color:#0550ae">6443</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#1f2328">delay_loop</span> <span style="color:#0550ae">6</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#1f2328">lb_algo</span> <span style="color:#1f2328">rr</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#1f2328">lb_kind</span> <span style="color:#1f2328">NAT</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#1f2328">protocol</span> <span style="color:#1f2328">TCP</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#1f2328">real_server</span> <span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">119</span> <span style="color:#0550ae">6443</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#1f2328">weight</span> <span style="color:#0550ae">1</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#1f2328">TCP_CHECK</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#1f2328">connect_timeout</span> <span style="color:#0550ae">3</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#1f2328">connect_port</span> <span style="color:#0550ae">6443</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#1f2328">real_server</span> <span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">173</span> <span style="color:#0550ae">6443</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#1f2328">weight</span> <span style="color:#0550ae">1</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#1f2328">TCP_CHECK</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#1f2328">connect_timeout</span> <span style="color:#0550ae">3</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#1f2328">connect_port</span> <span style="color:#0550ae">6443</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#1f2328">real_server</span> <span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">100</span> <span style="color:#0550ae">6443</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#1f2328">weight</span> <span style="color:#0550ae">1</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#1f2328">TCP_CHECK</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#1f2328">connect_timeout</span> <span style="color:#0550ae">3</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#1f2328">connect_port</span> <span style="color:#0550ae">6443</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#57606a"># Restarts keepalived</span>
+</span></span><span style="display:flex;"><span>sudo systemctl restart keepalived</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Second, test the connection, which will fail at this point in time:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>nc -v 192.168.100.200 <span style="color:#0550ae">6443</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Expected result</span>
+</span></span><span style="display:flex;"><span>nc: connect to 192.168.100.200 port <span style="color:#0550ae">6443</span> <span style="color:#0550ae">(</span>tcp<span style="color:#0550ae">)</span> failed: Connection refused</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="preparing-certs-for-etcd">Preparing certs for etcd</h2>
+<p><em>(5 mins)</em></p>
+<p>First, by following 
+
+
+
+
+
+
+  <a href="https://networklessons.com/uncategorized/openssl-certification-authority-ca-ubuntu-server" target="_blank" rel="noopener noreferrer" >openssl CA</a>
+, configure openssl and create root cert:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo su
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Openssl configuration</span>
+</span></span><span style="display:flex;"><span>vi /usr/lib/ssl/openssl.cnf</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span>[ <span style="color:#1f2328">CA_default</span> ]                                                                                                                                                                                
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">dir</span>             <span style="color:#1f2328">=</span> <span style="color:#0a3069">/root/</span><span style="color:#1f2328">ca</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">mkdir</span> <span style="color:#0a3069">/root/</span><span style="color:#1f2328">ca</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">cd</span> <span style="color:#0a3069">/root/</span><span style="color:#1f2328">ca</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">mkdir</span> <span style="color:#1f2328">newcerts</span> <span style="color:#1f2328">certs</span> <span style="color:#1f2328">crl</span> <span style="color:#1f2328">private</span> <span style="color:#1f2328">requests</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">touch</span> <span style="color:#1f2328">index</span>.<span style="color:#1f2328">txt</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">echo</span> <span style="color:#0a3069">&#39;1234&#39;</span> <span style="color:#1f2328">&gt;</span> <span style="color:#1f2328">serial</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Root</span> <span style="color:#1f2328">certificate</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">openssl</span> <span style="color:#1f2328">genrsa</span> <span style="color:#1f2328">-</span><span style="color:#1f2328">aes256</span> <span style="color:#1f2328">-</span><span style="color:#1f2328">out</span> <span style="color:#1f2328">private</span>/<span style="color:#1f2328">cakey</span>.<span style="color:#1f2328">pem</span> <span style="color:#0550ae">4096</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">openssl</span> <span style="color:#1f2328">req</span> <span style="color:#1f2328">-</span><span style="color:#1f2328">new</span> <span style="color:#1f2328">-</span><span style="color:#1f2328">x509</span> <span style="color:#1f2328">-</span><span style="color:#1f2328">key</span> <span style="color:#1f2328">private</span><span style="color:#0a3069">/cakey.pem -out cacert.pem -days 3650 -set_serial 0 -subj &#39;/</span><span style="color:#1f2328">C</span><span style="color:#1f2328">=</span><span style="color:#1f2328">SG</span><span style="color:#0a3069">/ST=SG/</span><span style="color:#1f2328">O</span><span style="color:#1f2328">=</span><span style="color:#1f2328">seehiong</span>/<span style="color:#1f2328">CN</span><span style="color:#1f2328">=</span><span style="color:#1f2328">master1</span>&#39;</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Second, create certs for all master nodes:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#57606a"># Create master nodes&#39; certificate</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">cd</span> /root/ca/requests/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>openssl genrsa -out etcd-key.pem
+</span></span><span style="display:flex;"><span>openssl req -new -key etcd-key.pem -out etcd.csr -subj <span style="color:#0a3069">&#39;/C=SG/ST=SG/O=seehiong/CN=master1,master2,master3,localhost,cluster-endpoint&#39;</span>
+</span></span><span style="display:flex;"><span>openssl ca -in etcd.csr -out etcd.pem <span style="color:#0a3069">\
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  -extfile &lt;<span style="color:#0550ae">(</span><span style="color:#6639ba">printf</span> <span style="color:#0a3069">&#34;subjectAltName=IP:192.168.100.119,IP:192.168.100.173,IP:192.168.100.100,IP:192.168.100.200,IP:127.0.0.1,\
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">  DNS:master1,DNS:master2,DNS:master3,DNS:localhost,DNS:cluster-endpoint&#34;</span><span style="color:#0550ae">)</span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>openssl genrsa -out peer-etcd-key.pem
+</span></span><span style="display:flex;"><span>openssl req -new -key peer-etcd-key.pem -out peer-etcd.csr -subj <span style="color:#0a3069">&#39;/C=SG/ST=SG/O=seehiong/CN=192.168.100.119,192.168.100.173,192.168.100.100,192.168.100.200&#39;</span>
+</span></span><span style="display:flex;"><span>openssl ca -in peer-etcd.csr -out peer-etcd.pem <span style="color:#0a3069">\
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  -extfile &lt;<span style="color:#0550ae">(</span><span style="color:#6639ba">printf</span> <span style="color:#0a3069">&#34;subjectAltName=IP:192.168.100.119,IP:192.168.100.173,IP:192.168.100.100,IP:192.168.100.200,IP:127.0.0.1,\
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">  DNS:master1,DNS:master2,DNS:master3,DNS:localhost,DNS:cluster-endpoint&#34;</span><span style="color:#0550ae">)</span>
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>rm etcd.csr peer-etcd.csr
+</span></span><span style="display:flex;"><span>mv etcd-key.pem peer-etcd-key.pem /root/ca/private/
+</span></span><span style="display:flex;"><span>mv etcd.pem peer-etcd.pem /root/ca/certs/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Protects /root/ca folder</span>
+</span></span><span style="display:flex;"><span>chmod -R <span style="color:#0550ae">600</span> /root/ca</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Third, copies all certs to <em>/srv/etcd-certs/</em> for all master nodes.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#57606a"># Copies certs to master1  </span>
+</span></span><span style="display:flex;"><span>cp /root/ca/cacert.pem /root/ca/private/etcd-key.pem /root/ca/private/peer-etcd-key.pem <span style="color:#0a3069">\
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  /root/ca/certs/etcd.pem /root/ca/certs/peer-etcd.pem /srv/etcd-certs/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Copies certs to other master nodes</span>
+</span></span><span style="display:flex;"><span>scp /root/ca/cacert.pem /root/ca/private/etcd-key.pem /root/ca/private/peer-etcd-key.pem <span style="color:#0a3069">\
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  /root/ca/certs/etcd.pem /root/ca/certs/peer-etcd.pem ubuntu@master2:/tmp
+</span></span><span style="display:flex;"><span>scp /root/ca/cacert.pem /root/ca/private/etcd-key.pem /root/ca/private/peer-etcd-key.pem <span style="color:#0a3069">\
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  /root/ca/certs/etcd.pem /root/ca/certs/peer-etcd.pem ubuntu@master3:/tmp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ssh into other master nodes, perform these</span>
+</span></span><span style="display:flex;"><span>sudo mv /tmp/*.pem  /srv/etcd-certs/
+</span></span><span style="display:flex;"><span>sudo chown -R etcd:etcd /srv/etcd-certs/</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Lastly, update ca-certificate on all nodes:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo cp /srv/etcd-certs/cacert.pem /usr/local/share/ca-certificates
+</span></span><span style="display:flex;"><span>sudo update-ca-certificates --fresh</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="setting-up-etcd">Setting up etcd</h2>
+<p><em>(5 mins)</em></p>
+<p>First, by following 
+
+
+
+
+
+
+  <a href="https://github.com/etcd-io/etcd/releases" target="_blank" rel="noopener noreferrer" >v3.4.10 release</a>
+, setup etcd on each master as follows:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#953800">ETCD_VER</span><span style="color:#0550ae">=</span>v3.4.10
+</span></span><span style="display:flex;"><span><span style="color:#953800">GITHUB_URL</span><span style="color:#0550ae">=</span>https://github.com/etcd-io/etcd/releases/download
+</span></span><span style="display:flex;"><span><span style="color:#953800">DOWNLOAD_URL</span><span style="color:#0550ae">=</span><span style="color:#0a3069">${</span><span style="color:#953800">GITHUB_URL</span><span style="color:#0a3069">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Downloads the arm64 architecture for Raspberry Pi</span>
+</span></span><span style="display:flex;"><span>rm -f /tmp/etcd-<span style="color:#0a3069">${</span><span style="color:#953800">ETCD_VER</span><span style="color:#0a3069">}</span>-linux-arm64.tar.gz
+</span></span><span style="display:flex;"><span>rm -rf /tmp/etcd-download-test <span style="color:#0550ae">&amp;&amp;</span> mkdir -p /tmp/etcd-download-test
+</span></span><span style="display:flex;"><span>curl -L <span style="color:#0a3069">${</span><span style="color:#953800">DOWNLOAD_URL</span><span style="color:#0a3069">}</span>/<span style="color:#0a3069">${</span><span style="color:#953800">ETCD_VER</span><span style="color:#0a3069">}</span>/etcd-<span style="color:#0a3069">${</span><span style="color:#953800">ETCD_VER</span><span style="color:#0a3069">}</span>-linux-arm64.tar.gz -o /tmp/etcd-<span style="color:#0a3069">${</span><span style="color:#953800">ETCD_VER</span><span style="color:#0a3069">}</span>-linux-arm64.tar.gz
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Extracts etcd</span>
+</span></span><span style="display:flex;"><span>tar xzvf /tmp/etcd-<span style="color:#0a3069">${</span><span style="color:#953800">ETCD_VER</span><span style="color:#0a3069">}</span>-linux-arm64.tar.gz -C /tmp/etcd-download-test --strip-components<span style="color:#0550ae">=</span><span style="color:#0550ae">1</span>
+</span></span><span style="display:flex;"><span>rm -f /tmp/etcd-<span style="color:#0a3069">${</span><span style="color:#953800">ETCD_VER</span><span style="color:#0a3069">}</span>-linux-arm64.tar.gz
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Checks version</span>
+</span></span><span style="display:flex;"><span>/tmp/etcd-download-test/etcd --version <span style="color:#0550ae">(</span>Error: etcd on unsupported platform without <span style="color:#953800">ETCD_UNSUPPORTED_ARCH</span><span style="color:#0550ae">=</span>arm64 <span style="color:#6639ba">set</span><span style="color:#0550ae">)</span>
+</span></span><span style="display:flex;"><span>/tmp/etcd-download-test/etcdctl version <span style="color:#0550ae">(</span>Success: etcdctl version: 3.4.10, API version: 3.4<span style="color:#0550ae">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Moves to /usr/local/bin</span>
+</span></span><span style="display:flex;"><span>sudo cp /tmp/etcd-download-test/etcd /usr/local/bin/
+</span></span><span style="display:flex;"><span>sudo cp /tmp/etcd-download-test/etcdctl /usr/local/bin/
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">export</span> <span style="color:#953800">ETCD_UNSUPPORTED_ARCH</span><span style="color:#0550ae">=</span>arm64
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Checks version again</span>
+</span></span><span style="display:flex;"><span>etcd --version <span style="color:#0550ae">(</span>Sccuess: running etcd on unsupported architecture <span style="color:#0a3069">&#34;arm64&#34;</span> since ETCD_UNSUPPORTED_ARCH is <span style="color:#6639ba">set</span><span style="color:#0550ae">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Second, prepares etcd as a service on <strong>master1</strong>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /lib/systemd/system/etcd.service</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#1f2328">Inserts</span> <span style="color:#1f2328">the</span> <span style="color:#1f2328">following</span> <span style="color:#1f2328">into</span> <span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">service</span> <span style="color:#1f2328">for</span> <span style="color:#1f2328">master1</span>
+</span></span><span style="display:flex;"><span>[<span style="color:#1f2328">Unit</span>]
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Description</span><span style="color:#1f2328">=</span><span style="color:#1f2328">etcd</span> <span style="color:#1f2328">key</span><span style="color:#1f2328">-</span><span style="color:#1f2328">value</span> <span style="color:#1f2328">store</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Documentation</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">io</span><span style="color:#0a3069">/docs/</span><span style="color:#1f2328">v3</span>.<span style="color:#0550ae">4</span>.<span style="color:#0550ae">0</span>/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#1f2328">Service</span>]
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">User</span><span style="color:#1f2328">=</span><span style="color:#1f2328">etcd</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Type</span><span style="color:#1f2328">=</span><span style="color:#1f2328">notify</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_UNSUPPORTED_ARCH</span><span style="color:#1f2328">=</span><span style="color:#1f2328">arm64</span>
+</span></span><span style="display:flex;"><span>#<span style="color:#1f2328">Loggingg</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_LOGGER</span><span style="color:#1f2328">=</span><span style="color:#1f2328">zap</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Member</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_NAME</span><span style="color:#1f2328">=</span><span style="color:#1f2328">infra1</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_DATA_DIR</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/var/</span><span style="color:#1f2328">lib</span>/<span style="color:#1f2328">etcd</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_LISTEN_PEER_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">119</span>:<span style="color:#0550ae">2380</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_LISTEN_CLIENT_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">119</span>:<span style="color:#0550ae">2379</span><span style="color:#1f2328">,</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">127</span>.<span style="color:#0550ae">0</span>.<span style="color:#0550ae">0</span>.<span style="color:#0550ae">1</span>:<span style="color:#0550ae">2379</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_HEARTBEAT_INTERVAL</span><span style="color:#1f2328">=</span><span style="color:#0550ae">1000</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_ELECTION_TIMEOUT</span><span style="color:#1f2328">=</span><span style="color:#0550ae">5000</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Clustering</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_ADVERTISE_PEER_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">119</span>:<span style="color:#0550ae">2380</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER_TOKEN</span><span style="color:#1f2328">=</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">cluster</span><span style="color:#0550ae">-1</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER</span><span style="color:#1f2328">=</span><span style="color:#1f2328">infra1</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">119</span>:<span style="color:#0550ae">2380</span><span style="color:#1f2328">,</span><span style="color:#1f2328">infra2</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">173</span>:<span style="color:#0550ae">2380</span><span style="color:#1f2328">,</span><span style="color:#1f2328">infra3</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">100</span>:<span style="color:#0550ae">2380</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER_STATE</span><span style="color:#1f2328">=</span><span style="color:#1f2328">new</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_ADVERTISE_CLIENT_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">119</span>:<span style="color:#0550ae">2379</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Security</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_CLIENT_CERT_AUTH</span><span style="color:#1f2328">=</span><span style="color:#1f2328">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_TRUSTED_CA_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">cacert</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_CERT_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_KEY_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">key</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_CLIENT_CERT_AUTH</span><span style="color:#1f2328">=</span><span style="color:#1f2328">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_TRUSTED_CA_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">cacert</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_CERT_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">peer</span><span style="color:#1f2328">-</span><span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_KEY_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">peer</span><span style="color:#1f2328">-</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">key</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">ExecStart</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/usr/</span><span style="color:#1f2328">local</span><span style="color:#0a3069">/bin/</span><span style="color:#1f2328">etcd</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Restart</span><span style="color:#1f2328">=</span><span style="color:#1f2328">always</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">RestartSec</span><span style="color:#1f2328">=</span><span style="color:#0550ae">10</span>s
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">LimitNOFILE</span><span style="color:#1f2328">=</span><span style="color:#0550ae">40000</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#1f2328">Install</span>]
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">WantedBy</span><span style="color:#1f2328">=</span><span style="color:#1f2328">multi</span><span style="color:#1f2328">-</span><span style="color:#1f2328">user</span>.<span style="color:#1f2328">target</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Third, creates etcd data folder and system account on master1:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo mkdir -p /var/lib/etcd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># etcd fails if file permissions are not set correctly</span>
+</span></span><span style="display:flex;"><span>sudo chmod -R <span style="color:#0550ae">700</span> /var/lib/etcd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Creates system user</span>
+</span></span><span style="display:flex;"><span>sudo adduser --system etcd
+</span></span><span style="display:flex;"><span>sudo addgroup etcd
+</span></span><span style="display:flex;"><span>sudo usermod -aG etcd etcd</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Fourth, install etcd as a service:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo systemctl daemon-reload
+</span></span><span style="display:flex;"><span>sudo systemctl <span style="color:#6639ba">enable</span> etcd
+</span></span><span style="display:flex;"><span>sudo systemctl stop etcd
+</span></span><span style="display:flex;"><span>sudo systemctl start etcd.service
+</span></span><span style="display:flex;"><span>systemctl status etcd.service
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Check for logs</span>
+</span></span><span style="display:flex;"><span>journalctl -xeu etcd</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Fifth, ssh into other master nodes (verify that step 1 is done by <em>etcd &ndash;version</em>) and perform the following:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>ssh ubuntu@master2
+</span></span><span style="display:flex;"><span>sudo vi /lib/systemd/system/etcd.service</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#1f2328">Variations</span> <span style="color:#1f2328">for</span> <span style="color:#1f2328">step</span> <span style="color:#0550ae">2</span> <span style="color:#1f2328">for</span> <span style="color:#1f2328">master2</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Inserts</span> <span style="color:#1f2328">the</span> <span style="color:#1f2328">following</span> <span style="color:#1f2328">into</span> <span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">service</span>
+</span></span><span style="display:flex;"><span>[<span style="color:#1f2328">Unit</span>]
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Description</span><span style="color:#1f2328">=</span><span style="color:#1f2328">etcd</span> <span style="color:#1f2328">key</span><span style="color:#1f2328">-</span><span style="color:#1f2328">value</span> <span style="color:#1f2328">store</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Documentation</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">io</span><span style="color:#0a3069">/docs/</span><span style="color:#1f2328">v3</span>.<span style="color:#0550ae">4</span>.<span style="color:#0550ae">0</span>/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#1f2328">Service</span>]
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">User</span><span style="color:#1f2328">=</span><span style="color:#1f2328">etcd</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Type</span><span style="color:#1f2328">=</span><span style="color:#1f2328">notify</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_UNSUPPORTED_ARCH</span><span style="color:#1f2328">=</span><span style="color:#1f2328">arm64</span>
+</span></span><span style="display:flex;"><span>#<span style="color:#1f2328">Loggingg</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_LOGGER</span><span style="color:#1f2328">=</span><span style="color:#1f2328">zap</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Member</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_NAME</span><span style="color:#1f2328">=</span><span style="color:#1f2328">infra2</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_DATA_DIR</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/var/</span><span style="color:#1f2328">lib</span>/<span style="color:#1f2328">etcd</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_LISTEN_PEER_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">173</span>:<span style="color:#0550ae">2380</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_LISTEN_CLIENT_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">173</span>:<span style="color:#0550ae">2379</span><span style="color:#1f2328">,</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">127</span>.<span style="color:#0550ae">0</span>.<span style="color:#0550ae">0</span>.<span style="color:#0550ae">1</span>:<span style="color:#0550ae">2379</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_HEARTBEAT_INTERVAL</span><span style="color:#1f2328">=</span><span style="color:#0550ae">1000</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_ELECTION_TIMEOUT</span><span style="color:#1f2328">=</span><span style="color:#0550ae">5000</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Clustering</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_ADVERTISE_PEER_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">173</span>:<span style="color:#0550ae">2380</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER_TOKEN</span><span style="color:#1f2328">=</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">cluster</span><span style="color:#0550ae">-1</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER</span><span style="color:#1f2328">=</span><span style="color:#1f2328">infra1</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">119</span>:<span style="color:#0550ae">2380</span><span style="color:#1f2328">,</span><span style="color:#1f2328">infra2</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">173</span>:<span style="color:#0550ae">2380</span><span style="color:#1f2328">,</span><span style="color:#1f2328">infra3</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">100</span>:<span style="color:#0550ae">2380</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER_STATE</span><span style="color:#1f2328">=</span><span style="color:#1f2328">new</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_ADVERTISE_CLIENT_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">173</span>:<span style="color:#0550ae">2379</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Security</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_CLIENT_CERT_AUTH</span><span style="color:#1f2328">=</span><span style="color:#1f2328">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_TRUSTED_CA_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">cacert</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_CERT_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_KEY_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">key</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_CLIENT_CERT_AUTH</span><span style="color:#1f2328">=</span><span style="color:#1f2328">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_TRUSTED_CA_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">cacert</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_CERT_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">peer</span><span style="color:#1f2328">-</span><span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_KEY_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">peer</span><span style="color:#1f2328">-</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">key</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">ExecStart</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/usr/</span><span style="color:#1f2328">local</span><span style="color:#0a3069">/bin/</span><span style="color:#1f2328">etcd</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Restart</span><span style="color:#1f2328">=</span><span style="color:#1f2328">always</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">RestartSec</span><span style="color:#1f2328">=</span><span style="color:#0550ae">10</span>s
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">LimitNOFILE</span><span style="color:#1f2328">=</span><span style="color:#0550ae">40000</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#1f2328">Install</span>]
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">WantedBy</span><span style="color:#1f2328">=</span><span style="color:#1f2328">multi</span><span style="color:#1f2328">-</span><span style="color:#1f2328">user</span>.<span style="color:#1f2328">target</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>ssh ubuntu@master3
+</span></span><span style="display:flex;"><span>sudo vi /lib/systemd/system/etcd.service</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#1f2328">Variations</span> <span style="color:#1f2328">for</span> <span style="color:#1f2328">step</span> <span style="color:#0550ae">2</span> <span style="color:#1f2328">for</span> <span style="color:#1f2328">master3</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Inserts</span> <span style="color:#1f2328">the</span> <span style="color:#1f2328">following</span> <span style="color:#1f2328">into</span> <span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">service</span>
+</span></span><span style="display:flex;"><span>[<span style="color:#1f2328">Unit</span>]
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Description</span><span style="color:#1f2328">=</span><span style="color:#1f2328">etcd</span> <span style="color:#1f2328">key</span><span style="color:#1f2328">-</span><span style="color:#1f2328">value</span> <span style="color:#1f2328">store</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Documentation</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">io</span><span style="color:#0a3069">/docs/</span><span style="color:#1f2328">v3</span>.<span style="color:#0550ae">4</span>.<span style="color:#0550ae">0</span>/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#1f2328">Service</span>]
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">User</span><span style="color:#1f2328">=</span><span style="color:#1f2328">etcd</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Type</span><span style="color:#1f2328">=</span><span style="color:#1f2328">notify</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_UNSUPPORTED_ARCH</span><span style="color:#1f2328">=</span><span style="color:#1f2328">arm64</span>
+</span></span><span style="display:flex;"><span>#<span style="color:#1f2328">Loggingg</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_LOGGER</span><span style="color:#1f2328">=</span><span style="color:#1f2328">zap</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Member</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_NAME</span><span style="color:#1f2328">=</span><span style="color:#1f2328">infra3</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_DATA_DIR</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/var/</span><span style="color:#1f2328">lib</span>/<span style="color:#1f2328">etcd</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_LISTEN_PEER_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">100</span>:<span style="color:#0550ae">2380</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_LISTEN_CLIENT_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">100</span>:<span style="color:#0550ae">2379</span><span style="color:#1f2328">,</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">127</span>.<span style="color:#0550ae">0</span>.<span style="color:#0550ae">0</span>.<span style="color:#0550ae">1</span>:<span style="color:#0550ae">2379</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_HEARTBEAT_INTERVAL</span><span style="color:#1f2328">=</span><span style="color:#0550ae">1000</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_ELECTION_TIMEOUT</span><span style="color:#1f2328">=</span><span style="color:#0550ae">5000</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Clustering</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_ADVERTISE_PEER_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">100</span>:<span style="color:#0550ae">2380</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER_TOKEN</span><span style="color:#1f2328">=</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">cluster</span><span style="color:#0550ae">-1</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER</span><span style="color:#1f2328">=</span><span style="color:#1f2328">infra1</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">119</span>:<span style="color:#0550ae">2380</span><span style="color:#1f2328">,</span><span style="color:#1f2328">infra2</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">173</span>:<span style="color:#0550ae">2380</span><span style="color:#1f2328">,</span><span style="color:#1f2328">infra3</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">100</span>:<span style="color:#0550ae">2380</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER_STATE</span><span style="color:#1f2328">=</span><span style="color:#1f2328">new</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_ADVERTISE_CLIENT_URLS</span><span style="color:#1f2328">=</span><span style="color:#1f2328">https</span>:<span style="color:#0a3069">//</span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">100</span>:<span style="color:#0550ae">2379</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Security</span> <span style="color:#1f2328">flags</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_CLIENT_CERT_AUTH</span><span style="color:#1f2328">=</span><span style="color:#1f2328">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_TRUSTED_CA_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">cacert</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_CERT_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_KEY_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">key</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_CLIENT_CERT_AUTH</span><span style="color:#1f2328">=</span><span style="color:#1f2328">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_TRUSTED_CA_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">cacert</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_CERT_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">peer</span><span style="color:#1f2328">-</span><span style="color:#1f2328">etcd</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_PEER_KEY_FILE</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/srv/</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">certs</span>/<span style="color:#1f2328">peer</span><span style="color:#1f2328">-</span><span style="color:#1f2328">etcd</span><span style="color:#1f2328">-</span><span style="color:#1f2328">key</span>.<span style="color:#1f2328">pem</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">ExecStart</span><span style="color:#1f2328">=</span><span style="color:#0a3069">/usr/</span><span style="color:#1f2328">local</span><span style="color:#0a3069">/bin/</span><span style="color:#1f2328">etcd</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Restart</span><span style="color:#1f2328">=</span><span style="color:#1f2328">always</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">RestartSec</span><span style="color:#1f2328">=</span><span style="color:#0550ae">10</span>s
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">LimitNOFILE</span><span style="color:#1f2328">=</span><span style="color:#0550ae">40000</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#1f2328">Install</span>]
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">WantedBy</span><span style="color:#1f2328">=</span><span style="color:#1f2328">multi</span><span style="color:#1f2328">-</span><span style="color:#1f2328">user</span>.<span style="color:#1f2328">target</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#57606a"># Follows step 3</span>
+</span></span><span style="display:flex;"><span>sudo mkdir -p /var/lib/etcd
+</span></span><span style="display:flex;"><span>sudo chmod -R <span style="color:#0550ae">700</span> /var/lib/etcd
+</span></span><span style="display:flex;"><span>sudo adduser --system etcd
+</span></span><span style="display:flex;"><span>sudo addgroup etcd
+</span></span><span style="display:flex;"><span>sudo usermod -aG etcd etcd
+</span></span><span style="display:flex;"><span>sudo mkdir -p /srv/etcd-certs/
+</span></span><span style="display:flex;"><span>sudo mv ~/*.csr ~/*.pem /srv/etcd-certs/
+</span></span><span style="display:flex;"><span>sudo chown -R etcd:etcd /srv/etcd-certs/ /var/lib/etcd /usr/local/bin/etcd /usr/local/bin/etcdctl</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#57606a"># Follows step 4</span>
+</span></span><span style="display:flex;"><span>sudo systemctl daemon-reload
+</span></span><span style="display:flex;"><span>sudo systemctl <span style="color:#6639ba">enable</span> etcd
+</span></span><span style="display:flex;"><span>sudo systemctl start etcd
+</span></span><span style="display:flex;"><span>sudo systemctl stop etcd
+</span></span><span style="display:flex;"><span>systemctl status etcd</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Finally, by following etcd [security]https://etcd.io/docs/v3.4.0/op-guide/security/) guide, I test my etcd setup using:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo curl -k -L https://localhost:2379/metrics --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem <span style="color:#1f2328">|</span> grep -v debugging
+</span></span><span style="display:flex;"><span>sudo etcdctl --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem member list</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="request-sent-was-ignored-by-remote-peer-due-to-cluster-id-mismatch">Request sent was ignored by remote peer due to cluster ID mismatch</h3>
+<p>I solved mine by changing ETCD_INITIAL_CLUSTER_TOKEN=[something else]. You can check the end point health.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo etcdctl --endpoints<span style="color:#0550ae">=</span>https://cluster-endpoint:2379 --cacert<span style="color:#0550ae">=</span>/srv/etcd-certs/cacert.pem --cert<span style="color:#0550ae">=</span>/srv/etcd-certs/etcd.pem --key<span style="color:#0550ae">=</span>/srv/etcd-certs/etcd-key.pem endpoint health</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>If it still fails, you may try to re-create the folder by:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo rm -rf /var/lib/etcd <span style="color:#0550ae">&amp;&amp;</span> sudo mkdir -p /var/lib/etcd
+</span></span><span style="display:flex;"><span>sudo chown -R etcd:etcd /var/lib/etcd <span style="color:#0550ae">&amp;&amp;</span> sudo chmod -R <span style="color:#0550ae">700</span> /var/lib/etcd</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="errorthere-is-already-a-certificate-for-csgstsgoseehiongcn192168100119">ERROR:There is already a certificate for /C=SG/ST=SG/O=seehiong/CN=192.168.100.119</h3>
+<p>You may try to revoke the old certificate and sign the CSR again:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>openssl ca -revoke /root/ca/newcerts/1240.pem</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="replacing-a-faulty-member">Replacing a faulty member</h3>
+<p>You may have to re-configure your etcd cluster when your SD card failed</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#57606a"># Get member list</span>
+</span></span><span style="display:flex;"><span>sudo etcdctl --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem member list
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Delete the member based on the ID</span>
+</span></span><span style="display:flex;"><span>sudo etcdctl --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem member remove 34ef554257cff34e
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Add the previous member (previous settings remain the same, e.g. IP address)</span>
+</span></span><span style="display:flex;"><span>sudo etcdctl --cacert /srv/etcd-certs/cacert.pem --cert /srv/etcd-certs/etcd.pem  --key /srv/etcd-certs/etcd-key.pem member add infra3 --peer-urls<span style="color:#0550ae">=</span>https://192.168.100.182:2380</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Similar message as this will appear:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/ha-k8s1/add-new-etcd-member.png"   alt="add-new-etcd-member" class="sc-image sc-image-default"
+       >
+
+
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /lib/systemd/system/etcd.service</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span># <span style="color:#1f2328">Make</span> <span style="color:#1f2328">the</span> <span style="color:#1f2328">following</span> <span style="color:#1f2328">changes</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER_STATE</span><span style="color:#1f2328">=</span><span style="color:#1f2328">existing</span>
+</span></span><span style="display:flex;"><span># <span style="color:#1f2328">Add</span> <span style="color:#1f2328">new</span> <span style="color:#1f2328">configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">Environment</span><span style="color:#1f2328">=</span><span style="color:#1f2328">ETCD_INITIAL_CLUSTER</span><span style="color:#1f2328">=</span><span style="color:#0a3069">&#34;infra2=https://192.168.100.181:2380,infra3=https://192.168.100.182:2380,infra1=https://192.168.100.180:2380&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#57606a"># Restart etcd</span>
+</span></span><span style="display:flex;"><span>sudo systemctl daemon-reload
+</span></span><span style="display:flex;"><span>sudo systemctl start etcd</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2020/08/private-registry-for-k8s-cluster/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Private Registry for K8s Cluster</span>
+            </a>
+          </div>
+        
+        
+          <div class="nav-next">
+            <a href="/posts/2020/08/ha-k8s-pi-cluster-ii/" rel="next">
+              <span class="meta-nav">Next →</span>
+              <span class="post-title">HA K8s Pi Cluster (II)</span>
+            </a>
+          </div>
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2025 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>

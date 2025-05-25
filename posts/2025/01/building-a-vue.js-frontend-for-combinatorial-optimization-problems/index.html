@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2025/01/building-a-vue.js-frontend-for-combinatorial-optimization-problems/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Building a Vue.js Frontend for Combinatorial Optimization Problems">
+  <meta property="og:description" content="In this post, I’ll walk you through the development of a Vue.js frontend application designed to complement my previous work on a flexible optimizer framework built with Micronaut. This frontend provides a visual interface for designing, managing, and optimizing workflows, with a focus on solving combinatorial optimization problems like the Traveling Salesman Problem (TSP). The app features a drag-and-drop UI, enabling users to define optimization problems graphically without relying on tools like Postman. By connecting inputs, transformations, and outputs through Workflow Nodes, users can visualize and compare the performance of backend optimization algorithms across different datasets.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-01-26T10:00:00+08:00">
+    <meta property="article:modified_time" content="2025-01-26T10:00:00+08:00">
+    <meta property="article:tag" content="Vue.js">
+    <meta property="article:tag" content="TSP">
+    <meta property="article:tag" content="FE">
+    <meta property="article:tag" content="Frontend">
+    <meta property="article:tag" content="Vue">
+    <meta property="article:tag" content="Optimizer">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Building a Vue.js Frontend for Combinatorial Optimization Problems">
+  <meta name="twitter:description" content="In this post, I’ll walk you through the development of a Vue.js frontend application designed to complement my previous work on a flexible optimizer framework built with Micronaut. This frontend provides a visual interface for designing, managing, and optimizing workflows, with a focus on solving combinatorial optimization problems like the Traveling Salesman Problem (TSP). The app features a drag-and-drop UI, enabling users to define optimization problems graphically without relying on tools like Postman. By connecting inputs, transformations, and outputs through Workflow Nodes, users can visualize and compare the performance of backend optimization algorithms across different datasets.">
+
+  <meta itemprop="name" content="Building a Vue.js Frontend for Combinatorial Optimization Problems">
+  <meta itemprop="description" content="In this post, I’ll walk you through the development of a Vue.js frontend application designed to complement my previous work on a flexible optimizer framework built with Micronaut. This frontend provides a visual interface for designing, managing, and optimizing workflows, with a focus on solving combinatorial optimization problems like the Traveling Salesman Problem (TSP). The app features a drag-and-drop UI, enabling users to define optimization problems graphically without relying on tools like Postman. By connecting inputs, transformations, and outputs through Workflow Nodes, users can visualize and compare the performance of backend optimization algorithms across different datasets.">
+  <meta itemprop="datePublished" content="2025-01-26T10:00:00+08:00">
+  <meta itemprop="dateModified" content="2025-01-26T10:00:00+08:00">
+  <meta itemprop="wordCount" content="2021">
+  <meta itemprop="keywords" content="Vue.js,TSP,FE,Frontend,Vue,Optimizer"><title>Building a Vue.js Frontend for Combinatorial Optimization Problems | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2025/01/building-a-vue.js-frontend-for-combinatorial-optimization-problems/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          
+          
+          <img src="/images/blog_logo.png" alt="See Hiong&#39;s Blog Logo" class="nav-logo-image">
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Building a Vue.js Frontend for Combinatorial Optimization Problems</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2025-01-26T10:00:00&#43;08:00">January 26, 2025</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/vue.js">Vue.js</a>
+            
+              , <a href="/tags/tsp">TSP</a>
+            
+              , <a href="/tags/fe">FE</a>
+            
+              , <a href="/tags/frontend">Frontend</a>
+            
+              , <a href="/tags/vue">Vue</a>
+            
+              , <a href="/tags/optimizer">Optimizer</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/vue/building-a-vuejs-frontend-for-combinatorial-optimization-problem.png');"></div>
+          <img src="/images/vue/building-a-vuejs-frontend-for-combinatorial-optimization-problem.png" alt="Building a Vue.js Frontend for Combinatorial Optimization Problems cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>This application was developed with the assistance of AI pair programming tools, including 
+
+
+
+
+
+
+  <a href="https://chat.deepseek.com/" target="_blank" rel="noopener noreferrer" >DeepSeek Chat</a>
+ and 
+
+
+
+
+
+
+  <a href="https://claude.ai/new" target="_blank" rel="noopener noreferrer" >Claude Chat</a>
+. These tools were invaluable in brainstorming solutions, debugging code, and refining the architecture of the application. Their contributions helped streamline the development process and ensured the implementation of best practices.</p>
+<p>Following my previous post, 
+
+
+
+
+
+
+  <a href="/posts/2024/12/building-a-flexible-optimizer-framework-with-micronaut/" >Building a Flexible Optimizer Framework with Micronaut</a>
+, I embarked on creating a frontend application with Vue.js. This app serves as a visual interface for designing and managing optimization workflows, seamlessly connecting to the Micronaut backend service. The primary goal was to create an intuitive drag-and-drop UI where users could define optimization problems by connecting inputs, transformations, and outputs. This approach eliminates the need for manual API testing tools and provides a user-friendly way to visualize and compare the efficiency of backend optimization algorithms.</p>
+<p>In this blog, I’ll guide you through the setup, project structure, and key features of this Vue.js application.</p>
+<h2 id="setup">Setup</h2>
+<p>To get started, ensure you have 
+
+
+
+
+
+
+  <a href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer" >Node.js</a>
+ installed. Verify the installation by running:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>node --version
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># v22.12.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>npm --version
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 10.9.0</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Next, install the Vue CLI globally and create the Vue project within the 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/micronaut-optimizer" target="_blank" rel="noopener noreferrer" >Micronaut-Optimizer</a>
+ repository:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>npm install -g @vue/cli
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>vue create vue-app</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="project-structure">Project Structure</h2>
+<p>The project is organized into a modular structure to ensure scalability and maintainability. Below is an overview of the directory layout:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>vue-app/
+</span></span><span style="display:flex;"><span>├── src/
+</span></span><span style="display:flex;"><span>│   ├── assets/
+</span></span><span style="display:flex;"><span>│   ├── components/
+</span></span><span style="display:flex;"><span>│   │   ├── inputs/
+</span></span><span style="display:flex;"><span>│   │   │   ├── KeyInput.vue
+</span></span><span style="display:flex;"><span>│   │   │   ├── SubkeyInput.vue
+</span></span><span style="display:flex;"><span>│   │   │   └── TextInput.vue
+</span></span><span style="display:flex;"><span>│   │   ├── managers/
+</span></span><span style="display:flex;"><span>│   │   │   ├── DragManager.vue
+</span></span><span style="display:flex;"><span>│   │   │   ├── InputManager.vue
+</span></span><span style="display:flex;"><span>│   │   │   ├── LinkManager.vue
+</span></span><span style="display:flex;"><span>│   │   │   ├── NodeManager.vue
+</span></span><span style="display:flex;"><span>│   │   │   └── OutputManager.vue
+</span></span><span style="display:flex;"><span>│   │   ├── outputs/
+</span></span><span style="display:flex;"><span>│   │   │   ├── TextOutput.vue
+</span></span><span style="display:flex;"><span>│   │   │   └── TSPChartOutput.vue
+</span></span><span style="display:flex;"><span>│   │   ├── ConnectionLine.vue
+</span></span><span style="display:flex;"><span>│   │   ├── Inport.vue
+</span></span><span style="display:flex;"><span>│   │   ├── LeftPanel.vue
+</span></span><span style="display:flex;"><span>│   │   ├── LocalPersistent.vue
+</span></span><span style="display:flex;"><span>│   │   ├── MainPanel.vue
+</span></span><span style="display:flex;"><span>│   │   ├── OutPort.vue
+</span></span><span style="display:flex;"><span>│   │   └── WorkflowNode.vue
+</span></span><span style="display:flex;"><span>│   ├── models/
+</span></span><span style="display:flex;"><span>│   │   └── Node.js
+</span></span><span style="display:flex;"><span>│   ├── store/
+</span></span><span style="display:flex;"><span>│   │   └── index.js
+</span></span><span style="display:flex;"><span>│   ├── utils/
+</span></span><span style="display:flex;"><span>│   │   ├── lineConnectionUtils.vue
+</span></span><span style="display:flex;"><span>│   │   ├── nodeUtils.vue
+</span></span><span style="display:flex;"><span>│   │   └── transformUtils.js
+</span></span><span style="display:flex;"><span>│   ├── App.vue
+</span></span><span style="display:flex;"><span>│   └── main.js
+</span></span><span style="display:flex;"><span>├── babel.config.js
+</span></span><span style="display:flex;"><span>├── jsconfig.json
+</span></span><span style="display:flex;"><span>├── package.json
+</span></span><span style="display:flex;"><span>├── README.md
+</span></span><span style="display:flex;"><span>└── vue.config.js</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This structure groups components, utilities, and managers logically, ensuring the project remains scalable as it evolves.</p>
+<h2 id="key-concepts-and-features">Key Concepts and Features</h2>
+<h3 id="1-component-based-architecture">1. Component-Based Architecture</h3>
+<p>The Vue.js app follows a modular, component-based architecture. Components are grouped into subfolders such as <code>inputs</code>, <code>managers</code> and <code>outputs</code> to promote reusability and maintainability.</p>
+<p>Below are the <code>template</code> sections for two essential components, <strong>TextInput.vue</strong> and <strong>TextOutput.vue</strong>:</p>
+<p><strong>TextInput.vue</strong>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vue" data-lang="vue"><span style="display:flex;"><span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">template</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">textarea</span> <span style="color:#0550ae">v-model</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;text&#34; placeholder=&#34;Text input...&#34; spellcheck=&#34;false&#34;</span><span style="color:#1f2328"> </span><span style="color:#0550ae">@mousedown.stop</span><span style="color:#1f2328"> </span><span style="color:#0550ae">@mouseup.stop</span><span style="color:#1f2328">
+</span></span></span><span style="display:flex;"><span><span style="color:#1f2328"></span>        <span style="color:#0550ae">@mousemove.stop</span><span style="color:#1f2328"> </span><span style="color:#0550ae">@input</span><span style="color:#0a3069">=&#34;onInputChange&#34;</span><span style="color:#1f2328">
+</span></span></span><span style="display:flex;"><span><span style="color:#1f2328"></span>        <span style="color:#0550ae">:</span><span style="color:#1f2328">style</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;{ width: initialWidth + &#39;px&#39;, height: initialHeight + &#39;px&#39; }&#34;</span><span style="color:#1f2328">&gt;&lt;/</span><span style="color:#0550ae">textarea</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">template</span><span style="color:#1f2328">&gt;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong>TextOutput.vue</strong>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vue" data-lang="vue"><span style="display:flex;"><span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">template</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">textarea</span> <span style="color:#0550ae">:value</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;formattedOutput&#34;</span> <span style="color:#1f2328">placeholder</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;Output text...&#34;</span> <span style="color:#1f2328">spellcheck</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;false&#34;</span> <span style="color:#0550ae">@mousedown.stop</span><span style="color:#1f2328"> </span><span style="color:#1f2328">readonly</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">:</span><span style="color:#1f2328">style</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;{ width: initialWidth + &#39;px&#39;, height: initialHeight + &#39;px&#39; }&#34;</span><span style="color:#1f2328">&gt;&lt;/</span><span style="color:#0550ae">textarea</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">template</span><span style="color:#1f2328">&gt;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>These components allow users to drag Workflow Nodes from the <strong>Left Panel</strong>, link outputs to inputs, and visually design optimization workflows.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/vue/vue-text-input-output-components.png"   alt="vue-text-input-output-components" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="2-drag-and-drop-functionality">2. Drag-and-Drop Functionality</h3>
+<p>The drag-and-drop feature is managed by <code>DragManager.vue</code>. Below is a snippet illustrating how nodes are handled during the drag process:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vue" data-lang="vue"><span style="display:flex;"><span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">script</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">export</span> <span style="color:#cf222e">default</span> <span style="color:#1f2328">{</span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">methods</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">onStartDrag</span><span style="color:#1f2328">(</span><span style="color:#1f2328">nodeId</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">event</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">draggingNodeId</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">nodeId</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">node</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">nodes</span><span style="color:#1f2328">.</span><span style="color:#1f2328">find</span><span style="color:#1f2328">((</span><span style="color:#1f2328">n</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">n</span><span style="color:#1f2328">.</span><span style="color:#1f2328">id</span> <span style="color:#0550ae">===</span> <span style="color:#1f2328">nodeId</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// Get the container&#39;s position
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">container</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">$el</span><span style="color:#1f2328">.</span><span style="color:#1f2328">parentElement</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">containerRect</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">container</span><span style="color:#1f2328">.</span><span style="color:#1f2328">getBoundingClientRect</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// Calculate offset relative to the container
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">offset</span><span style="color:#1f2328">.</span><span style="color:#1f2328">x</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">event</span><span style="color:#1f2328">.</span><span style="color:#1f2328">clientX</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">containerRect</span><span style="color:#1f2328">.</span><span style="color:#1f2328">left</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">node</span><span style="color:#1f2328">.</span><span style="color:#1f2328">x</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">offset</span><span style="color:#1f2328">.</span><span style="color:#1f2328">y</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">event</span><span style="color:#1f2328">.</span><span style="color:#1f2328">clientY</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">containerRect</span><span style="color:#1f2328">.</span><span style="color:#1f2328">top</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">node</span><span style="color:#1f2328">.</span><span style="color:#1f2328">y</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">document</span><span style="color:#1f2328">.</span><span style="color:#1f2328">addEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;mousemove&#34;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onMouseMove</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">document</span><span style="color:#1f2328">.</span><span style="color:#1f2328">addEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;mouseup&#34;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onStopDrag</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">onStopDrag</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">draggingNodeId</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">null</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">document</span><span style="color:#1f2328">.</span><span style="color:#1f2328">removeEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;mousemove&#34;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onMouseMove</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">document</span><span style="color:#1f2328">.</span><span style="color:#1f2328">removeEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;mouseup&#34;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onStopDrag</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">};</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">script</span><span style="color:#1f2328">&gt;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="3-connection-validation">3. Connection Validation</h3>
+<p>The <code>LinkManager.vue</code> component handles connection validation between nodes, ensuring that connections adhere to predefined rules. These rules are defined in  <code>lineConnectionUtils.js</code>.</p>
+<p><strong>Example of Line Linking</strong>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vue" data-lang="vue"><span style="display:flex;"><span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">script</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">export</span> <span style="color:#cf222e">default</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">mounted</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">window</span><span style="color:#1f2328">.</span><span style="color:#1f2328">addEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;keydown&#34;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onKeydown</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">beforeUnmount</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">window</span><span style="color:#1f2328">.</span><span style="color:#1f2328">removeEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;keydown&#34;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onKeydown</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">methods</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">onKeydown</span><span style="color:#1f2328">(</span><span style="color:#1f2328">event</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">event</span><span style="color:#1f2328">.</span><span style="color:#1f2328">key</span> <span style="color:#0550ae">===</span> <span style="color:#0a3069">&#34;Escape&#34;</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">resetLinkingState</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">onStartLink</span><span style="color:#1f2328">(</span><span style="color:#1f2328">nodeId</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">type</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">!</span><span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">linking</span><span style="color:#1f2328">.</span><span style="color:#1f2328">isDrawing</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">startLink</span><span style="color:#1f2328">(</span><span style="color:#1f2328">nodeId</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">type</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">endLink</span><span style="color:#1f2328">(</span><span style="color:#1f2328">nodeId</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">type</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">startLink</span><span style="color:#1f2328">(</span><span style="color:#1f2328">nodeId</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">type</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// Determine if the port is an input or output port
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">isInputPort</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">type</span> <span style="color:#0550ae">===</span> <span style="color:#0a3069">&#34;input&#34;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// For input ports, check if they already have a line
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">isInputPort</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">isInputPortConnected</span><span style="color:#1f2328">(</span><span style="color:#1f2328">nodeId</span><span style="color:#1f2328">))</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">toast</span><span style="color:#1f2328">.</span><span style="color:#1f2328">warning</span><span style="color:#1f2328">(</span><span style="color:#0a3069">`This </span><span style="color:#0a3069">${</span><span style="color:#1f2328">type</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> port already has a line.`</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// Start the linking process
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">$emit</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;update-linking&#34;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">sourceId</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">nodeId</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">sourceType</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">type</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">targetId</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">null</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">targetType</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">null</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">isDrawing</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">resetLinkingState</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">$emit</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;update-linking&#34;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">sourceId</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">null</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">sourceType</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">null</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">targetId</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">null</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">isDrawing</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">};</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">script</span><span style="color:#1f2328">&gt;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong>Example of Line Validation</strong>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#57606a">// src/utils/lineConnectionUtils.js
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#cf222e">import</span> <span style="color:#1f2328">store</span> <span style="color:#1f2328">from</span> <span style="color:#0a3069">&#39;@/store&#39;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">useToast</span> <span style="color:#1f2328">}</span> <span style="color:#1f2328">from</span> <span style="color:#0a3069">&#34;vue-toastification&#34;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">findNodeById</span> <span style="color:#1f2328">}</span> <span style="color:#1f2328">from</span> <span style="color:#0a3069">&#34;@/utils/nodeUtils&#34;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">const</span> <span style="color:#1f2328">toast</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">useToast</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">const</span> <span style="color:#1f2328">nodeTypes</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">TextInput</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">inputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">outputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;textInput&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">KeyInput</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">inputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">outputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;keyInput&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">SubkeyInput</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">inputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">outputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;subkeyInput&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">TextOutput</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">inputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;any&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">outputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">DistanceMatrixConstraint</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">inputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;double[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">outputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;distanceMatrixConstraint&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">SolveTimeConstraint</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">inputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;string&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">outputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;solveTimeConstraint&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">TSPInput</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">inputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;distanceMatrixConstraint&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;solveTimeConstraint&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">outputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;TSPInput&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">TSPProblem</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">inputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;TSPInput&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">outputTypes</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;TSPOutput&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">};</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">const</span> <span style="color:#1f2328">typeCompatibility</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a">// Primitive type compatibility rules
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#cf222e">double</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;double&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;double[]&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;double[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;double[]&#34;</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;double[]&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;double[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;double[][]&#34;</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;double[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">int</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;int&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;int[]&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;int[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;int[]&#34;</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;int[]&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;int[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;int[][]&#34;</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;int[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">boolean</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;boolean&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;boolean[]&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;boolean[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;boolean[]&#34;</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;boolean[]&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;boolean[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;boolean[][]&#34;</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;boolean[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">string</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;string&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;string[]&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;string[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;string[]&#34;</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;string[]&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;string[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;string[][]&#34;</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;string[][]&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">any</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;any&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">};</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="4-consistent-line-rendering">4. Consistent Line Rendering</h3>
+<p>The <code>ConnectionLine.vue</code> component ensures consistent rendering of lines between nodes. It includes logic to switch between straight lines and curves based on thresholds and adjusts source and target positions for perpendicularity.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vue" data-lang="vue"><span style="display:flex;"><span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">template</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">path</span> <span style="color:#0550ae">:d</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;curvePath&#34;</span> <span style="color:#0550ae">:stroke</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;strokeColor&#34;</span> <span style="color:#0550ae">:stroke-width</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;strokeWidth&#34;</span> <span style="color:#1f2328">fill</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;none&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">:</span><span style="color:#1f2328">stroke</span><span style="color:#0550ae">-dasharray</span><span style="color:#f6f8fa;background-color:#82071e">=&#34;</span><span style="color:#1f2328">isDotted</span> <span style="color:#f6f8fa;background-color:#82071e">?</span> <span style="color:#f6f8fa;background-color:#82071e">&#39;</span><span style="color:#1f2328">3</span><span style="color:#f6f8fa;background-color:#82071e">&#39;</span> <span style="color:#0550ae">:</span> <span style="color:#1f2328">undefined</span><span style="color:#f6f8fa;background-color:#82071e">&#34;</span> <span style="color:#1f2328">/&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">template</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">script</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">export</span> <span style="color:#cf222e">default</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">name</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#34;ConnectionLine&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">props</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">sourcePointId</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">type</span><span style="color:#0550ae">:</span> <span style="color:#6639ba">String</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">required</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">true</span> <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">targetPointId</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">type</span><span style="color:#0550ae">:</span> <span style="color:#6639ba">String</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">default</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">null</span> <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">mousePosition</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">type</span><span style="color:#0550ae">:</span> <span style="color:#6639ba">Object</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">default</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">null</span> <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">strokeColor</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">type</span><span style="color:#0550ae">:</span> <span style="color:#6639ba">String</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">default</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#34;#42b983&#34;</span> <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">strokeWidth</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">type</span><span style="color:#0550ae">:</span> <span style="color:#6639ba">Number</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">default</span><span style="color:#0550ae">:</span> <span style="color:#0550ae">1</span> <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">isDotted</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">type</span><span style="color:#0550ae">:</span> <span style="color:#6639ba">Boolean</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">default</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">false</span> <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">computed</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">sourcePosition</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">getPosition</span><span style="color:#1f2328">(</span><span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">sourcePointId</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">targetPosition</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">mousePosition</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">return</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#1f2328">x</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">mousePosition</span><span style="color:#1f2328">.</span><span style="color:#1f2328">x</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#1f2328">y</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">mousePosition</span><span style="color:#1f2328">.</span><span style="color:#1f2328">y</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">};</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">getPosition</span><span style="color:#1f2328">(</span><span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">targetPointId</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">curvePath</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">let</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">x</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">x1</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">y</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">y1</span> <span style="color:#1f2328">}</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">sourcePosition</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">let</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">x</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">x2</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">y</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">y2</span> <span style="color:#1f2328">}</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">targetPosition</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// Calculate the distance between the source and target points
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">dx</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">x2</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">x1</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">dy</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">y2</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">y1</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">distance</span> <span style="color:#0550ae">=</span> <span style="color:#6639ba">Math</span><span style="color:#1f2328">.</span><span style="color:#1f2328">sqrt</span><span style="color:#1f2328">(</span><span style="color:#1f2328">dx</span> <span style="color:#0550ae">*</span> <span style="color:#1f2328">dx</span> <span style="color:#0550ae">+</span> <span style="color:#1f2328">dy</span> <span style="color:#0550ae">*</span> <span style="color:#1f2328">dy</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// Define thresholds for switching between straight lines and curves
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">distanceThreshold</span> <span style="color:#0550ae">=</span> <span style="color:#0550ae">50</span><span style="color:#1f2328">;</span> <span style="color:#57606a">// Use straight lines if nodes are within 10 pixels
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">alignmentThreshold</span> <span style="color:#0550ae">=</span> <span style="color:#0550ae">10</span><span style="color:#1f2328">;</span> <span style="color:#57606a">// Use straight lines if nodes are aligned within 5 pixels
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// Adjust source and target positions for perpendicularity
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#6639ba">Math</span><span style="color:#1f2328">.</span><span style="color:#1f2328">abs</span><span style="color:#1f2328">(</span><span style="color:#1f2328">dx</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">&lt;</span> <span style="color:#1f2328">alignmentThreshold</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a">// Nodes are vertically aligned: adjust x positions to be the same
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#1f2328">x1</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">x2</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">x1</span> <span style="color:#0550ae">+</span> <span style="color:#1f2328">x2</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">/</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#6639ba">Math</span><span style="color:#1f2328">.</span><span style="color:#1f2328">abs</span><span style="color:#1f2328">(</span><span style="color:#1f2328">dy</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">&lt;</span> <span style="color:#1f2328">alignmentThreshold</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a">// Nodes are horizontally aligned: adjust y positions to be the same
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#1f2328">y1</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">y2</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">y1</span> <span style="color:#0550ae">+</span> <span style="color:#1f2328">y2</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">/</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// Ensure the line stays within the 5-pixel bounding circles
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">radius</span> <span style="color:#0550ae">=</span> <span style="color:#0550ae">5</span><span style="color:#1f2328">;</span> <span style="color:#57606a">// Radius of the bounding circle
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">distance</span> <span style="color:#0550ae">&gt;</span> <span style="color:#0550ae">0</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">const</span> <span style="color:#1f2328">directionX</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">dx</span> <span style="color:#0550ae">/</span> <span style="color:#1f2328">distance</span><span style="color:#1f2328">;</span> <span style="color:#57606a">// Normalized direction vector (x)
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#cf222e">const</span> <span style="color:#1f2328">directionY</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">dy</span> <span style="color:#0550ae">/</span> <span style="color:#1f2328">distance</span><span style="color:#1f2328">;</span> <span style="color:#57606a">// Normalized direction vector (y)
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a">// Adjust source position to stay within its bounding circle
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#1f2328">x1</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">x1</span> <span style="color:#0550ae">+</span> <span style="color:#1f2328">directionX</span> <span style="color:#0550ae">*</span> <span style="color:#1f2328">radius</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">y1</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">y1</span> <span style="color:#0550ae">+</span> <span style="color:#1f2328">directionY</span> <span style="color:#0550ae">*</span> <span style="color:#1f2328">radius</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a">// Adjust target position to stay within its bounding circle
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#1f2328">x2</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">x2</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">directionX</span> <span style="color:#0550ae">*</span> <span style="color:#1f2328">radius</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">y2</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">y2</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">directionY</span> <span style="color:#0550ae">*</span> <span style="color:#1f2328">radius</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// Check if nodes are close or aligned
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">distance</span> <span style="color:#0550ae">&lt;</span> <span style="color:#1f2328">distanceThreshold</span> <span style="color:#0550ae">||</span> <span style="color:#57606a">// Nodes are close
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#6639ba">Math</span><span style="color:#1f2328">.</span><span style="color:#1f2328">abs</span><span style="color:#1f2328">(</span><span style="color:#1f2328">dx</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">&lt;</span> <span style="color:#1f2328">alignmentThreshold</span> <span style="color:#0550ae">||</span> <span style="color:#57606a">// Nodes are vertically aligned
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#6639ba">Math</span><span style="color:#1f2328">.</span><span style="color:#1f2328">abs</span><span style="color:#1f2328">(</span><span style="color:#1f2328">dy</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">&lt;</span> <span style="color:#1f2328">alignmentThreshold</span> <span style="color:#57606a">// Nodes are horizontally aligned
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a">// Use a straight line
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#cf222e">return</span> <span style="color:#0a3069">`M </span><span style="color:#0a3069">${</span><span style="color:#1f2328">x1</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> </span><span style="color:#0a3069">${</span><span style="color:#1f2328">y1</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> L </span><span style="color:#0a3069">${</span><span style="color:#1f2328">x2</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> </span><span style="color:#0a3069">${</span><span style="color:#1f2328">y2</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a">// Use a quadratic Bézier curve
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#cf222e">const</span> <span style="color:#1f2328">cpX</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">x1</span> <span style="color:#0550ae">+</span> <span style="color:#1f2328">x2</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">/</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">;</span> <span style="color:#57606a">// Midpoint between x1 and x2
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#cf222e">const</span> <span style="color:#1f2328">cpY</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">y1</span> <span style="color:#0550ae">-</span> <span style="color:#0550ae">30</span><span style="color:#1f2328">;</span> <span style="color:#57606a">// Adjust this value to control the curve&#39;s height
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>                <span style="color:#cf222e">return</span> <span style="color:#0a3069">`M </span><span style="color:#0a3069">${</span><span style="color:#1f2328">x1</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> </span><span style="color:#0a3069">${</span><span style="color:#1f2328">y1</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> Q </span><span style="color:#0a3069">${</span><span style="color:#1f2328">cpX</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> </span><span style="color:#0a3069">${</span><span style="color:#1f2328">cpY</span><span style="color:#0a3069">}</span><span style="color:#0a3069">, </span><span style="color:#0a3069">${</span><span style="color:#1f2328">x2</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> </span><span style="color:#0a3069">${</span><span style="color:#1f2328">y2</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">mounted</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">window</span><span style="color:#1f2328">.</span><span style="color:#1f2328">addEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;resize&#39;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">handleViewportChange</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">window</span><span style="color:#1f2328">.</span><span style="color:#1f2328">addEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;scroll&#39;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">handleViewportChange</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">beforeUnmount</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">window</span><span style="color:#1f2328">.</span><span style="color:#1f2328">removeEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;resize&#39;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">handleViewportChange</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">window</span><span style="color:#1f2328">.</span><span style="color:#1f2328">removeEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;scroll&#39;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">handleViewportChange</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">methods</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">handleViewportChange</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// Trigger a re-render of the lines
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">this</span><span style="color:#1f2328">.</span><span style="color:#1f2328">$forceUpdate</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">getPosition</span><span style="color:#1f2328">(</span><span style="color:#1f2328">pointId</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">element</span> <span style="color:#0550ae">=</span> <span style="color:#6639ba">document</span><span style="color:#1f2328">.</span><span style="color:#1f2328">querySelector</span><span style="color:#1f2328">(</span><span style="color:#0a3069">`[data-point-id=&#34;</span><span style="color:#0a3069">${</span><span style="color:#1f2328">pointId</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;]`</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">svgContainer</span> <span style="color:#0550ae">=</span> <span style="color:#6639ba">document</span><span style="color:#1f2328">.</span><span style="color:#1f2328">querySelector</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;.permanent-lines&#39;</span><span style="color:#1f2328">);</span> <span style="color:#57606a">// Reference to the SVG container
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">elementRect</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">element</span><span style="color:#1f2328">.</span><span style="color:#1f2328">getBoundingClientRect</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">svgRect</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">svgContainer</span><span style="color:#1f2328">.</span><span style="color:#1f2328">getBoundingClientRect</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// Calculate positions relative to the SVG container
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">x</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">elementRect</span><span style="color:#1f2328">.</span><span style="color:#1f2328">left</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">svgRect</span><span style="color:#1f2328">.</span><span style="color:#1f2328">left</span> <span style="color:#0550ae">+</span> <span style="color:#1f2328">elementRect</span><span style="color:#1f2328">.</span><span style="color:#1f2328">width</span> <span style="color:#0550ae">/</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">y</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">elementRect</span><span style="color:#1f2328">.</span><span style="color:#1f2328">top</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">svgRect</span><span style="color:#1f2328">.</span><span style="color:#1f2328">top</span> <span style="color:#0550ae">+</span> <span style="color:#1f2328">elementRect</span><span style="color:#1f2328">.</span><span style="color:#1f2328">height</span> <span style="color:#0550ae">/</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">x</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">y</span> <span style="color:#1f2328">};</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">};</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">script</span><span style="color:#1f2328">&gt;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="5-dynamic-node-management">5. Dynamic Node Management</h3>
+<p>The <code>WorkflowNode.vue</code> component represents individual nodes in the workflow. Each node can be dynamically positioned and interacted with, allowing users to create flexible workflows. Below is the implementation:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vue" data-lang="vue"><span style="display:flex;"><span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">template</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">div</span> <span style="color:#1f2328">class</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node&#34;</span> <span style="color:#0550ae">:</span><span style="color:#1f2328">style</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;{ left: node.x + &#39;px&#39;, top: node.y + &#39;px&#39; }&#34;</span> <span style="color:#0550ae">:data-node-id</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.id&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0550ae">@mousedown</span><span style="color:#0a3069">=&#34;onStartDrag&#34;</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f6f8fa;background-color:#82071e">&lt;!--</span> <span style="color:#1f2328">Node</span> <span style="color:#1f2328">Content</span> <span style="color:#f6f8fa;background-color:#82071e">--</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">div</span> <span style="color:#1f2328">class</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node-rectangle&#34;</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">div</span> <span style="color:#1f2328">class</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node-name&#34;</span> <span style="color:#0550ae">:</span><span style="color:#1f2328">style</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;{ fontSize: fontSize + &#39;px&#39; }&#34;</span> <span style="color:#0550ae">:title</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.name&#34;</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">{{</span> <span style="color:#1f2328">truncatedName</span> <span style="color:#1f2328">}}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">div</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">div</span> <span style="color:#1f2328">class</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;left-section&#34;</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">div</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">div</span> <span style="color:#1f2328">class</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;right-section&#34;</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">button</span> <span style="color:#0550ae">v-if</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.triggerAction !== &#39;A&#39;&#34; class=&#34;trigger-button&#34; :title=&#34;actionTitle&#34; @click=&#34;onTrigger&#34;</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">{{</span> <span style="color:#1f2328">node.triggerAction</span> <span style="color:#1f2328">}}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">button</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">div</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">div</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f6f8fa;background-color:#82071e">&lt;!--</span> <span style="color:#1f2328">Input</span> <span style="color:#1f2328">Manager</span> <span style="color:#f6f8fa;background-color:#82071e">--</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">InputManager</span> <span style="color:#0550ae">:id</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.id&#34;</span> <span style="color:#0550ae">:hasTextInput</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.hasTextInput&#34;</span> <span style="color:#0550ae">:hasKeyInput</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.hasKeyInput&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">:hasSubkeyInput</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.hasSubkeyInput&#34;</span> <span style="color:#0550ae">:initialData</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.outputData&#34;</span> <span style="color:#0550ae">:initialWidth</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.width&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">:initialHeight</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.height&#34;</span> <span style="color:#f6f8fa;background-color:#82071e">@</span><span style="color:#1f2328">input</span><span style="color:#0550ae">-change</span><span style="color:#f6f8fa;background-color:#82071e">=&#34;</span><span style="color:#1f2328">onInputChange</span><span style="color:#f6f8fa;background-color:#82071e">&#34;</span> <span style="color:#0550ae">@resize</span><span style="color:#0a3069">=&#34;onResize&#34;</span><span style="color:#1f2328"> /&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a">&lt;!--</span> <span style="color:#1f2328">Output</span> <span style="color:#1f2328">Manager</span> <span style="color:#0550ae">--&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">OutputManager</span> <span style="color:#0550ae">:hasTextOutput</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.hasTextOutput&#34;</span> <span style="color:#0550ae">:hasTSPChart</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.hasChartOutput&#34;</span> <span style="color:#0550ae">:outputData</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.outputData&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">:solverId</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;solverId&#34;</span> <span style="color:#0550ae">:initialWidth</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.width&#34;</span> <span style="color:#0550ae">:initialHeight</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;node.height&#34;</span> <span style="color:#0550ae">@resize</span><span style="color:#0a3069">=&#34;onResize&#34;</span><span style="color:#1f2328"> /&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a">&lt;!--</span> <span style="color:#1f2328">Input</span> <span style="color:#1f2328">Ports</span> <span style="color:#0550ae">--&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">InPort</span> <span style="color:#0550ae">v-for</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;(input, index) in node.inputTypes&#34; :key=&#34;&#39;input-&#39; + index&#34;</span><span style="color:#1f2328">
+</span></span></span><span style="display:flex;"><span><span style="color:#1f2328"></span>      <span style="color:#0550ae">:</span><span style="color:#1f2328">id</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;generatePortId(node.id, &#39;input&#39;, index)&#34;</span> <span style="color:#0550ae">:nodeWidth</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;200&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">:</span><span style="color:#1f2328">offsetY</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;getPortPosition(index, node.inputTypes.length)&#34;</span> <span style="color:#0550ae">:label</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;input&#34;</span> <span style="color:#0550ae">:inPortData</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;portInputData[index]&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f6f8fa;background-color:#82071e">@</span><span style="color:#1f2328">start</span><span style="color:#0550ae">-link</span><span style="color:#f6f8fa;background-color:#82071e">=&#34;</span><span style="color:#1f2328">onStartLink</span><span style="color:#f6f8fa;background-color:#82071e">&#34;</span> <span style="color:#1f2328">/&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a">&lt;!--</span> <span style="color:#1f2328">Output</span> <span style="color:#1f2328">Ports</span> <span style="color:#0550ae">--&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">OutPort</span> <span style="color:#0550ae">v-for</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;(output, index) in node.outputTypes&#34; :key=&#34;&#39;output-&#39; + index&#34;</span><span style="color:#1f2328">
+</span></span></span><span style="display:flex;"><span><span style="color:#1f2328"></span>      <span style="color:#0550ae">:</span><span style="color:#1f2328">id</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;generatePortId(node.id, &#39;output&#39;, index)&#34;</span> <span style="color:#0550ae">:nodeWidth</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;200&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">:</span><span style="color:#1f2328">offsetY</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;getPortPosition(index, node.outputTypes.length)&#34;</span> <span style="color:#0550ae">:label</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;output&#34;</span> <span style="color:#0550ae">:outPortData</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;portOutputData&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f6f8fa;background-color:#82071e">@</span><span style="color:#1f2328">start</span><span style="color:#0550ae">-link</span><span style="color:#f6f8fa;background-color:#82071e">=&#34;</span><span style="color:#1f2328">onStartLink</span><span style="color:#f6f8fa;background-color:#82071e">&#34;</span> <span style="color:#1f2328">/&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">div</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">template</span><span style="color:#1f2328">&gt;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>There are three types of trigger actions: <code>Submit</code>, <code>Auto</code>, and <code>Optimize</code>. Each input node has a Submit button (<strong>S</strong> button) in its top-right corner, which propagates data to the next node in the workflow. Nodes with the Auto trigger action automatically transform their inputs into outputs. Optimization problems feature an Optimize button (<strong>O</strong> button), which invokes an API call to the Micronaut backend and streams data via Server-Sent Events (SSE) whenever a better solution is found.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/vue/vue-optimization-problem-nodes.png"   alt="vue-optimization-problem-nodes" class="sc-image sc-image-default"
+       >
+
+
+<p>The <code>TSPChartOutput.vue</code> component provides a resizable chart for visualizing optimization results:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vue" data-lang="vue"><span style="display:flex;"><span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">template</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">div</span> <span style="color:#1f2328">class</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;chart-output&#34;</span> <span style="color:#0550ae">:</span><span style="color:#1f2328">style</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;{ width: width + &#39;px&#39;, height: height + &#39;px&#39; }&#34;</span> <span style="color:#0550ae">@mousedown</span><span style="color:#0a3069">=&#34;startDrag&#34;</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">canvas</span> <span style="color:#1f2328">ref</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;chartCanvas&#34;</span><span style="color:#1f2328">&gt;&lt;/</span><span style="color:#0550ae">canvas</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">&lt;</span><span style="color:#0550ae">div</span> <span style="color:#1f2328">class</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;resize-handle&#34;</span> <span style="color:#0550ae">@mousedown</span><span style="color:#0a3069">=&#34;startResize&#34;</span><span style="color:#1f2328">&gt;&lt;/</span><span style="color:#0550ae">div</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">div</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">template</span><span style="color:#1f2328">&gt;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="6-data-persistence-with-indexeddb">6. Data Persistence with IndexedDB</h3>
+<p>The <code>LocalPersistent.vue</code> component uses <strong>IndexedDB</strong> to save and load the application state. This ensures that users can save their workflows and resume work later without losing progress, even with large datasets. For simplicity, I’ve implemented a save slot system that currently supports up to five slots. Data is compressed using the pako library before saving to reduce storage size.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vue" data-lang="vue"><span style="display:flex;"><span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">script</span><span style="color:#1f2328">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">useToast</span> <span style="color:#1f2328">}</span> <span style="color:#1f2328">from</span> <span style="color:#0a3069">&#34;vue-toastification&#34;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#1f2328">pako</span> <span style="color:#1f2328">from</span> <span style="color:#0a3069">&#39;pako&#39;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">const</span> <span style="color:#1f2328">toast</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">useToast</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a">// IndexedDB utility functions
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#cf222e">const</span> <span style="color:#1f2328">openDB</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">()</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#cf222e">new</span> <span style="color:#6639ba">Promise</span><span style="color:#1f2328">((</span><span style="color:#1f2328">resolve</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">reject</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">request</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">indexedDB</span><span style="color:#1f2328">.</span><span style="color:#1f2328">open</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;ProblemSolverDB&#39;</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">1</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">request</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onupgradeneeded</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">event</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">const</span> <span style="color:#1f2328">db</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">event</span><span style="color:#1f2328">.</span><span style="color:#1f2328">target</span><span style="color:#1f2328">.</span><span style="color:#1f2328">result</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">!</span><span style="color:#1f2328">db</span><span style="color:#1f2328">.</span><span style="color:#1f2328">objectStoreNames</span><span style="color:#1f2328">.</span><span style="color:#1f2328">contains</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;savedProblems&#39;</span><span style="color:#1f2328">))</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">db</span><span style="color:#1f2328">.</span><span style="color:#1f2328">createObjectStore</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;savedProblems&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">keyPath</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;slot&#39;</span> <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">};</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">request</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onsuccess</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">()</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">resolve</span><span style="color:#1f2328">(</span><span style="color:#1f2328">request</span><span style="color:#1f2328">.</span><span style="color:#1f2328">result</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">request</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onerror</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">()</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">reject</span><span style="color:#1f2328">(</span><span style="color:#1f2328">request</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">};</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">const</span> <span style="color:#1f2328">saveToIndexedDB</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">async</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">slot</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">data</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">db</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">await</span> <span style="color:#1f2328">openDB</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">transaction</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">db</span><span style="color:#1f2328">.</span><span style="color:#1f2328">transaction</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;savedProblems&#39;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;readwrite&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">store</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">transaction</span><span style="color:#1f2328">.</span><span style="color:#1f2328">objectStore</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;savedProblems&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">store</span><span style="color:#1f2328">.</span><span style="color:#1f2328">put</span><span style="color:#1f2328">({</span> <span style="color:#1f2328">slot</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">data</span> <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">};</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">const</span> <span style="color:#1f2328">loadFromIndexedDB</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">async</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">slot</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">db</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">await</span> <span style="color:#1f2328">openDB</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">transaction</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">db</span><span style="color:#1f2328">.</span><span style="color:#1f2328">transaction</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;savedProblems&#39;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;readonly&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">store</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">transaction</span><span style="color:#1f2328">.</span><span style="color:#1f2328">objectStore</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;savedProblems&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">request</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">store</span><span style="color:#1f2328">.</span><span style="color:#1f2328">get</span><span style="color:#1f2328">(</span><span style="color:#1f2328">slot</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#cf222e">new</span> <span style="color:#6639ba">Promise</span><span style="color:#1f2328">((</span><span style="color:#1f2328">resolve</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">reject</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">request</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onsuccess</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">()</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">resolve</span><span style="color:#1f2328">(</span><span style="color:#1f2328">request</span><span style="color:#1f2328">.</span><span style="color:#1f2328">result</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">data</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">request</span><span style="color:#1f2328">.</span><span style="color:#1f2328">onerror</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">()</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">reject</span><span style="color:#1f2328">(</span><span style="color:#1f2328">request</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">};</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">&lt;/</span><span style="color:#0550ae">script</span><span style="color:#1f2328">&gt;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="running-the-application">Running the Application</h2>
+<p>To run the application, execute the following commands:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#57606a"># Clone the repo</span>
+</span></span><span style="display:flex;"><span>git clone https://github.com/seehiong/micronaut-optimizer
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">cd</span> micronaut-optimizer/vue-app
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Installs dependencies</span>
+</span></span><span style="display:flex;"><span>yarn install
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Starts the development server</span>
+</span></span><span style="display:flex;"><span>yarn serve
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Starts the backend Micronaut server</span>
+</span></span><span style="display:flex;"><span>gradlew run</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The frontend is configured to run on port 8081 and can be accessed at <em>http://localhost:8081</em>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/vue/vue-tsp-problem-optimization.png"   alt="vue-tsp-problem-optimization" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="conclusion">Conclusion</h2>
+<p>This Vue.js application provides an intuitive and powerful frontend for defining, managing, and troubleshooting optimization problems. It bridges the gap between complex backend algorithms and user-friendly workflows, making it easier to analyze and compare different optimization techniques.</p>
+<p>Future enhancements include dynamic configuration retrieval from the backend, improved validation, and expanded visualization capabilities. Stay tuned for updates!</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+        
+          <div class="nav-next">
+            <a href="/posts/2025/02/jmc-java-performance-profiling-simplified/" rel="next">
+              <span class="meta-nav">Next →</span>
+              <span class="post-title">JMC: Java Performance Profiling Simplified</span>
+            </a>
+          </div>
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2025 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>

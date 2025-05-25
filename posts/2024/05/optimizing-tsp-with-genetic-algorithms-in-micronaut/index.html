@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2024/05/optimizing-tsp-with-genetic-algorithms-in-micronaut/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Optimizing TSP with Genetic Algorithms in Micronaut">
+  <meta property="og:description" content="In this post, I explore solving a Traveling Salesman Problem (TSP) involving 200 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-05-23T20:00:00+08:00">
+    <meta property="article:modified_time" content="2024-05-23T20:00:00+08:00">
+    <meta property="article:tag" content="Genetic Algorithm">
+    <meta property="article:tag" content="Micronaut">
+    <meta property="article:tag" content="TSP">
+    <meta property="article:tag" content="BE">
+    <meta property="article:tag" content="Backend">
+    <meta property="article:tag" content="Java">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Optimizing TSP with Genetic Algorithms in Micronaut">
+  <meta name="twitter:description" content="In this post, I explore solving a Traveling Salesman Problem (TSP) involving 200 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively.">
+
+  <meta itemprop="name" content="Optimizing TSP with Genetic Algorithms in Micronaut">
+  <meta itemprop="description" content="In this post, I explore solving a Traveling Salesman Problem (TSP) involving 200 cities using genetic algorithms within a Micronaut framework. Leveraging techniques like inversion, insertion, and swap mutations, I illustrate how to maintain genetic diversity and improve solution quality over generations. The implementation showcases significant performance improvements compared to previous solvers. This approach combines simulated annealing, genetic algorithms, and local search to tackle complex optimization challenges effectively.">
+  <meta itemprop="datePublished" content="2024-05-23T20:00:00+08:00">
+  <meta itemprop="dateModified" content="2024-05-23T20:00:00+08:00">
+  <meta itemprop="wordCount" content="2177">
+  <meta itemprop="keywords" content="Genetic Algorithm,Micronaut,TSP,BE,Backend,Java"><title>Optimizing TSP with Genetic Algorithms in Micronaut | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2024/05/optimizing-tsp-with-genetic-algorithms-in-micronaut/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          
+          
+          <img src="/images/blog_logo.png" alt="See Hiong&#39;s Blog Logo" class="nav-logo-image">
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Optimizing TSP with Genetic Algorithms in Micronaut</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2024-05-23T20:00:00&#43;08:00">May 23, 2024</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/genetic-algorithm">Genetic Algorithm</a>
+            
+              , <a href="/tags/micronaut">Micronaut</a>
+            
+              , <a href="/tags/tsp">TSP</a>
+            
+              , <a href="/tags/be">BE</a>
+            
+              , <a href="/tags/backend">Backend</a>
+            
+              , <a href="/tags/java">Java</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/tsp/optimizing-tsp-with-genetic-algorithms-in-micronaut.svg');"></div>
+          <img src="/images/tsp/optimizing-tsp-with-genetic-algorithms-in-micronaut.svg" alt="Optimizing TSP with Genetic Algorithms in Micronaut cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <h2 id="problem-statement">Problem Statement</h2>
+<p>Research suggests that the  
+
+
+
+
+
+
+  <a href="https://www.math.uwaterloo.ca/tsp/pla85900/index.html" target="_blank" rel="noopener noreferrer" >Optimal 85,900-Point Tour</a>
+ is the largest solved instance of the Traveling Salesman Problem (TSP). For this post, I will attempt to solve the TSP problem involving 200 cities.</p>
+<p>Genetic algorithms simulate the process of natural selection, mimicking &ldquo;survival of the fittest&rdquo; to solve problems. These algorithms evolve over generations, with each generation comprising individuals better adapted to solving the problem.</p>
+<p>Referencing 
+
+
+
+
+
+
+  <a href="https://www.geeksforgeeks.org/traveling-salesman-problem-using-genetic-algorithm/" target="_blank" rel="noopener noreferrer" >Genetic Algorithm for TSP</a>
+, I documented my solution steps.</p>
+<h2 id="initialisation">Initialisation</h2>
+<p>I implemented the genome as an int[]. Here’s my <em>Individual.java</em>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#cf222e">import</span><span style="color:#fff"> </span><span style="color:#24292e">io.micronaut.serde.annotation.Serdeable</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">import</span><span style="color:#fff"> </span><span style="color:#24292e">lombok.*</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">@Data</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">@Builder</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">@AllArgsConstructor</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">@NoArgsConstructor</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">@Serdeable.Serializable</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">public</span><span style="color:#fff"> </span><span style="color:#cf222e">class</span> <span style="color:#1f2328">Individual</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// sequence of cities to visit, starting with first city 0</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>fitness<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// total distance travelled</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>String<span style="color:#fff"> </span>message<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// additional information attached to the individual</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Here are the configuration parameters in <em>TspGaService.java</em>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#57606a">// Configuration</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">final</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>POPULATION_SIZE<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>100<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Population size</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">final</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>MAX_GENERATIONS<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>1200<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Maximum number of generations</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">final</span><span style="color:#fff"> </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>INITIAL_TEMPERATURE<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>1000<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Initial temperature to start with</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">final</span><span style="color:#fff"> </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>FINAL_TEMPERATURE<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>1<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Terminate main loop when temperature reached</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">final</span><span style="color:#fff"> </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>COOLING_RATE<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">.</span><span style="color:#1f2328">9995</span><span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Cooling rate</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">final</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>FITNESS_MEMO_SIZE<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>10000000<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Limit the size of the fitness memo (out of heap size, avoid OOM error)</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">final</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>STAGNATION_THRESHOLD<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>50<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Number of generations without improvement to trigger action</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">final</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>LOCAL_SEARCH_ATTEMPTS<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>50<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Number of attempts on local search before exiting local optima</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">final</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>MUTATION_ATTEMPTS<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>50<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Number of attempts on mutation</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">double</span><span style="color:#0550ae">[][]</span><span style="color:#fff"> </span>graph<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Populate with actual distances</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>fitnessThreshold<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// The desired fitness threshold</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>maxStagnationRetry<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>10<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span>ConcurrentHashMap<span style="color:#0550ae">&lt;</span>Integer<span style="color:#1f2328">,</span><span style="color:#fff"> </span>Double<span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>fitnessMemo<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">new</span><span style="color:#fff"> </span>ConcurrentHashMap<span style="color:#0550ae">&lt;&gt;</span><span style="color:#1f2328">();</span><span style="color:#fff"> </span><span style="color:#57606a">// Thread-safe memoization for fitness</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>generation<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>1<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span>DecimalFormat<span style="color:#fff"> </span>df<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">new</span><span style="color:#fff"> </span>DecimalFormat<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;#&#34;</span><span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>optimalCount<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>In the same class, these helper methods were used:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Individual<span style="color:#fff"> </span><span style="color:#6639ba">getIndividual</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>Individual<span style="color:#1f2328">.</span><span style="color:#1f2328">builder</span><span style="color:#1f2328">().</span><span style="color:#1f2328">genome</span><span style="color:#1f2328">(</span>genome<span style="color:#1f2328">).</span><span style="color:#1f2328">fitness</span><span style="color:#1f2328">(</span>calculateFitness<span style="color:#1f2328">(</span>genome<span style="color:#1f2328">)).</span><span style="color:#1f2328">build</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span>Individual<span style="color:#fff"> </span><span style="color:#6639ba">getIndividual</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>fitness<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>Individual<span style="color:#1f2328">.</span><span style="color:#1f2328">builder</span><span style="color:#1f2328">().</span><span style="color:#1f2328">genome</span><span style="color:#1f2328">(</span>genome<span style="color:#1f2328">).</span><span style="color:#1f2328">fitness</span><span style="color:#1f2328">(</span>fitness<span style="color:#1f2328">).</span><span style="color:#1f2328">build</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#57606a">// Random number generator function</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#fff"> </span><span style="color:#6639ba">randNumber</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>start<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>end<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>Math<span style="color:#1f2328">.</span><span style="color:#1f2328">random</span><span style="color:#1f2328">()</span><span style="color:#fff"> </span><span style="color:#0550ae">*</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>end<span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>start<span style="color:#1f2328">))</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>start<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">double</span><span style="color:#fff"> </span><span style="color:#6639ba">calculateCityDistance</span><span style="color:#1f2328">(</span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>x1<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>y1<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>x2<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>y2<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>xDelta<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>x1<span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>x2<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>yDelta<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>y1<span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>y2<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>Math<span style="color:#1f2328">.</span><span style="color:#1f2328">sqrt</span><span style="color:#1f2328">((</span>xDelta<span style="color:#fff"> </span><span style="color:#0550ae">*</span><span style="color:#fff"> </span>xDelta<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>yDelta<span style="color:#fff"> </span><span style="color:#0550ae">*</span><span style="color:#fff"> </span>yDelta<span style="color:#1f2328">));</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">double</span><span style="color:#fff"> </span><span style="color:#6639ba">calculateDistance</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>distance<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>1<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>from<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>to<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#0550ae">[</span>i<span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>1<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>distance<span style="color:#fff"> </span><span style="color:#0550ae">+=</span><span style="color:#fff"> </span>graph<span style="color:#0550ae">[</span>from<span style="color:#0550ae">][</span>to<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">//NOTE: This is distance needed to travel back to the original city</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>distance<span style="color:#fff"> </span><span style="color:#0550ae">+=</span><span style="color:#fff"> </span>graph<span style="color:#0550ae">[</span>genome<span style="color:#0550ae">[</span>genome<span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#0550ae">-</span>1<span style="color:#0550ae">]][</span>0<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>distance<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#57606a">// Hash-based map for the fitness (total distance of the entire genome)</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">double</span><span style="color:#fff"> </span><span style="color:#6639ba">calculateFitness</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>genomeHash<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>Arrays<span style="color:#1f2328">.</span><span style="color:#1f2328">hashCode</span><span style="color:#1f2328">(</span>genome<span style="color:#1f2328">);</span><span style="color:#fff"> </span><span style="color:#57606a">// Compute the hashcode of entire genome as key, to reduce memory usage</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>fitnessMemo<span style="color:#1f2328">.</span><span style="color:#1f2328">containsKey</span><span style="color:#1f2328">(</span>genomeHash<span style="color:#1f2328">))</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>fitnessMemo<span style="color:#1f2328">.</span><span style="color:#1f2328">get</span><span style="color:#1f2328">(</span>genomeHash<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>totalDistance<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>calculateDistance<span style="color:#1f2328">(</span>genome<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>fitnessMemo<span style="color:#1f2328">.</span><span style="color:#1f2328">size</span><span style="color:#1f2328">()</span><span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>FITNESS_MEMO_SIZE<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>fitnessMemo<span style="color:#1f2328">.</span><span style="color:#1f2328">put</span><span style="color:#1f2328">(</span>genomeHash<span style="color:#1f2328">,</span><span style="color:#fff"> </span>totalDistance<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>totalDistance<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#57606a">// Function to create a genome</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span><span style="color:#6639ba">createGenome</span><span style="color:#1f2328">()</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">new</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[</span>maxCities<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>genome<span style="color:#0550ae">[</span>0<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>Set<span style="color:#0550ae">&lt;</span>Integer<span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>newGenome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">new</span><span style="color:#fff"> </span>HashSet<span style="color:#0550ae">&lt;&gt;</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>newGenome<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>0<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>index<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>1<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">while</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">.</span><span style="color:#1f2328">size</span><span style="color:#1f2328">()</span><span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>temp<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#0550ae">!</span>newGenome<span style="color:#1f2328">.</span><span style="color:#1f2328">contains</span><span style="color:#1f2328">(</span>temp<span style="color:#1f2328">))</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>genome<span style="color:#0550ae">[</span>index<span style="color:#0550ae">++]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>temp<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>newGenome<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>temp<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#57606a">// Convenience method to reinit portion of population</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">void</span><span style="color:#fff"> </span><span style="color:#6639ba">reinitializePartOfPopulation</span><span style="color:#1f2328">(</span>List<span style="color:#0550ae">&lt;</span>Individual<span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>population<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>reinitializeCount<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>POPULATION_SIZE<span style="color:#fff"> </span><span style="color:#0550ae">/</span><span style="color:#fff"> </span>5<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Reinitialize 20% of the population</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>reinitializeCount<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>createGenome<span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>population<span style="color:#1f2328">.</span><span style="color:#1f2328">set</span><span style="color:#1f2328">(</span>randNumber<span style="color:#1f2328">(</span>2<span style="color:#1f2328">,</span><span style="color:#fff"> </span>population<span style="color:#1f2328">.</span><span style="color:#1f2328">size</span><span style="color:#1f2328">()),</span><span style="color:#fff"> </span>getIndividual<span style="color:#1f2328">(</span>genome<span style="color:#1f2328">));</span><span style="color:#fff"> </span><span style="color:#57606a">// Replace random individuals (excluding the best two)</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span>List<span style="color:#0550ae">&lt;</span>Individual<span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span><span style="color:#6639ba">initialPopulation</span><span style="color:#1f2328">()</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>List<span style="color:#0550ae">&lt;</span>Individual<span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>population<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>Collections<span style="color:#1f2328">.</span><span style="color:#1f2328">synchronizedList</span><span style="color:#1f2328">(</span><span style="color:#cf222e">new</span><span style="color:#fff"> </span>ArrayList<span style="color:#0550ae">&lt;&gt;</span><span style="color:#1f2328">());</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>POPULATION_SIZE<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>population<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>getIndividual<span style="color:#1f2328">(</span>createGenome<span style="color:#1f2328">()));</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>population<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="local-search">Local Search</h2>
+<p>I implemented the 2-opt swap for local search to optimize the tour. My current approach emphasizes breaking the loop as soon as a better solution is found, rather than exhaustively checking all pairs, which would have a complexity of \( O(n^2) \).</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#cf222e">double</span><span style="color:#fff"> </span><span style="color:#6639ba">calculateDelta</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>j<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Calculate the difference in the tour length if the swap (i, j) is made</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>graph<span style="color:#0550ae">[</span>genome<span style="color:#0550ae">[</span>i<span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>1<span style="color:#0550ae">]][</span>genome<span style="color:#0550ae">[</span>j<span style="color:#0550ae">]]</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>graph<span style="color:#0550ae">[</span>genome<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]][</span>genome<span style="color:#0550ae">[</span>j<span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>1<span style="color:#0550ae">]]</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>graph<span style="color:#0550ae">[</span>genome<span style="color:#0550ae">[</span>i<span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>1<span style="color:#0550ae">]][</span>genome<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]]</span><span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>graph<span style="color:#0550ae">[</span>genome<span style="color:#0550ae">[</span>j<span style="color:#0550ae">]][</span>genome<span style="color:#0550ae">[</span>j<span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>1<span style="color:#0550ae">]]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">void</span><span style="color:#fff"> </span><span style="color:#6639ba">twoOptSwap</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>j<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">while</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>j<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>temp<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>genome<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#0550ae">[</span>j<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>genome<span style="color:#0550ae">[</span>j<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>temp<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>j<span style="color:#0550ae">--</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#57606a">// Few variations, used this as it seems to be work better for both small and large number of cities</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span><span style="color:#6639ba">localSearch</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>newGenome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">.</span><span style="color:#1f2328">clone</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">boolean</span><span style="color:#fff"> </span>improvement<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">true</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>iteration<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">while</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>improvement<span style="color:#fff"> </span><span style="color:#0550ae">&amp;&amp;</span><span style="color:#fff"> </span>iteration<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>LOCAL_SEARCH_ATTEMPTS<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>improvement<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">false</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>1<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>newGenome<span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>2<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>j<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>1<span style="color:#1f2328">;</span><span style="color:#fff"> </span>j<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>1<span style="color:#1f2328">);</span><span style="color:#fff"> </span>j<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>i<span style="color:#fff"> </span><span style="color:#0550ae">==</span><span style="color:#fff"> </span>j<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#cf222e">continue</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>delta<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>calculateDelta<span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">,</span><span style="color:#fff"> </span>i<span style="color:#1f2328">,</span><span style="color:#fff"> </span>j<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>delta<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>0<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>twoOptSwap<span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">,</span><span style="color:#fff"> </span>i<span style="color:#1f2328">,</span><span style="color:#fff"> </span>j<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>improvement<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">true</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#cf222e">break</span><span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Early exit on improvement</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>improvement<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#cf222e">break</span><span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Early exit on improvement</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>iteration<span style="color:#0550ae">++</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>newGenome<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="mutation">Mutation</h2>
+<p>To maintain genetic diversity within the population, I implemented three distinct mutation methods:</p>
+<ul>
+<li><strong>Inversion Mutation</strong>: Randomly inverts a sequence within the genome.</li>
+<li><strong>Insertion Mutation</strong>: Randomly inserts a sequence at a different position within the genome.</li>
+<li><strong>Swap Mutation</strong>: Randomly swaps the positions of two genes within the genome.</li>
+</ul>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span><span style="color:#6639ba">inversionMutation</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>newGenome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">.</span><span style="color:#1f2328">clone</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>start<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>end<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">while</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>start<span style="color:#fff"> </span><span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>end<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>end<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">while</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>start<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>end<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>temp<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>newGenome<span style="color:#0550ae">[</span>start<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>newGenome<span style="color:#0550ae">[</span>start<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>newGenome<span style="color:#0550ae">[</span>end<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>newGenome<span style="color:#0550ae">[</span>end<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>temp<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>start<span style="color:#0550ae">++</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>end<span style="color:#0550ae">--</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>newGenome<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span><span style="color:#6639ba">insertionMutation</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>newGenome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">.</span><span style="color:#1f2328">clone</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>start<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>end<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">while</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>start<span style="color:#fff"> </span><span style="color:#0550ae">==</span><span style="color:#fff"> </span>end<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>end<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>temp<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>newGenome<span style="color:#0550ae">[</span>start<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>start<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>end<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>System<span style="color:#1f2328">.</span><span style="color:#1f2328">arraycopy</span><span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">,</span><span style="color:#fff"> </span>start<span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>newGenome<span style="color:#1f2328">,</span><span style="color:#fff"> </span>start<span style="color:#1f2328">,</span><span style="color:#fff"> </span>end<span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>start<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff"> </span><span style="color:#cf222e">else</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>System<span style="color:#1f2328">.</span><span style="color:#1f2328">arraycopy</span><span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">,</span><span style="color:#fff"> </span>end<span style="color:#1f2328">,</span><span style="color:#fff"> </span>newGenome<span style="color:#1f2328">,</span><span style="color:#fff"> </span>end<span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>start<span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>end<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>newGenome<span style="color:#0550ae">[</span>end<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>temp<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>newGenome<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span><span style="color:#6639ba">swapMutation</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>newGenome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">.</span><span style="color:#1f2328">clone</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>index1<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">);</span><span style="color:#fff">  </span><span style="color:#57606a">// Avoid swapping the first position</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>index2<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>maxCities<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>temp<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#0550ae">[</span>index1<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>genome<span style="color:#0550ae">[</span>index1<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#0550ae">[</span>index2<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>genome<span style="color:#0550ae">[</span>index2<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>temp<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>newGenome<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#57606a">// Mutation Operator to maintain diversity in population</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span><span style="color:#6639ba">mutateGenome</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>newGenome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>genome<span style="color:#1f2328">.</span><span style="color:#1f2328">clone</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>mutationType<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>0<span style="color:#1f2328">,</span><span style="color:#fff"> </span>3<span style="color:#1f2328">);</span><span style="color:#fff">  </span><span style="color:#57606a">// Adjust to the number of mutation operators</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span><span style="color:#cf222e">switch</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>mutationType<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">case</span><span style="color:#fff"> </span>0<span style="color:#fff"> </span><span style="color:#0550ae">-&gt;</span><span style="color:#fff"> </span>inversionMutation<span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">case</span><span style="color:#fff"> </span>1<span style="color:#fff"> </span><span style="color:#0550ae">-&gt;</span><span style="color:#fff"> </span>insertionMutation<span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">default</span><span style="color:#fff"> </span><span style="color:#0550ae">-&gt;</span><span style="color:#fff"> </span>swapMutation<span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">};</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span><span style="color:#6639ba">performMutation</span><span style="color:#1f2328">(</span>Individual<span style="color:#fff"> </span>individual<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>temperature<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>newGenome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>individual<span style="color:#1f2328">.</span><span style="color:#1f2328">genome</span><span style="color:#1f2328">.</span><span style="color:#1f2328">clone</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>newFitness<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>mutationAttempts<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">while</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>mutationAttempts<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>MUTATION_ATTEMPTS<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>mutationAttempts<span style="color:#0550ae">++</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>newGenome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>mutateGenome<span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">);</span><span style="color:#fff"> </span><span style="color:#57606a">// Apply mutation</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>newGenome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>localSearch<span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">);</span><span style="color:#fff">  </span><span style="color:#57606a">// Integrate local search</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>newFitness<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>calculateFitness<span style="color:#1f2328">(</span>newGenome<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>newFitness<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>individual<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#fff"> </span><span style="color:#0550ae">||</span><span style="color:#fff"> </span>Math<span style="color:#1f2328">.</span><span style="color:#1f2328">exp</span><span style="color:#1f2328">((</span>individual<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>newFitness<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#0550ae">/</span><span style="color:#fff"> </span>temperature<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>Math<span style="color:#1f2328">.</span><span style="color:#1f2328">random</span><span style="color:#1f2328">())</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>newGenome<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// No improvements after mutation attempts</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>individual<span style="color:#1f2328">.</span><span style="color:#1f2328">genome</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="crossover">Crossover</h2>
+<p>In each generation, the algorithm selects the two fittest individuals to perform crossover. This process creates new offspring by combining genetic material from both parents. A segment of the chromosome is randomly selected from the first parent and incorporated into the offspring. Then, the remaining genes are filled in from the second parent, ensuring that no genes are duplicated. This method blends the characteristics of both parents, producing diverse and potentially more fit offspring for the next generation.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span><span style="color:#6639ba">performCrossover</span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>parent1<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>parent2<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>length<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>parent1<span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>child<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">new</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[</span>length<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>Set<span style="color:#0550ae">&lt;</span>Integer<span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>usedGenes<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">new</span><span style="color:#fff"> </span>HashSet<span style="color:#0550ae">&lt;&gt;</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Choose a segment from parent1</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>startPos<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>length<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>endPos<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>length<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Ensure startPos is less than endPos</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>startPos<span style="color:#fff"> </span><span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>endPos<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>temp<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>startPos<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>startPos<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>endPos<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>endPos<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>temp<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Copy the segment from parent1 to the child</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>startPos<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>endPos<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>child<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>parent1<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>usedGenes<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>parent1<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]</span><span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Ensure the first position is always the starting point</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>child<span style="color:#0550ae">[</span>0<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>usedGenes<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>0<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Fill the remaining positions with genes from parent2 in the order they appear</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>currentPos<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>endPos<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>1<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>length<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>geneFromParent2<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>parent2<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#0550ae">!</span>usedGenes<span style="color:#1f2328">.</span><span style="color:#1f2328">contains</span><span style="color:#1f2328">(</span>geneFromParent2<span style="color:#1f2328">))</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>usedGenes<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>geneFromParent2<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>currentPos<span style="color:#fff"> </span><span style="color:#0550ae">&gt;=</span><span style="color:#fff"> </span>length<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>currentPos<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>1<span style="color:#1f2328">;</span><span style="color:#fff"> </span><span style="color:#57606a">// Wrap around to start filling from the beginning (skipping index 0)</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>child<span style="color:#0550ae">[</span>currentPos<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">==</span><span style="color:#fff"> </span>0<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>child<span style="color:#0550ae">[</span>currentPos<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>geneFromParent2<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>currentPos<span style="color:#0550ae">++</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Fill any remaining unfilled positions with random unused genes</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>1<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>length<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>child<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">==</span><span style="color:#fff"> </span>0<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>rand<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">do</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>rand<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>randNumber<span style="color:#1f2328">(</span>1<span style="color:#1f2328">,</span><span style="color:#fff"> </span>length<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff"> </span><span style="color:#cf222e">while</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>usedGenes<span style="color:#1f2328">.</span><span style="color:#1f2328">contains</span><span style="color:#1f2328">(</span>rand<span style="color:#1f2328">));</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>child<span style="color:#0550ae">[</span>i<span style="color:#0550ae">]</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>rand<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>usedGenes<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>rand<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>child<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="combining-with-simulated-anealling">Combining with Simulated Anealling</h2>
+<p>To enhance the efficiency of solving the problem, I combined the genetic algorithm with simulated annealing. This hybrid approach leverages the strengths of both techniques. The simulated annealing mechanism uses temperature as a probabilistic factor to either accept a better genome or, occasionally, accept a worse genome. This strategy maintains diversity and fosters exploration within the solution space.</p>
+<p>The temperature starts high and gradually decreases according to a cooling rate. At higher temperatures, the algorithm is more likely to accept suboptimal solutions, promoting exploration and helping escape local optima. As the temperature drops, the algorithm becomes more selective, favoring better solutions and converging towards an optimal or near-optimal solution.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#cf222e">double</span><span style="color:#fff"> </span><span style="color:#6639ba">adaptiveCooling</span><span style="color:#1f2328">(</span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>temperature<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>generation<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>temperature<span style="color:#fff"> </span><span style="color:#0550ae">*</span><span style="color:#fff"> </span>Math<span style="color:#1f2328">.</span><span style="color:#1f2328">pow</span><span style="color:#1f2328">(</span>COOLING_RATE<span style="color:#1f2328">,</span><span style="color:#fff"> </span>generation<span style="color:#fff"> </span><span style="color:#0550ae">/</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">double</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span>MAX_GENERATIONS<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"> </span><span style="color:#57606a">// Combine simulated annealing with genetic algorithm</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">void</span><span style="color:#fff"> </span><span style="color:#6639ba">simulatedAnnealing</span><span style="color:#1f2328">(</span>Individual<span style="color:#fff"> </span>individual<span style="color:#1f2328">,</span><span style="color:#fff"> </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>temperature<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>100<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">  </span><span style="color:#57606a">// Simulated annealing iterations</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>mutatedGenome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>mutateGenome<span style="color:#1f2328">(</span>individual<span style="color:#1f2328">.</span><span style="color:#1f2328">genome</span><span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>mutatedFitness<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>calculateFitness<span style="color:#1f2328">(</span>mutatedGenome<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>mutatedFitness<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>individual<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#fff"> </span><span style="color:#0550ae">||</span><span style="color:#fff"> </span>Math<span style="color:#1f2328">.</span><span style="color:#1f2328">exp</span><span style="color:#1f2328">((</span>individual<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#fff"> </span><span style="color:#0550ae">-</span><span style="color:#fff"> </span>mutatedFitness<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#0550ae">/</span><span style="color:#fff"> </span>temperature<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>Math<span style="color:#1f2328">.</span><span style="color:#1f2328">random</span><span style="color:#1f2328">())</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>individual<span style="color:#1f2328">.</span><span style="color:#1f2328">genome</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>mutatedGenome<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>individual<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>mutatedFitness<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">break</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="tspgaservice-singleton">TspGaService Singleton</h2>
+<p>This is the <em>TspGaService.java</em> singleton, with the main solve methods:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#0550ae">@Singleton</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">public</span><span style="color:#fff"> </span><span style="color:#cf222e">class</span> <span style="color:#1f2328">TspGaService</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Configurations</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Helper methods</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// LocalSearch</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Mutation</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Crossover</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#57606a">// Simulated Annealing</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>Individual<span style="color:#fff"> </span><span style="color:#6639ba">solve</span><span style="color:#1f2328">(</span><span style="color:#cf222e">double</span><span style="color:#0550ae">[][]</span><span style="color:#fff"> </span>input<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>Instant<span style="color:#fff"> </span>startTime<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>Instant<span style="color:#1f2328">.</span><span style="color:#1f2328">now</span><span style="color:#1f2328">();</span><span style="color:#fff"> </span><span style="color:#57606a">// Record the start time</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>fitnessMemo<span style="color:#1f2328">.</span><span style="color:#1f2328">clear</span><span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>graph<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>input<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>maxCities<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>graph<span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>List<span style="color:#0550ae">&lt;</span>Individual<span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>population<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>initialPopulation<span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>Individual<span style="color:#fff"> </span>bestIndividual<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">null</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>bestFitness<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>Double<span style="color:#1f2328">.</span><span style="color:#1f2328">MAX_VALUE</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>stagnationCount<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>stagnationResetCount<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">double</span><span style="color:#fff"> </span>temperature<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>INITIAL_TEMPERATURE<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">while</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>temperature<span style="color:#fff"> </span><span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>FINAL_TEMPERATURE<span style="color:#fff"> </span><span style="color:#0550ae">&amp;&amp;</span><span style="color:#fff"> </span>generation<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>MAX_GENERATIONS<span style="color:#fff"> </span><span style="color:#0550ae">&amp;&amp;</span><span style="color:#fff"> </span>stagnationResetCount<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>maxStagnationRetry<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#57606a">// Sort the population by fitness</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>Collections<span style="color:#1f2328">.</span><span style="color:#1f2328">sort</span><span style="color:#1f2328">(</span>population<span style="color:#1f2328">,</span><span style="color:#fff"> </span>Comparator<span style="color:#1f2328">.</span><span style="color:#1f2328">comparingDouble</span><span style="color:#1f2328">(</span>a<span style="color:#fff"> </span><span style="color:#0550ae">-&gt;</span><span style="color:#fff"> </span>a<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#1f2328">));</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#57606a">// Retain the best two individuals for elitism and crossover</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>Individual<span style="color:#fff"> </span>bestCurrentIndividual<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>population<span style="color:#1f2328">.</span><span style="color:#1f2328">get</span><span style="color:#1f2328">(</span>0<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>Individual<span style="color:#fff"> </span>secondBestIndividual<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>population<span style="color:#1f2328">.</span><span style="color:#1f2328">get</span><span style="color:#1f2328">(</span>1<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>List<span style="color:#0550ae">&lt;</span>Individual<span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>newPopulation<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>Collections<span style="color:#1f2328">.</span><span style="color:#1f2328">synchronizedList</span><span style="color:#1f2328">(</span><span style="color:#cf222e">new</span><span style="color:#fff"> </span>ArrayList<span style="color:#0550ae">&lt;&gt;</span><span style="color:#1f2328">());</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>newPopulation<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>bestCurrentIndividual<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>newPopulation<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>secondBestIndividual<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#57606a">// Perform crossover and mutation</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>POPULATION_SIZE<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>newGnome<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>Math<span style="color:#1f2328">.</span><span style="color:#1f2328">random</span><span style="color:#1f2328">()</span><span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>0<span style="color:#1f2328">.</span><span style="color:#1f2328">5</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>newGnome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>performCrossover<span style="color:#1f2328">(</span>bestCurrentIndividual<span style="color:#1f2328">.</span><span style="color:#1f2328">genome</span><span style="color:#1f2328">,</span><span style="color:#fff"> </span>secondBestIndividual<span style="color:#1f2328">.</span><span style="color:#1f2328">genome</span><span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#1f2328">}</span><span style="color:#fff"> </span><span style="color:#cf222e">else</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>Individual<span style="color:#fff"> </span>randomIndividual<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>population<span style="color:#1f2328">.</span><span style="color:#1f2328">get</span><span style="color:#1f2328">(</span>i<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>newGnome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>performMutation<span style="color:#1f2328">(</span>randomIndividual<span style="color:#1f2328">,</span><span style="color:#fff"> </span>temperature<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>newGnome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>localSearch<span style="color:#1f2328">(</span>newGnome<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>Individual<span style="color:#fff"> </span>newIndividual<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>getIndividual<span style="color:#1f2328">(</span>newGnome<span style="color:#1f2328">,</span><span style="color:#fff"> </span>calculateFitness<span style="color:#1f2328">(</span>newGnome<span style="color:#1f2328">));</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>simulatedAnnealing<span style="color:#1f2328">(</span>newIndividual<span style="color:#1f2328">,</span><span style="color:#fff"> </span>temperature<span style="color:#1f2328">);</span><span style="color:#fff"> </span><span style="color:#57606a">// Apply simulated annealing</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>newPopulation<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>newIndividual<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#57606a">// Ensure population is updated correctly</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#0550ae">!</span>newPopulation<span style="color:#1f2328">.</span><span style="color:#1f2328">isEmpty</span><span style="color:#1f2328">())</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#57606a">// Use a mix of old and new population to maintain diversity</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>population<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span><span style="color:#cf222e">new</span><span style="color:#fff"> </span>ArrayList<span style="color:#0550ae">&lt;&gt;</span><span style="color:#1f2328">(</span>newPopulation<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#cf222e">while</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>population<span style="color:#1f2328">.</span><span style="color:#1f2328">size</span><span style="color:#1f2328">()</span><span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>POPULATION_SIZE<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>createGenome<span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>population<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>getIndividual<span style="color:#1f2328">(</span>genome<span style="color:#1f2328">,</span><span style="color:#fff"> </span>calculateFitness<span style="color:#1f2328">(</span>genome<span style="color:#1f2328">)));</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff"> </span><span style="color:#cf222e">else</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#cf222e">for</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#cf222e">int</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>POPULATION_SIZE<span style="color:#1f2328">;</span><span style="color:#fff"> </span>i<span style="color:#0550ae">++</span><span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#cf222e">int</span><span style="color:#0550ae">[]</span><span style="color:#fff"> </span>genome<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>createGenome<span style="color:#1f2328">();</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>population<span style="color:#1f2328">.</span><span style="color:#1f2328">add</span><span style="color:#1f2328">(</span>getIndividual<span style="color:#1f2328">(</span>genome<span style="color:#1f2328">,</span><span style="color:#fff"> </span>calculateFitness<span style="color:#1f2328">(</span>genome<span style="color:#1f2328">)));</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#57606a">// Update temperature regardless of population changes</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>temperature<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>adaptiveCooling<span style="color:#1f2328">(</span>temperature<span style="color:#1f2328">,</span><span style="color:#fff"> </span>generation<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#57606a">// Check for stagnation</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>Individual<span style="color:#fff"> </span>currentBest<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>Collections<span style="color:#1f2328">.</span><span style="color:#1f2328">min</span><span style="color:#1f2328">(</span>population<span style="color:#1f2328">,</span><span style="color:#fff"> </span>Comparator<span style="color:#1f2328">.</span><span style="color:#1f2328">comparingDouble</span><span style="color:#1f2328">(</span>a<span style="color:#fff"> </span><span style="color:#0550ae">-&gt;</span><span style="color:#fff"> </span>a<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#1f2328">));</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>currentBest<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#fff"> </span><span style="color:#0550ae">==</span><span style="color:#fff"> </span>bestFitness<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>optimalCount<span style="color:#0550ae">++</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>System<span style="color:#1f2328">.</span><span style="color:#1f2328">out</span><span style="color:#1f2328">.</span><span style="color:#1f2328">println</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Potentially an optimal solution! &#34;</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>bestFitness<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>optimalCount<span style="color:#fff"> </span><span style="color:#0550ae">&gt;</span><span style="color:#fff"> </span>3<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>System<span style="color:#1f2328">.</span><span style="color:#1f2328">out</span><span style="color:#1f2328">.</span><span style="color:#1f2328">println</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Optimal solution, existing &#34;</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>bestFitness<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#cf222e">break</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff"> </span><span style="color:#cf222e">else</span><span style="color:#fff"> </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>currentBest<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#fff"> </span><span style="color:#0550ae">&lt;</span><span style="color:#fff"> </span>bestFitness<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                 </span>optimalCount<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>bestIndividual<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>currentBest<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>bestFitness<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>bestIndividual<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>Duration<span style="color:#fff"> </span>elapsedDuration<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>Duration<span style="color:#1f2328">.</span><span style="color:#1f2328">between</span><span style="color:#1f2328">(</span>startTime<span style="color:#1f2328">,</span><span style="color:#fff"> </span>Instant<span style="color:#1f2328">.</span><span style="color:#1f2328">now</span><span style="color:#1f2328">());</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>System<span style="color:#1f2328">.</span><span style="color:#1f2328">out</span><span style="color:#1f2328">.</span><span style="color:#1f2328">println</span><span style="color:#1f2328">(</span>elapsedDuration<span style="color:#1f2328">.</span><span style="color:#1f2328">toSeconds</span><span style="color:#1f2328">()</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span><span style="color:#0a3069">&#34;, generation &#34;</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>generation<span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span><span style="color:#0a3069">&#34;, fitness &#34;</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>df<span style="color:#1f2328">.</span><span style="color:#1f2328">format</span><span style="color:#1f2328">(</span>bestFitness<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span><span style="color:#0a3069">&#34;, fitnessMemo &#34;</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>fitnessMemo<span style="color:#1f2328">.</span><span style="color:#1f2328">size</span><span style="color:#1f2328">());</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>stagnationCount<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff"> </span><span style="color:#cf222e">else</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>stagnationCount<span style="color:#0550ae">++</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>stagnationCount<span style="color:#fff"> </span><span style="color:#0550ae">&gt;=</span><span style="color:#fff"> </span>STAGNATION_THRESHOLD<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#57606a">// Increase mutation rate to escape local optima</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>Duration<span style="color:#fff"> </span>elapsedDuration<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>Duration<span style="color:#1f2328">.</span><span style="color:#1f2328">between</span><span style="color:#1f2328">(</span>startTime<span style="color:#1f2328">,</span><span style="color:#fff"> </span>Instant<span style="color:#1f2328">.</span><span style="color:#1f2328">now</span><span style="color:#1f2328">());</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>System<span style="color:#1f2328">.</span><span style="color:#1f2328">out</span><span style="color:#1f2328">.</span><span style="color:#1f2328">println</span><span style="color:#1f2328">(</span>elapsedDuration<span style="color:#1f2328">.</span><span style="color:#1f2328">toSeconds</span><span style="color:#1f2328">()</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span><span style="color:#0a3069">&#34;, stagnation detected: &#34;</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>stagnationResetCount<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>reinitializePartOfPopulation<span style="color:#1f2328">(</span>population<span style="color:#1f2328">);</span><span style="color:#fff">  </span><span style="color:#57606a">// Reinitialize part of the population</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>stagnationCount<span style="color:#fff"> </span><span style="color:#0550ae">=</span><span style="color:#fff"> </span>0<span style="color:#1f2328">;</span><span style="color:#fff">  </span><span style="color:#57606a">// Reset stagnation count</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span>stagnationResetCount<span style="color:#0550ae">++</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>generation<span style="color:#0550ae">++</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#57606a">// Check if the current best fitness meets the required threshold</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#cf222e">if</span><span style="color:#fff"> </span><span style="color:#1f2328">(</span>bestIndividual<span style="color:#fff"> </span><span style="color:#0550ae">!=</span><span style="color:#fff"> </span><span style="color:#cf222e">null</span><span style="color:#fff"> </span><span style="color:#0550ae">&amp;&amp;</span><span style="color:#fff"> </span>bestIndividual<span style="color:#1f2328">.</span><span style="color:#1f2328">fitness</span><span style="color:#fff"> </span><span style="color:#0550ae">&lt;=</span><span style="color:#fff"> </span>fitnessThreshold<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span>System<span style="color:#1f2328">.</span><span style="color:#1f2328">out</span><span style="color:#1f2328">.</span><span style="color:#1f2328">println</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Reached the fitness threshold. Stopping the algorithm.&#34;</span><span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#cf222e">break</span><span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#57606a">// Find and print the most efficient path</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>System<span style="color:#1f2328">.</span><span style="color:#1f2328">out</span><span style="color:#1f2328">.</span><span style="color:#1f2328">println</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Most efficient path after &#34;</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>generation<span style="color:#fff">  </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span><span style="color:#0a3069">&#34; generations, threshold=&#34;</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span>fitnessThreshold<span style="color:#fff"> </span><span style="color:#0550ae">+</span><span style="color:#fff"> </span><span style="color:#0a3069">&#34;, temp:&#34;</span><span style="color:#fff"> </span><span style="color:#0550ae">+</span>temperature<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>bestIndividual<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="tspcontroller">TSPController</h2>
+<p>Refactored from my previous controller:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#0550ae">@Controller</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;/tsp&#34;</span><span style="color:#1f2328">)</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#cf222e">public</span><span style="color:#fff"> </span><span style="color:#cf222e">class</span> <span style="color:#1f2328">TSPController</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">...</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">private</span><span style="color:#fff"> </span><span style="color:#cf222e">final</span><span style="color:#fff"> </span>TspGaService<span style="color:#fff"> </span>tspGaService<span style="color:#1f2328">;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">@Post</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;/solveGa&#34;</span><span style="color:#1f2328">)</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">@Produces</span><span style="color:#1f2328">(</span>MediaType<span style="color:#1f2328">.</span><span style="color:#1f2328">APPLICATION_JSON</span><span style="color:#1f2328">)</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">@Consumes</span><span style="color:#1f2328">(</span>MediaType<span style="color:#1f2328">.</span><span style="color:#1f2328">APPLICATION_JSON</span><span style="color:#1f2328">)</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#cf222e">public</span><span style="color:#fff"> </span>Individual<span style="color:#fff"> </span><span style="color:#6639ba">solveTspGa</span><span style="color:#1f2328">(</span><span style="color:#0550ae">@Body</span><span style="color:#fff"> </span><span style="color:#cf222e">double</span><span style="color:#0550ae">[][]</span><span style="color:#fff"> </span>distances<span style="color:#1f2328">)</span><span style="color:#fff"> </span><span style="color:#1f2328">{</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#cf222e">return</span><span style="color:#fff"> </span>tspGaService<span style="color:#1f2328">.</span><span style="color:#1f2328">solve</span><span style="color:#1f2328">(</span>distances<span style="color:#1f2328">);</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#1f2328">}</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="solver-in-action">Solver in Action</h2>
+<p>Following these steps, I achieved a solution to the problem, though there is still room for improvement. This approach demonstrates how simulated annealing, genetic algorithms, and local search can collectively address the TSP, even with a large number of cities.</p>
+<p>Compared to my previous solver, this algorithm performs significantly better:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/tsp/tsp-ga-postman.png"   alt="tsp-ga-postman" class="sc-image sc-image-default"
+       >
+
+
+<p>With this custom implementation, here is the result for 51 cities:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/tsp/tsp-ga-51-city.png"   alt="tsp-ga-51-city" class="sc-image sc-image-default"
+       >
+
+
+<p>And for 200 cities:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/tsp/tsp-ga-200-city.png"   alt="tsp-ga-200-city" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="lesson-learnt">Lesson Learnt</h2>
+<p>Chat Less, Think More!</p>
+<p>While I enjoy discussing algorithms with 
+
+
+
+
+
+
+  <a href="https://openai.com/index/hello-gpt-4o/" target="_blank" rel="noopener noreferrer" >GPT-4o</a>
+, sometimes it&rsquo;s crucial to chat less and think more about the algorithm&rsquo;s implementation!</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2024/04/efficient-tsp-solver-api-with-micronaut/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Efficient TSP Solver API with Micronaut</span>
+            </a>
+          </div>
+        
+        
+          <div class="nav-next">
+            <a href="/posts/2024/05/solving-facility-location-problem-with-or-tools-and-micronaut/" rel="next">
+              <span class="meta-nav">Next →</span>
+              <span class="post-title">Solving Facility Location Problem with OR-Tools and Micronaut</span>
+            </a>
+          </div>
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2025 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
