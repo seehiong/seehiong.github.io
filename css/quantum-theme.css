@@ -51,6 +51,11 @@
   --copy-btn-hover-bg: var(--primary-color);
   --copy-btn-hover-text: var(--primary-text-over);
   --copy-btn-hover-border: var(--primary-color);
+
+  --logo-font-family: 'Montserrat', sans-serif;
+  --logo-main-color-light: #0B1D3A;
+  --logo-sub-color-light: #8CA6C1;
+  --header-height: 70px; 
 }
 
 html.dark-mode {
@@ -96,6 +101,9 @@ html.dark-mode {
   --copy-btn-hover-bg: var(--primary-color);
   --copy-btn-hover-text: var(--primary-text-over);
   --copy-btn-hover-border: var(--primary-color);
+
+  --logo-main-color-dark: #E2ECF9;
+  --logo-sub-color-dark: #AFCBE4;
 }
 
 body {
@@ -606,7 +614,7 @@ html.dark-mode .simplified-footer .social-link {
   left: 0;
   right: 0;
   z-index: 1000;
-  height: var(--header-height, 70px);
+  height: var(--header-height);
   transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out; 
 }
 
@@ -650,13 +658,40 @@ html.dark-mode .nav:not(.nav--scrolled) {
 .nav-logo-link {
   display: flex; 
   align-items: center;
+  text-decoration: none;
   height: 100%;
 }
 
-.nav-logo-image {
-  max-height: calc(var(--header-height) - 24px); 
-  width: auto;
-  display: block;
+.nav-site-title {
+  font-family: var(--logo-font-family);
+  line-height: 1.1; 
+  display: flex; 
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.nav-site-title__main {
+  font-size: 24px;  
+  font-weight: 700; 
+  color: var(--logo-main-color-light);
+  letter-spacing: 0.02em; 
+  transition: color var(--transition-standard);
+}
+html.dark-mode .nav-site-title__main {
+  color: var(--logo-main-color-dark);
+}
+
+.nav-site-title__sub {
+  font-size: 16px; 
+  font-weight: 500;
+  color: var(--logo-sub-color-light);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: -2px; 
+  transition: color var(--transition-standard);
+}
+html.dark-mode .nav-site-title__sub {
+  color: var(--logo-sub-color-dark);
 }
 
 .nav-menu {
@@ -1014,6 +1049,21 @@ html.dark-mode .archive-item__date {
   margin-bottom: 0.5em;
 }
 
+.about-page__main-content ul {
+  padding-left: 20px;
+  padding: 0;
+  margin-left: 20px;
+  margin-top: 0;
+}
+
+.about-page__main-content li {
+  margin-bottom: 0.8em;
+}
+.about-page__main-content li {
+  font-size: 1.0em;  
+  line-height:  1.05em;
+  line-height: 1.6;  
+}
 
 /* layouts/_default/single.html - Blog Post Styles */
 .post-layout { 
@@ -1389,6 +1439,122 @@ html.dark-mode .post-cover-blur-background {
   .terms-list {
     column-count: 1;
   }
+}
+
+
+/* --- About Page Styles (layouts/about/single.html) --- */
+
+.about-page-layout {
+  padding-top: 40px;
+  padding-bottom: 60px;
+  max-width: 900px; /* Slightly wider to accommodate two columns comfortably */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.about-page__header {
+  margin-bottom: 30px;
+  /* text-align: center; /* Optional */
+}
+
+.about-page__header h1 {
+  font-size: 36px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Two-column layout for intro text and image */
+.about-page__intro {
+  display: flex;
+  flex-wrap: wrap; /* Allow image to wrap below text on small screens */
+  gap: 30px;       /* Space between text and image column */
+  margin-bottom: 40px; /* Space before "Hosted Projects" */
+  align-items: flex-start; /* Align items to the top */
+}
+
+.about-page__intro-text {
+  flex: 2; /* Text takes up more space, e.g., 2/3 */
+  min-width: 300px; /* Ensure text column doesn't get too squeezed */
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+.about-page__intro-text p,
+.about-page__intro-text ul {
+  margin-bottom: 1.25em;
+}
+.about-page__intro-text ul {
+  padding-left: 20px;
+}
+.about-page__intro-text li {
+  margin-bottom: 0.5em;
+}
+.about-page__intro-text strong { /* Make bold text from Markdown more prominent */
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+
+.about-page__intro-image {
+  flex: 1; /* Image takes up less space, e.g., 1/3 */
+  min-width: 250px; /* Minimum width for the image column */
+  text-align: center; /* Center image if it's narrower than its column */
+}
+
+.profile-image {
+  max-width: 100%; /* Make image responsive within its column */
+  height: auto;
+  border-radius: 12px; /* Soft rounded corners */
+  box-shadow: 0 5px 15px rgba(var(--shadow-color-light-rgb), var(--shadow-opacity-medium));
+  object-fit: cover; /* If you want it to fill a certain aspect ratio */
+}
+
+/* Styles for the "Hosted Projects" section and below */
+.about-page__projects {
+  /* border-top: 1px solid var(--border-color); /* Optional separator */
+  padding-top: 40px;
+}
+
+.about-page__projects h2 {
+  font-size: 28px; /* Or use your .section-title styles */
+  color: var(--text-main);
+  margin-top: 0; /* Reset if it had top margin from intro section */
+  margin-bottom: 25px;
+  font-weight: 600;
+  /* Add styling similar to .section-title if desired, e.g., bottom border */
+  position: relative;
+  padding-bottom: 10px;
+}
+.about-page__projects h2::after { /* Underline for this specific H2 */
+  content: "";
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 1.5px;
+}
+
+
+.about-page__projects ul {
+  list-style: none;
+  padding: 0;
+}
+.about-page__projects li {
+  margin-bottom: 1em;
+  font-size: 1.05em; /* Slightly larger project links */
+  line-height: 1.6;
+}
+.about-page__projects a {
+  color: var(--text-link);
+  font-weight: 500;
+  /* text-decoration: none; */ /* Already default */
+}
+.about-page__projects a:hover {
+  text-decoration: underline;
+  color: var(--primary-dark);
 }
 
 
@@ -2032,9 +2198,6 @@ html.dark-mode .copy-code-button.copied {
   .content-body.footer-wraper {
     padding: 0 16px;
   }
-  .nav-logo-image {
-    max-height: calc(var(--header-height) - 28px);
-  }
   .section-content {
     margin-bottom: 40px;
   }
@@ -2104,6 +2267,39 @@ html.dark-mode .copy-code-button.copied {
 }
 
 @media (max-width: 768px) {
+  .nav-site-title__main {
+    font-size: 20px;
+  }
+  .nav-site-title__sub {
+    font-size: 14px; 
+  }
+  .nav-item-wrapper {
+    margin-left: 8px; 
+  }
+  .nav-item-content, .nav-item-button {
+    font-size: 14px;
+    padding: 6px 8px;
+  }
+  #theme-toggle {
+    min-width: auto;
+  }
+  .about-page__intro {
+    flex-direction: column;
+    align-items: center;
+  }
+  .about-page__intro-text {
+    order: 1; 
+    min-width: 100%;
+    text-align: left;
+  }
+  .about-page__intro-image {
+    order: 0; 
+    margin-bottom: 30px;
+    max-width: 300px;
+  }
+  .profile-image {
+    max-width: 250px;
+  }
   .two-column-grid, .three-column-grid {
     grid-template-columns: 1fr;
   }
@@ -2128,5 +2324,28 @@ html.dark-mode .copy-code-button.copied {
   .post-navigation .nav-previous,
   .post-navigation .nav-next {
     flex-basis: 100%;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  :root {
+    --header-height: 60px;
+  }
+  .nav-site-title__main {
+    font-size: 18px;
+  }
+  .nav-site-title__sub {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .nav-menu {
+    gap: 3px;
+  }
+  .nav-item-wrapper {
+    margin-left: 5px;
+  }
+  .nav-item-content, .nav-item-button {
+    font-size: 13px;
+    padding: 5px 6px;
   }
 }
