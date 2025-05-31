@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <link rel="icon" href="/img/favicon.ico">
+    <link rel="icon" href="/images/favicon.ico">
     
 
     <meta property="og:url" content="https://seehiong.github.io/posts/2024/07/integrating-draw.io-and-plantuml-with-gitlab/">
@@ -32,7 +32,7 @@
   <meta itemprop="description" content="As we transition from Lucidchart to draw.io for team diagramming, this guide outlines the steps to integrate draw.io and PlantUML with GitLab. I’ll configure the Diagrams.net server, enable integration, and demonstrate creating and editing diagrams within GitLab. Additionally, I’ll cover the setup and integration of PlantUML for creating detailed design diagrams. Follow along to seamlessly incorporate these powerful diagramming tools into your GitLab workflow.">
   <meta itemprop="datePublished" content="2024-07-06T10:00:00+08:00">
   <meta itemprop="dateModified" content="2024-07-06T10:00:00+08:00">
-  <meta itemprop="wordCount" content="427">
+  <meta itemprop="wordCount" content="654">
   <meta itemprop="keywords" content="HomeLab,Diagrams,Drawio,PlantUML,Gitlab,Lucidchart"><title>Integrating Draw.io and PlantUML with GitLab | See Hiong&#39;s Blog</title>
 
     <link rel="canonical" href="https://seehiong.github.io/posts/2024/07/integrating-draw.io-and-plantuml-with-gitlab/">
@@ -42,6 +42,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
     
     <link rel="stylesheet" href="/css/variables.css">
     
@@ -847,7 +862,9 @@
        >
 
 
+<h3 id="personas-design">Personas Design</h3>
 <p>For each of the different personas:</p>
+<h4 id="traveler">Traveler</h4>
 
 
 
@@ -855,108 +872,37 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
   
   
 
-
-
-
-
-  <img src="/images/drawio/plantuml-persona-design-traveler.png"   alt="plantuml-persona-design-traveler" class="sc-image sc-image-default"
-       >
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
   
+    
+    
+    <script src="/js/plantuml-bundle.6a8276b7a4f6ba2161545379939a85839f01e6cb3d0afd36cdd36a5d32bde30c.js" defer></script>
+    
   
 
 
+<span id="plantuml-traveler" style="display:none;">
+@startuml
+actor Traveler
+participant &#34;Web/Mobile UI&#34; as UI
+participant &#34;Search Service&#34; as Search
+participant &#34;Order Service&#34; as Order
+participant &#34;Payment Service&#34; as Payment
 
-
-
-  <img src="/images/drawio/plantuml-persona-design-hotel-operator.png"   alt="plantuml-persona-design-hotel-operator" class="sc-image sc-image-default"
-       >
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Traveler -&gt; UI: Search for flights/hotels
+UI -&gt; Search: Search request
+Search -&gt; Order: Check availability
+Order -&gt; Search: Available options
+Search -&gt; UI: Display search results
+Traveler -&gt; UI: Proceed to payment
+UI -&gt; Payment: Request payment details
+Payment -&gt; UI: Provide payment information
+@enduml
+</span>
+<img class="plantuml" id="plantuml-traveler" alt="PlantUML Diagram traveler" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<h4 id="hotel-operator">Hotel Operator</h4>
 
 
 
@@ -965,6 +911,23 @@
 
 
 
+<span id="plantuml-hotel-operator" style="display:none;">
+actor &#34;Hotel Operator&#34; as Operator
+participant &#34;Web/Mobile UI&#34; as UI
+participant &#34;Inventory Service&#34; as Inventory
+participant &#34;Analytics Service&#34; as Analytics
+
+Operator -&gt; UI: Log in
+UI -&gt; Operator: Display dashboard
+Operator -&gt; UI: Manage inventory (CRUD)
+UI -&gt; Inventory: Perform CRUD operations
+Inventory -&gt; UI: Confirmation/status
+Operator -&gt; UI: Access analytics
+UI -&gt; Analytics: Request insights
+Analytics -&gt; UI: Provide insights
+</span>
+<img class="plantuml" id="plantuml-hotel-operator" alt="PlantUML Diagram hotel-operator" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<h4 id="travel-portal-manager">Travel Portal Manager</h4>
 
 
 
@@ -973,19 +936,27 @@
 
 
 
+<span id="plantuml-travel-portal-manager]" style="display:none;">
+actor &#34;Travel Portal Manager&#34; as Manager
+participant &#34;Web/Mobile UI&#34; as UI
+participant &#34;Reporting Service&#34; as Reporting
+participant &#34;Analytics Service&#34; as Analytics
 
- 
-  
-  
+Manager -&gt; UI: Log in
+UI -&gt; Manager: Display dashboard
+Manager -&gt; UI: Access sales data
+UI -&gt; Reporting: Request performance reports
+Reporting -&gt; Analytics: Retrieve sales data
+Analytics -&gt; Reporting: Provide performance reports
+Reporting -&gt; UI: Display reports
 
-
-
-
-
-  <img src="/images/drawio/plantuml-persona-design-travel-portal-manager.png"   alt="plantuml-persona-design-travel-portal-manager" class="sc-image sc-image-default"
-       >
-
-
+Manager -&gt; UI: Access analytics
+UI -&gt; Analytics: Request sales predictions
+Analytics -&gt; Analytics: Analyze historical data
+Analytics -&gt; Analytics: Provide data insights
+Analytics -&gt; UI: Provide sales predictions
+</span>
+<img class="plantuml" id="plantuml-travel-portal-manager]" alt="PlantUML Diagram travel-portal-manager]" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
 
     </section>
 
