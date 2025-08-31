@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2025/08/reverse-engineering-pdfs-with-ai-tools/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Reverse-Engineering PDFs with AI Tools">
+  <meta property="og:description" content="What started as a corrupted PDF upload led to a deep exploration of PDF internals using tools like qpdf, PyMuPDF, and Grok Code Fast 1. This post walks through reconstructing broken files, extracting embedded images, and pulling structured data—all while testing the capabilities of AI-powered tools for reverse engineering. A practical guide for anyone curious about what’s really inside a PDF.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-08-31T10:00:00+08:00">
+    <meta property="article:modified_time" content="2025-08-31T10:00:00+08:00">
+    <meta property="article:tag" content="PDF Reconstruction">
+    <meta property="article:tag" content="AI Tools">
+    <meta property="article:tag" content="Reverse Engineering">
+    <meta property="article:tag" content="PyMuPDF">
+    <meta property="article:tag" content="Qpdf">
+    <meta property="article:tag" content="Embedded Data">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Reverse-Engineering PDFs with AI Tools">
+  <meta name="twitter:description" content="What started as a corrupted PDF upload led to a deep exploration of PDF internals using tools like qpdf, PyMuPDF, and Grok Code Fast 1. This post walks through reconstructing broken files, extracting embedded images, and pulling structured data—all while testing the capabilities of AI-powered tools for reverse engineering. A practical guide for anyone curious about what’s really inside a PDF.">
+
+  <meta itemprop="name" content="Reverse-Engineering PDFs with AI Tools">
+  <meta itemprop="description" content="What started as a corrupted PDF upload led to a deep exploration of PDF internals using tools like qpdf, PyMuPDF, and Grok Code Fast 1. This post walks through reconstructing broken files, extracting embedded images, and pulling structured data—all while testing the capabilities of AI-powered tools for reverse engineering. A practical guide for anyone curious about what’s really inside a PDF.">
+  <meta itemprop="datePublished" content="2025-08-31T10:00:00+08:00">
+  <meta itemprop="dateModified" content="2025-08-31T10:00:00+08:00">
+  <meta itemprop="wordCount" content="1951">
+  <meta itemprop="keywords" content="PDF Reconstruction,AI Tools,Reverse Engineering,PyMuPDF,Qpdf,Embedded Data,Tech Tutorial,Document Parsing,AI,Data Extraction"><title>Reverse-Engineering PDFs with AI Tools | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2025/08/reverse-engineering-pdfs-with-ai-tools/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Reverse-Engineering PDFs with AI Tools</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2025-08-31T10:00:00&#43;08:00">August 31, 2025</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/pdf-reconstruction">PDF Reconstruction</a>
+            
+              , <a href="/tags/ai-tools">AI tools</a>
+            
+              , <a href="/tags/reverse-engineering">Reverse Engineering</a>
+            
+              , <a href="/tags/pymupdf">PyMuPDF</a>
+            
+              , <a href="/tags/qpdf">qpdf</a>
+            
+              , <a href="/tags/embedded-data">Embedded Data</a>
+            
+              , <a href="/tags/tech-tutorial">Tech Tutorial</a>
+            
+              , <a href="/tags/document-parsing">Document Parsing</a>
+            
+              , <a href="/tags/ai">AI</a>
+            
+              , <a href="/tags/data-extraction">Data Extraction</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/scholarscan/scholar-scan-cover.png');"></div>
+          <img src="/images/scholarscan/scholar-scan-cover.png" alt="Reverse-Engineering PDFs with AI Tools cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>While working on one of the hackathon projects, I encountered a tricky issue when uploading a PDF document to a web-based application. As it was a race against time, I quickly decided to use 
+
+
+
+
+
+
+  <a href="https://github.com/mozilla/pdf.js" target="_blank" rel="noopener noreferrer" >pdf.js</a>
+ to get things going. As a reminder, 
+
+
+
+
+
+
+  <a href="https://en.wikipedia.org/wiki/PDF" target="_blank" rel="noopener noreferrer" >PDF</a>
+ is a file format developed by Adobe.</p>
+<h2 id="setup">Setup</h2>
+<p>Since I already use 
+
+
+
+
+
+
+  <a href="https://notepad-plus-plus.org/downloads/" target="_blank" rel="noopener noreferrer" >Notepad++</a>
+, I installed the <strong>HEX-Editor</strong> plugin via <em>Plugins &gt; Plugins Admin&hellip;.</em> Simply search and install it from there.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/scholarscan/scholarscan-add-hex-editor-plugin.png"   alt="scholarscan-add-hex-editor-plugin" class="sc-image sc-image-default"
+       >
+
+
+<p>For the purpose of this post, I will use the reserach paper 
+
+
+
+
+
+
+  <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener noreferrer" >Attention Is All You Need</a>
+ as the example PDF.</p>
+<p>To manipulate and inspect the PDF structure, I installed 
+
+
+
+
+
+
+  <a href="https://qpdf.readthedocs.io/en/stable/" target="_blank" rel="noopener noreferrer" >qpdf</a>
+, a C++ library that enables structural, content-preserving transformations on PDF files. The latest version 
+
+
+
+
+
+
+  <a href="https://github.com/qpdf/qpdf/releases/" target="_blank" rel="noopener noreferrer" >e.g. qpdf 12.2.0</a>
+ can be downloaded from GitHub.</p>
+<h2 id="hex-editing-with-notepad">HEX Editing with NotePad++</h2>
+<p>Dragging the <code>Attention Is All You Need PDF</code> into Notepad++ gives us a hex representation of the file. However, since it’s in raw hex, it&rsquo;s not easy to interpret.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/scholarscan/scholarscan-hex-editor-view.png"   alt="scholarscan-hex-editor-view" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="using-qpdf-for-extraction">Using qpdf for Extraction</h2>
+<p>Let&rsquo;s now try some 
+
+
+
+
+
+
+  <a href="https://qpdf.readthedocs.io/en/stable/cli.html" target="_blank" rel="noopener noreferrer" >cli commands</a>
+. Using the <code>--qdf</code> option, we can create a human-readable version of the PDF:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>qpdf 1706.03762v7.pdf --qdf file.pdf</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Here’s a snippet of the output:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>%PDF-1.5
+</span></span><span style="display:flex;"><span>%¿÷¢þ
+</span></span><span style="display:flex;"><span>%QDF-1.0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>%% Original object ID: 5953 0
+</span></span><span style="display:flex;"><span>1 0 obj
+</span></span><span style="display:flex;"><span>&lt;&lt;
+</span></span><span style="display:flex;"><span>  /Names 3 0 R
+</span></span><span style="display:flex;"><span>  /OpenAction 4 0 R
+</span></span><span style="display:flex;"><span>  /Outlines 5 0 R
+</span></span><span style="display:flex;"><span>  /PageMode /UseOutlines
+</span></span><span style="display:flex;"><span>  /Pages 6 0 R
+</span></span><span style="display:flex;"><span>  /Type /Catalog
+</span></span><span style="display:flex;"><span>&gt;&gt;
+</span></span><span style="display:flex;"><span>endobj
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>%% Original object ID: 5954 0
+</span></span><span style="display:flex;"><span>2 0 obj
+</span></span><span style="display:flex;"><span>&lt;&lt;
+</span></span><span style="display:flex;"><span>  /Author ()
+</span></span><span style="display:flex;"><span>  /CreationDate (D:20240410211143Z)
+</span></span><span style="display:flex;"><span>  /Creator (LaTeX with hyperref)
+</span></span><span style="display:flex;"><span>  /Keywords ()
+</span></span><span style="display:flex;"><span>  /ModDate (D:20240410211143Z)
+</span></span><span style="display:flex;"><span>  /PTEX.Fullbanner (This is pdfTeX, Version 3.141592653-2.6-1.40.25 \(TeX Live 2023\) kpathsea version 6.3.5)
+</span></span><span style="display:flex;"><span>  /Producer (pdfTeX-1.40.25)
+</span></span><span style="display:flex;"><span>  /Subject ()
+</span></span><span style="display:flex;"><span>  /Title ()
+</span></span><span style="display:flex;"><span>  /Trapped /False
+</span></span><span style="display:flex;"><span>&gt;&gt;
+</span></span><span style="display:flex;"><span>endobj
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>%% Original object ID: 5952 0
+</span></span><span style="display:flex;"><span>3 0 obj
+</span></span><span style="display:flex;"><span>&lt;&lt;
+</span></span><span style="display:flex;"><span>  /Dests 7 0 R
+</span></span><span style="display:flex;"><span>&gt;&gt;
+</span></span><span style="display:flex;"><span>endobj</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>We can also output the PDF in JSON format:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>qpdf 1706.03762v7.pdf --json-output inline.json</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Here’s a sample:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#0550ae">&#34;qpdf&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;jsonversion&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;pdfversion&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;1.5&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;pushedinheritedpageresources&#34;</span><span style="color:#1f2328">:</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;calledgetallpages&#34;</span><span style="color:#1f2328">:</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;maxobjectid&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">5957</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;obj:1 0 R&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">&#34;value&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;/D&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;u:section.1&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;/S&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/GoTo&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;obj:2 0 R&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">&#34;stream&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;data&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;eNrFWltv20YWftevmMf2odTcL0BQIE7qJLubNIiD3e4mwYKWxrIaRTQo0o7z6/sdiqZEiRKVhEEBmyOSwzPfucy5kYJxZpjizDLBBQtMKIFfTASJn0xKDJopiduOKYt7nhkhmBTMaDvCbcslk4ZZjcEyFwKTgXkViGgwiinFQsCgmZAcVx1GDZIehJVlGiS1EyM8LkzwTBsmLJ7RtCIuakByTjIDTN5ZBooicIygF4xj+BMBYI0HJsy3hM25kQUcCTDWMKmwuLUYA/gEPg28jgM16DgwaYDDaYxeMufABnh1oOfAkAc9Z8UIt6Q3hnnQ86DjLRjUjnliFA/hkhJgKgiMIC4gFogN3HCSAacfmKKIXyyntPYjwFbO41nMCEqyoJnmjsTGtISQA8SjTGDBQSxcMxKPhWDAlnaYJKAoHUhCmGwENyMhIAnwgSsKIgJ/AuozxkJqwkBYOBMC0vOGbjloD1oXUKoVmp6CwBRdkZCUJqxQtMXskSBVOyAXUjHrPd3SkCKULUicAoIUZACKlpAQoDZkTZw5SzBgVs4ZMirIOEAUAkr2XMsRSc0Lkhvzku5isMQTrIgsUUHoitSPi14Hsh/8sBrrQa/e0hVo13uyXEsagTkJB/ER7wK2EwQUB/aDpHUBNEhiDSoPEnoF05A+yFmoT1k8A+VCrPQwrlgSjCMteDl69IiNL9j4WfY2Y+On7KdVnBTzbJmIn9mvv45+eq+cxb97zzl/QYclHQo65HTI6DClQ0mHSXN33txd/nxwEbm/yBkd0obWRzrM2suVDY7pYdJqn/TLNuBIhwUd3nPNaXzcrFOtfd3wUTTzNwyWzeTYgaK8bIB0ifK3hoVJB6h8G1S64Xb78tM2pGMULhrMO3Jd9QDvUM/jhtZGJssTlQ7SLepdgrloEKaNemI381mz7C90eN1vky09D8WEPGBoZYN/Q7UC+rxZM91jbFBk6oD6bprDoqG6EfnuSpWhbGOsLl99E+rth+Z7V7L2tnq43Llteyy3g/XXDZlVe1/v4Kt0dNfcWDVrPuA5b65sDPOX5kbW4L9rRJrv6flV83jRTN08edLm1Ae8yic6XLbhTdsCn+3p9ICTuWjru2joV/M/9yA0366EdM83H/SYW2wdjgYdwvpP4+Lv91jehIarRrvfszVrFB0CedsoPW0zc5ytjZhNlxc9heqeP03bYaLHNM7aj+wEzJOAd3jO5x17ZmcfxVPtdgMptgPCoj9omy4P8nvjNzcq/9T8+rIJvj2kO4zxTfPwrA1zw/dmkfTrrM4eW27VEaqOex7bZXAv29nFjiG0VLZjm5v4svga3rbxyG9I9f7dIdzD4a8HgDqW4M3agXbVyOcBypOOWFu0vWPZ9jiTPa/1us3O6mTH6Pah7+CZNPjLNukDunmHwoezN2x8Pi8+EPFHj0bjt/c3kY1fp7M4Gj/JlkVcFquqPsfM0fhNXGVlPomrqqSsLr2M03l6ln1m7+iCFVRjyQ8jkMjxLOaFal5NfmvVP/77P9xFtWZc4lEzL8vF4sPBeZ45FIatOeeAx4inc496CUXqmhlUtahH6xOqEVEDrk+o8MSC65OqPvbVCeiNX+fZ5CIW7B2Yf3rOxm/j54I1S3VLRbk9qSjzVVIZP14uM5B6h3KwgoJ6vBrWzIQ1G2HNQFhDD2vQoaJQFeLrUdSjrEdVj7oeTT3aenT16OuxpidrerKmJ2t6sqYna3qypidrerKmp+rnVf28qp9X6+d3RFrxPxpflJdFdf6v+fLjaHyW5dOYV6ITH8bPxy/GT3ACgh9I2BNoSUmTUA/Gep1Q00EplwSwbAOqOG4w7zHb3UmTeRGT62xynUf8ykUI6z01CCAtbUJNmwdAWqkE8IJMvLKH4czy8rfbdCH0gEhESKiRYq1MtAYQAUAA5jB6dxjKqixWH+MtBDMkGKUTZ30FxgCMFgm11nrBXKbX03SZlpILvYxlni4GxKSR0RjdCMigNJS+H9PkOiM4i5jmy/lyNhwgYWErUJjmiaWupzOJtdTXDIm24TCgOxKPnWXZbBEHRON8Ykk8gOPgBUQALPirXjiLMlvOgMjEqysKWrdDgsK+ph7tg4wkN4kxqh/Un9mXeJXdzSdfSFbx880iywdVnpYuoVaesSFxnjZ+SKSi7rBPjDriif5ZTq7TebwFLneeTgrg+pJSqB/WsOCLjPGJc6EyLEACVAchHvFKq+v0S4w5IcvKIkfYy8rV4n44YBLe0hvBDIfQrKI+eeIRUYyA0MTf4xaksrB7X2EyGpg09gH1snswrYq8nBRlHqePC0oMoMFXsbjL8o+r4cApDV8l1wKzEJgyOlH0TqIH3DROsk832Sq9XETAW77MpnFAmSH7gCs1THmV8KpDD18qmAoi8V4ehoXkKi6ncbqc3ZRDmjsyfORFDRpsQQiqH86rdHF2D0SxIJMf0KTgrTRlJ14iO7EwKZdoJES9gP6RLdMVnEJ8NTQklA4JvYdQcFO6klVIBKKfgrVLbU9JnCTnYpan0zmM/XuAUYK4pTyP7YYkUnFsQ0ceHkrEqAScluj28B098GF8OjDQ6x6J0sQaelOoEo0ILWFgmqtjKUKsQqBdZIPGGIF1bQXHEBzpE418vhfOD979lFpqrje4tEropWEvrpu0XJQrMuxpjDdDZnZwANpv9IbAp7jqB7SYLwnNxpUP6AOESJSkV8NIy6EzCUulN73QoQjHYnD58foyTYuUwrAZ0AEgclh6G+rguhWcI2RjURULFxLuj4SSdbz9/6AeWyFpMsFuwHgBSxL9YH6Ux9aUV9K3BgBEpbMWskqZegH9OI+N9BZL01tpjbxEMO1swumtOixJ/S31iiZhaFchspCRByAqFPoA/dCiDnGM06cOtZQM50mwJ4D6IWUv5UW06WFFget1WuToE5XEHcvWEFVvI/lFNYNp56gG2mp7CsrKntY+25nY0T/rmqSRBIeg+ycK8vnhYENuuwfX6s4hwgsVHk6w8zXvatXRNxH6oT0pQUDL+kRUZ+q7GneO7zXurP+6xt2zPCtvqu9B2n08+jCk6nfZui9m3XbfqwJUPzy+GL/N0+XqhkhP7tn4ycX4abydT+KbZ2ds/IIhGsVBcisd4OMpyVNUD6LMQm7luKBPgRLtfadBXs1nCIT1K4TBKmUeKDqjZnFVocwNBWeXKHFkh15HyqiGzRQUYaEPrZCRQ1NKaWChr8koUfBHEoX0PubLLP9EkHa3pg0nbs3tiVJTXkCfYVGbxR+fTDuvSoi7tujuRBngdYI6YSKZg3D9E4VA8SDCN7ThW7t+s51pA//x++WfpBMi8eITeeyerjxmYT8/6dvkfr87781Am9zVTXNXN8193fT24vua3DvblksEVkpCkBVRMoLinzaQRjjR4ui2HbAYUgFFKyQiUVXDmpDwI6Cqyrqs+6Zo/xdsv40P&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;dict&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Filter&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/FlateDecode&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/First&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">816</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/N&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">100</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Type&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/ObjStm&#34;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;obj:3 0 R&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">&#34;value&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;/D&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">[</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">&#34;136 0 R&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">&#34;/XYZ&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">108</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">720</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">null</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;obj:128 0 R&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">&#34;stream&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;data&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;eNrs3W+vHNd92PF9JxT14PJ1XMpSboWgQHRFK05rizTNJEpIM6plhTQjwwEZM1JsgjEhxyJo0RZMy6KsNiJhwpHiv7Jk2JRFtVBtklJQwAVvAudBgSZAH7IHWXRwOrs7e2Z2ZnbO7ueDHwr56t79M0teZb49c+buXQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACApRmlcaAAAAAAlm7UiOMGAAAA0L/RwhxDAAAAgH6MWjXwN+hTVt4AAABglU7zE/tMdklHynAQAAAAYCXP8Rs0mVySjpThIAAAAMDqneAvcrI//KQjZTgIAAAAsGJn962c5g856UgZDgIAAACs2Nl9W+f4ek4un7g//wAAAJD1qX27J/jDTDpShoMAAAAAK3Ne3/rZ/TCvupIyHAQAAABYmfP6Ls7u9Zzhf+7+FgAAAEC+5/Udndqvds8ZVcric/e3AAAAADLST39IeZbFX8asRxjVl/jCmj1gg7ew9IMAAAAADEdvp/Ar1nNGjfTwceg5AAAAsPL0nAY9p8FPJb4vPQcAAACode7fZ8+ZfK7uUkb1dzZ45c2eqMH3D+cgAAAAAAPR83qM1es5zV5YxQ/qOQAAAEBb5/49PF12PaeL16bnAAAAAG2d+/fwdHn1nAVf26xH0HMAAACAts79e3i61e45iS9PzwEAAADaOvfv4eky6jmtvP2eb/K14EEAAAAABkLP6bPn3F3qTdsXPAgAAADAQOg5eo6eAwAAAHnRcxr0nE4PuJ4DAAAAtHXu38PTrUPPmfvUeg4AAADQ1rl/D0+3hj0no4MAAAAADISeo+foOQAAAJCXPnvO3F2F9Zy7eg4AAABQ89y/0/N6PSfl0fQcAAAAoMXT/66fSM+5q+cAAAAArZ7+d/1Ees5dPQcAAACof/rf0al9yrO4X/l
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">          ...
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">          AAAAAAAAAAAAAAAAAAAAABgz/4/6jXPIg==&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;dict&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/BitsPerComponent&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">8</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/ColorSpace&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/DeviceRGB&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Filter&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/FlateDecode&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Height&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">2239</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/SMask&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;175 0 R&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Subtype&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/Image&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Type&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/XObject&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Width&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">1520</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>To decode stream data more effectively, use:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mkdir json
+</span></span><span style="display:flex;"><span>qpdf 1706.03762v7.pdf --json-output --decode-level<span style="color:#0550ae">=</span>generalized --json-stream-data<span style="color:#0550ae">=</span>file json<span style="color:#0a3069">\f</span>ile.json</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    Note: This PDF has 5,954 objects, so expect the same number of stream files.
+  </div>
+</div>
+<p>Here’s a sample:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#0550ae">&#34;qpdf&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;jsonversion&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;pdfversion&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;1.5&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;pushedinheritedpageresources&#34;</span><span style="color:#1f2328">:</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;calledgetallpages&#34;</span><span style="color:#1f2328">:</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;maxobjectid&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">5957</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;obj:1 0 R&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">&#34;value&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;/D&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;u:section.1&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;/S&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/GoTo&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;obj:2 0 R&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">&#34;stream&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;datafile&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;json\\file.json-2&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;dict&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/First&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">816</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/N&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">100</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Type&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/ObjStm&#34;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;obj:3 0 R&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">&#34;value&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;/D&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">[</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">&#34;136 0 R&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">&#34;/XYZ&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">108</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">720</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">null</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">&#34;obj:128 0 R&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">&#34;stream&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;datafile&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;json\\file.json-128&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#0550ae">&#34;dict&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/BitsPerComponent&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">8</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/ColorSpace&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/DeviceRGB&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Height&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">2239</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/SMask&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;175 0 R&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Subtype&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/Image&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Type&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;/XObject&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">&#34;/Width&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">1520</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="reconstructing-images-from-pdfs">Reconstructing Images from PDFs</h2>
+<p>From the earlier step, we can reconstruct an image from one of the streams (e.g., <strong>file.json-128</strong>). This is done using Python and the Pillow library inside a Jupyter plugin using a local <code>.venv</code> environment.</p>
+<p>First, install the required packages:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>pip install pillow numpy</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then use the script to reconstruct the image.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">numpy</span> <span style="color:#cf222e">as</span> <span style="color:#24292e">np</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">PIL</span> <span style="color:#cf222e">import</span> Image
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">struct</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">reconstruct_image_from_pdf_stream</span><span style="color:#1f2328">(</span>stream_file_path<span style="color:#1f2328">,</span> width<span style="color:#1f2328">,</span> height<span style="color:#1f2328">,</span> bits_per_component<span style="color:#0550ae">=</span><span style="color:#0550ae">8</span><span style="color:#1f2328">,</span> colorspace<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;RGB&#34;</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    Reconstruct an image from PDF stream data extracted by qpdf.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    Args:
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">        stream_file_path: Path to the stream data file (e.g., &#39;json</span><span style="color:#0a3069">\\</span><span style="color:#0a3069">file.json-128&#39;)
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">        width: Image width from PDF dictionary
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">        height: Image height from PDF dictionary
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">        bits_per_component: Bits per color component (usually 8)
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">        colorspace: Color space (RGB, CMYK, etc.)
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Read the raw stream data</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">with</span> <span style="color:#6639ba">open</span><span style="color:#1f2328">(</span>stream_file_path<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;rb&#39;</span><span style="color:#1f2328">)</span> <span style="color:#cf222e">as</span> f<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        raw_data <span style="color:#0550ae">=</span> f<span style="color:#0550ae">.</span>read<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Raw data size: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>raw_data<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> bytes&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Calculate expected size</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> colorspace <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#34;RGB&#34;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        channels <span style="color:#0550ae">=</span> <span style="color:#0550ae">3</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">elif</span> colorspace <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#34;CMYK&#34;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        channels <span style="color:#0550ae">=</span> <span style="color:#0550ae">4</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">elif</span> colorspace <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#34;Gray&#34;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        channels <span style="color:#0550ae">=</span> <span style="color:#0550ae">1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        channels <span style="color:#0550ae">=</span> <span style="color:#0550ae">3</span>  <span style="color:#57606a"># Default to RGB</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    bytes_per_pixel <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span>bits_per_component <span style="color:#0550ae">*</span> channels<span style="color:#1f2328">)</span> <span style="color:#0550ae">//</span> <span style="color:#0550ae">8</span>
+</span></span><span style="display:flex;"><span>    expected_size <span style="color:#0550ae">=</span> width <span style="color:#0550ae">*</span> height <span style="color:#0550ae">*</span> bytes_per_pixel
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Expected size: </span><span style="color:#0a3069">{</span>expected_size<span style="color:#0a3069">}</span><span style="color:#0a3069"> bytes&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Image dimensions: </span><span style="color:#0a3069">{</span>width<span style="color:#0a3069">}</span><span style="color:#0a3069"> x </span><span style="color:#0a3069">{</span>height<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Channels: </span><span style="color:#0a3069">{</span>channels<span style="color:#0a3069">}</span><span style="color:#0a3069">, Bits per component: </span><span style="color:#0a3069">{</span>bits_per_component<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># Method 1: Direct reconstruction (most common case)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>raw_data<span style="color:#1f2328">)</span> <span style="color:#0550ae">==</span> expected_size<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a"># Create numpy array from raw data</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> bits_per_component <span style="color:#0550ae">==</span> <span style="color:#0550ae">8</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                img_array <span style="color:#0550ae">=</span> np<span style="color:#0550ae">.</span>frombuffer<span style="color:#1f2328">(</span>raw_data<span style="color:#1f2328">,</span> dtype<span style="color:#0550ae">=</span>np<span style="color:#0550ae">.</span>uint8<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">elif</span> bits_per_component <span style="color:#0550ae">==</span> <span style="color:#0550ae">16</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                img_array <span style="color:#0550ae">=</span> np<span style="color:#0550ae">.</span>frombuffer<span style="color:#1f2328">(</span>raw_data<span style="color:#1f2328">,</span> dtype<span style="color:#0550ae">=</span>np<span style="color:#0550ae">.</span>uint16<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a"># Convert to 8-bit for PIL</span>
+</span></span><span style="display:flex;"><span>                img_array <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span>img_array <span style="color:#0550ae">//</span> <span style="color:#0550ae">256</span><span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>astype<span style="color:#1f2328">(</span>np<span style="color:#0550ae">.</span>uint8<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">raise</span> ValueError<span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Unsupported bits per component: </span><span style="color:#0a3069">{</span>bits_per_component<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a"># Reshape to image dimensions</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> channels <span style="color:#0550ae">==</span> <span style="color:#0550ae">1</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                img_array <span style="color:#0550ae">=</span> img_array<span style="color:#0550ae">.</span>reshape<span style="color:#1f2328">((</span>height<span style="color:#1f2328">,</span> width<span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>                mode <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;L&#39;</span>  <span style="color:#57606a"># Grayscale</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">elif</span> channels <span style="color:#0550ae">==</span> <span style="color:#0550ae">3</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                img_array <span style="color:#0550ae">=</span> img_array<span style="color:#0550ae">.</span>reshape<span style="color:#1f2328">((</span>height<span style="color:#1f2328">,</span> width<span style="color:#1f2328">,</span> <span style="color:#0550ae">3</span><span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>                mode <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;RGB&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">elif</span> channels <span style="color:#0550ae">==</span> <span style="color:#0550ae">4</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                img_array <span style="color:#0550ae">=</span> img_array<span style="color:#0550ae">.</span>reshape<span style="color:#1f2328">((</span>height<span style="color:#1f2328">,</span> width<span style="color:#1f2328">,</span> <span style="color:#0550ae">4</span><span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>                mode <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;CMYK&#39;</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a"># Create PIL Image</span>
+</span></span><span style="display:flex;"><span>            image <span style="color:#0550ae">=</span> Image<span style="color:#0550ae">.</span>fromarray<span style="color:#1f2328">(</span>img_array<span style="color:#1f2328">,</span> mode<span style="color:#0550ae">=</span>mode<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a"># Convert CMYK to RGB if necessary</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> mode <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#39;CMYK&#39;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                image <span style="color:#0550ae">=</span> image<span style="color:#0550ae">.</span>convert<span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;RGB&#39;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span> image
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># Method 2: Try to handle compressed data</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Data size doesn&#39;t match expected size. Trying decompression...&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a"># Try zlib decompression (FlateDecode)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">import</span> <span style="color:#24292e">zlib</span>
+</span></span><span style="display:flex;"><span>                decompressed <span style="color:#0550ae">=</span> zlib<span style="color:#0550ae">.</span>decompress<span style="color:#1f2328">(</span>raw_data<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Decompressed size: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>decompressed<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> bytes&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">if</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>decompressed<span style="color:#1f2328">)</span> <span style="color:#0550ae">==</span> expected_size<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                    img_array <span style="color:#0550ae">=</span> np<span style="color:#0550ae">.</span>frombuffer<span style="color:#1f2328">(</span>decompressed<span style="color:#1f2328">,</span> dtype<span style="color:#0550ae">=</span>np<span style="color:#0550ae">.</span>uint8<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">if</span> channels <span style="color:#0550ae">==</span> <span style="color:#0550ae">1</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                        img_array <span style="color:#0550ae">=</span> img_array<span style="color:#0550ae">.</span>reshape<span style="color:#1f2328">((</span>height<span style="color:#1f2328">,</span> width<span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>                        mode <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;L&#39;</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">elif</span> channels <span style="color:#0550ae">==</span> <span style="color:#0550ae">3</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                        img_array <span style="color:#0550ae">=</span> img_array<span style="color:#0550ae">.</span>reshape<span style="color:#1f2328">((</span>height<span style="color:#1f2328">,</span> width<span style="color:#1f2328">,</span> <span style="color:#0550ae">3</span><span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>                        mode <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;RGB&#39;</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">elif</span> channels <span style="color:#0550ae">==</span> <span style="color:#0550ae">4</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                        img_array <span style="color:#0550ae">=</span> img_array<span style="color:#0550ae">.</span>reshape<span style="color:#1f2328">((</span>height<span style="color:#1f2328">,</span> width<span style="color:#1f2328">,</span> <span style="color:#0550ae">4</span><span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>                        mode <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;CMYK&#39;</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                    image <span style="color:#0550ae">=</span> Image<span style="color:#0550ae">.</span>fromarray<span style="color:#1f2328">(</span>img_array<span style="color:#1f2328">,</span> mode<span style="color:#0550ae">=</span>mode<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">if</span> mode <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#39;CMYK&#39;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                        image <span style="color:#0550ae">=</span> image<span style="color:#0550ae">.</span>convert<span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;RGB&#39;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">return</span> image
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Zlib decompression failed: </span><span style="color:#0a3069">{</span>e<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a"># Try other decompression methods if needed</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a"># You might need to handle DCTDecode (JPEG), etc.</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">raise</span> ValueError<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Could not reconstruct image from stream data&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Error reconstructing image: </span><span style="color:#0a3069">{</span>e<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">raise</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Usage example based on your PDF data</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">main</span><span style="color:#1f2328">():</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Your image parameters from the PDF dictionary</span>
+</span></span><span style="display:flex;"><span>    width <span style="color:#0550ae">=</span> <span style="color:#0550ae">1520</span>
+</span></span><span style="display:flex;"><span>    height <span style="color:#0550ae">=</span> <span style="color:#0550ae">2239</span>
+</span></span><span style="display:flex;"><span>    bits_per_component <span style="color:#0550ae">=</span> <span style="color:#0550ae">8</span>
+</span></span><span style="display:flex;"><span>    colorspace <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;RGB&#34;</span>  <span style="color:#57606a"># DeviceRGB</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Path to your stream data file</span>
+</span></span><span style="display:flex;"><span>    stream_file <span style="color:#0550ae">=</span> <span style="color:#0a3069">r</span><span style="color:#0a3069">&#34;json\file.json-128&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># Reconstruct the image</span>
+</span></span><span style="display:flex;"><span>        image <span style="color:#0550ae">=</span> reconstruct_image_from_pdf_stream<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            stream_file<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>            width<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>            height<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>            bits_per_component<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>            colorspace
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># Save the reconstructed image</span>
+</span></span><span style="display:flex;"><span>        output_path <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;reconstructed_image.png&#34;</span>
+</span></span><span style="display:flex;"><span>        image<span style="color:#0550ae">.</span>save<span style="color:#1f2328">(</span>output_path<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Image saved as: </span><span style="color:#0a3069">{</span>output_path<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># Optionally display the image</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># image.show()</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Failed to reconstruct image: </span><span style="color:#0a3069">{</span>e<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;You may need to handle specific PDF filters or compression methods.&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">if</span> <span style="color:#953800">__name__</span> <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#34;__main__&#34;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>    main<span style="color:#1f2328">()</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This is the sample output:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Raw data size: 10209840 bytes
+</span></span><span style="display:flex;"><span>Expected size: 10209840 bytes
+</span></span><span style="display:flex;"><span>Image dimensions: 1520 x 2239
+</span></span><span style="display:flex;"><span>Channels: 3, Bits per component: 8
+</span></span><span style="display:flex;"><span>Image saved as: reconstructed_image.png
+</span></span><span style="display:flex;"><span>C:\ProgramData\Temp\ipykernel_34232\1422296325.py:65: DeprecationWarning: &#39;mode&#39; parameter is deprecated and will be removed in Pillow 13 (2026-10-15)
+</span></span><span style="display:flex;"><span>  image = Image.fromarray(img_array, mode=mode)</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/scholarscan/scholarscan-reconstructed-image.png"   alt="scholarscan-reconstructed-image" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="detecting-tables-in-pdf-content">Detecting Tables in PDF Content</h2>
+<p>To detect and extract tables from the PDF, I used 
+
+
+
+
+
+
+  <a href="https://pymupdf.readthedocs.io/en/latest/" target="_blank" rel="noopener noreferrer" >PyMuPDF</a>
+.<br>
+Install the packages:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>pip install PyMuPDF pandas</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then run the script to scan pages and extract table content. It supports exporting to CSV, Markdown, and more.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">fitz</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">pandas</span> <span style="color:#cf222e">as</span> <span style="color:#24292e">pd</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">extract_tables_from_page</span><span style="color:#1f2328">(</span>pdf_path<span style="color:#1f2328">,</span> page_number<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    Extract tables from a specific page with enhanced error handling
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    doc <span style="color:#0550ae">=</span> fitz<span style="color:#0550ae">.</span>open<span style="color:#1f2328">(</span>pdf_path<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># Check if page number is valid</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> page_number <span style="color:#0550ae">&gt;=</span> doc<span style="color:#0550ae">.</span>page_count<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Error: Page </span><span style="color:#0a3069">{</span>page_number <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> doesn&#39;t exist. PDF has </span><span style="color:#0a3069">{</span>doc<span style="color:#0550ae">.</span>page_count<span style="color:#0a3069">}</span><span style="color:#0a3069"> pages.&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        page <span style="color:#0550ae">=</span> doc<span style="color:#1f2328">[</span>page_number<span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Analyzing page </span><span style="color:#0a3069">{</span>page_number <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> of </span><span style="color:#0a3069">{</span>doc<span style="color:#0550ae">.</span>page_count<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># Find tables</span>
+</span></span><span style="display:flex;"><span>        table_finder <span style="color:#0550ae">=</span> page<span style="color:#0550ae">.</span>find_tables<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        tables <span style="color:#0550ae">=</span> <span style="color:#6639ba">list</span><span style="color:#1f2328">(</span>table_finder<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> <span style="color:#0550ae">not</span> tables<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;No tables found on this page.&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Found </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>tables<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> table(s)&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">for</span> i<span style="color:#1f2328">,</span> table <span style="color:#0550ae">in</span> <span style="color:#6639ba">enumerate</span><span style="color:#1f2328">(</span>tables<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">{</span><span style="color:#0a3069">&#39;=&#39;</span><span style="color:#0550ae">*</span><span style="color:#0550ae">50</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;TABLE </span><span style="color:#0a3069">{</span>i <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">{</span><span style="color:#0a3069">&#39;=&#39;</span><span style="color:#0550ae">*</span><span style="color:#0550ae">50</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Position (bbox): </span><span style="color:#0a3069">{</span>table<span style="color:#0550ae">.</span>bbox<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Dimensions: </span><span style="color:#0a3069">{</span>table<span style="color:#0550ae">.</span>row_count<span style="color:#0a3069">}</span><span style="color:#0a3069"> rows × </span><span style="color:#0a3069">{</span>table<span style="color:#0550ae">.</span>col_count<span style="color:#0a3069">}</span><span style="color:#0a3069"> columns&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a"># Extract as list of lists</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">--- Raw Data (first 5 rows) ---&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                data_list <span style="color:#0550ae">=</span> table<span style="color:#0550ae">.</span>extract<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">if</span> data_list<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">for</span> j<span style="color:#1f2328">,</span> row <span style="color:#0550ae">in</span> <span style="color:#6639ba">enumerate</span><span style="color:#1f2328">(</span>data_list<span style="color:#1f2328">[:</span><span style="color:#0550ae">5</span><span style="color:#1f2328">]):</span>  <span style="color:#57606a"># Show first 5 rows</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Row </span><span style="color:#0a3069">{</span>j<span style="color:#0a3069">}</span><span style="color:#0a3069">: </span><span style="color:#0a3069">{</span>row<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">if</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>data_list<span style="color:#1f2328">)</span> <span style="color:#0550ae">&gt;</span> <span style="color:#0550ae">5</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;... and </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>data_list<span style="color:#1f2328">)</span> <span style="color:#0550ae">-</span> <span style="color:#0550ae">5</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> more rows&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;No data extracted&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">continue</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a"># Convert to pandas DataFrame</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">--- DataFrame ---&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                    df <span style="color:#0550ae">=</span> table<span style="color:#0550ae">.</span>to_pandas<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>df<span style="color:#0550ae">.</span>head<span style="color:#1f2328">())</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Shape: </span><span style="color:#0a3069">{</span>df<span style="color:#0550ae">.</span>shape<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                    <span style="color:#57606a"># Save to CSV</span>
+</span></span><span style="display:flex;"><span>                    csv_filename <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;table_page</span><span style="color:#0a3069">{</span>page_number <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">_table</span><span style="color:#0a3069">{</span>i <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">.csv&#34;</span>
+</span></span><span style="display:flex;"><span>                    df<span style="color:#0550ae">.</span>to_csv<span style="color:#1f2328">(</span>csv_filename<span style="color:#1f2328">,</span> index<span style="color:#0550ae">=</span><span style="color:#cf222e">False</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Saved to: </span><span style="color:#0a3069">{</span>csv_filename<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Could not convert to DataFrame: </span><span style="color:#0a3069">{</span>e<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#57606a"># Fallback: create DataFrame manually</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">if</span> data_list <span style="color:#0550ae">and</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>data_list<span style="color:#1f2328">)</span> <span style="color:#0550ae">&gt;</span> <span style="color:#0550ae">1</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                        df <span style="color:#0550ae">=</span> pd<span style="color:#0550ae">.</span>DataFrame<span style="color:#1f2328">(</span>data_list<span style="color:#1f2328">[</span><span style="color:#0550ae">1</span><span style="color:#1f2328">:],</span> columns<span style="color:#0550ae">=</span>data_list<span style="color:#1f2328">[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Manual DataFrame creation:&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>df<span style="color:#0550ae">.</span>head<span style="color:#1f2328">())</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a"># Convert to Markdown</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">--- Markdown ---&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                    md_text <span style="color:#0550ae">=</span> table<span style="color:#0550ae">.</span>to_markdown<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>md_text<span style="color:#1f2328">[:</span><span style="color:#0550ae">500</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">+</span> <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;...&#34;</span> <span style="color:#cf222e">if</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>md_text<span style="color:#1f2328">)</span> <span style="color:#0550ae">&gt;</span> <span style="color:#0550ae">500</span> <span style="color:#cf222e">else</span> <span style="color:#0a3069">&#34;&#34;</span><span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                    <span style="color:#57606a"># Save markdown</span>
+</span></span><span style="display:flex;"><span>                    md_filename <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;table_page</span><span style="color:#0a3069">{</span>page_number <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">_table</span><span style="color:#0a3069">{</span>i <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">.md&#34;</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">with</span> <span style="color:#6639ba">open</span><span style="color:#1f2328">(</span>md_filename<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;w&#39;</span><span style="color:#1f2328">,</span> encoding<span style="color:#0550ae">=</span><span style="color:#0a3069">&#39;utf-8&#39;</span><span style="color:#1f2328">)</span> <span style="color:#cf222e">as</span> f<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                        f<span style="color:#0550ae">.</span>write<span style="color:#1f2328">(</span>md_text<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Markdown saved to: </span><span style="color:#0a3069">{</span>md_filename<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Could not convert to Markdown: </span><span style="color:#0a3069">{</span>e<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Error processing table </span><span style="color:#0a3069">{</span>i <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">: </span><span style="color:#0a3069">{</span>e<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Error processing page: </span><span style="color:#0a3069">{</span>e<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">finally</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        doc<span style="color:#0550ae">.</span>close<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">scan_all_pages_for_tables</span><span style="color:#1f2328">(</span>pdf_path<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    Scan all pages to find which ones contain tables
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    doc <span style="color:#0550ae">=</span> fitz<span style="color:#0550ae">.</span>open<span style="color:#1f2328">(</span>pdf_path<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Scanning </span><span style="color:#0a3069">{</span>doc<span style="color:#0550ae">.</span>page_count<span style="color:#0a3069">}</span><span style="color:#0a3069"> pages for tables...&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    pages_with_tables <span style="color:#0550ae">=</span> <span style="color:#1f2328">[]</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> page_num <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span>doc<span style="color:#0550ae">.</span>page_count<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        page <span style="color:#0550ae">=</span> doc<span style="color:#1f2328">[</span>page_num<span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        table_finder <span style="color:#0550ae">=</span> page<span style="color:#0550ae">.</span>find_tables<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        tables <span style="color:#0550ae">=</span> <span style="color:#6639ba">list</span><span style="color:#1f2328">(</span>table_finder<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> tables<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            pages_with_tables<span style="color:#0550ae">.</span>append<span style="color:#1f2328">((</span>page_num<span style="color:#1f2328">,</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>tables<span style="color:#1f2328">)))</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Page </span><span style="color:#0a3069">{</span>page_num <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>tables<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> table(s)&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    doc<span style="color:#0550ae">.</span>close<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> pages_with_tables<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">Summary: Tables found on </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>pages_with_tables<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> page(s)&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">for</span> page_num<span style="color:#1f2328">,</span> table_count <span style="color:#0550ae">in</span> pages_with_tables<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;  Page </span><span style="color:#0a3069">{</span>page_num <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">: </span><span style="color:#0a3069">{</span>table_count<span style="color:#0a3069">}</span><span style="color:#0a3069"> table(s)&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;No tables found in the entire document&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> pages_with_tables
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">extract_table_with_options</span><span style="color:#1f2328">(</span>pdf_path<span style="color:#1f2328">,</span> page_number<span style="color:#1f2328">,</span> table_index<span style="color:#0550ae">=</span><span style="color:#0550ae">0</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    Extract a specific table with different formatting options
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    doc <span style="color:#0550ae">=</span> fitz<span style="color:#0550ae">.</span>open<span style="color:#1f2328">(</span>pdf_path<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    page <span style="color:#0550ae">=</span> doc<span style="color:#1f2328">[</span>page_number<span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    table_finder <span style="color:#0550ae">=</span> page<span style="color:#0550ae">.</span>find_tables<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    tables <span style="color:#0550ae">=</span> <span style="color:#6639ba">list</span><span style="color:#1f2328">(</span>table_finder<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> table_index <span style="color:#0550ae">&gt;=</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>tables<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Table </span><span style="color:#0a3069">{</span>table_index<span style="color:#0a3069">}</span><span style="color:#0a3069"> not found. Only </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>tables<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> table(s) on page </span><span style="color:#0a3069">{</span>page_number <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        doc<span style="color:#0550ae">.</span>close<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    table <span style="color:#0550ae">=</span> tables<span style="color:#1f2328">[</span>table_index<span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Extracting Table </span><span style="color:#0a3069">{</span>table_index <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> from Page </span><span style="color:#0a3069">{</span>page_number <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Table bounds: </span><span style="color:#0a3069">{</span>table<span style="color:#0550ae">.</span>bbox<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Different extraction options</span>
+</span></span><span style="display:flex;"><span>    formats <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;Raw List&#34;</span><span style="color:#1f2328">:</span> <span style="color:#cf222e">lambda</span><span style="color:#1f2328">:</span> table<span style="color:#0550ae">.</span>extract<span style="color:#1f2328">(),</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;Pandas DataFrame&#34;</span><span style="color:#1f2328">:</span> <span style="color:#cf222e">lambda</span><span style="color:#1f2328">:</span> table<span style="color:#0550ae">.</span>to_pandas<span style="color:#1f2328">(),</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;Markdown&#34;</span><span style="color:#1f2328">:</span> <span style="color:#cf222e">lambda</span><span style="color:#1f2328">:</span> table<span style="color:#0550ae">.</span>to_markdown<span style="color:#1f2328">(),</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;CSV String&#34;</span><span style="color:#1f2328">:</span> <span style="color:#cf222e">lambda</span><span style="color:#1f2328">:</span> table<span style="color:#0550ae">.</span>to_csv<span style="color:#1f2328">(),</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> format_name<span style="color:#1f2328">,</span> extract_func <span style="color:#0550ae">in</span> formats<span style="color:#0550ae">.</span>items<span style="color:#1f2328">():</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">--- </span><span style="color:#0a3069">{</span>format_name<span style="color:#0a3069">}</span><span style="color:#0a3069"> ---&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            result <span style="color:#0550ae">=</span> extract_func<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">,</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">[:</span><span style="color:#0550ae">300</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">+</span> <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;...&#34;</span> <span style="color:#cf222e">if</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">)</span> <span style="color:#0550ae">&gt;</span> <span style="color:#0550ae">300</span> <span style="color:#cf222e">else</span> <span style="color:#0a3069">&#34;&#34;</span><span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">elif</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">,</span> pd<span style="color:#0550ae">.</span>DataFrame<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">elif</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">,</span> <span style="color:#6639ba">list</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">for</span> i<span style="color:#1f2328">,</span> row <span style="color:#0550ae">in</span> <span style="color:#6639ba">enumerate</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">[:</span><span style="color:#0550ae">3</span><span style="color:#1f2328">]):</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Row </span><span style="color:#0a3069">{</span>i<span style="color:#0a3069">}</span><span style="color:#0a3069">: </span><span style="color:#0a3069">{</span>row<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">if</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">)</span> <span style="color:#0550ae">&gt;</span> <span style="color:#0550ae">3</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;... </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">)</span> <span style="color:#0550ae">-</span> <span style="color:#0550ae">3</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> more rows&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Error with </span><span style="color:#0a3069">{</span>format_name<span style="color:#0a3069">}</span><span style="color:#0a3069">: </span><span style="color:#0a3069">{</span>e<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    doc<span style="color:#0550ae">.</span>close<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Usage examples</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">if</span> <span style="color:#953800">__name__</span> <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#34;__main__&#34;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>    pdf_file <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;1706.03762v7.pdf&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;=== EXTRACTING FROM PAGE 10 ===&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    extract_tables_from_page<span style="color:#1f2328">(</span>pdf_file<span style="color:#1f2328">,</span> <span style="color:#0550ae">9</span><span style="color:#1f2328">)</span>  <span style="color:#57606a"># Page 10 (0-indexed)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">=== SCANNING ALL PAGES ===&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    pages_with_tables <span style="color:#0550ae">=</span> scan_all_pages_for_tables<span style="color:#1f2328">(</span>pdf_file<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Extract from other pages if found</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> pages_with_tables<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">=== EXTRACTING FROM FIRST TABLE-CONTAINING PAGE ===&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        first_page_with_tables <span style="color:#0550ae">=</span> pages_with_tables<span style="color:#1f2328">[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">][</span><span style="color:#0550ae">0</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        extract_table_with_options<span style="color:#1f2328">(</span>pdf_file<span style="color:#1f2328">,</span> first_page_with_tables<span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/scholarscan/scholarscan-table-extracted.png"   alt="scholarscan-table-extracted" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="the-vibe-coding-challenge">The Vibe Coding Challenge</h2>
+<h3 id="xai-grok-code-fast-1">xAI Grok Code Fast 1</h3>
+<p>With the release of 
+
+
+
+
+
+
+  <a href="https://x.ai/news/grok-code-fast-1" target="_blank" rel="noopener noreferrer" >Grok Code Fast 1</a>
+, now available for free via exclusive launch partners, I gave it a try! For my setup, I installed 
+
+
+
+
+
+
+  <a href="https://cline.bot/" target="_blank" rel="noopener noreferrer" >Cline</a>
+ inside 
+
+
+
+
+
+
+  <a href="https://cursor.com/en" target="_blank" rel="noopener noreferrer" >Cursor</a>
+, an AI-powered code editor.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/scholarscan/scholarscan-grok-code-fast-1.png"   alt="scholarscan-grok-code-fast-1" class="sc-image sc-image-default"
+       >
+
+
+<p>Unfortunately, after several attempts, the project didn’t run as expected. Below is the sample autonomous coding agent setup in Cursor using Cline:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/scholarscan/scholarscan-cline-coding-agent.png"   alt="scholarscan-cline-coding-agent" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="google-ai-studio">Google AI Studio</h3>
+<p>With 
+
+
+
+
+
+
+  <a href="https://ai.google.dev/aistudio" target="_blank" rel="noopener noreferrer" >Google AI Studio</a>
+, an easy and free way to start building with Gemini, I tried the same prompts there…</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/scholarscan/scholarscan-by-google-ai-studio.png"   alt="scholarscan-by-google-ai-studio" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="conclusion">Conclusion</h2>
+<p>This exploration began with a simple PDF upload challenge and expanded into a deep dive through PDF internals—from inspecting raw hex data, manipulating structure with qpdf, reconstructing embedded images, to extracting tables using PyMuPDF. Along the way, I experimented with new tools like Grok Code Fast 1 and AI Studio to assess their potential in handling real-world document analysis.</p>
+<p>If you&rsquo;re working on similar PDF-related tasks, want to experiment with document internals, or just enjoy tinkering with file formats—hopefully this walkthrough gives you a head start.</p>
+<p>Have your own tricks for working with PDFs?<br>
+Or found a better way to extract structured data from academic papers?<br>
+👉 Drop me a message or share your approach—I’d love to learn more!</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2025/08/run-gpt-oss-locally-on-ryzen-ai/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Run gpt-oss Locally on Ryzen AI</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2025 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
