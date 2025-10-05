@@ -11,7 +11,7 @@
     <meta property="og:url" content="https://seehiong.github.io/posts/2025/10/ats-buddy-privacy-first-resume-ai/">
   <meta property="og:site_name" content="See Hiong&#39;s Blog">
   <meta property="og:title" content="ATS Buddy: Privacy-First Resume AI">
-  <meta property="og:description" content="ATS Buddy is an AI-powered resume analysis tool built with AWS Bedrock, Textract, and Comprehend for the AWS AI Agent Hackathon. Designed with a privacy-first approach, it automatically redacts sensitive PII before analysis, helping job seekers optimize resumes without exposing personal data. With S3 storage, DynamoDB caching, and serverless workflows via AWS SAM, ATS Buddy provides end-to-end resume analysis that is secure, cost-efficient, and hackathon-ready.">
+  <meta property="og:description" content="ATS Buddy is an AI-powered resume analysis tool built with AWS Bedrock, Textract, and Comprehend. Designed with a privacy-first approach, it redacts PII before analysis, helping job seekers optimize resumes without exposing personal data. With S3, DynamoDB caching, and serverless workflows, ATS Buddy delivers secure, cost-efficient resume insights—built hackathon-ready.">
   <meta property="og:locale" content="en">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -26,13 +26,13 @@
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="ATS Buddy: Privacy-First Resume AI">
-  <meta name="twitter:description" content="ATS Buddy is an AI-powered resume analysis tool built with AWS Bedrock, Textract, and Comprehend for the AWS AI Agent Hackathon. Designed with a privacy-first approach, it automatically redacts sensitive PII before analysis, helping job seekers optimize resumes without exposing personal data. With S3 storage, DynamoDB caching, and serverless workflows via AWS SAM, ATS Buddy provides end-to-end resume analysis that is secure, cost-efficient, and hackathon-ready.">
+  <meta name="twitter:description" content="ATS Buddy is an AI-powered resume analysis tool built with AWS Bedrock, Textract, and Comprehend. Designed with a privacy-first approach, it redacts PII before analysis, helping job seekers optimize resumes without exposing personal data. With S3, DynamoDB caching, and serverless workflows, ATS Buddy delivers secure, cost-efficient resume insights—built hackathon-ready.">
 
   <meta itemprop="name" content="ATS Buddy: Privacy-First Resume AI">
-  <meta itemprop="description" content="ATS Buddy is an AI-powered resume analysis tool built with AWS Bedrock, Textract, and Comprehend for the AWS AI Agent Hackathon. Designed with a privacy-first approach, it automatically redacts sensitive PII before analysis, helping job seekers optimize resumes without exposing personal data. With S3 storage, DynamoDB caching, and serverless workflows via AWS SAM, ATS Buddy provides end-to-end resume analysis that is secure, cost-efficient, and hackathon-ready.">
+  <meta itemprop="description" content="ATS Buddy is an AI-powered resume analysis tool built with AWS Bedrock, Textract, and Comprehend. Designed with a privacy-first approach, it redacts PII before analysis, helping job seekers optimize resumes without exposing personal data. With S3, DynamoDB caching, and serverless workflows, ATS Buddy delivers secure, cost-efficient resume insights—built hackathon-ready.">
   <meta itemprop="datePublished" content="2025-10-05T10:00:00+08:00">
   <meta itemprop="dateModified" content="2025-10-05T10:00:00+08:00">
-  <meta itemprop="wordCount" content="876">
+  <meta itemprop="wordCount" content="1132">
   <meta itemprop="keywords" content="ATS,AWS,AI,Resume Analysis,Serverless,Bedrock,Textract,Comprehend,Hackathon,Privacy"><title>ATS Buddy: Privacy-First Resume AI | See Hiong&#39;s Blog</title>
 
     <link rel="canonical" href="https://seehiong.github.io/posts/2025/10/ats-buddy-privacy-first-resume-ai/">
@@ -351,6 +351,60 @@
        >
 
 
+<h2 id="aws-aiml-pipeline-architecture">AWS AI/ML Pipeline Architecture</h2>
+<p>ATS Buddy combines Textract, Comprehend, and Bedrock into a privacy-first AI pipeline:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/ats-buddy/ats-buddy-aws-ai-ml-pipeline-architecture.png"   alt="ats-buddy-aws-ai-ml-pipeline-architecture" class="sc-image sc-image-default"
+       >
+
+
+<ul>
+<li><strong>Textract</strong> → Extract text from PDFs</li>
+<li><strong>Comprehend</strong> → Detect &amp; redact PII</li>
+<li><strong>Bedrock (Nova Lite)</strong> → AI-driven ATS analysis</li>
+<li><strong>S3/DynamoDB</strong> → Storage + caching with lifecycle management</li>
+</ul>
 <h2 id="infrastructure-as-code">Infrastructure As Code</h2>
 <p>All infrastructure is defined with AWS SAM (Serverless Application Model). A detailed <code>DEPLOYMENT_GUIDE.md</code> is included in the project repository.</p>
 <h3 id="prerequisites">Prerequisites</h3>
@@ -1014,8 +1068,61 @@
        >
 
 
-<h2 id="aws-aiml-pipeline-architecture">AWS AI/ML Pipeline Architecture</h2>
-<p>ATS Buddy combines Textract, Comprehend, and Bedrock into a privacy-first AI pipeline:</p>
+<h2 id="in-action">In Action</h2>
+<p>Let&rsquo;s download our sample 
+
+
+
+
+
+
+  <a href="/docs/JohnTan-Resume.pdf" >John Tan Resume</a>
+ and try it out! For this example, we&rsquo;ll use this sample Job Description:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Job Title: Software Engineer
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Location: Singapore
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Job Description:
+</span></span><span style="display:flex;"><span>We are seeking an experienced Software Engineer to join our dynamic team to build robust web and cloud-based applications. The candidate should be passionate about designing scalable systems and delivering high-quality, maintainable code.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Responsibilities:
+</span></span><span style="display:flex;"><span>- Develop, test, and maintain scalable web applications and REST APIs
+</span></span><span style="display:flex;"><span>- Collaborate with cross-functional teams to design and implement new features
+</span></span><span style="display:flex;"><span>- Participate in code reviews and mentor junior engineers
+</span></span><span style="display:flex;"><span>- Troubleshoot, debug, and optimize application performance
+</span></span><span style="display:flex;"><span>- Stay up-to-date with emerging technologies and propose improvements
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Requirements:
+</span></span><span style="display:flex;"><span>- Bachelor’s degree in Computer Science, Information Technology, or related field
+</span></span><span style="display:flex;"><span>- 3+ years of experience in software development
+</span></span><span style="display:flex;"><span>- Proficiency in Python, JavaScript (React/Node.js), or Java
+</span></span><span style="display:flex;"><span>- Experience with cloud services (AWS or GCP) and containerization (Docker, Kubernetes)
+</span></span><span style="display:flex;"><span>- Strong knowledge of database systems (SQL/NoSQL)
+</span></span><span style="display:flex;"><span>- Familiarity with DevOps practices and CI/CD pipelines
+</span></span><span style="display:flex;"><span>- Excellent problem-solving and communication skills
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Preferred:
+</span></span><span style="display:flex;"><span>- Experience with Agile methodologies
+</span></span><span style="display:flex;"><span>- Open source contributions or personal projects
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Apply by sending your resume and cover letter to hr@samplecompany.com.</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>After clicking on the Analyze button, ATS Buddy will process the resume and generate a report. Here&rsquo;s what you see:</p>
 
 
 
@@ -1058,16 +1165,104 @@
 
 
 
-  <img src="/images/ats-buddy/ats-buddy-aws-ai-ml-pipeline-architecture.png"   alt="ats-buddy-aws-ai-ml-pipeline-architecture" class="sc-image sc-image-default"
+  <img src="/images/ats-buddy/ats-buddy-analyze-resume.png"   alt="ats-buddy-analyze-resume" class="sc-image sc-image-default"
        >
 
 
-<ul>
-<li><strong>Textract</strong> → Extract text from PDFs</li>
-<li><strong>Comprehend</strong> → Detect &amp; redact PII</li>
-<li><strong>Bedrock (Nova Lite)</strong> → AI-driven ATS analysis</li>
-<li><strong>S3/DynamoDB</strong> → Storage + caching with lifecycle management</li>
-</ul>
+<p>This is the sample <em>Analyis results</em>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/ats-buddy/ats-buddy-analysis-results.png"   alt="ats-buddy-analysis-results" class="sc-image sc-image-default"
+       >
+
+
+<p>You may choose to download the reports as a HTML or Markdown report. Let&rsquo;s click on <strong>Generate Enhanced Resume</strong> button and here you go, a cover letter with the enhanced resume in markdown format!</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/ats-buddy/ats-buddy-enhanced-resume.png"   alt="ats-buddy-enhanced-resume" class="sc-image sc-image-default"
+       >
+
+
 <h2 id="conclusion">CONCLUSION</h2>
 <p>The ATS Buddy POC is now <strong>complete and demo-ready</strong>:</p>
 <p>✅ End-to-end resume analysis<br>
