@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><head>
+  <head><head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,10 +8,10 @@
     <link rel="icon" href="/images/favicon.ico">
     
 
-    <meta property="og:url" content="http://localhost:1313/posts/2025/10/building-hdb-agent/">
+    <meta property="og:url" content="https://seehiong.github.io/posts/2025/10/smartflat-ai-building-aws-multi-agent-system/">
   <meta property="og:site_name" content="See Hiong&#39;s Blog">
-  <meta property="og:title" content="Building HDB Agent">
-  <meta property="og:description" content="Discover how I built HDB Agent, an AI-driven system leveraging AWS Bedrock AgentCore, Lambda, and Athena to analyze Singapore’s HDB resale market. The architecture combines serverless, event-driven design with hybrid infrastructure—integrating S3, RDS Aurora, and CloudFormation for modular deployment. Intelligent query routing directs requests to the most efficient backend—XGBoost for price prediction, Athena for analytics, PostgreSQL MCP for comparisons, and Bedrock LLMs for contextual insights—creating a powerful, scalable, and cost-efficient agentic AI solution.">
+  <meta property="og:title" content="SmartFlat AI: Building AWS Multi-Agent System">
+  <meta property="og:description" content="This post explores how I built SmartFlat AI, a multi-agent system powered by AWS Bedrock AgentCore and Amazon Nova Lite to analyze Singapore’s HDB resale data. By combining Athena, RDS Aurora, and Lambda in a cost-optimized, serverless design, the system intelligently routes queries to the most efficient backend—balancing cost, performance, and scalability. The result is an intelligent, modular AI architecture for real-world housing analytics.">
   <meta property="og:locale" content="en">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -20,28 +20,43 @@
     <meta property="article:tag" content="AWS">
     <meta property="article:tag" content="Bedrock">
     <meta property="article:tag" content="AgentCore">
+    <meta property="article:tag" content="Nova Lite">
+    <meta property="article:tag" content="Multi-Agent">
     <meta property="article:tag" content="Serverless">
-    <meta property="article:tag" content="HDB">
-    <meta property="article:tag" content="AI Agent">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Building HDB Agent">
-  <meta name="twitter:description" content="Discover how I built HDB Agent, an AI-driven system leveraging AWS Bedrock AgentCore, Lambda, and Athena to analyze Singapore’s HDB resale market. The architecture combines serverless, event-driven design with hybrid infrastructure—integrating S3, RDS Aurora, and CloudFormation for modular deployment. Intelligent query routing directs requests to the most efficient backend—XGBoost for price prediction, Athena for analytics, PostgreSQL MCP for comparisons, and Bedrock LLMs for contextual insights—creating a powerful, scalable, and cost-efficient agentic AI solution.">
+  <meta name="twitter:title" content="SmartFlat AI: Building AWS Multi-Agent System">
+  <meta name="twitter:description" content="This post explores how I built SmartFlat AI, a multi-agent system powered by AWS Bedrock AgentCore and Amazon Nova Lite to analyze Singapore’s HDB resale data. By combining Athena, RDS Aurora, and Lambda in a cost-optimized, serverless design, the system intelligently routes queries to the most efficient backend—balancing cost, performance, and scalability. The result is an intelligent, modular AI architecture for real-world housing analytics.">
 
-  <meta itemprop="name" content="Building HDB Agent">
-  <meta itemprop="description" content="Discover how I built HDB Agent, an AI-driven system leveraging AWS Bedrock AgentCore, Lambda, and Athena to analyze Singapore’s HDB resale market. The architecture combines serverless, event-driven design with hybrid infrastructure—integrating S3, RDS Aurora, and CloudFormation for modular deployment. Intelligent query routing directs requests to the most efficient backend—XGBoost for price prediction, Athena for analytics, PostgreSQL MCP for comparisons, and Bedrock LLMs for contextual insights—creating a powerful, scalable, and cost-efficient agentic AI solution.">
+  <meta itemprop="name" content="SmartFlat AI: Building AWS Multi-Agent System">
+  <meta itemprop="description" content="This post explores how I built SmartFlat AI, a multi-agent system powered by AWS Bedrock AgentCore and Amazon Nova Lite to analyze Singapore’s HDB resale data. By combining Athena, RDS Aurora, and Lambda in a cost-optimized, serverless design, the system intelligently routes queries to the most efficient backend—balancing cost, performance, and scalability. The result is an intelligent, modular AI architecture for real-world housing analytics.">
   <meta itemprop="datePublished" content="2025-10-11T10:00:00+08:00">
   <meta itemprop="dateModified" content="2025-10-11T10:00:00+08:00">
   <meta itemprop="wordCount" content="1070">
-  <meta itemprop="keywords" content="AWS,Bedrock,AgentCore,Serverless,HDB,AI Agent,CloudFormation,Lambda,Athena,XGBoost"><title>Building HDB Agent | See Hiong&#39;s Blog</title>
+  <meta itemprop="keywords" content="AWS,Bedrock,AgentCore,Nova Lite,Multi-Agent,Serverless,CloudFormation,Lambda,Athena,RDS,PostgreSQL,AI Agent,Cost Optimization,HDB"><title>SmartFlat AI: Building AWS Multi-Agent System | See Hiong&#39;s Blog</title>
 
-    <link rel="canonical" href="http://localhost:1313/posts/2025/10/building-hdb-agent/">
+    <link rel="canonical" href="https://seehiong.github.io/posts/2025/10/smartflat-ai-building-aws-multi-agent-system/">
 
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
     
     <link rel="stylesheet" href="/css/variables.css">
     
@@ -157,7 +172,7 @@
   <article class="post-layout container">
 
     <header class="post-header">
-      <h1 class="post-title">Building HDB Agent</h1>
+      <h1 class="post-title">SmartFlat AI: Building AWS Multi-Agent System</h1>
 
       <div class="post-meta">
         <span class="post-meta__date">
@@ -178,11 +193,11 @@
             
               , <a href="/tags/agentcore">AgentCore</a>
             
+              , <a href="/tags/nova-lite">Nova Lite</a>
+            
+              , <a href="/tags/multi-agent">Multi-Agent</a>
+            
               , <a href="/tags/serverless">Serverless</a>
-            
-              , <a href="/tags/hdb">HDB</a>
-            
-              , <a href="/tags/ai-agent">AI Agent</a>
             
               , <a href="/tags/cloudformation">CloudFormation</a>
             
@@ -190,7 +205,15 @@
             
               , <a href="/tags/athena">Athena</a>
             
-              , <a href="/tags/xgboost">XGBoost</a>
+              , <a href="/tags/rds">RDS</a>
+            
+              , <a href="/tags/postgresql">PostgreSQL</a>
+            
+              , <a href="/tags/ai-agent">AI Agent</a>
+            
+              , <a href="/tags/cost-optimization">Cost Optimization</a>
+            
+              , <a href="/tags/hdb">HDB</a>
             
           </span>
         
@@ -205,7 +228,7 @@
       <div class="post-cover-container post-cover--artistic-blur-wrapper">
         
           <div class="post-cover-blur-background" style="--bg-image: url('/images/hdb-agent/building-hdb-agent.png');"></div>
-          <img src="/images/hdb-agent/building-hdb-agent.png" alt="Building HDB Agent cover image" class="post-cover-image post-cover-image--artistic-blur">
+          <img src="/images/hdb-agent/building-hdb-agent.png" alt="SmartFlat AI: Building AWS Multi-Agent System cover image" class="post-cover-image post-cover-image--artistic-blur">
         
       </div>
     
