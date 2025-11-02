@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2025/11/adk-web-multi-agent-system/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="ADK Web Multi-Agent System">
+  <meta property="og:description" content="This blog post details how I built a multi-agent system using Google’s ADK, powered by OpenRouter models, for a web application focused on Singapore’s HDB data. The system integrates structured data via PostgreSQL (managed by MCP Toolbox) and general statistics via the Data Commons MCP Tools. The architecture uses a Coordinator/Dispatcher pattern to intelligently route HDB-specific queries to the PostgreSQL agent and general queries to the Data Commons agent, ensuring specialized and efficient data retrieval.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-11-02T00:00:00+08:00">
+    <meta property="article:modified_time" content="2025-11-02T00:00:00+08:00">
+    <meta property="article:tag" content="Google ADK">
+    <meta property="article:tag" content="Multi-Agent System">
+    <meta property="article:tag" content="OpenRouter">
+    <meta property="article:tag" content="MCP Toolbox">
+    <meta property="article:tag" content="PostgreSQL">
+    <meta property="article:tag" content="DataCommons">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="ADK Web Multi-Agent System">
+  <meta name="twitter:description" content="This blog post details how I built a multi-agent system using Google’s ADK, powered by OpenRouter models, for a web application focused on Singapore’s HDB data. The system integrates structured data via PostgreSQL (managed by MCP Toolbox) and general statistics via the Data Commons MCP Tools. The architecture uses a Coordinator/Dispatcher pattern to intelligently route HDB-specific queries to the PostgreSQL agent and general queries to the Data Commons agent, ensuring specialized and efficient data retrieval.">
+
+  <meta itemprop="name" content="ADK Web Multi-Agent System">
+  <meta itemprop="description" content="This blog post details how I built a multi-agent system using Google’s ADK, powered by OpenRouter models, for a web application focused on Singapore’s HDB data. The system integrates structured data via PostgreSQL (managed by MCP Toolbox) and general statistics via the Data Commons MCP Tools. The architecture uses a Coordinator/Dispatcher pattern to intelligently route HDB-specific queries to the PostgreSQL agent and general queries to the Data Commons agent, ensuring specialized and efficient data retrieval.">
+  <meta itemprop="datePublished" content="2025-11-02T00:00:00+08:00">
+  <meta itemprop="dateModified" content="2025-11-02T00:00:00+08:00">
+  <meta itemprop="wordCount" content="1934">
+  <meta itemprop="keywords" content="Google ADK,Multi-Agent System,OpenRouter,MCP Toolbox,PostgreSQL,DataCommons,LangChain,LangGraph"><title>ADK Web Multi-Agent System | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2025/11/adk-web-multi-agent-system/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">ADK Web Multi-Agent System</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2025-11-02T00:00:00&#43;08:00">November 2, 2025</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/google-adk">Google ADK</a>
+            
+              , <a href="/tags/multi-agent-system">Multi-Agent System</a>
+            
+              , <a href="/tags/openrouter">OpenRouter</a>
+            
+              , <a href="/tags/mcp-toolbox">MCP Toolbox</a>
+            
+              , <a href="/tags/postgresql">PostgreSQL</a>
+            
+              , <a href="/tags/datacommons">DataCommons</a>
+            
+              , <a href="/tags/langchain">LangChain</a>
+            
+              , <a href="/tags/langgraph">LangGraph</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/adk-web/adk-web-multi-agent-system.png');"></div>
+          <img src="/images/adk-web/adk-web-multi-agent-system.png" alt="ADK Web Multi-Agent System cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>Building upon my earlier post — 
+
+
+
+
+
+
+  <a href="/posts/2025/10/smartflat-ai-building-aws-multi-agent-system/" >SmartFlat AI: Building AWS Multi-Agent System</a>
+ — this article explores how to use 
+
+
+
+
+
+
+  <a href="https://github.com/google/adk-python" target="_blank" rel="noopener noreferrer" >Google&rsquo;s ADK (Agent Development Kit)</a>
+ to create an intelligent, web-based multi-agent system. The agents will answer questions about Singapore’s HDB market, leveraging free models available through <strong>OpenRouter</strong>.</p>
+<p>While the concept is similar to the AWS-based version, this project focuses on Google’s ADK ecosystem and demonstrates how to integrate it with the <strong>MCP Toolbox</strong> and <strong>PostgreSQL</strong> database for structured reasoning.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>For this post, I will be using 
+
+
+
+
+
+
+  <a href="https://github.com/googleapis/genai-toolbox" target="_blank" rel="noopener noreferrer" >MCP Toolbox for Databases</a>
+ to handle database connections and tool registration.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#953800">$VERSION</span> <span style="color:#1f2328">=</span> <span style="color:#0a3069">&#34;0.18.0&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">Invoke-WebRequest</span> -Uri <span style="color:#0a3069">&#34;https://storage.googleapis.com/genai-toolbox/v</span><span style="color:#953800">$VERSION</span><span style="color:#0a3069">/windows/amd64/toolbox.exe&#34;</span> -OutFile <span style="color:#0a3069">&#34;toolbox.exe&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># To run Toolbox from binary</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">.\</span>toolbox
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Or with the Toolbox UI</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">.\</span>toolbox <span style="color:#1f2328">-</span>-ui</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>We’ll start by initializing a new Python project using 
+
+
+
+
+
+
+  <a href="https://github.com/astral-sh/uv" target="_blank" rel="noopener noreferrer" ><code>uv</code></a>
+ — a fast Python package manager and environment tool.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>mkdir <span style="color:#6639ba">adk-web</span>-multi-agent
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">cd adk-web</span>-multi-agent
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Create and activate virtual environment</span>
+</span></span><span style="display:flex;"><span>uv venv
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Initialize project</span>
+</span></span><span style="display:flex;"><span>uv init 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Add dependencies</span>
+</span></span><span style="display:flex;"><span>uv add <span style="color:#6639ba">google-adk</span> litellm <span style="color:#6639ba">toolbox-core</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Sample <code>pyproject.toml</code>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-toml" data-lang="toml"><span style="display:flex;"><span><span style="color:#1f2328">[</span><span style="color:#1f2328">project</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">name</span> <span style="color:#1f2328">=</span> <span style="color:#0a3069">&#34;adk-web-multi-agent-system&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">version</span> <span style="color:#1f2328">=</span> <span style="color:#0a3069">&#34;0.1.0&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">description</span> <span style="color:#1f2328">=</span> <span style="color:#0a3069">&#34;Multi Agent System for Google ADK&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">readme</span> <span style="color:#1f2328">=</span> <span style="color:#0a3069">&#34;README.md&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">requires-python</span> <span style="color:#1f2328">=</span> <span style="color:#0a3069">&#34;&gt;=3.12&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">dependencies</span> <span style="color:#1f2328">=</span> <span style="color:#1f2328">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;google-adk&gt;=1.17.0&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;litellm&gt;=1.78.7&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;toolbox-core&gt;=0.5.2&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">]</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="setting-up-postgresql-database">Setting up PostgreSQL Database</h2>
+<p>For this demonstration, I used a locally hosted PostgreSQL database containing 
+
+
+
+
+
+
+  <a href="https://data.gov.sg/datasets?page=1&amp;query=hdb&#43;2017&#43;resale&#43;price&amp;resultId=189" target="_blank" rel="noopener noreferrer" >resale flat prices from Jan 2017 onwards</a>
+.<br>
+Below is the DDL for the <strong>resale_transactions</strong> table:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#cf222e">CREATE</span><span style="color:#fff"> </span><span style="color:#cf222e">TABLE</span><span style="color:#fff"> </span><span style="color:#cf222e">public</span><span style="color:#1f2328">.</span>resale_transactions<span style="color:#fff"> </span><span style="color:#1f2328">(</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">	</span><span style="color:#0a3069">&#34;month&#34;</span><span style="color:#fff"> </span><span style="color:#6639ba">text</span><span style="color:#fff"> </span><span style="color:#cf222e">NULL</span><span style="color:#1f2328">,</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">	</span>town<span style="color:#fff"> </span><span style="color:#6639ba">text</span><span style="color:#fff"> </span><span style="color:#cf222e">NULL</span><span style="color:#1f2328">,</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">	</span>flat_type<span style="color:#fff"> </span><span style="color:#6639ba">text</span><span style="color:#fff"> </span><span style="color:#cf222e">NULL</span><span style="color:#1f2328">,</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">	</span>block<span style="color:#fff"> </span><span style="color:#6639ba">text</span><span style="color:#fff"> </span><span style="color:#cf222e">NULL</span><span style="color:#1f2328">,</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">	</span>street_name<span style="color:#fff"> </span><span style="color:#6639ba">text</span><span style="color:#fff"> </span><span style="color:#cf222e">NULL</span><span style="color:#1f2328">,</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">	</span>storey_range<span style="color:#fff"> </span><span style="color:#6639ba">text</span><span style="color:#fff"> </span><span style="color:#cf222e">NULL</span><span style="color:#1f2328">,</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">	</span>floor_area_sqm<span style="color:#fff"> </span><span style="color:#6639ba">text</span><span style="color:#fff"> </span><span style="color:#cf222e">NULL</span><span style="color:#1f2328">,</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">	</span>flat_model<span style="color:#fff"> </span><span style="color:#6639ba">text</span><span style="color:#fff"> </span><span style="color:#cf222e">NULL</span><span style="color:#1f2328">,</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">	</span>lease_commence_date<span style="color:#fff"> </span><span style="color:#6639ba">text</span><span style="color:#fff"> </span><span style="color:#cf222e">NULL</span><span style="color:#1f2328">,</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">	</span>resale_price<span style="color:#fff"> </span>int4<span style="color:#fff"> </span><span style="color:#cf222e">NULL</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#1f2328">);</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="configuring-mcp-toolbox">Configuring MCP Toolbox</h3>
+<p>Toolbox acts as the interface layer between ADK and the database.<br>
+Here’s a sample configuration using the default <code>tools.yaml</code> file:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#0550ae">sources</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">my-pg-source</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>postgres<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">host</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#0550ae">127.0.0.1</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">port</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#0550ae">5432</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">database</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>postgres<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">user</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>postgres<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">password</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>postgres<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">tools</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">postgres-list-tables</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>postgres-list-tables<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">source</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>my-pg-source<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>Use this tool to retrieve schema information for all or specified tables. Output format can be simple (only table names) or detailed.<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">execute-sql-tool</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>postgres-execute-sql<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">source</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>my-pg-source<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>Use this tool to execute sql statement.<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">list-hdb-flats-by-town</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>postgres-sql<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">source</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>my-pg-source<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>Finds the most recent 5 resale transaction records for HDB flats in the specified town<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">parameters</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span>- <span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>town<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">type</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>string<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>The town of the HDB flat<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">statement</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>SELECT * FROM public.resale_transactions t WHERE t.town ILIKE &#39;%&#39; || $1 || &#39;%&#39; ORDER BY t.month DESC LIMIT 5;<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">count-hdb-flats-by-town</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>postgres-sql<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">source</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>my-pg-source<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>Calculates the total number of HDB resale transactions that have occurred in the specified town since 2017<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">parameters</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span>- <span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>town<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">type</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>string<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>The town of the HDB flat<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">statement</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>SELECT COUNT(*) as count FROM public.resale_transactions t WHERE t.town ILIKE &#39;%&#39; || $1 || &#39;%&#39;;<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">percentile-price-by-town</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>postgres-sql<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">source</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>my-pg-source<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>Calculates a specific resale price percentile (e.g., median price) based on all recorded HDB resale transactions in the specified town<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">parameters</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span>- <span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>town<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">type</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>string<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>The town to check the percentile price for<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span>- <span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>percentile<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">type</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>float<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>The percentile to calculate (e.g., 0.5 for median, 0.9 for 90th percentile)<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">default</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#0550ae">0.5</span><span style="color:#fff">   
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">statement</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>SELECT PERCENTILE_CONT($2) WITHIN GROUP (ORDER BY t.resale_price) AS percentile_price FROM public.resale_transactions t WHERE t.town ILIKE &#39;%&#39; || $1 || &#39;%&#39;;<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">average-price-by-flat-type</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>postgres-sql<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">source</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>my-pg-source<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>Calculates the average resale price for a specific flat type across all of Singapore or filtered by town<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">parameters</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span>- <span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>flat_type<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">type</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>string<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>The type of flat (e.g., &#39;3 ROOM&#39;, &#39;4 ROOM&#39;, &#39;5 ROOM&#39;)<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span>- <span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>town<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">type</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>string<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">description</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>Optional town filter. Leave empty or use &#39;%&#39; for all of Singapore<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">default</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#0a3069">&#39;%&#39;</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">statement</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>SELECT AVG(t.resale_price) as avg_price FROM public.resale_transactions t WHERE t.flat_type = $1 AND t.town ILIKE &#39;%&#39; || $2 || &#39;%&#39;;<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">toolsets</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">my-toolset</span><span style="color:#1f2328">:</span><span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>- postgres-list-tables<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>- execute-sql-tool<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>- list-hdb-flats-by-town<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>- count-hdb-flats-by-town<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>- percentile-price-by-town<span style="color:#fff">
+</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span>- average-price-by-flat-type</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/adk-web/adk-web-toolbox-ui-query.png"   alt="adk-web-toolbox-ui-query" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="building-the-agent">Building the Agent</h3>
+<p>With the tools configured, we can now create an ADK-powered database agent that interacts with PostgreSQL.</p>
+<h4 id="step-1-import-dependencies">Step 1. Import Dependencies</h4>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># Import the necessary libraries</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">google.adk.agents</span> <span style="color:#cf222e">import</span> Agent
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">google.adk.models.lite_llm</span> <span style="color:#cf222e">import</span> LiteLlm
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">google.adk.sessions</span> <span style="color:#cf222e">import</span> InMemorySessionService
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">google.adk.runners</span> <span style="color:#cf222e">import</span> Runner
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">google.genai</span> <span style="color:#cf222e">import</span> types
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">typing</span> <span style="color:#cf222e">import</span> Optional<span style="color:#1f2328">,</span> Dict
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">toolbox_core</span> <span style="color:#cf222e">import</span> ToolboxSyncClient</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h4 id="step-2-configure-the-model">Step 2: Configure the Model</h4>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>MODEL <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;openrouter/z-ai/glm-4.5-air:free&#34;</span>
+</span></span><span style="display:flex;"><span>llm <span style="color:#0550ae">=</span> LiteLlm<span style="color:#1f2328">(</span>model<span style="color:#0550ae">=</span>MODEL<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Test LLM with a direct call</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span>llm<span style="color:#0550ae">.</span>llm_client<span style="color:#0550ae">.</span>completion<span style="color:#1f2328">(</span>model<span style="color:#0550ae">=</span>llm<span style="color:#0550ae">.</span>model<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>                                messages<span style="color:#0550ae">=</span><span style="color:#1f2328">[{</span><span style="color:#0a3069">&#34;role&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;user&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;content&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;Hello&#34;</span><span style="color:#1f2328">}],</span> 
+</span></span><span style="display:flex;"><span>                                tools<span style="color:#0550ae">=</span><span style="color:#1f2328">[]))</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">OpenRouter is ready for use.&#34;</span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/adk-web/adk-web-toolbox-llm.png"   alt="adk-web-toolbox-llm" class="sc-image sc-image-default"
+       >
+
+
+
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    It’s important to verify model compatibility first. For example, <code>openrouter/minimax/minimax-m2:free</code> produced inconsistent results, while <code>openrouter/openai/gpt-oss-20b:free</code> currently lacks tool-calling support.
+  </div>
+</div>
+<h4 id="step-3-load-the-tools">Step 3. Load the Tools</h4>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>client <span style="color:#0550ae">=</span> ToolboxSyncClient<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;http://127.0.0.1:5000&#34;</span><span style="color:#1f2328">)</span> 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># This will load all tools</span>
+</span></span><span style="display:flex;"><span>all_tools <span style="color:#0550ae">=</span> client<span style="color:#0550ae">.</span>load_toolset<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Loaded </span><span style="color:#0a3069">{</span>all_tools<span style="color:#0a3069">}</span><span style="color:#0a3069"> tools from MCP server&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Sample Output</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Loaded [&lt;toolbox_core.sync_tool.ToolboxSyncTool object at 0x0000021D4120F680&gt;, &lt;toolbox_core.sync_tool.ToolboxSyncTool object at 0x0000021D422D03B0&gt;, &lt;toolbox_core.sync_tool.ToolboxSyncTool object at 0x0000021D422D1970&gt;, &lt;toolbox_core.sync_tool.ToolboxSyncTool object at 0x0000021D422D0200&gt;, &lt;toolbox_core.sync_tool.ToolboxSyncTool object at 0x0000021D422D02C0&gt;, &lt;toolbox_core.sync_tool.ToolboxSyncTool object at 0x0000021D422D0410&gt;] tools from MCP server</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h4 id="step-4-creates-the-runner">Step 4. Creates the Runner</h4>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># Global cache for runners (maintains sessions)</span>
+</span></span><span style="display:flex;"><span>_runner_cache<span style="color:#1f2328">:</span> Dict<span style="color:#1f2328">[</span><span style="color:#6639ba">str</span><span style="color:#1f2328">,</span> <span style="color:#6639ba">tuple</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">{}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">chat_with_agent</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    agent<span style="color:#1f2328">:</span> Agent<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    message<span style="color:#1f2328">:</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    user_id<span style="color:#1f2328">:</span> <span style="color:#6639ba">str</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;user_001&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    session_id<span style="color:#1f2328">:</span> Optional<span style="color:#1f2328">[</span><span style="color:#6639ba">str</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">None</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    maintain_session<span style="color:#1f2328">:</span> <span style="color:#6639ba">bool</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">True</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    verbose<span style="color:#1f2328">:</span> <span style="color:#6639ba">bool</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">True</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span> <span style="color:#0550ae">-&gt;</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    Send a message to an agent and get the response.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> session_id <span style="color:#0550ae">is</span> <span style="color:#cf222e">None</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        session_id <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">{</span>agent<span style="color:#0550ae">.</span>name<span style="color:#0a3069">}</span><span style="color:#0a3069">_session&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    app_name <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">{</span>agent<span style="color:#0550ae">.</span>name<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span>
+</span></span><span style="display:flex;"><span>    cache_key <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">{</span>agent<span style="color:#0550ae">.</span>name<span style="color:#0a3069">}</span><span style="color:#0a3069">_</span><span style="color:#0a3069">{</span>user_id<span style="color:#0a3069">}</span><span style="color:#0a3069">_</span><span style="color:#0a3069">{</span>session_id<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Reuse or create runner</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> maintain_session <span style="color:#0550ae">and</span> cache_key <span style="color:#0550ae">in</span> _runner_cache<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        runner <span style="color:#0550ae">=</span> _runner_cache<span style="color:#1f2328">[</span>cache_key<span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        session_service <span style="color:#0550ae">=</span> InMemorySessionService<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">await</span> session_service<span style="color:#0550ae">.</span>create_session<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            app_name<span style="color:#0550ae">=</span>app_name<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            user_id<span style="color:#0550ae">=</span>user_id<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            session_id<span style="color:#0550ae">=</span>session_id
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        runner <span style="color:#0550ae">=</span> Runner<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            agent<span style="color:#0550ae">=</span>agent<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            app_name<span style="color:#0550ae">=</span>app_name<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            session_service<span style="color:#0550ae">=</span>session_service
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> maintain_session<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            _runner_cache<span style="color:#1f2328">[</span>cache_key<span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> runner
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> verbose<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">&gt;&gt;&gt; User Message: </span><span style="color:#0a3069">{</span>message<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    content <span style="color:#0550ae">=</span> types<span style="color:#0550ae">.</span>Content<span style="color:#1f2328">(</span>role<span style="color:#0550ae">=</span><span style="color:#0a3069">&#39;user&#39;</span><span style="color:#1f2328">,</span> parts<span style="color:#0550ae">=</span><span style="color:#1f2328">[</span>types<span style="color:#0550ae">.</span>Part<span style="color:#1f2328">(</span>text<span style="color:#0550ae">=</span>message<span style="color:#1f2328">)])</span>
+</span></span><span style="display:flex;"><span>    final_response_text <span style="color:#0550ae">=</span> <span style="color:#cf222e">None</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">async</span> <span style="color:#cf222e">for</span> event <span style="color:#0550ae">in</span> runner<span style="color:#0550ae">.</span>run_async<span style="color:#1f2328">(</span>user_id<span style="color:#0550ae">=</span>user_id<span style="color:#1f2328">,</span> session_id<span style="color:#0550ae">=</span>session_id<span style="color:#1f2328">,</span> new_message<span style="color:#0550ae">=</span>content<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> verbose<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;[Event] Author: </span><span style="color:#0a3069">{</span>event<span style="color:#0550ae">.</span>author<span style="color:#0a3069">}</span><span style="color:#0a3069">, Type: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">type</span><span style="color:#1f2328">(</span>event<span style="color:#1f2328">)</span><span style="color:#0550ae">.</span><span style="color:#953800">__name__</span><span style="color:#0a3069">}</span><span style="color:#0a3069">, Final: </span><span style="color:#0a3069">{</span>event<span style="color:#0550ae">.</span>is_final_response<span style="color:#1f2328">()</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> event<span style="color:#0550ae">.</span>is_final_response<span style="color:#1f2328">():</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> event<span style="color:#0550ae">.</span>content <span style="color:#0550ae">and</span> event<span style="color:#0550ae">.</span>content<span style="color:#0550ae">.</span>parts<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                final_response_text <span style="color:#0550ae">=</span> event<span style="color:#0550ae">.</span>content<span style="color:#0550ae">.</span>parts<span style="color:#1f2328">[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">]</span><span style="color:#0550ae">.</span>text
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">elif</span> event<span style="color:#0550ae">.</span>actions <span style="color:#0550ae">and</span> event<span style="color:#0550ae">.</span>actions<span style="color:#0550ae">.</span>escalate<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                final_response_text <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Agent escalated: </span><span style="color:#0a3069">{</span>event<span style="color:#0550ae">.</span>error_message <span style="color:#0550ae">or</span> <span style="color:#0a3069">&#39;No specific message.&#39;</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">break</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> verbose<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;&lt;&lt;&lt; Agent Response: </span><span style="color:#0a3069">{</span>final_response_text<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> final_response_text</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h4 id="step-5-creates-the-agent">Step 5. Creates the Agent</h4>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>db_agent <span style="color:#0550ae">=</span> Agent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    name<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;agents&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    model<span style="color:#0550ae">=</span>llm<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    description<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;An intelligent database assistant for HDB resale transaction data&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    instruction<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;&#34;&#34;You are a helpful database assistant with access to HDB resale transaction data from 2017 onwards.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">**Your Role:**
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- Answer user questions using the available tools
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- Always respond in clear, natural language
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- Format prices with proper currency notation (e.g., $500,000)
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- Format large numbers with commas for readability
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">**Response Guidelines:**
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- After calling any tool, ALWAYS provide a complete natural language summary
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- Never output raw JSON or technical data structures
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- Be conversational and helpful
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- If a query returns no results, explain this clearly
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">**Available Data:**
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">The database contains HDB resale transactions with information about prices, locations (towns), flat types, flat models, floor areas, lease dates, and transaction dates.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Use the available tools intelligently to answer user questions. Each tool&#39;s description explains when to use it.&#34;&#34;&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    tools<span style="color:#0550ae">=</span>all_tools<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">Agent &#39;</span><span style="color:#0a3069">{</span>db_agent<span style="color:#0550ae">.</span>name<span style="color:#0a3069">}</span><span style="color:#0a3069">&#39; created successfully with </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>all_tools<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> tools&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Sample output</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Agent &#39;database_agent&#39; created successfully with 6 tools</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h4 id="step-6-tests-the-agent">Step 6. Tests the Agent</h4>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>response_avg_tampines <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> chat_with_agent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    db_agent<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;What is the average resale price for 4 ROOM flats in Tampines?&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    user_id<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;user_001&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    maintain_session<span style="color:#0550ae">=</span><span style="color:#cf222e">True</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>response_persistence_test <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> chat_with_agent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    db_agent<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;Using the average price from the last step, how many 5 ROOM flats in Tampines have a resale price greater than that value?&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    user_id<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;user_001&#34;</span><span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>    maintain_session<span style="color:#0550ae">=</span><span style="color:#cf222e">True</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>response_switch <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> chat_with_agent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    db_agent<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;What is the median price in Jurong West?&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    user_id<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;user_001&#34;</span><span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>    maintain_session<span style="color:#0550ae">=</span><span style="color:#cf222e">True</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/adk-web/adk-web-toolbox-chat-with-agent.png"   alt="adk-web-chat-with-agent" class="sc-image sc-image-default"
+       >
+
+
+<h4 id="step-7-tests-without-maintaining-session">Step 7. Tests without Maintaining Session</h4>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>response_memory <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> chat_with_agent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    db_agent<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;What was the average price we calculated for 4 ROOM flats in Tampines?&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    user_id<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;user_001&#34;</span><span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>    maintain_session<span style="color:#0550ae">=</span><span style="color:#cf222e">True</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># &gt;&gt;&gt; User Message: What was the average price we calculated for 4 ROOM flats in Tampines?</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># [Event] Author: agents, Type: Event, Final: True</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># &lt;&lt;&lt; Agent Response: </span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># The average price we calculated for 4 ROOM flats in Tampines was **$371,135**.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>response_reset <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> chat_with_agent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>  db_agent<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#0a3069">&#34;What is the total count of flats in Tampines?&#34;</span><span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>  user_id<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;user_002&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  session_id<span style="color:#0550ae">=</span><span style="color:#cf222e">None</span><span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>  maintain_session<span style="color:#0550ae">=</span><span style="color:#cf222e">False</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># &gt;&gt;&gt; User Message: What is the total count of flats in Tampines?</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># [Event] Author: agents, Type: Event, Final: False</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># [Event] Author: agents, Type: Event, Final: False</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># [Event] Author: agents, Type: Event, Final: True</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># &lt;&lt;&lt; Agent Response: </span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Based on the HDB resale transaction data from 2017 onwards, there are **51,077** flats in Tampines.</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h2 id="datacommon-api">Datacommon API</h2>
+<p>Data Commons provides a single source for publicly available statistical data. To run a local instance of 
+
+
+
+
+
+
+  <a href="https://docs.datacommons.org/mcp/run_tools.html" target="_blank" rel="noopener noreferrer" >DataCommons API</a>
+:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>uvx <span style="color:#6639ba">datacommons-mcp</span> serve http <span style="color:#1f2328">-</span>-port <span style="color:#0550ae">8000</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/adk-web/adk-web-datacommons-mcp-server.png"   alt="adk-web-datacommons-mcp-server" class="sc-image sc-image-default"
+       >
+
+
+
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    Ensure that the DC_API_KEY environment variable has been set correctly.
+  </div>
+</div>
+<h3 id="datacommon-agent">Datacommon Agent</h3>
+<p>This is the <code>agent.py</code>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># agents/datacommons_agent/agent.py</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">google.adk.agents.llm_agent</span> <span style="color:#cf222e">import</span> LlmAgent
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">google.adk.tools.mcp_tool.mcp_toolset</span> <span style="color:#cf222e">import</span> <span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    MCPToolset<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    StreamableHTTPConnectionParams<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">google.adk.models.lite_llm</span> <span style="color:#cf222e">import</span> LiteLlm
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">.instructions</span> <span style="color:#cf222e">import</span> AGENT_INSTRUCTIONS
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>MODEL <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;openrouter/z-ai/glm-4.5-air:free&#34;</span>
+</span></span><span style="display:flex;"><span>llm <span style="color:#0550ae">=</span> LiteLlm<span style="color:#1f2328">(</span>model<span style="color:#0550ae">=</span>MODEL<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>root_agent <span style="color:#0550ae">=</span> LlmAgent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    model<span style="color:#0550ae">=</span>llm<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    name<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;basic_agent&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    instruction<span style="color:#0550ae">=</span>AGENT_INSTRUCTIONS<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    tools<span style="color:#0550ae">=</span><span style="color:#1f2328">[</span>
+</span></span><span style="display:flex;"><span>        MCPToolset<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            connection_params<span style="color:#0550ae">=</span>StreamableHTTPConnectionParams<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            url<span style="color:#0550ae">=</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;http://localhost:8001/mcp&#34;</span>
+</span></span><span style="display:flex;"><span>         <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="adk-web">ADK Web</h3>
+<p>Following 
+
+
+
+
+
+
+  <a href="https://docs.datacommons.org/mcp/develop_agent.html" target="_blank" rel="noopener noreferrer" >Develop your own ADK Agent</a>
+, let&rsquo;s run with the following command:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>adk web</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Let&rsquo;s test with this question: <em>&ldquo;What is the population of Singapore?&rdquo;</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/adk-web/adk-web-datacommons-query.png"   alt="adk-web-datacommons-query" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="coordinator--dispatcher-pattern">Coordinator / Dispatcher Pattern</h2>
+<p>To handle multiple data sources, we can use a <strong>Coordinator</strong> agent that intelligently delegates questions to the right specialist agent. If a question involves HDB resale data, it routes to the <strong>PostgresAgent</strong>; if it’s about global or demographic data, it delegates to the <strong>DataCommonsAgent</strong>.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># agents/coordinator.py</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">google.adk.agents</span> <span style="color:#cf222e">import</span> LlmAgent
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">google.adk.models.lite_llm</span> <span style="color:#cf222e">import</span> LiteLlm
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">agents.datacommons_agent.agent</span> <span style="color:#cf222e">import</span> dc_agent <span style="color:#cf222e">as</span> datacommons_agent
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">agents.postgres_agent.agent</span> <span style="color:#cf222e">import</span> db_agent <span style="color:#cf222e">as</span> postgres_agent
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>COORDINATOR_MODEL <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;openrouter/z-ai/glm-4.5-air:free&#34;</span> 
+</span></span><span style="display:flex;"><span>llm <span style="color:#0550ae">=</span> LiteLlm<span style="color:#1f2328">(</span>model<span style="color:#0550ae">=</span>COORDINATOR_MODEL<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>COORDINATOR_INSTRUCTION <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">You are the Master Coordinator for an intelligent assistant system. Your job is NOT to answer questions directly, but to delegate them to the correct specialist sub-agent.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">**Delegate based on topic:**
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">1. **POSTGRESQL AGENT (`PostgresAgent`):** Route any request that involves **HDB resale transactions, flat prices, flat counts, town names (Tampines, Jurong West), or flat types (&#39;4 ROOM&#39;, &#39;3 ROOM&#39;)**. If the user mentions *any* HDB-specific term, delegate here.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">2. **DATACOMMONS AGENT (`DataCommonsAgent`):** Route requests involving **global data, countries, continents, economics (GDP, income, inequality), health statistics, or general population data**.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">3. **Other:** If the request is not clearly HDB-related and not clearly global data, default to routing to the `datacommons_agent` as it covers general knowledge.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">**CRITICAL:** You must only output a **LLM-Driven Delegation call** using the format: `transfer_to_agent(agent_name=&#39;&lt;target_agent_name&gt;&#39;)`. Do not generate any other text or tool calls yourself.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>root_agent <span style="color:#0550ae">=</span> LlmAgent<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    name<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;MasterCoordinator&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    model<span style="color:#0550ae">=</span>llm<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    instruction<span style="color:#0550ae">=</span>COORDINATOR_INSTRUCTION<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    description<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;Master router for HDB data and Global Data Commons queries.&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    sub_agents<span style="color:#0550ae">=</span><span style="color:#1f2328">[</span>
+</span></span><span style="display:flex;"><span>        postgres_agent<span style="color:#1f2328">,</span> 
+</span></span><span style="display:flex;"><span>        datacommons_agent
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Question 1: &ldquo;What is the average resale price for 4 ROOM flats in Tampines?&rdquo;</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/adk-web/adk-web-coordinator-1.png"   alt="adk-web-coordinator-1" class="sc-image sc-image-default"
+       >
+
+
+<p>Question 2: &ldquo;What is the population of Singapore?&rdquo;</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/adk-web/adk-web-coordinator-2.png"   alt="adk-web-coordinator-2" class="sc-image sc-image-default"
+       >
+
+
+
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    Notice the color distinction representing each agent, indicating successful handoff between them.
+  </div>
+</div>
+<h2 id="conclusion">Conclusion</h2>
+<p>This project demonstrates how <strong>Google’s ADK</strong> can be combined with <strong>OpenRouter models</strong> and <strong>MCP Toolbox</strong> to create a fully functional, multi-agent system that integrates both structured (Postgres) and unstructured (DataCommons) data. By using a <strong>Coordinator/Dispatcher</strong> pattern, the system can scale to include more specialized agents — each handling its domain efficiently while maintaining a seamless conversational experience.</p>
+<h2 id="future-work">Future Work</h2>
+<p>In the next phase, I plan to extend the system using <strong>LangChain</strong> and <strong>LangGraph</strong> to bring more sophisticated agent orchestration and reasoning capabilities.</p>
+<ul>
+<li>
+<p><strong>LangChain Integration</strong>:
+LangChain can serve as the backbone for chaining complex reasoning steps — such as combining property search, analytics, and neighborhood insights into a cohesive workflow. It will also simplify managing context between agents, enabling memory persistence and multi-turn query understanding.</p>
+</li>
+<li>
+<p><strong>LangGraph Exploration</strong>:
+LangGraph offers a declarative, graph-based approach to building <strong>multi-agent workflows</strong>. By defining agents as graph nodes and their interactions as edges, it becomes easier to visualize, debug, and evolve complex behaviors like task delegation, dependency management, and parallel execution.</p>
+</li>
+</ul>
+<p>Together, these enhancements would elevate the current architecture from a rule-based agent system to a <strong>truly autonomous, reasoning-driven network</strong> capable of learning from user interactions and adapting over time.</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2025/10/smartflat-ai-building-aws-multi-agent-system/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">SmartFlat AI: Building AWS Multi-Agent System</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2025 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
