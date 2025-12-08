@@ -32,7 +32,7 @@
   <meta itemprop="description" content="This post walks through building a complete multi-agent system using LangGraph—from a simple deterministic chain to a fully orchestrated ReAct agent and a modular supervisor-led MAS. It integrates Postgres (via MCP Toolbox), Tavily web search, and custom Python tools to analyze Singapore HDB resale data and nearby amenities. Complete with diagrams, code walkthroughs, and LangSmith Studio deployment, this guide demonstrates how to design practical, production-ready agent workflows using LangChain and LangGraph.">
   <meta itemprop="datePublished" content="2025-11-23T18:00:00+08:00">
   <meta itemprop="dateModified" content="2025-11-23T18:00:00+08:00">
-  <meta itemprop="wordCount" content="2985">
+  <meta itemprop="wordCount" content="3437">
   <meta itemprop="keywords" content="LangGraph,LangChain,LangSmith Studio,OpenRouter,Travily,Postgres,MCP Toolbox,Multi-Agent System"><title>Building a LangGraph Multi-Agent System | See Hiong&#39;s Blog</title>
 
     <link rel="canonical" href="https://seehiong.github.io/posts/2025/11/building-a-langgraph-multi-agent-system/">
@@ -252,12 +252,12 @@ This post walks through the full journey—from building a minimal LangGraph cha
   <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>mkdir <span style="color:#6639ba">multi-agent</span>-system-using-langgraph
 </span></span><span style="display:flex;"><span><span style="color:#6639ba">cd multi-agent</span>-system-using-langgraph
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Create and activate virtual environment</span>
-</span></span><span style="display:flex;"><span>uv venv
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">.</span>venv<span style="color:#1f2328">\</span>Scripts<span style="color:#1f2328">\</span>activate
-</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#57606a"># Initialize project</span>
-</span></span><span style="display:flex;"><span>uv init 
+</span></span><span style="display:flex;"><span>uv init <span style="color:#1f2328">.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Create and activate virtual environment</span>
+</span></span><span style="display:flex;"><span>uv sync
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">.</span>venv<span style="color:#1f2328">\</span>Scripts<span style="color:#1f2328">\</span>activate
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#57606a"># Add dependencies</span>
 </span></span><span style="display:flex;"><span>uv add langgraph langchain langchain_openai langchain_tavily <span style="color:#6639ba">toolbox-langchain</span></span></span></code></pre></div>
@@ -2174,113 +2174,115 @@ I implement this in a new notebook <code>langgraph_mas.ipynb</code>.</p>
   <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">os</span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">json</span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">asyncio</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">sys</span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">typing</span> <span style="color:#cf222e">import</span> Annotated<span style="color:#1f2328">,</span> Sequence<span style="color:#1f2328">,</span> TypedDict
-</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">langchain_core.messages</span> <span style="color:#cf222e">import</span> <span style="color:#1f2328">(</span>
 </span></span><span style="display:flex;"><span>    HumanMessage<span style="color:#1f2328">,</span> AIMessage<span style="color:#1f2328">,</span> BaseMessage<span style="color:#1f2328">,</span> ToolMessage
 </span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Fix Windows event loop issue</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">if</span> sys<span style="color:#0550ae">.</span>platform <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#34;win32&#34;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>    asyncio<span style="color:#0550ae">.</span>set_event_loop_policy<span style="color:#1f2328">(</span>asyncio<span style="color:#0550ae">.</span>WindowsSelectorEventLoopPolicy<span style="color:#1f2328">())</span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">langchain_core.prompts</span> <span style="color:#cf222e">import</span> ChatPromptTemplate<span style="color:#1f2328">,</span> MessagesPlaceholder
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">langchain.tools</span> <span style="color:#cf222e">import</span> tool
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">langchain_tavily</span> <span style="color:#cf222e">import</span> TavilySearch
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">langchain_openai</span> <span style="color:#cf222e">import</span> ChatOpenAI
-</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">toolbox_langchain</span> <span style="color:#cf222e">import</span> ToolboxClient
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">langgraph.graph</span> <span style="color:#cf222e">import</span> StateGraph<span style="color:#1f2328">,</span> END
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">langgraph.graph.message</span> <span style="color:#cf222e">import</span> add_messages
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Load MCP toolbox async-safe</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">_load_mcp</span><span style="color:#1f2328">():</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">async</span> <span style="color:#cf222e">with</span> ToolboxClient<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;http://127.0.0.1:5000&#34;</span><span style="color:#1f2328">)</span> <span style="color:#cf222e">as</span> client<span style="color:#1f2328">:</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#cf222e">await</span> client<span style="color:#0550ae">.</span>aload_toolset<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Global state for MCP tools</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
+</span></span><span style="display:flex;"><span>_mcp_tools <span style="color:#0550ae">=</span> <span style="color:#cf222e">None</span>
+</span></span><span style="display:flex;"><span>_toolbox_client <span style="color:#0550ae">=</span> <span style="color:#cf222e">None</span>
+</span></span><span style="display:flex;"><span>_client_lock <span style="color:#0550ae">=</span> asyncio<span style="color:#0550ae">.</span>Lock<span style="color:#1f2328">()</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># preload tools for LangGraph load-time</span>
-</span></span><span style="display:flex;"><span>mcp_tools <span style="color:#0550ae">=</span> asyncio<span style="color:#0550ae">.</span>run<span style="color:#1f2328">(</span>_load_mcp<span style="color:#1f2328">())</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">get_mcp_tools</span><span style="color:#1f2328">():</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;Lazy load MCP tools on first use with connection pooling&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">global</span> _mcp_tools<span style="color:#1f2328">,</span> _toolbox_client
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">async</span> <span style="color:#cf222e">with</span> _client_lock<span style="color:#1f2328">:</span>  <span style="color:#57606a"># Prevent concurrent initialization</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> _mcp_tools <span style="color:#0550ae">is</span> <span style="color:#cf222e">None</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a"># Move blocking ToolboxClient to separate thread</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">def</span> <span style="color:#6639ba">_create_client</span><span style="color:#1f2328">():</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#cf222e">return</span> ToolboxClient<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;http://127.0.0.1:5000&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                _toolbox_client <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> asyncio<span style="color:#0550ae">.</span>to_thread<span style="color:#1f2328">(</span>_create_client<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a"># Try aload_toolset first, fall back to load_toolset</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">if</span> <span style="color:#6639ba">hasattr</span><span style="color:#1f2328">(</span>_toolbox_client<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;aload_toolset&#39;</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                    _mcp_tools <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> asyncio<span style="color:#0550ae">.</span>wait_for<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>                        _toolbox_client<span style="color:#0550ae">.</span>aload_toolset<span style="color:#1f2328">(),</span>
+</span></span><span style="display:flex;"><span>                        timeout<span style="color:#0550ae">=</span><span style="color:#0550ae">30</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                    _mcp_tools <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> asyncio<span style="color:#0550ae">.</span>wait_for<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>                        _toolbox_client<span style="color:#0550ae">.</span>load_toolset<span style="color:#1f2328">(),</span>
+</span></span><span style="display:flex;"><span>                        timeout<span style="color:#0550ae">=</span><span style="color:#0550ae">30</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Loaded </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>_mcp_tools<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> MCP tools&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">except</span> asyncio<span style="color:#0550ae">.</span>TimeoutError<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;MCP tools loading timed out&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                _mcp_tools <span style="color:#0550ae">=</span> <span style="color:#1f2328">[]</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Failed to load MCP tools: </span><span style="color:#0a3069">{</span>e<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                _mcp_tools <span style="color:#0550ae">=</span> <span style="color:#1f2328">[]</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> _mcp_tools
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#57606a"># Tavily</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span>tavily <span style="color:#0550ae">=</span> TavilySearch<span style="color:#1f2328">(</span>max_results<span style="color:#0550ae">=</span><span style="color:#0550ae">5</span><span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#57606a"># Custom amenity search tool</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#0550ae">@tool</span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">search_hdb_amenities</span><span style="color:#1f2328">(</span>query<span style="color:#1f2328">:</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">-&gt;</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">:</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    Search for amenities near an HDB block or town using Tavily.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;Search for amenities near an HDB block or town using Tavily.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    
 </span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    Example queries:
 </span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    - &#34;amenities near Block 123 Ang Mo Kio&#34;
 </span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    - &#34;schools near Bukit Panjang&#34;
 </span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    - &#34;supermarkets near Tampines&#34;
 </span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    - &#34;parks near Woodlands&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    The tool returns summarized search results.
 </span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    &#34;&#34;&#34;</span>
 </span></span><span style="display:flex;"><span>    formatted_query <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;amenities around </span><span style="color:#0a3069">{</span>query<span style="color:#0a3069">}</span><span style="color:#0a3069">, Singapore HDB, nearby facilities, schools, supermarkets, malls, transport&#34;</span>
 </span></span><span style="display:flex;"><span>    results <span style="color:#0550ae">=</span> tavily<span style="color:#0550ae">.</span>invoke<span style="color:#1f2328">(</span>formatted_query<span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> results
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Tool registry</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
-</span></span><span style="display:flex;"><span>all_tools <span style="color:#0550ae">=</span> mcp_tools <span style="color:#0550ae">+</span> <span style="color:#1f2328">[</span>tavily<span style="color:#1f2328">,</span> search_hdb_amenities<span style="color:#1f2328">]</span>
-</span></span><span style="display:flex;"><span>tools_by_name <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span>t<span style="color:#0550ae">.</span>name<span style="color:#1f2328">:</span> t <span style="color:#cf222e">for</span> t <span style="color:#0550ae">in</span> all_tools<span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#57606a"># STATE</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">AgentState</span><span style="color:#1f2328">(</span>TypedDict<span style="color:#1f2328">):</span>
 </span></span><span style="display:flex;"><span>    messages<span style="color:#1f2328">:</span> Annotated<span style="color:#1f2328">[</span>Sequence<span style="color:#1f2328">[</span>BaseMessage<span style="color:#1f2328">],</span> add_messages<span style="color:#1f2328">]</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#57606a"># PROMPTS</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span>sql_prompt <span style="color:#0550ae">=</span> ChatPromptTemplate<span style="color:#0550ae">.</span>from_messages<span style="color:#1f2328">([</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;system&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">SQL Agent.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">You answer only questions requiring HDB resale data or stats.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Use MCP SQL tools ONLY.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Always return structured, correct SQL tool calls.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">&#34;&#34;&#34;</span><span style="color:#1f2328">),</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;system&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;&#34;SQL Agent. You answer only questions requiring HDB resale data or stats.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Use MCP SQL tools ONLY. Always return structured, correct SQL tool calls.&#34;&#34;&#34;</span><span style="color:#1f2328">),</span>
 </span></span><span style="display:flex;"><span>    MessagesPlaceholder<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;scratch_pad&#34;</span><span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span><span style="color:#1f2328">])</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>amenities_prompt <span style="color:#0550ae">=</span> ChatPromptTemplate<span style="color:#0550ae">.</span>from_messages<span style="color:#1f2328">([</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;system&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Amenities Agent.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Use `search_hdb_amenities` first.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Use Tavily for deeper context.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">You answer:
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- amenities
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- schools
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- malls
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- MRT
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- supermarkets
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">near a block or town.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">&#34;&#34;&#34;</span><span style="color:#1f2328">),</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;system&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;&#34;Amenities Agent. Use search_hdb_amenities first. Use Tavily for deeper context.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">You answer: amenities, schools, malls, MRT, supermarkets near a block or town.&#34;&#34;&#34;</span><span style="color:#1f2328">),</span>
 </span></span><span style="display:flex;"><span>    MessagesPlaceholder<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;scratch_pad&#34;</span><span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span><span style="color:#1f2328">])</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>web_prompt <span style="color:#0550ae">=</span> ChatPromptTemplate<span style="color:#0550ae">.</span>from_messages<span style="color:#1f2328">([</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;system&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Web Research Agent.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Use Tavily search for general knowledge or non-HDB topics.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">&#34;&#34;&#34;</span><span style="color:#1f2328">),</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;system&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;&#34;Web Research Agent. Use Tavily search for general knowledge or non-HDB topics.&#34;&#34;&#34;</span><span style="color:#1f2328">),</span>
 </span></span><span style="display:flex;"><span>    MessagesPlaceholder<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;scratch_pad&#34;</span><span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span><span style="color:#1f2328">])</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#57606a"># MODEL FACTORY</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span>MODEL <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;moonshotai/kimi-k2-thinking&#34;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">build_model</span><span style="color:#1f2328">():</span>
@@ -2290,121 +2292,213 @@ I implement this in a new notebook <code>langgraph_mas.ipynb</code>.</p>
 </span></span><span style="display:flex;"><span>        model<span style="color:#0550ae">=</span>MODEL<span style="color:#1f2328">,</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># AGENTS (built dynamically with tools)</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">build_agents</span><span style="color:#1f2328">(</span>mcp_tools<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;Build agents with available tools&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    sql_agent <span style="color:#0550ae">=</span> sql_prompt <span style="color:#0550ae">|</span> build_model<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>bind_tools<span style="color:#1f2328">(</span>mcp_tools<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    amenities_agent <span style="color:#0550ae">=</span> amenities_prompt <span style="color:#0550ae">|</span> build_model<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>bind_tools<span style="color:#1f2328">([</span>search_hdb_amenities<span style="color:#1f2328">,</span> tavily<span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>    web_agent <span style="color:#0550ae">=</span> web_prompt <span style="color:#0550ae">|</span> build_model<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>bind_tools<span style="color:#1f2328">([</span>tavily<span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> sql_agent<span style="color:#1f2328">,</span> amenities_agent<span style="color:#1f2328">,</span> web_agent
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># AGENTS</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
-</span></span><span style="display:flex;"><span>sql_agent <span style="color:#0550ae">=</span> sql_prompt <span style="color:#0550ae">|</span> build_model<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>bind_tools<span style="color:#1f2328">(</span>mcp_tools<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>amenities_agent <span style="color:#0550ae">=</span> amenities_prompt <span style="color:#0550ae">|</span> build_model<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>bind_tools<span style="color:#1f2328">([</span>search_hdb_amenities<span style="color:#1f2328">,</span> tavily<span style="color:#1f2328">])</span>
-</span></span><span style="display:flex;"><span>web_agent <span style="color:#0550ae">=</span> web_prompt <span style="color:#0550ae">|</span> build_model<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>bind_tools<span style="color:#1f2328">([</span>tavily<span style="color:#1f2328">])</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Supervisor (router)</span>
-</span></span><span style="display:flex;"><span>supervisor_prompt <span style="color:#0550ae">=</span> ChatPromptTemplate<span style="color:#0550ae">.</span>from_messages<span style="color:#1f2328">([</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;system&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">You are the Supervisor.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">ROUTE the user query to one agent:
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ROUTER NODE</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">router_node</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">:</span> AgentState<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;Route to appropriate agent&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    router_model <span style="color:#0550ae">=</span> build_model<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    supervisor_prompt <span style="color:#0550ae">=</span> ChatPromptTemplate<span style="color:#0550ae">.</span>from_messages<span style="color:#1f2328">([</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;system&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;&#34;You are the Supervisor. ROUTE the user query to one agent:
 </span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- SQL_AGENT for resale/transaction/statistics queries
 </span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- AMENITIES_AGENT for amenities/schools/MRT/malls
 </span></span></span><span style="display:flex;"><span><span style="color:#0a3069">- WEB_AGENT for general queries
 </span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Respond with ONLY one of:
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">SQL_AGENT
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">AMENITIES_AGENT
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">WEB_AGENT
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">&#34;&#34;&#34;</span><span style="color:#1f2328">),</span>
-</span></span><span style="display:flex;"><span>    MessagesPlaceholder<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">])</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>router_model <span style="color:#0550ae">=</span> build_model<span style="color:#1f2328">()</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># ROUTER NODE — WITH VALIDATION</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">router_node</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">:</span> AgentState<span style="color:#1f2328">):</span>
-</span></span><span style="display:flex;"><span>    decision <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> router_model<span style="color:#0550ae">.</span>ainvoke<span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>        supervisor_prompt<span style="color:#0550ae">.</span>format<span style="color:#1f2328">(</span>messages<span style="color:#0550ae">=</span>state<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">])</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">Respond with ONLY one of: SQL_AGENT AMENITIES_AGENT WEB_AGENT&#34;&#34;&#34;</span><span style="color:#1f2328">),</span>
+</span></span><span style="display:flex;"><span>        MessagesPlaceholder<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    chain <span style="color:#0550ae">=</span> supervisor_prompt <span style="color:#0550ae">|</span> router_model
+</span></span><span style="display:flex;"><span>    decision <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> chain<span style="color:#0550ae">.</span>ainvoke<span style="color:#1f2328">({</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">:</span> state<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">]})</span>
 </span></span><span style="display:flex;"><span>    route <span style="color:#0550ae">=</span> decision<span style="color:#0550ae">.</span>content<span style="color:#0550ae">.</span>strip<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>upper<span style="color:#1f2328">()</span>
-</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> route <span style="color:#0550ae">not</span> <span style="color:#0550ae">in</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;SQL_AGENT&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;AMENITIES_AGENT&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;WEB_AGENT&#34;</span><span style="color:#1f2328">}:</span>
-</span></span><span style="display:flex;"><span>        route <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;WEB_AGENT&#34;</span>     <span style="color:#57606a"># fallback so KeyError never happens</span>
-</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        route <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;WEB_AGENT&#34;</span>
+</span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;next_agent&#34;</span><span style="color:#1f2328">:</span> route<span style="color:#1f2328">}</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#57606a"># TOOL EXECUTION NODE</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">execute_tool_with_retry</span><span style="color:#1f2328">(</span>tool<span style="color:#1f2328">,</span> tool_name<span style="color:#1f2328">,</span> args<span style="color:#1f2328">,</span> max_retries<span style="color:#0550ae">=</span><span style="color:#0550ae">2</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;Execute tool with exponential backoff retry&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> attempt <span style="color:#0550ae">in</span> <span style="color:#6639ba">range</span><span style="color:#1f2328">(</span>max_retries <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    Attempt </span><span style="color:#0a3069">{</span>attempt <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">/</span><span style="color:#0a3069">{</span>max_retries <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">...&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> <span style="color:#6639ba">hasattr</span><span style="color:#1f2328">(</span>tool<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;ainvoke&#39;</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                result <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> asyncio<span style="color:#0550ae">.</span>wait_for<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>                    tool<span style="color:#0550ae">.</span>ainvoke<span style="color:#1f2328">(</span>args<span style="color:#1f2328">),</span>
+</span></span><span style="display:flex;"><span>                    timeout<span style="color:#0550ae">=</span><span style="color:#0550ae">20</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                result <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> asyncio<span style="color:#0550ae">.</span>wait_for<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>                    asyncio<span style="color:#0550ae">.</span>to_thread<span style="color:#1f2328">(</span>tool<span style="color:#0550ae">.</span>invoke<span style="color:#1f2328">,</span> args<span style="color:#1f2328">),</span>
+</span></span><span style="display:flex;"><span>                    timeout<span style="color:#0550ae">=</span><span style="color:#0550ae">20</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span> result
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">except</span> asyncio<span style="color:#0550ae">.</span>TimeoutError<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    Timeout on attempt </span><span style="color:#0a3069">{</span>attempt <span style="color:#0550ae">+</span> <span style="color:#0550ae">1</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> attempt <span style="color:#0550ae">&lt;</span> max_retries<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                wait_time <span style="color:#0550ae">=</span> <span style="color:#0550ae">2</span> <span style="color:#0550ae">**</span> attempt
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    Retrying in </span><span style="color:#0a3069">{</span>wait_time<span style="color:#0a3069">}</span><span style="color:#0a3069">s...&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">await</span> asyncio<span style="color:#0550ae">.</span>sleep<span style="color:#1f2328">(</span>wait_time<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">raise</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    Error: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">str</span><span style="color:#1f2328">(</span>e<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> attempt <span style="color:#0550ae">&lt;</span> max_retries <span style="color:#0550ae">and</span> <span style="color:#0a3069">&#34;Network&#34;</span> <span style="color:#0550ae">in</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">(</span>e<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                wait_time <span style="color:#0550ae">=</span> <span style="color:#0550ae">2</span> <span style="color:#0550ae">**</span> attempt
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    Retrying in </span><span style="color:#0a3069">{</span>wait_time<span style="color:#0a3069">}</span><span style="color:#0a3069">s...&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">await</span> asyncio<span style="color:#0550ae">.</span>sleep<span style="color:#1f2328">(</span>wait_time<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">raise</span>
+</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">tool_node</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">:</span> AgentState<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;Execute tool calls from agent&#34;&#34;&#34;</span>
 </span></span><span style="display:flex;"><span>    last <span style="color:#0550ae">=</span> state<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">][</span><span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">]</span>
 </span></span><span style="display:flex;"><span>    outputs <span style="color:#0550ae">=</span> <span style="color:#1f2328">[]</span>
-</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    mcp_tools <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> get_mcp_tools<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    all_tools <span style="color:#0550ae">=</span> mcp_tools <span style="color:#0550ae">+</span> <span style="color:#1f2328">[</span>tavily<span style="color:#1f2328">,</span> search_hdb_amenities<span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>    tools_by_name <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span>t<span style="color:#0550ae">.</span>name<span style="color:#1f2328">:</span> t <span style="color:#cf222e">for</span> t <span style="color:#0550ae">in</span> all_tools<span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">TOOL_NODE: Found </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>last<span style="color:#0550ae">.</span>tool_calls<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> tool call(s)&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Available tools: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">list</span><span style="color:#1f2328">(</span>tools_by_name<span style="color:#0550ae">.</span>keys<span style="color:#1f2328">())</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> tc <span style="color:#0550ae">in</span> last<span style="color:#0550ae">.</span>tool_calls<span style="color:#1f2328">:</span>
-</span></span><span style="display:flex;"><span>        tool <span style="color:#0550ae">=</span> tools_by_name<span style="color:#1f2328">[</span>tc<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;name&#34;</span><span style="color:#1f2328">]]</span>
-</span></span><span style="display:flex;"><span>        result <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> tool<span style="color:#0550ae">.</span>ainvoke<span style="color:#1f2328">(</span>tc<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;args&#34;</span><span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>        tool_name <span style="color:#0550ae">=</span> tc<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;name&#34;</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">  Executing: </span><span style="color:#0a3069">{</span>tool_name<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    Args: </span><span style="color:#0a3069">{</span>tc<span style="color:#1f2328">[</span><span style="color:#0a3069">&#39;args&#39;</span><span style="color:#1f2328">]</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span>        
-</span></span><span style="display:flex;"><span>        outputs<span style="color:#0550ae">.</span>append<span style="color:#1f2328">(</span>ToolMessage<span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>            content<span style="color:#0550ae">=</span>json<span style="color:#0550ae">.</span>dumps<span style="color:#1f2328">(</span>result<span style="color:#1f2328">),</span>
-</span></span><span style="display:flex;"><span>            name<span style="color:#0550ae">=</span>tc<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;name&#34;</span><span style="color:#1f2328">],</span>
-</span></span><span style="display:flex;"><span>            tool_call_id<span style="color:#0550ae">=</span>tc<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;id&#34;</span><span style="color:#1f2328">],</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">))</span>
-</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            tool <span style="color:#0550ae">=</span> tools_by_name<span style="color:#0550ae">.</span>get<span style="color:#1f2328">(</span>tool_name<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> <span style="color:#0550ae">not</span> tool<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                result <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Tool &#39;</span><span style="color:#0a3069">{</span>tool_name<span style="color:#0a3069">}</span><span style="color:#0a3069">&#39; not found. Available: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">list</span><span style="color:#1f2328">(</span>tools_by_name<span style="color:#0550ae">.</span>keys<span style="color:#1f2328">())</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    </span><span style="color:#0a3069">{</span>result<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    Tool type: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">type</span><span style="color:#1f2328">(</span>tool<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                result <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> execute_tool_with_retry<span style="color:#1f2328">(</span>tool<span style="color:#1f2328">,</span> tool_name<span style="color:#1f2328">,</span> tc<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;args&#34;</span><span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    Success.&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">if</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">,</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                content <span style="color:#0550ae">=</span> result
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">elif</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">,</span> <span style="color:#6639ba">dict</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                content <span style="color:#0550ae">=</span> json<span style="color:#0550ae">.</span>dumps<span style="color:#1f2328">(</span>result<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">elif</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">,</span> <span style="color:#6639ba">list</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                content <span style="color:#0550ae">=</span> json<span style="color:#0550ae">.</span>dumps<span style="color:#1f2328">(</span>result<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">else</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                content <span style="color:#0550ae">=</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            outputs<span style="color:#0550ae">.</span>append<span style="color:#1f2328">(</span>ToolMessage<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>                content<span style="color:#0550ae">=</span>content<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                name<span style="color:#0550ae">=</span>tool_name<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                tool_call_id<span style="color:#0550ae">=</span>tc<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;id&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    ToolMessage created (</span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>content<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> chars)&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            error_msg <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Error executing </span><span style="color:#0a3069">{</span>tool_name<span style="color:#0a3069">}</span><span style="color:#0a3069">: </span><span style="color:#0a3069">{</span><span style="color:#6639ba">str</span><span style="color:#1f2328">(</span>e<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;    </span><span style="color:#0a3069">{</span>error_msg<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">import</span> <span style="color:#24292e">traceback</span>
+</span></span><span style="display:flex;"><span>            traceback<span style="color:#0550ae">.</span>print_exc<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            outputs<span style="color:#0550ae">.</span>append<span style="color:#1f2328">(</span>ToolMessage<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>                content<span style="color:#0550ae">=</span>error_msg<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                name<span style="color:#0550ae">=</span>tool_name<span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                tool_call_id<span style="color:#0550ae">=</span>tc<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;id&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">))</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">  Returning </span><span style="color:#0a3069">{</span><span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>outputs<span style="color:#1f2328">)</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> ToolMessage(s)&#34;</span><span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">:</span> outputs<span style="color:#1f2328">}</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#57606a"># SPECIALIST NODES</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">run_agent</span><span style="color:#1f2328">(</span>agent<span style="color:#1f2328">,</span> state<span style="color:#1f2328">):</span>
 </span></span><span style="display:flex;"><span>    response <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> agent<span style="color:#0550ae">.</span>ainvoke<span style="color:#1f2328">({</span><span style="color:#0a3069">&#34;scratch_pad&#34;</span><span style="color:#1f2328">:</span> state<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">]})</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">[</span>response<span style="color:#1f2328">]}</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">sql_agent_node</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">):</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#cf222e">await</span> run_agent<span style="color:#1f2328">(</span>sql_agent<span style="color:#1f2328">,</span> state<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">sql_agent_node</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">:</span> AgentState<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    mcp_tools <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> get_mcp_tools<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>    agent <span style="color:#0550ae">=</span> sql_prompt <span style="color:#0550ae">|</span> build_model<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>bind_tools<span style="color:#1f2328">(</span>mcp_tools<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#cf222e">await</span> run_agent<span style="color:#1f2328">(</span>agent<span style="color:#1f2328">,</span> state<span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">amenities_agent_node</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">):</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#cf222e">await</span> run_agent<span style="color:#1f2328">(</span>amenities_agent<span style="color:#1f2328">,</span> state<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">amenities_agent_node</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">:</span> AgentState<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    agent <span style="color:#0550ae">=</span> amenities_prompt <span style="color:#0550ae">|</span> build_model<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>bind_tools<span style="color:#1f2328">([</span>search_hdb_amenities<span style="color:#1f2328">,</span> tavily<span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#cf222e">await</span> run_agent<span style="color:#1f2328">(</span>agent<span style="color:#1f2328">,</span> state<span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">web_agent_node</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">):</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#cf222e">await</span> run_agent<span style="color:#1f2328">(</span>web_agent<span style="color:#1f2328">,</span> state<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">web_agent_node</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">:</span> AgentState<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    agent <span style="color:#0550ae">=</span> web_prompt <span style="color:#0550ae">|</span> build_model<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>bind_tools<span style="color:#1f2328">([</span>tavily<span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#cf222e">await</span> run_agent<span style="color:#1f2328">(</span>agent<span style="color:#1f2328">,</span> state<span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
 </span></span><span style="display:flex;"><span><span style="color:#57606a"># GRAPH BUILD</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># -----------------------------</span>
-</span></span><span style="display:flex;"><span>workflow <span style="color:#0550ae">=</span> StateGraph<span style="color:#1f2328">(</span>AgentState<span style="color:#1f2328">,</span> async_mode<span style="color:#0550ae">=</span><span style="color:#cf222e">True</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">build_graph</span><span style="color:#1f2328">():</span>
+</span></span><span style="display:flex;"><span>    workflow <span style="color:#0550ae">=</span> StateGraph<span style="color:#1f2328">(</span>AgentState<span style="color:#1f2328">,</span> async_mode<span style="color:#0550ae">=</span><span style="color:#cf222e">True</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>add_node<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;ROUTER&#34;</span><span style="color:#1f2328">,</span> router_node<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>add_node<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;SQL_AGENT&#34;</span><span style="color:#1f2328">,</span> sql_agent_node<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>add_node<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;AMENITIES_AGENT&#34;</span><span style="color:#1f2328">,</span> amenities_agent_node<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>add_node<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;WEB_AGENT&#34;</span><span style="color:#1f2328">,</span> web_agent_node<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>add_node<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">,</span> tool_node<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">next_step</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">:</span> AgentState<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        last <span style="color:#0550ae">=</span> state<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">][</span><span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>        has_calls <span style="color:#0550ae">=</span> <span style="color:#6639ba">hasattr</span><span style="color:#1f2328">(</span>last<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;tool_calls&#39;</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">and</span> <span style="color:#6639ba">len</span><span style="color:#1f2328">(</span>last<span style="color:#0550ae">.</span>tool_calls<span style="color:#1f2328">)</span> <span style="color:#0550ae">&gt;</span> <span style="color:#0550ae">0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">next_step: Last message type=</span><span style="color:#0a3069">{</span><span style="color:#6639ba">type</span><span style="color:#1f2328">(</span>last<span style="color:#1f2328">)</span><span style="color:#0550ae">.</span><span style="color:#953800">__name__</span><span style="color:#0a3069">}</span><span style="color:#0a3069">, has_tool_calls=</span><span style="color:#0a3069">{</span>has_calls<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#0a3069">&#34;TOOLS&#34;</span> <span style="color:#cf222e">if</span> has_calls <span style="color:#cf222e">else</span> END
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>add_conditional_edges<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;SQL_AGENT&#34;</span><span style="color:#1f2328">,</span> next_step<span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">,</span> END<span style="color:#1f2328">:</span> END<span style="color:#1f2328">})</span>
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>add_conditional_edges<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;AMENITIES_AGENT&#34;</span><span style="color:#1f2328">,</span> next_step<span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">,</span> END<span style="color:#1f2328">:</span> END<span style="color:#1f2328">})</span>
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>add_conditional_edges<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;WEB_AGENT&#34;</span><span style="color:#1f2328">,</span> next_step<span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">,</span> END<span style="color:#1f2328">:</span> END<span style="color:#1f2328">})</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>add_conditional_edges<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;ROUTER&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">lambda</span> out<span style="color:#1f2328">:</span> out<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;next_agent&#34;</span><span style="color:#1f2328">],</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">&#34;SQL_AGENT&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;SQL_AGENT&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">&#34;AMENITIES_AGENT&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;AMENITIES_AGENT&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">&#34;WEB_AGENT&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;WEB_AGENT&#34;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>add_edge<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;ROUTER&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    workflow<span style="color:#0550ae">.</span>set_entry_point<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;ROUTER&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> workflow<span style="color:#0550ae">.</span>compile<span style="color:#1f2328">()</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>add_node<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;ROUTER&#34;</span><span style="color:#1f2328">,</span> router_node<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>add_node<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;SQL_AGENT&#34;</span><span style="color:#1f2328">,</span> sql_agent_node<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>add_node<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;AMENITIES_AGENT&#34;</span><span style="color:#1f2328">,</span> amenities_agent_node<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>add_node<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;WEB_AGENT&#34;</span><span style="color:#1f2328">,</span> web_agent_node<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>add_node<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">,</span> tool_node<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>graph <span style="color:#0550ae">=</span> build_graph<span style="color:#1f2328">()</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">def</span> <span style="color:#6639ba">next_step</span><span style="color:#1f2328">(</span>state<span style="color:#1f2328">:</span> AgentState<span style="color:#1f2328">):</span>
-</span></span><span style="display:flex;"><span>    last <span style="color:#0550ae">=</span> state<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">][</span><span style="color:#0550ae">-</span><span style="color:#0550ae">1</span><span style="color:#1f2328">]</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#0a3069">&#34;TOOLS&#34;</span> <span style="color:#cf222e">if</span> last<span style="color:#0550ae">.</span>tool_calls <span style="color:#cf222e">else</span> END
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># MAIN</span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># ----------------------------- </span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">main</span><span style="color:#1f2328">(</span>user_query<span style="color:#1f2328">:</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;&#34;&#34;Run the graph with a user query&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">Query: </span><span style="color:#0a3069">{</span>user_query<span style="color:#0a3069">}</span><span style="color:#0a3069">\n</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    initial_state <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;messages&#34;</span><span style="color:#1f2328">:</span> <span style="color:#1f2328">[</span>HumanMessage<span style="color:#1f2328">(</span>content<span style="color:#0550ae">=</span>user_query<span style="color:#1f2328">)]}</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">async</span> <span style="color:#cf222e">for</span> output <span style="color:#0550ae">in</span> graph<span style="color:#0550ae">.</span>astream<span style="color:#1f2328">(</span>initial_state<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;State:&#34;</span><span style="color:#1f2328">,</span> output<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> graph<span style="color:#0550ae">.</span>get_state<span style="color:#1f2328">(</span>initial_state<span style="color:#1f2328">)</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>add_conditional_edges<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;SQL_AGENT&#34;</span><span style="color:#1f2328">,</span> next_step<span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">,</span> END<span style="color:#1f2328">:</span> END<span style="color:#1f2328">})</span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>add_conditional_edges<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;AMENITIES_AGENT&#34;</span><span style="color:#1f2328">,</span> next_step<span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">,</span> END<span style="color:#1f2328">:</span> END<span style="color:#1f2328">})</span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>add_conditional_edges<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;WEB_AGENT&#34;</span><span style="color:#1f2328">,</span> next_step<span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">,</span> END<span style="color:#1f2328">:</span> END<span style="color:#1f2328">})</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>add_conditional_edges<span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;ROUTER&#34;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">lambda</span> out<span style="color:#1f2328">:</span> out<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;next_agent&#34;</span><span style="color:#1f2328">],</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;SQL_AGENT&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;SQL_AGENT&#34;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;AMENITIES_AGENT&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;AMENITIES_AGENT&#34;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">&#34;WEB_AGENT&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;WEB_AGENT&#34;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">},</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>add_edge<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;TOOLS&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;ROUTER&#34;</span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>workflow<span style="color:#0550ae">.</span>set_entry_point<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;ROUTER&#34;</span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>graph <span style="color:#0550ae">=</span> workflow<span style="color:#0550ae">.</span>compile<span style="color:#1f2328">()</span></span></span></code></pre></div>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">if</span> <span style="color:#953800">__name__</span> <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#34;__main__&#34;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>    query <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;What amenities are near Bukit Panjang?&#34;</span>
+</span></span><span style="display:flex;"><span>    asyncio<span style="color:#0550ae">.</span>run<span style="color:#1f2328">(</span>main<span style="color:#1f2328">(</span>query<span style="color:#1f2328">))</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -2600,6 +2694,91 @@ I implement this in a new notebook <code>langgraph_mas.ipynb</code>.</p>
        >
 
 
+<p>Test case for MCP Tools:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Show me the median resale price of 4-room flats in Bishan.</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/mas/mas-multi-agent-system-langsmith-studio-chat-mode2.png"   alt="mas-multi-agent-system-langsmith-studio-chat-mode2" class="sc-image sc-image-default"
+       >
+
+
+<hr>
+<h2 id="source-code-on-github">Source Code on GitHub</h2>
+<p>You can find the full project, including notebooks, MAS graph, and tools configuration, here:</p>
+<p>👉 <strong>GitHub Repository:</strong> 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/multi-agent-system-using-langgraph" target="_blank" rel="noopener noreferrer" >https://github.com/seehiong/multi-agent-system-using-langgraph</a>
+</p>
+<p>The repo includes:</p>
+<ul>
+<li>All Jupyter notebooks (<code>toto_generator</code>, <code>ReAct agent</code>, <code>MAS supervisor</code>)</li>
+<li><code>graph.py</code> for LangGraph CLI</li>
+<li><code>tools.yaml</code> for MCP Toolbox</li>
+<li>Environment setup (<code>pyproject.toml</code>, <code>uv.lock</code>)</li>
+<li>Clean project structure and <code>.gitignore</code></li>
+</ul>
+<p>Feel free to star ⭐ the repo if you found it helpful!</p>
 
     </section>
 
@@ -2613,6 +2792,13 @@ I implement this in a new notebook <code>langgraph_mas.ipynb</code>.</p>
             </a>
           </div>
         
+        
+          <div class="nav-next">
+            <a href="/posts/2025/12/autonomous-deepagents-for-hdb-insights/" rel="next">
+              <span class="meta-nav">Next →</span>
+              <span class="post-title">Autonomous DeepAgents for HDB Insights</span>
+            </a>
+          </div>
         
       </div>
     </nav>
