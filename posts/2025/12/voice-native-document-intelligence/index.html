@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2025/12/voice-native-document-intelligence/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Voice-Native Document Intelligence">
+  <meta property="og:description" content="VoiceDoc Agent is a voice-native document intelligence system built for the AI Partner Catalyst hackathon. It transforms static documents into spoken, conversational experiences using Gemini on Vertex AI, ElevenLabs Speech-to-Text and Text-to-Speech, and Datadog observability. The project demonstrates a production-ready, voice-first architecture with expressive narration, persona-aware responses, real-time metrics, and synthetic traffic testing — showcasing how Google Cloud partner services can be composed into a measurable, scalable AI system.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-12-27T10:00:00+08:00">
+    <meta property="article:modified_time" content="2025-12-27T10:00:00+08:00">
+    <meta property="article:tag" content="Voice AI">
+    <meta property="article:tag" content="Gemini">
+    <meta property="article:tag" content="Firestore">
+    <meta property="article:tag" content="Google Cloud">
+    <meta property="article:tag" content="ElevenLabs">
+    <meta property="article:tag" content="Datadog">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Voice-Native Document Intelligence">
+  <meta name="twitter:description" content="VoiceDoc Agent is a voice-native document intelligence system built for the AI Partner Catalyst hackathon. It transforms static documents into spoken, conversational experiences using Gemini on Vertex AI, ElevenLabs Speech-to-Text and Text-to-Speech, and Datadog observability. The project demonstrates a production-ready, voice-first architecture with expressive narration, persona-aware responses, real-time metrics, and synthetic traffic testing — showcasing how Google Cloud partner services can be composed into a measurable, scalable AI system.">
+
+  <meta itemprop="name" content="Voice-Native Document Intelligence">
+  <meta itemprop="description" content="VoiceDoc Agent is a voice-native document intelligence system built for the AI Partner Catalyst hackathon. It transforms static documents into spoken, conversational experiences using Gemini on Vertex AI, ElevenLabs Speech-to-Text and Text-to-Speech, and Datadog observability. The project demonstrates a production-ready, voice-first architecture with expressive narration, persona-aware responses, real-time metrics, and synthetic traffic testing — showcasing how Google Cloud partner services can be composed into a measurable, scalable AI system.">
+  <meta itemprop="datePublished" content="2025-12-27T10:00:00+08:00">
+  <meta itemprop="dateModified" content="2025-12-27T10:00:00+08:00">
+  <meta itemprop="wordCount" content="2849">
+  <meta itemprop="keywords" content="Voice AI,Gemini,Firestore,Google Cloud,ElevenLabs,Datadog,LLM Obervability,Hackathon,RAG"><title>Voice-Native Document Intelligence | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2025/12/voice-native-document-intelligence/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Voice-Native Document Intelligence</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2025-12-27T10:00:00&#43;08:00">December 27, 2025</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/voice-ai">Voice AI</a>
+            
+              , <a href="/tags/gemini">Gemini</a>
+            
+              , <a href="/tags/firestore">Firestore</a>
+            
+              , <a href="/tags/google-cloud">Google Cloud</a>
+            
+              , <a href="/tags/elevenlabs">ElevenLabs</a>
+            
+              , <a href="/tags/datadog">Datadog</a>
+            
+              , <a href="/tags/llm-obervability">LLM Obervability</a>
+            
+              , <a href="/tags/hackathon">Hackathon</a>
+            
+              , <a href="/tags/rag">RAG</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/voicedoc/voicedoc-voice-native-document-intelligence.png');"></div>
+          <img src="/images/voicedoc/voicedoc-voice-native-document-intelligence.png" alt="Voice-Native Document Intelligence cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>I recently signed up for the 
+
+
+
+
+
+
+  <a href="https://ai-partner-catalyst.devpost.com/" target="_blank" rel="noopener noreferrer" >AI Partner Catalyst: Accelerate Innovation</a>
+ hackathon — an initiative focused on accelerating innovation through the Google Cloud partner ecosystem.</p>
+<p>For this submission, I built 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/voicedoc-agent" target="_blank" rel="noopener noreferrer" >VoiceDoc-Agent</a>
+: a <strong>voice‑native document intelligence system</strong> that transforms static text documents into spoken, conversational experiences. The system is powered by Gemini on Vertex AI, ElevenLabs Speech‑to‑Text and Text‑to‑Speech, and Datadog observability, demonstrating how partner AI services can be composed into a cohesive, production‑grade architecture.</p>
+<p>VoiceDoc Agent allows users to upload text‑based documents and interact with them entirely through speech. Beyond basic Q&amp;A, the agent supports narration, expressive voice output, persona‑aware responses, and end‑to‑end observability — all deployed serverlessly on Google Cloud.</p>
+<p>This project was created specifically for <strong>AI Partner Catalyst: Accelerate Innovation</strong>, showcasing how Google Cloud partners can collaborate to deliver voice‑first AI systems with real‑time insight into performance, cost, and user experience.</p>
+<h2 id="setup">Setup</h2>
+<h3 id="firestore">Firestore</h3>
+<p>
+
+
+
+
+
+
+  <a href="https://firebase.google.com/docs/firestore" target="_blank" rel="noopener noreferrer" >Firestore</a>
+ is used as a serverless document database for ingestion, deduplication, and retrieval‑augmented generation (RAG).</p>
+<p>Create a new Firestore database named <strong>voicedoc-fs</strong>. Two collections are required:</p>
+<ul>
+<li><strong>documents</strong> — Used for smart ingestion and deduplication. Before processing a file, the system checks whether its content hash already exists.</li>
+<li><strong>document_chunks</strong>&quot; — Stores chunked document text and embeddings used for retrieval.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-firestore-setup.png"   alt="voicedoc-firestore-setup" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="service-account">Service Account</h3>
+<p>VoiceDoc Agent follows the principle of least privilege. Only the following IAM roles are required:</p>
+<ul>
+<li><strong>Vertex AI User</strong> — Gemini API calls, embeddings generation, and document classification</li>
+<li><strong>Cloud Datastore User</strong> — Firestore read/write access for document chunks and metadata</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-serviceaccount-setup.png"   alt="voicedoc-serviceaccount-setup" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="datadog-dashboard">Datadog Dashboard</h3>
+<p>To visualize system‑wide metrics:</p>
+<ol>
+<li>Navigate to <strong>Dashboards</strong> → <strong>New Dashboard</strong> in Datadog</li>
+<li>Click <strong>Configure</strong> → <strong>Import dashboard JSON</strong></li>
+<li>Paste the contents of <code>setup/datadog-dashboard.json</code></li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-datadog-dashboard-setup.png"   alt="voicedoc-datadog-dashboard-setup" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="datadog-monitors">Datadog Monitors</h3>
+<p>To enable proactive alerting:</p>
+<ol>
+<li>Go to <strong>Monitoring</strong> → <em>New Monitor</em></li>
+<li>Select <strong>Import From JSON</strong></li>
+<li>Import each monitor defined in <code>setup/datadob-monitors.json</code></li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-datadog-monitors-setup.png"   alt="voicedoc-datadog-monitors-setup" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="elevenlabs-api-key">ElevenLabs API Key</h3>
+<p>Configure the ElevenLabs API key with <strong>least‑privilege access</strong>:</p>
+<ul>
+<li>✅ Text to Speech → Access</li>
+<li>✅ Voices → Read</li>
+<li>✅ Speech to Text → Access</li>
+<li>❌ Everything else → Disabled</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-elevenlabs-api-key.png"   alt="voicedoc-elevenlabs-api-key" class="sc-image sc-image-default"
+       >
+
+
+<hr>
+<h2 id="code-walkthrough">Code Walkthrough</h2>
+<h3 id="1-gemini-ai-integration">1. Gemini AI Integration</h3>
+<p>The Gemini integration lives in <code>src/lib/vertex.ts</code> and is structured as a <strong>three‑stage pipeline</strong>:</p>
+<ol>
+<li>Retrieve the raw LLM response</li>
+<li>Optionally enrich the response with emotion tags (Expressive Mode)</li>
+<li>Stream the final response back to the client</li>
+</ol>
+<p>This design keeps narration, expressive speech, and observability concerns cleanly separated.</p>
+<h4 id="11-get-the-raw-response-from-gemini">1.1 Get the raw response from Gemini</h4>
+<p>The first call retrieves a strictly grounded response from Gemini, instrumented with Datadog tracing and token‑level metrics.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// CALL 1: Get the raw response from Gemini (WITH METRICS)
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#cf222e">async</span> <span style="color:#cf222e">function</span> <span style="color:#1f2328">getGeminiRawResponse</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">history</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">[],</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">query</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">context</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">isNarrationRequest</span>: <span style="color:#cf222e">boolean</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">voiceMode</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;standard&#39;</span> <span style="color:#0550ae">|</span> <span style="color:#0a3069">&#39;expressive&#39;</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;standard&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">trafficType</span>: <span style="color:#cf222e">string</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;user&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">Promise</span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">string</span><span style="color:#1f2328">&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#cf222e">const</span> <span style="color:#1f2328">startTime</span> <span style="color:#0550ae">=</span> <span style="color:#6639ba">Date</span><span style="color:#1f2328">.</span><span style="color:#1f2328">now</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#cf222e">return</span> <span style="color:#1f2328">tracer</span><span style="color:#1f2328">.</span><span style="color:#1f2328">trace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;gemini.request&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">resource</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;getGeminiRawResponse&#39;</span> <span style="color:#1f2328">},</span> <span style="color:#cf222e">async</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">span</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">=&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;voice_mode&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call1:getGeminiRawResponse] Getting raw response from Gemini&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">model</span>: <span style="color:#cf222e">GenerativeModel</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">getVertexAI</span><span style="color:#1f2328">().</span><span style="color:#1f2328">getGenerativeModel</span><span style="color:#1f2328">({</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">model</span>: <span style="color:#cf222e">modelName</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">generationConfig</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">maxOutputTokens</span>: <span style="color:#cf222e">8192</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">temperature</span>: <span style="color:#cf222e">0.7</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">validHistory</span>: <span style="color:#cf222e">Content</span><span style="color:#1f2328">[]</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">history</span><span style="color:#1f2328">.</span><span style="color:#1f2328">map</span><span style="color:#1f2328">((</span><span style="color:#1f2328">h</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">=&gt;</span> <span style="color:#1f2328">({</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">role</span>: <span style="color:#cf222e">h.role</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">parts</span>: <span style="color:#cf222e">h.parts</span> <span style="color:#0550ae">||</span> <span style="color:#1f2328">[{</span> <span style="color:#1f2328">text</span>: <span style="color:#cf222e">h.text</span> <span style="color:#1f2328">}]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}));</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">let</span> <span style="color:#1f2328">systemPrompt</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">let</span> <span style="color:#1f2328">textToRead</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">context</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">isNarrationRequest</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">extracted</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">extractSection</span><span style="color:#1f2328">(</span><span style="color:#1f2328">context</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">query</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">extracted</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">textToRead</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">extracted</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call1] Extracted chapter/section&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">systemPrompt</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">`You are a professional audiobook narrator. Read the following text aloud EXACTLY as written, word-for-word. 
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">CRITICAL RULES:
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">1. Do NOT summarize.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">2. Do NOT paraphrase.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">3. Do NOT skip any words.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">4. Output the spoken text ONLY.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">5. Do NOT include narration notes, stage directions, or descriptions of tone (e.g., (softly), (muttering), (friendly)).
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">6. Do NOT include speaker labels.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">TEXT TO READ:
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span><span style="color:#0a3069">${</span><span style="color:#1f2328">textToRead</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">systemPrompt</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">`You are a voice assistant answering questions about a document. Answer based STRICTLY on the provided context. Do NOT use training data to fill gaps.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">CONTEXT:
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span><span style="color:#0a3069">${</span><span style="color:#1f2328">context</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.model&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">modelName</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.is_narration&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">isNarrationRequest</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">chat</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">model</span><span style="color:#1f2328">.</span><span style="color:#1f2328">startChat</span><span style="color:#1f2328">({</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">history</span>: <span style="color:#cf222e">validHistory</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">systemInstruction</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">role</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;system&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">parts</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[{</span> <span style="color:#1f2328">text</span>: <span style="color:#cf222e">systemPrompt</span> <span style="color:#1f2328">}]</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">message</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">isNarrationRequest</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">extractSection</span><span style="color:#1f2328">(</span><span style="color:#1f2328">context</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">query</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">?</span> <span style="color:#0a3069">`Please begin reading.`</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">:</span> <span style="color:#1f2328">query</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">result</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">chat</span><span style="color:#1f2328">.</span><span style="color:#1f2328">sendMessage</span><span style="color:#1f2328">(</span><span style="color:#1f2328">message</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">response</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">result</span><span style="color:#1f2328">.</span><span style="color:#1f2328">response</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">rawText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">response</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidates</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">].</span><span style="color:#1f2328">content</span><span style="color:#1f2328">.</span><span style="color:#1f2328">parts</span><span style="color:#1f2328">[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">].</span><span style="color:#1f2328">text</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">usage</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">response</span><span style="color:#1f2328">.</span><span style="color:#1f2328">usageMetadata</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">usage</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.prompt_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.completion_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.total_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">totalTokenCount</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// 📊 RECORD METRICS
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordTokens</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">trafficType</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordLLMCost</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">trafficType</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call1] Got raw response, length:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">rawText</span><span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">return</span> <span style="color:#1f2328">rawText</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">catch</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;error&#39;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">true</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;error.message&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">message</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// 📊 RECORD ERROR METRIC
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordError</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;call1_error&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">throw</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong><em>Key characteristics</em></strong>:</p>
+<ul>
+<li>Supports both <strong>narration</strong> and <strong>Q&amp;A</strong> modes</li>
+<li>Enforces strict grounding against provided document context</li>
+<li>Records token usage and estimated cost</li>
+<li>Emits latency and error metrics for observability</li>
+</ul>
+<h4 id="12-add-emotion-tags-using-few-shot-learning">1.2 Add emotion tags using few-shot learning</h4>
+<p>When <strong>Expressive Mode</strong> is enabled, a second Gemini call augments the text with ElevenLabs V3 emotion tags using few‑shot examples.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// CALL 2: Add emotion tags using few-shot learning (WITH METRICS)
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#cf222e">async</span> <span style="color:#cf222e">function</span> <span style="color:#1f2328">addEmotionTagsWithFewShot</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">rawText</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">persona</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">contextHint?</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">voiceMode</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;standard&#39;</span> <span style="color:#0550ae">|</span> <span style="color:#0a3069">&#39;expressive&#39;</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;expressive&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">trafficType</span>: <span style="color:#cf222e">string</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;user&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">Promise</span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">string</span><span style="color:#1f2328">&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#cf222e">return</span> <span style="color:#1f2328">tracer</span><span style="color:#1f2328">.</span><span style="color:#1f2328">trace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;gemini.request&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">resource</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;addEmotionTagsWithFewShot&#39;</span> <span style="color:#1f2328">},</span> <span style="color:#cf222e">async</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">span</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">=&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;voice_mode&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call2:addEmotionTagsWithFewShot] Starting with text length:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">rawText</span><span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">model</span>: <span style="color:#cf222e">GenerativeModel</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">getVertexAI</span><span style="color:#1f2328">().</span><span style="color:#1f2328">getGenerativeModel</span><span style="color:#1f2328">({</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">model</span>: <span style="color:#cf222e">modelName</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">generationConfig</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">temperature</span>: <span style="color:#cf222e">0.2</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">topP</span>: <span style="color:#cf222e">0.7</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">fewShotExamples</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">getFewShotExamples</span><span style="color:#1f2328">(</span><span style="color:#1f2328">persona</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">history</span>: <span style="color:#cf222e">Content</span><span style="color:#1f2328">[]</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">[];</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> <span style="color:#1f2328">(</span><span style="color:#cf222e">const</span> <span style="color:#1f2328">example</span> <span style="color:#cf222e">of</span> <span style="color:#1f2328">fewShotExamples</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">history</span><span style="color:#1f2328">.</span><span style="color:#1f2328">push</span><span style="color:#1f2328">({</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">role</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;user&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">parts</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[{</span> <span style="color:#1f2328">text</span>: <span style="color:#cf222e">example.userInput</span> <span style="color:#1f2328">}]</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">history</span><span style="color:#1f2328">.</span><span style="color:#1f2328">push</span><span style="color:#1f2328">({</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">role</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;assistant&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">parts</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[{</span> <span style="color:#1f2328">text</span>: <span style="color:#cf222e">example.expectedOutput</span> <span style="color:#1f2328">}]</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">systemPrompt</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">`SYSTEM: You add emotion tags to text ONLY. Nothing else.
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">TAGS ONLY: [excited] [nervous] [frustrated] [sorrowful] [calm] [sigh] [laughs] [gulps] [gasps] [whispers] [pauses] [hesitates] [wearily] [warmly] [playfully] [stunned] [intrigued] [reflectively] [passionately] [poetically]
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">YOUR JOB:
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">1. Take input text
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">2. Add [tag] BEFORE words - no parentheses, no narration notes
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">3. Keep EVERY word exactly the same
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">4. Return ONLY the tagged text
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">NEVER add: (notes), descriptions, or stage directions. 
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">ONLY add: [emotion_tag] tags in square brackets.`</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.model&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">modelName</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.persona&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">persona</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">chat</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">model</span><span style="color:#1f2328">.</span><span style="color:#1f2328">startChat</span><span style="color:#1f2328">({</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">history</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">systemInstruction</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">role</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;system&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">parts</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[{</span> <span style="color:#1f2328">text</span>: <span style="color:#cf222e">systemPrompt</span> <span style="color:#1f2328">}]</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">userMessage</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">`Add ONLY emotion tags [like this] to this text. Do NOT add parentheses or narration notes. PRESERVE ALL WORDS:
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
+</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span><span style="color:#0a3069">${</span><span style="color:#1f2328">rawText</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call2] Sending to Gemini...&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">result</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">chat</span><span style="color:#1f2328">.</span><span style="color:#1f2328">sendMessage</span><span style="color:#1f2328">(</span><span style="color:#1f2328">userMessage</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">response</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">result</span><span style="color:#1f2328">.</span><span style="color:#1f2328">response</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">let</span> <span style="color:#1f2328">taggedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">response</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidates</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">].</span><span style="color:#1f2328">content</span><span style="color:#1f2328">.</span><span style="color:#1f2328">parts</span><span style="color:#1f2328">[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">].</span><span style="color:#1f2328">text</span> <span style="color:#0550ae">||</span> <span style="color:#1f2328">rawText</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">usage</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">response</span><span style="color:#1f2328">.</span><span style="color:#1f2328">usageMetadata</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">usage</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.prompt_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.completion_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.total_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">totalTokenCount</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// 📊 RECORD METRICS
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordTokens</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">trafficType</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordLLMCost</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">trafficType</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">taggedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">taggedText</span><span style="color:#1f2328">.</span><span style="color:#1f2328">replace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">/\([^)]*?\)/g</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">).</span><span style="color:#1f2328">trim</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call2] After cleanup, length:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">taggedText</span><span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">return</span> <span style="color:#1f2328">taggedText</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">catch</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;error&#39;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">true</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;error.message&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">message</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// 📊 RECORD ERROR METRIC
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordError</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;call2_error&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">throw</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong><em>Design goals</em></strong>:</p>
+<ul>
+<li>Preserve <strong>every word</strong> of the original text</li>
+<li>Insert emotion tags only in square‑bracket format</li>
+<li>Prevent narration notes or paraphrasing</li>
+<li>Keep expressive behavior deterministic and auditable</li>
+</ul>
+<h4 id="13-stream-response-from-llm">1.3 Stream response from LLM</h4>
+<p>The streaming function orchestrates the two‑call pipeline and yields the final text for downstream TTS processing.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// STREAMING RESPONSE (WITH METRICS)
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#cf222e">export</span> <span style="color:#cf222e">async</span> <span style="color:#cf222e">function</span><span style="color:#0550ae">*</span> <span style="color:#1f2328">getGeminiStream</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">history</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">Content</span><span style="color:#1f2328">[],</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">query</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">string</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">context</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">string</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">isNarrationRequest</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">boolean</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">expressiveMode</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">boolean</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">persona</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">string</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;narrative&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">trafficType</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">string</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;user&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#cf222e">const</span> <span style="color:#1f2328">startTime</span> <span style="color:#0550ae">=</span> <span style="color:#6639ba">Date</span><span style="color:#1f2328">.</span><span style="color:#1f2328">now</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] 🚀 Starting two-call process&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">expressiveMode</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">persona</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span> <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#cf222e">try</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] Is narration request:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">isNarrationRequest</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a">// CALL 1: Get raw response
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] ========== CALL 1: RAW RESPONSE ==========&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">voiceMode</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">expressiveMode</span> <span style="color:#0550ae">?</span> <span style="color:#0a3069">&#39;expressive&#39;</span> <span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;standard&#39;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">rawResponse</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">getGeminiRawResponse</span><span style="color:#1f2328">(</span><span style="color:#1f2328">history</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">query</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">context</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">isNarrationRequest</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] CALL 1 OUTPUT (length:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">rawResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;)&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">!</span><span style="color:#1f2328">rawResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">trim</span><span style="color:#1f2328">())</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">yield</span> <span style="color:#0a3069">&#39;No response generated.&#39;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// 📊 RECORD METRICS
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">duration</span> <span style="color:#0550ae">=</span> <span style="color:#6639ba">Date</span><span style="color:#1f2328">.</span><span style="color:#1f2328">now</span><span style="color:#1f2328">()</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">startTime</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">return</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a">// CALL 2: Add emotion tags if expressive mode
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#cf222e">let</span> <span style="color:#1f2328">finalResponse</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">string</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">expressiveMode</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] ========== CALL 2: ADD EMOTION TAGS ==========&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">finalResponse</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">addEmotionTagsWithFewShot</span><span style="color:#1f2328">(</span><span style="color:#1f2328">rawResponse</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">persona</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">undefined</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] CALL 2 OUTPUT (length:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">finalResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;)&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// Cleanup any hallucinations like (narrative tone) or [pauses] that might leak in Standard mode
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#1f2328">finalResponse</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">rawResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">replace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">/\([^)]*?\)/g</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">).</span><span style="color:#1f2328">replace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">/\[[^\]]*?\]/g</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">).</span><span style="color:#1f2328">trim</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] Standard mode - cleanup applied and Call 2 skipped&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] ✅ Complete, yielding final response&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">yield</span> <span style="color:#1f2328">finalResponse</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">}</span> <span style="color:#cf222e">catch</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] ❌ Fatal error:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a">// 📊 RECORD ERROR
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordError</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;fatal_error&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">expressiveMode</span> <span style="color:#0550ae">?</span> <span style="color:#0a3069">&#39;expressive&#39;</span> <span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;standard&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span> <span style="color:#cf222e">instanceof</span> <span style="color:#6639ba">Error</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] Message:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">message</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] Stack:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">stack</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">yield</span> <span style="color:#0a3069">`\n\nERROR: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">error</span> <span style="color:#cf222e">instanceof</span> <span style="color:#6639ba">Error</span> <span style="color:#0550ae">?</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">message</span> <span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;Unknown error&#39;</span><span style="color:#0a3069">}</span><span style="color:#0a3069">\n`</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">throw</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong><em>Highlights</em></strong>:</p>
+<ul>
+<li>Expressive Mode triggers a controlled second LLM call</li>
+<li>Standard Mode performs defensive cleanup of stray tags</li>
+<li>All errors and latency are captured via Datadog metrics</li>
+</ul>
+<h3 id="2-elevenlabs-api">2. ElevenLabs API</h3>
+<p>ElevenLabs is used for both <strong>speech transcription</strong> and <strong>voice generation</strong>, with dynamic model selection based on document persona and expressive intent.</p>
+<h4 id="21-transcribe-api">2.1 Transcribe API</h4>
+<p>Speech‑to‑Text is implemented in <code>src/app/api/transcribe/route.ts</code>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#cf222e">export</span> <span style="color:#cf222e">async</span> <span style="color:#cf222e">function</span> <span style="color:#1f2328">POST</span><span style="color:#1f2328">(</span><span style="color:#1f2328">req</span>: <span style="color:#cf222e">NextRequest</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;=== Transcribe API Called ===&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">formData</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">req</span><span style="color:#1f2328">.</span><span style="color:#1f2328">formData</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">audioFile</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">formData</span><span style="color:#1f2328">.</span><span style="color:#cf222e">get</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;audio&#39;</span><span style="color:#1f2328">)</span> <span style="color:#cf222e">as</span> <span style="color:#1f2328">File</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">!</span><span style="color:#1f2328">audioFile</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;No audio file provided&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">{</span> <span style="color:#1f2328">error</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;No audio file provided&#39;</span> <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">{</span> <span style="color:#1f2328">status</span>: <span style="color:#cf222e">400</span> <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">`📦 Received audio file: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">audioFile</span><span style="color:#1f2328">.</span><span style="color:#1f2328">name</span><span style="color:#0a3069">}</span><span style="color:#0a3069">, size: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">audioFile</span><span style="color:#1f2328">.</span><span style="color:#1f2328">size</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> bytes, type: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">audioFile</span><span style="color:#1f2328">.</span><span style="color:#cf222e">type</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// Convert File to Blob
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">arrayBuffer</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">audioFile</span><span style="color:#1f2328">.</span><span style="color:#1f2328">arrayBuffer</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">audioBlob</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">new</span> <span style="color:#1f2328">Blob</span><span style="color:#1f2328">([</span><span style="color:#1f2328">arrayBuffer</span><span style="color:#1f2328">],</span> <span style="color:#1f2328">{</span> <span style="color:#cf222e">type</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">audioFile</span><span style="color:#1f2328">.</span><span style="color:#cf222e">type</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;audio/webm&#39;</span> <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;🎙️ Calling ElevenLabs speechToText.convert()...&#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">transcription</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">getClient</span><span style="color:#1f2328">().</span><span style="color:#1f2328">speechToText</span><span style="color:#1f2328">.</span><span style="color:#1f2328">convert</span><span style="color:#1f2328">({</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">file</span>: <span style="color:#cf222e">audioBlob</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">modelId</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;scribe_v1&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">tagAudioEvents</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">languageCode</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;eng&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">diarize</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;✅ Transcription successful:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">JSON</span><span style="color:#1f2328">.</span><span style="color:#1f2328">stringify</span><span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">null</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">));</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// Handle different response structures
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">let</span> <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// Check various possible response structures
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">if</span> <span style="color:#1f2328">((</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">text</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">text</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#cf222e">if</span> <span style="color:#1f2328">((</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">transcription</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">transcription</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#cf222e">if</span> <span style="color:#1f2328">((</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">result</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">result</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#cf222e">if</span> <span style="color:#1f2328">((</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">chunks</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#6639ba">Array</span><span style="color:#1f2328">.</span><span style="color:#1f2328">isArray</span><span style="color:#1f2328">((</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">chunks</span><span style="color:#1f2328">))</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// If it&#39;s multichannel with chunks
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">chunks</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">.</span><span style="color:#1f2328">map</span><span style="color:#1f2328">((</span><span style="color:#1f2328">chunk</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">=&gt;</span> <span style="color:#1f2328">chunk</span><span style="color:#1f2328">.</span><span style="color:#1f2328">text</span> <span style="color:#0550ae">||</span> <span style="color:#1f2328">chunk</span><span style="color:#1f2328">.</span><span style="color:#1f2328">transcript</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">.</span><span style="color:#1f2328">join</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39; &#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#6639ba">Array</span><span style="color:#1f2328">.</span><span style="color:#1f2328">isArray</span><span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span><span style="color:#1f2328">))</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// If it&#39;s an array response
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">transcription</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">.</span><span style="color:#1f2328">map</span><span style="color:#1f2328">((</span><span style="color:#1f2328">item</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">=&gt;</span> <span style="color:#1f2328">item</span><span style="color:#1f2328">.</span><span style="color:#1f2328">text</span> <span style="color:#0550ae">||</span> <span style="color:#1f2328">item</span><span style="color:#1f2328">.</span><span style="color:#1f2328">transcript</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">.</span><span style="color:#1f2328">join</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39; &#39;</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;📝 Extracted text:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">transcribedText</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">({</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">text</span>: <span style="color:#cf222e">transcribedText</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">success</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">transcription</span>: <span style="color:#cf222e">transcription</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">catch</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;❌ Transcription error:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// Log detailed error info
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span> <span style="color:#cf222e">instanceof</span> <span style="color:#6639ba">Error</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;Error message:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">message</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;Error stack:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">stack</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">errorMessage</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">error</span> <span style="color:#cf222e">instanceof</span> <span style="color:#6639ba">Error</span> <span style="color:#0550ae">?</span> <span style="color:#1f2328">error.message</span> : <span style="color:#cf222e">String</span><span style="color:#1f2328">(</span><span style="color:#1f2328">error</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">error</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;Transcription failed&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">details</span>: <span style="color:#cf222e">errorMessage</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span> <span style="color:#1f2328">status</span>: <span style="color:#cf222e">500</span> <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong><em>The implementation</em></strong>:</p>
+<ul>
+<li>Accepts streamed audio input</li>
+<li>Handles multiple response formats defensively</li>
+<li>Supports diarization and audio event tagging</li>
+<li>Emits structured logs for debugging and traceability</li>
+</ul>
+<h4 id="22-speak-api">2.2 Speak API</h4>
+<p>Text‑to‑Speech is implemented in <code>src/app/api/speak/route.ts</code>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#cf222e">export</span> <span style="color:#cf222e">async</span> <span style="color:#cf222e">function</span> <span style="color:#1f2328">POST</span><span style="color:#1f2328">(</span><span style="color:#1f2328">req</span>: <span style="color:#cf222e">NextRequest</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">text</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">persona</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">expressiveMode</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>   <span style="color:#57606a">// 🔑 mirrors Gemini pipeline
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#1f2328">}</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">text</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">persona?</span>: <span style="color:#cf222e">Persona</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">expressiveMode?</span>: <span style="color:#cf222e">boolean</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">req</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">!</span><span style="color:#1f2328">text</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">({</span> <span style="color:#1f2328">error</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;Text is required&#39;</span> <span style="color:#1f2328">},</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">status</span>: <span style="color:#cf222e">400</span> <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">voiceId</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">getVoiceIdForPersona</span><span style="color:#1f2328">(</span><span style="color:#1f2328">persona</span> <span style="color:#cf222e">as</span> <span style="color:#1f2328">Persona</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// 🎭 Model selection
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">modelId</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">expressiveMode</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">?</span> <span style="color:#0a3069">&#39;eleven_v3&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;eleven_flash_v2_5&#39;</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">inferredExpressive</span> <span style="color:#0550ae">=</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">expressiveMode</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">/\[[^\]]+\]/</span><span style="color:#1f2328">.</span><span style="color:#1f2328">test</span><span style="color:#1f2328">(</span><span style="color:#1f2328">text</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">finalExpressiveMode</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">inferredExpressive</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// 🧹 Strip emotion tags in standard mode
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">processedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">finalExpressiveMode</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">?</span> <span style="color:#1f2328">text</span>
+</span></span><span style="display:flex;"><span>            : <span style="color:#cf222e">text.replace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">/\[[^\]]*?\]/g</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">).</span><span style="color:#1f2328">trim</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">`🎙️ TTS Request | Persona: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">persona</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;narrative&#39;</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | `</span> <span style="color:#0550ae">+</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">`Mode: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">expressiveMode</span> <span style="color:#0550ae">?</span> <span style="color:#0a3069">&#39;expressive&#39;</span> <span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;standard&#39;</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | `</span> <span style="color:#0550ae">+</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">`Model: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">modelId</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | VoiceID: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">voiceId</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">audio</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">getClient</span><span style="color:#1f2328">().</span><span style="color:#1f2328">textToSpeech</span><span style="color:#1f2328">.</span><span style="color:#1f2328">convert</span><span style="color:#1f2328">(</span><span style="color:#1f2328">voiceId</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">text</span>: <span style="color:#cf222e">processedText</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">modelId</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">outputFormat</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;mp3_44100_128&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#cf222e">new</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">(</span><span style="color:#1f2328">audio</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">headers</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#0a3069">&#39;Content-Type&#39;</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;audio/mpeg&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">catch</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;❌ TTS Error:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">message</span>: <span style="color:#cf222e">error.message</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">statusCode</span>: <span style="color:#cf222e">error.statusCode</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">body</span>: <span style="color:#cf222e">error.body</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span> <span style="color:#1f2328">error</span>: <span style="color:#cf222e">error.message</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;TTS failed&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">details</span>: <span style="color:#cf222e">error.body</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;&#39;</span> <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span> <span style="color:#1f2328">status</span>: <span style="color:#cf222e">error.statusCode</span> <span style="color:#0550ae">||</span> <span style="color:#0550ae">500</span> <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong><em>Notable behaviors:</em></strong></p>
+<ul>
+<li>Automatically selects Eleven Flash v2.5 or Eleven v3</li>
+<li>Detects emotion tags to infer expressive output</li>
+<li>Strips tags when running in Standard Mode</li>
+<li>Streams MP3 audio optimized for low latency</li>
+</ul>
+<h3 id="3-datadog-api">3. Datadog API</h3>
+<h4 id="31-core-concept-agentless-observability">3.1 Core Concept: Agentless Observability</h4>
+<p>VoiceDoc Agent runs on <strong>Google Cloud Run</strong> without any Datadog Agent or sidecar containers. All telemetry is sent directly via Datadog’s HTTPS APIs, making it ideal for hackathons and serverless workloads.</p>
+<h4 id="32-real-user-monitoring-rum---frontend">3.2 Real User Monitoring (RUM) - Frontend</h4>
+<p>The frontend captures real user interactions, performance metrics, and session replays.<br>
+Implementation: <code>src/components/DatadogInit.tsx</code>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#1f2328">datadogRum</span><span style="color:#1f2328">.</span><span style="color:#1f2328">init</span><span style="color:#1f2328">({</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">applicationId</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">clientToken</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">site</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">service</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;voicedoc-agent&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">sessionSampleRate</span>: <span style="color:#cf222e">100</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">sessionReplaySampleRate</span>: <span style="color:#cf222e">20</span><span style="color:#1f2328">,</span> <span style="color:#57606a">// 100% for development/testing
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#1f2328">trackUserInteractions</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">trackResources</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">trackLongTasks</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">})</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h4 id="33-session-replay">3.3 Session Replay</h4>
+<p>Session Replay enables visual debugging by correlating UI behavior with backend traces.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#57606a">// Start Session Replay Recording
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#1f2328">datadogRum</span><span style="color:#1f2328">.</span><span style="color:#1f2328">startSessionReplayRecording</span><span style="color:#1f2328">();</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h4 id="34-custom-metrics-agentless---backend">3.4 Custom Metrics (Agentless) - Backend</h4>
+<p>Custom metrics are sent directly to Datadog without StatsD or agents.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#57606a">// PATH 1: AGENTLESS (HTTPS API) - Best for Hackathons
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">DD_API_KEY</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">response</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">fetch</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">`https://api.</span><span style="color:#0a3069">${</span><span style="color:#1f2328">DD_SITE</span><span style="color:#0a3069">}</span><span style="color:#0a3069">/api/v1/series?api_key=</span><span style="color:#0a3069">${</span><span style="color:#1f2328">DD_API_KEY</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">method</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;POST&#39;</span><span style="color:#1f2328">,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">headers</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span> <span style="color:#0a3069">&#39;Content-Type&#39;</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;application/json&#39;</span> <span style="color:#1f2328">},</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">body</span>: <span style="color:#cf222e">JSON.stringify</span><span style="color:#1f2328">({</span> <span style="color:#1f2328">series</span> <span style="color:#1f2328">})</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong>Key Metrics</strong>:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Metric</th>
+          <th>Purpose</th>
+          <th>Voice-Specific Tag</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>voicedoc.request.latency_ms</code></td>
+          <td>Gemini response latency</td>
+          <td><code>voice_mode:*</code></td>
+      </tr>
+      <tr>
+          <td><code>voicedoc.llm.total_tokens</code></td>
+          <td>Token usage</td>
+          <td><code>voice_mode:*</code></td>
+      </tr>
+      <tr>
+          <td><code>voicedoc.llm.cost</code></td>
+          <td>Estimated cost</td>
+          <td><code>currency:usd</code></td>
+      </tr>
+      <tr>
+          <td><code>voicedoc.request.hits</code></td>
+          <td>Request count</td>
+          <td><code>is_narration:*</code></td>
+      </tr>
+      <tr>
+          <td><code>voicedoc.request.errors</code></td>
+          <td>Error tracking</td>
+          <td><code>error_type:*</code></td>
+      </tr>
+      <tr>
+          <td><code>voicedoc.llm.ttft</code></td>
+          <td>Time to First Token</td>
+          <td><code>voice_mode:*</code></td>
+      </tr>
+      <tr>
+          <td><code>voicedoc.persona.classified</code></td>
+          <td>Persona detection</td>
+          <td><code>persona_type:*</code></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="4-core-ui-components">4. Core UI Components</h3>
+<p>The main Next.js application lives in <code>src/app/page.tsx</code> and provides:</p>
+<ul>
+<li><strong>Document Upload</strong> — Text ingestion and persona classification</li>
+<li><strong>Persona Settings</strong> — Toggle Standard vs Expressive voice modes</li>
+<li><strong>Mic Test Lab</strong> — Standalone microphone testing</li>
+<li><strong>Real-time Metrics</strong> — Live visibility into latency and speech performance</li>
+<li><strong>User Input</strong> — Speech or text‑based interaction</li>
+</ul>
+<h4 id="41-persona-settings">4.1 Persona Settings</h4>
+<p>Upon upload, <code>src/app/api/upload/route.ts</code> invokes Gemini to classify the document persona. Users can preview voices for:</p>
+<ul>
+<li>Professional Legal</li>
+<li>Financial Advisor</li>
+<li>Technical Expert</li>
+<li>Academic Scholar</li>
+<li>Storyteller</li>
+</ul>
+<p>Users can also experiment with ElevenLabs V3 emotion tags directly from the UI.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-persona-settings.png"   alt="voicedoc-persona-settings" class="sc-image sc-image-default"
+       >
+
+
+<h4 id="42-mic-test-lab">4.2 Mic Test Lab</h4>
+<p>The standalone Mic Test Lab allows users to validate microphone input and immediately hear synthesized output.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-mic-test-lab.png"   alt="voicedoc-mic-test-lab" class="sc-image sc-image-default"
+       >
+
+
+<h4 id="43-real-time-metrics">4.3 Real-time Metrics</h4>
+<p>The metrics sidebar provides transparent, user‑visible performance data, including:</p>
+<ul>
+<li>Perceivable Latency</li>
+<li>Total Round Trip Time</li>
+<li>Speech Duration and Confidence</li>
+<li>STT Latency and First Token</li>
+<li>LLM Latency and TTFT</li>
+<li>Token Usage</li>
+<li>TTS Latency and TTFB</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-real-time-metrics.png"   alt="voicedoc-real-time-metrics" class="sc-image sc-image-default"
+       >
+
+
+
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    LLM messages are indicated by a <strong>Zap</strong> icon (Standard Mode) or <strong>Sparkles</strong> icon (Expressive Mode). Expressive Mode incurs a longer TTFB due to the additional LLM enrichment step.
+  </div>
+</div>
+<hr>
+<h2 id="getting-started">Getting Started</h2>
+<p>To run VoiceDoc Agent locally, ensure that the following dependencies are provisioned and configured correctly:</p>
+<ul>
+<li>A Firestore database (<code>voicedoc-fs</code>) with the required collections</li>
+<li>A Google Cloud service account with Vertex AI and Firestore access</li>
+<li>Valid API keys for <strong>ElevenLabs</strong> and <strong>Datadog</strong></li>
+</ul>
+<p>All required environment variables are documented in <code>env.example</code>. Once configured, the local setup mirrors the production Cloud Run environment used for the hackathon.</p>
+<h3 id="running-locally">Running Locally</h3>
+<p>Start the VoiceDoc Agent development server with:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>npm run dev</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="in-action">In Action</h3>
+<p>To experience <strong>Expressive Mode</strong>, upload the sample document located at <code>sample/sample_narrative_story.txt</code>, then switch the persona mode to <em>Expressive</em> in the Persona Settings panel.</p>
+<p>As a first interaction, try issuing the voice or text command:</p>
+<blockquote>
+<p>&ldquo;Read Chapter One&rdquo;</p></blockquote>
+<p>This triggers the full two-stage Gemini pipeline — raw narration followed by emotion tagging — and streams the expressive audio response using ElevenLabs V3 voices.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-agent-in-action.png"   alt="voicedoc-agent-in-action" class="sc-image sc-image-default"
+       >
+
+
+<h4 id="elevenlabs-narrative-voice">ElevenLabs Narrative Voice</h4>
+<p>Below is a sample of the generated expressive narration audio:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="audio-shortcode-wrapper ">
+  <audio class="audio-shortcode__player"
+         controls
+         
+         
+         
+         preload="metadata"
+         >
+    <source src="/audio/voicedoc/sample-narrative-story-chapter-one.mp3" type="audio/mpeg">
+    Your browser does not support the audio element. You can <a href="/audio/voicedoc/sample-narrative-story-chapter-one.mp3">download the audio file</a> instead.
+  </audio>
+</div>
+<h4 id="sample-datadog-dashboard">Sample Datadog Dashboard:</h4>
+<p>The Datadog dashboard provides real-time visibility into latency, token usage, cost estimation, and voice-specific performance metrics across the entire request lifecycle.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-datadog-dashboard.png"   alt="voicedoc-datadog-dashboard" class="sc-image sc-image-default"
+       >
+
+
+<h4 id="sample-datadog-monitor">Sample Datadog Monitor:</h4>
+<p>Monitors are configured to proactively detect anomalies such as LLM token burn rate spikes, elevated latency, or error surges — enabling early intervention before user experience degrades.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-datadog-monitor-llm-token-burn-rate.png"   alt="voicedoc-datadog-monitor-llm-token-burn-rate" class="sc-image sc-image-default"
+       >
+
+
+<h4 id="sample-datadog-session-replay">Sample Datadog Session Replay</h4>
+<p>Session Replay ties everything together by correlating frontend user behavior with backend LLM and voice performance, making it easier to debug and optimize real-world voice interactions.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="video-shortcode-wrapper ">
+  <video class="video-shortcode__player"
+         controls
+         
+         
+         
+         preload="auto"
+         
+         
+         >
+    <source src="/videos/voicedoc/dd-playback.webm" type="video/webm">
+    Your browser does not seem to support the HTML5 video tag. You can <a href="/videos/voicedoc/dd-playback.webm">download the video</a> instead.
+  </video>
+</div>
+<hr>
+<h2 id="synthetic-traffic-generator">Synthetic Traffic Generator</h2>
+<p>To validate system behavior under repeatable and controlled conditions, VoiceDoc Agent includes a <strong>synthetic traffic generator</strong> that simulates real user interactions across different personas, voice modes, and request types.</p>
+<p>This tool is especially useful for:</p>
+<ul>
+<li>Load testing expressive vs standard voice paths</li>
+<li>Validating LLM latency, TTFT, and token usage</li>
+<li>Exercising Datadog monitors without real users</li>
+<li>Reproducing edge cases deterministically during development</li>
+</ul>
+<p>Trigger the synthetic traffic generator with:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python scripts<span style="color:#0a3069">\t</span>raffic-generator.py</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-synthetic-traffic-generator.png"   alt="voicedoc-synthetic-traffic-generator" class="sc-image sc-image-default"
+       >
+
+
+<p>Synthetic traffic is explicitly tagged and can be <strong>filtered independently</strong> within Datadog dashboards and monitors, ensuring clear separation between test signals and real user behavior.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/voicedoc/voicedoc-synthetic-traffic-generator-datadog-dashboard.png"   alt="voicedoc-synthetic-traffic-generator-datadog-dashboard" class="sc-image sc-image-default"
+       >
+
+
+<hr>
+<h2 id="conclusion">Conclusion</h2>
+<p>VoiceDoc Agent demonstrates how voice-first AI systems can be built with <strong>production-grade rigor</strong>, not just compelling demos. By combining <strong>Gemini on Vertex AI</strong> for reasoning, <strong>ElevenLabs</strong> for expressive and real-time voice, and <strong>Datadog</strong> for end-to-end observability, the project showcases a practical blueprint for deploying conversational, document-aware agents at scale.</p>
+<p>More importantly, this project highlights how the <strong>Google Cloud partner ecosystem</strong> can be composed into a cohesive system where performance, cost, and user experience are first-class concerns. Features such as expressive narration, persona-aware responses, agentless observability, and synthetic traffic testing ensure that the system is not only engaging, but measurable, debuggable, and extensible.</p>
+<p>Built for <strong>AI Partner Catalyst: Accelerate Innovation</strong>, VoiceDoc Agent reflects an approach to AI development that prioritizes clarity, control, and real-world operability — pushing voice-native interfaces beyond novelty and toward production-ready applications.</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2025/12/autonomous-deepagents-for-hdb-insights/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Autonomous DeepAgents for HDB Insights</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2025 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
