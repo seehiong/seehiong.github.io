@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/02/blender-mcp-for-n8n/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Blender MCP for n8n">
+  <meta property="og:description" content="Blender MCP for n8n is a Model Context Protocol (MCP) bridge that allows n8n AI workflows to directly control Blender’s Python API. The system combines a Blender addon, a stateless/stateful MCP bridge server, and a record-and-replay session framework to enable deterministic, reproducible 3D scene generation from natural language. With 70&#43; structured tools spanning modeling, materials, animation, architectural workflows, and MEP systems, complex scenes can be constructed, tested, and replayed reliably through AI-directed tool calls.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-28T10:00:00+08:00">
+    <meta property="article:modified_time" content="2026-02-28T10:00:00+08:00">
+    <meta property="article:tag" content="Blender">
+    <meta property="article:tag" content="Model Context Protocol">
+    <meta property="article:tag" content="MCP">
+    <meta property="article:tag" content="N8n">
+    <meta property="article:tag" content="AI Agents">
+    <meta property="article:tag" content="Workflow Automation">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Blender MCP for n8n">
+  <meta name="twitter:description" content="Blender MCP for n8n is a Model Context Protocol (MCP) bridge that allows n8n AI workflows to directly control Blender’s Python API. The system combines a Blender addon, a stateless/stateful MCP bridge server, and a record-and-replay session framework to enable deterministic, reproducible 3D scene generation from natural language. With 70&#43; structured tools spanning modeling, materials, animation, architectural workflows, and MEP systems, complex scenes can be constructed, tested, and replayed reliably through AI-directed tool calls.">
+
+  <meta itemprop="name" content="Blender MCP for n8n">
+  <meta itemprop="description" content="Blender MCP for n8n is a Model Context Protocol (MCP) bridge that allows n8n AI workflows to directly control Blender’s Python API. The system combines a Blender addon, a stateless/stateful MCP bridge server, and a record-and-replay session framework to enable deterministic, reproducible 3D scene generation from natural language. With 70&#43; structured tools spanning modeling, materials, animation, architectural workflows, and MEP systems, complex scenes can be constructed, tested, and replayed reliably through AI-directed tool calls.">
+  <meta itemprop="datePublished" content="2026-02-28T10:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-02-28T10:00:00+08:00">
+  <meta itemprop="wordCount" content="2472">
+  <meta itemprop="keywords" content="Blender,Model Context Protocol,MCP,N8n,AI Agents,Workflow Automation,3D Automation,Python,Generative AI,ASGI"><title>Blender MCP for n8n | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/02/blender-mcp-for-n8n/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Blender MCP for n8n</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-02-28T10:00:00&#43;08:00">February 28, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/blender">Blender</a>
+            
+              , <a href="/tags/model-context-protocol">Model Context Protocol</a>
+            
+              , <a href="/tags/mcp">MCP</a>
+            
+              , <a href="/tags/n8n">n8n</a>
+            
+              , <a href="/tags/ai-agents">AI Agents</a>
+            
+              , <a href="/tags/workflow-automation">Workflow Automation</a>
+            
+              , <a href="/tags/3d-automation">3D Automation</a>
+            
+              , <a href="/tags/python">Python</a>
+            
+              , <a href="/tags/generative-ai">Generative AI</a>
+            
+              , <a href="/tags/asgi">ASGI</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/blender/blender-mcp-n8n.png');"></div>
+          <img src="/images/blender/blender-mcp-n8n.png" alt="Blender MCP for n8n cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>This project implements a Model Context Protocol (MCP) server for Blender, enabling n8n AI workflows to directly control Blender’s Python API. In this post, I’ll walk through the architecture, key design decisions, and how you can use it to automate complex 3D workflows entirely through natural language.</p>
+<h2 id="system-overview">System Overview</h2>
+<p>The project consists of two core components that work together to bridge an AI agent running in n8n all the way through to Blender&rsquo;s Python API:</p>
+<ol>
+<li>
+<p><strong>Blender MCP Addon</strong> — A plugin installed <em>inside</em> Blender. It runs an embedded WebSocket server that sits on the main thread queue, receives commands, and manipulates the 3D scene safely.</p>
+</li>
+<li>
+<p><strong>MCP Bridge Server</strong> — A standalone Python server (<code>src/</code>) that acts as the gateway. Clients such as n8n connect via the HTTP Streamable MCP transport, and the Bridge forwards every tool call over a local WebSocket to the active Blender Addon.</p>
+</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>n8n AI Agent
+</span></span><span style="display:flex;"><span>      ↓
+</span></span><span style="display:flex;"><span>MCP Client (HTTP Streamable / JSON-RPC)
+</span></span><span style="display:flex;"><span>      ↓
+</span></span><span style="display:flex;"><span>MCP Bridge Server (ASGI)
+</span></span><span style="display:flex;"><span>      ↓
+</span></span><span style="display:flex;"><span>TCP Socket Bridge
+</span></span><span style="display:flex;"><span>      ↓
+</span></span><span style="display:flex;"><span>Blender Addon (Main Thread Queue)
+</span></span><span style="display:flex;"><span>      ↓
+</span></span><span style="display:flex;"><span>Blender Scene (Persistent State)</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Because many MCP clients (including n8n) operate in a stateless lifecycle — <code>Initialize → Discover Tools → Call Tool → Close</code> per interaction — the bridge implements an explicit stateless fallback mode. When no active HTTP Streamable session exists, requests are handled via standard JSON-RPC over HTTP.</p>
+<p>Each tool response includes a human-readable <code>&quot;message&quot;</code> field (prefixed with <code>✓</code> by the addon), allowing the AI agent to confirm completion without re-executing prior steps.</p>
+<hr>
+<h2 id="why-this-matters">Why This Matters</h2>
+<p>Most AI-driven creative tooling today stops at code generation. This project pushes further — enabling persistent, stateful control over a live 3D environment. By combining MCP transport, deterministic tool schemas, and recordable sessions, Blender becomes a reproducible AI execution engine rather than relying on one-off generated scripts.</p>
+<hr>
+<h2 id="setup">Setup</h2>
+<h3 id="1-checkout-the-code">1. Checkout the Code</h3>
+<blockquote>
+<p>🔗 <strong>Source Code</strong>: 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/blender-mcp-n8n" target="_blank" rel="noopener noreferrer" >https://github.com/seehiong/blender-mcp-n8n</a>
+</p></blockquote>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/seehiong/blender-mcp-n8n.git
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">cd</span> blender-mcp-n8n</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="2-create-a-virtual-environment-optional-but-recommended">2. Create a Virtual Environment <em>(optional but recommended)</em></h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python -m venv venv
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Windows</span>
+</span></span><span style="display:flex;"><span>venv<span style="color:#0a3069">\S</span>cripts<span style="color:#0a3069">\a</span>ctivate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># macOS / Linux</span>
+</span></span><span style="display:flex;"><span><span style="color:#6639ba">source</span> venv/bin/activate</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="3-install-dependencies">3. Install Dependencies</h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>pip install -r requirements.txt</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="4-install-the-blender-addon">4. Install the Blender Addon</h3>
+<p><strong>Method 1 — Zip &amp; Install (Recommended)</strong></p>
+<ol>
+<li>Compress the <code>blender_mcp_addon</code> directory into <em>blender_mcp_addon.zip</em>.</li>
+<li>Open Blender → <strong>Edit</strong> &gt; <strong>Preferences</strong> &gt; <strong>Add-ons</strong> → <strong>Install from disk…</strong></li>
+<li>Select the <code>.zip</code> file, search for <em>&ldquo;Blender MCP&rdquo;</em> and enable the checkbox.</li>
+</ol>
+<p><strong>Method 2 — Manual Copy (Developer)</strong></p>
+<ol>
+<li>Copy <code>blender_mcp_addon/</code> to your Blender addons directory:
+<ul>
+<li><strong>Windows</strong>: <code>%USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\4.x\scripts\addons</code></li>
+<li><strong>macOS</strong>: <code>~/Library/Application Support/Blender/4.x/scripts/addons</code></li>
+</ul>
+</li>
+<li>Restart Blender, then enable <em>&ldquo;Blender MCP&rdquo;</em> in Preferences.</li>
+</ol>
+<h3 id="5-configure-the-environment">5. Configure the Environment</h3>
+<p>Create a <code>.env</code> file in the project root:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Variable</th>
+          <th>Description</th>
+          <th>Default</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>MCP_BRIDGE_HOST</code></td>
+          <td>Host IP for the MCP Bridge Server</td>
+          <td><code>0.0.0.0</code></td>
+      </tr>
+      <tr>
+          <td><code>MCP_BRIDGE_PORT</code></td>
+          <td>Port n8n connects to</td>
+          <td><code>8008</code></td>
+      </tr>
+      <tr>
+          <td><code>BLENDER_ADDON_HOST</code></td>
+          <td>IP where Blender is running</td>
+          <td><code>127.0.0.1</code></td>
+      </tr>
+      <tr>
+          <td><code>BLENDER_ADDON_PORT</code></td>
+          <td>Port the Blender addon listens on</td>
+          <td><code>8888</code></td>
+      </tr>
+      <tr>
+          <td><code>BLENDER_ASSETS_DIR</code></td>
+          <td>Directory for textures / HDRIs</td>
+          <td><em>(optional)</em></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="6-start-everything">6. Start Everything</h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#57606a"># In Blender: N Panel → Blender MCP (n8n) → Start MCP Server</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># In your terminal:</span>
+</span></span><span style="display:flex;"><span>python -m src.main serve</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The bridge starts on <code>http://0.0.0.0:8008</code> with the MCP endpoint at <code>/mcp</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/blender/start-mcp-bridge-server.png"   alt="start-mcp-bridge-server" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="7-configure-the-n8n-workflow">7. Configure the n8n Workflow</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/blender/blender-mcp-for-n8n.png"   alt="blender-mcp-for-n8n" class="sc-image sc-image-default"
+       >
+
+
+<ol>
+<li>Add an <strong>MCP Client Tool</strong> node.</li>
+<li>Set <strong>HTTP Streamable Endpoint</strong> → <code>http://localhost:8008/mcp</code>, <strong>Authentication</strong> → None, <strong>Tools to Include</strong> → All.</li>
+<li>Connect to an <strong>AI Agent</strong> node and start prompting!</li>
+</ol>
+<hr>
+<h2 id="key-components">Key Components</h2>
+<h3 id="1-blender-mcp-addon">1. Blender MCP Addon</h3>
+<p>The addon (<code>blender_mcp_addon/</code>) is structured as a multi-module package rather than a single file. This modular structure keeps the 1,800+ lines of logic maintainable and easier to reason about:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code>blender_mcp_addon/
+├── __init__.py       # Registration entry point
+├── server.py         # WebSocket server &amp; main-thread command queue
+├── tools/            # Functional modules per category
+│   ├── modeling/
+│   ├── materials.py
+│   ├── animation.py
+│   └── ...</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>All Blender operations are dispatched through a <strong>main-thread command queue</strong> to prevent dependency graph errors that would crash the addon when Python callbacks try to modify the scene from a background thread.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># blender_mcp_addon/server.py</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">BlenderMCPServer</span><span style="color:#1f2328">(</span><span style="color:#0550ae">...</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">__init__</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>command_queue <span style="color:#0550ae">=</span> queue<span style="color:#0550ae">.</span>Queue<span style="color:#1f2328">()</span>  <span style="color:#57606a"># thread-safe producer/consumer queue</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0550ae">...</span>
+</span></span><span style="display:flex;"><span>        bpy<span style="color:#0550ae">.</span>app<span style="color:#0550ae">.</span>timers<span style="color:#0550ae">.</span>register<span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>_process_queue<span style="color:#1f2328">)</span>  <span style="color:#57606a"># runs on Blender&#39;s main thread</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Called from the background socket thread — only enqueues, never touches bpy</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">handle_command</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> command<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        result_event<span style="color:#1f2328">,</span> res_container <span style="color:#0550ae">=</span> threading<span style="color:#0550ae">.</span>Event<span style="color:#1f2328">(),</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;result&#34;</span><span style="color:#1f2328">:</span> <span style="color:#cf222e">None</span><span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>command_queue<span style="color:#0550ae">.</span>put<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;command&#34;</span><span style="color:#1f2328">:</span> command<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;event&#34;</span><span style="color:#1f2328">:</span> result_event<span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;container&#34;</span><span style="color:#1f2328">:</span> res_container<span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> <span style="color:#0550ae">not</span> result_event<span style="color:#0550ae">.</span>wait<span style="color:#1f2328">(</span>timeout<span style="color:#0550ae">=</span><span style="color:#0550ae">60.0</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;status&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;error&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;message&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;Command timed out&#34;</span><span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> res_container<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;result&#34;</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Polled every 5 ms by Blender&#39;s timer system on the main thread — safe to call bpy</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">_process_queue</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">while</span> <span style="color:#0550ae">not</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>command_queue<span style="color:#0550ae">.</span>empty<span style="color:#1f2328">():</span>
+</span></span><span style="display:flex;"><span>            item <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>command_queue<span style="color:#0550ae">.</span>get_nowait<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>            cmd<span style="color:#1f2328">,</span> event<span style="color:#1f2328">,</span> res <span style="color:#0550ae">=</span> item<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;command&#34;</span><span style="color:#1f2328">],</span> item<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;event&#34;</span><span style="color:#1f2328">],</span> item<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;container&#34;</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">try</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                res<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;result&#34;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>execute_command<span style="color:#1f2328">(</span>cmd<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#57606a"># Push each state-changing command onto Blender’s undo stack</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#cf222e">if</span> <span style="color:#0550ae">not</span> cmd<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;type&#34;</span><span style="color:#1f2328">]</span><span style="color:#0550ae">.</span>startswith<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;get_&#34;</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>                    bpy<span style="color:#0550ae">.</span>ops<span style="color:#0550ae">.</span>ed<span style="color:#0550ae">.</span>undo_push<span style="color:#1f2328">(</span>message<span style="color:#0550ae">=</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;MCP: </span><span style="color:#0a3069">{</span>cmd<span style="color:#1f2328">[</span><span style="color:#0a3069">&#39;type&#39;</span><span style="color:#1f2328">]</span><span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">except</span> Exception <span style="color:#cf222e">as</span> e<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                res<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;result&#34;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;status&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;error&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;message&#34;</span><span style="color:#1f2328">:</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">(</span>e<span style="color:#1f2328">)}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">finally</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>                event<span style="color:#0550ae">.</span>set<span style="color:#1f2328">()</span>  <span style="color:#57606a"># unblocks handle_command in the socket thread</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#0550ae">0.005</span>  <span style="color:#57606a"># re-schedule timer in 5 ms</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Dispatches to the correct tool method and stamps the ✓ prefix on success</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">def</span> <span style="color:#6639ba">execute_command</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> command<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        handler <span style="color:#0550ae">=</span> methods<span style="color:#0550ae">.</span>get<span style="color:#1f2328">(</span>command<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;type&#34;</span><span style="color:#1f2328">])</span>
+</span></span><span style="display:flex;"><span>        result <span style="color:#0550ae">=</span> handler<span style="color:#1f2328">(</span><span style="color:#0550ae">**</span>command<span style="color:#0550ae">.</span>get<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;params&#34;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{}))</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>result<span style="color:#1f2328">,</span> <span style="color:#6639ba">dict</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">and</span> <span style="color:#0a3069">&#34;message&#34;</span> <span style="color:#0550ae">in</span> result<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            msg <span style="color:#0550ae">=</span> result<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;message&#34;</span><span style="color:#1f2328">]</span>
+</span></span><span style="display:flex;"><span>            result<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;message&#34;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;✓ [</span><span style="color:#0a3069">{</span>rid<span style="color:#0a3069">}</span><span style="color:#0a3069">] </span><span style="color:#0a3069">{</span>msg<span style="color:#0a3069">}</span><span style="color:#0a3069">&#34;</span> <span style="color:#cf222e">if</span> <span style="color:#0550ae">not</span> msg<span style="color:#0550ae">.</span>startswith<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;✓&#34;</span><span style="color:#1f2328">)</span> <span style="color:#cf222e">else</span> msg
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;status&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;success&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;result&#34;</span><span style="color:#1f2328">:</span> result<span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The addon exposes <strong>70+ tools</strong> across eleven categories:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Category</th>
+          <th>Example Tools</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Inspection</td>
+          <td><code>get_scene_info</code>, <code>get_viewport_screenshot</code></td>
+      </tr>
+      <tr>
+          <td>Collections</td>
+          <td><code>create_collection</code>, <code>duplicate_collection</code></td>
+      </tr>
+      <tr>
+          <td>Modeling</td>
+          <td><code>boolean_operation</code>, <code>circular_array</code>, <code>extrude_mesh</code></td>
+      </tr>
+      <tr>
+          <td>Architectural</td>
+          <td><code>build_room_shell</code>, <code>build_wall_with_door</code>, <code>build_column</code></td>
+      </tr>
+      <tr>
+          <td>MEP Systems</td>
+          <td><code>build_pipe_run</code>, <code>build_cable_tray</code>, <code>add_auto_cable_drops</code></td>
+      </tr>
+      <tr>
+          <td>Materials</td>
+          <td><code>create_material</code>, <code>assign_builtin_texture</code>, <code>assign_texture_map</code></td>
+      </tr>
+      <tr>
+          <td>Animation</td>
+          <td><code>set_keyframe</code>, <code>play_animation</code></td>
+      </tr>
+      <tr>
+          <td>Rendering</td>
+          <td><code>configure_render_settings</code>, <code>render_frame</code></td>
+      </tr>
+      <tr>
+          <td>Camera</td>
+          <td><code>create_camera</code>, <code>camera_look_at</code></td>
+      </tr>
+      <tr>
+          <td>Lighting</td>
+          <td><code>create_light</code>, <code>configure_light</code></td>
+      </tr>
+      <tr>
+          <td>History</td>
+          <td><code>undo</code>, <code>redo</code></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="2-mcp-bridge-server">2. MCP Bridge Server</h3>
+<p>The Bridge (<code>src/</code>) is a modular Python package powered by the MCP SDK (v1.8.0+) using the HTTP Streamable transport:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>src/
+</span></span><span style="display:flex;"><span>├── main.py        # CLI entry point (serve / play sub-commands)
+</span></span><span style="display:flex;"><span>├── server.py      # MCP server registration &amp; tool routing
+</span></span><span style="display:flex;"><span>├── connection.py  # WebSocket client to the Blender addon
+</span></span><span style="display:flex;"><span>├── sessions.py    # Record &amp; playback session logic
+</span></span><span style="display:flex;"><span>├── config.py      # Environment-variable configuration
+</span></span><span style="display:flex;"><span>└── tools/         # Tool definitions &amp; schemas (mirrors addon)</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h4 id="bridge-server-code">Bridge Server Code</h4>
+<p><strong>Bridge Server</strong> uses a <code>StreamableHTTPSessionManager</code> to handle MCP requests and a custom ASGI middleware to detect transport types and route calls to Blender.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># src/server.py</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 1. SDK session manager runs in stateless mode by default</span>
+</span></span><span style="display:flex;"><span>session_manager <span style="color:#0550ae">=</span> StreamableHTTPSessionManager<span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>    app<span style="color:#0550ae">=</span>app<span style="color:#1f2328">,</span> json_response<span style="color:#0550ae">=</span><span style="color:#cf222e">True</span><span style="color:#1f2328">,</span> stateless<span style="color:#0550ae">=</span><span style="color:#cf222e">True</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 2. Per-request transport detection heuristic</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">mcp_asgi</span><span style="color:#1f2328">(</span>scope<span style="color:#1f2328">,</span> receive<span style="color:#1f2328">,</span> send<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> scope<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;type&#34;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#34;http&#34;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        method  <span style="color:#0550ae">=</span> scope<span style="color:#0550ae">.</span>get<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;method&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;POST&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        headers <span style="color:#0550ae">=</span> scope<span style="color:#0550ae">.</span>get<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;headers&#34;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">[])</span>
+</span></span><span style="display:flex;"><span>        query   <span style="color:#0550ae">=</span> scope<span style="color:#0550ae">.</span>get<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;query_string&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">b</span><span style="color:#0a3069">&#34;&#34;</span><span style="color:#1f2328">)</span><span style="color:#0550ae">.</span>decode<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;utf-8&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># Explicit overrides from the client</span>
+</span></span><span style="display:flex;"><span>        explicit_stateless <span style="color:#0550ae">=</span> <span style="color:#6639ba">any</span><span style="color:#1f2328">(</span>h<span style="color:#1f2328">[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">==</span> <span style="color:#0a3069">b</span><span style="color:#0a3069">&#34;x-mcp-model&#34;</span> <span style="color:#0550ae">and</span> h<span style="color:#1f2328">[</span><span style="color:#0550ae">1</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">==</span> <span style="color:#0a3069">b</span><span style="color:#0a3069">&#34;stateless&#34;</span> <span style="color:#cf222e">for</span> h <span style="color:#0550ae">in</span> headers<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        explicit_stateful  <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#34;transport=stateful&#34;</span> <span style="color:#0550ae">in</span> query
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#57606a"># Heuristic: a GET with Accept: text/event-stream → SSE handshake = stateful</span>
+</span></span><span style="display:flex;"><span>        is_handshake <span style="color:#0550ae">=</span> method <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#34;GET&#34;</span> <span style="color:#0550ae">and</span> <span style="color:#6639ba">any</span><span style="color:#1f2328">(</span>
+</span></span><span style="display:flex;"><span>            h<span style="color:#1f2328">[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">==</span> <span style="color:#0a3069">b</span><span style="color:#0a3069">&#34;accept&#34;</span> <span style="color:#0550ae">and</span> <span style="color:#0a3069">b</span><span style="color:#0a3069">&#34;text/event-stream&#34;</span> <span style="color:#0550ae">in</span> h<span style="color:#1f2328">[</span><span style="color:#0550ae">1</span><span style="color:#1f2328">]</span> <span style="color:#cf222e">for</span> h <span style="color:#0550ae">in</span> headers
+</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        is_root <span style="color:#0550ae">=</span> scope<span style="color:#0550ae">.</span>get<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;path&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">in</span> <span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;/&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;/mcp&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;/mcp/&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> explicit_stateful <span style="color:#0550ae">or</span> is_handshake<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            transport_var<span style="color:#0550ae">.</span>set<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Stateful&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">elif</span> explicit_stateless <span style="color:#0550ae">or</span> is_root<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            transport_var<span style="color:#0550ae">.</span>set<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Stateless&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">await</span> session_manager<span style="color:#0550ae">.</span>handle_request<span style="color:#1f2328">(</span>scope<span style="color:#1f2328">,</span> receive<span style="color:#1f2328">,</span> send<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># 3. The addon&#39;s execute_command stamps ✓ on success; the bridge just forwards the result</span>
+</span></span><span style="display:flex;"><span><span style="color:#0550ae">@app.call_tool</span><span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">call_tool</span><span style="color:#1f2328">(</span>name<span style="color:#1f2328">:</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">,</span> arguments<span style="color:#1f2328">:</span> <span style="color:#6639ba">dict</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#0550ae">...</span>
+</span></span><span style="display:flex;"><span>    blender_res <span style="color:#0550ae">=</span> blender<span style="color:#0550ae">.</span>send_command<span style="color:#1f2328">(</span>name<span style="color:#1f2328">,</span> clean_args<span style="color:#1f2328">,</span> rid<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Normalise None returns</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> blender_res <span style="color:#0550ae">is</span> <span style="color:#cf222e">None</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        blender_res <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span><span style="color:#0a3069">&#34;status&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;success&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;message&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">{</span>name<span style="color:#0a3069">}</span><span style="color:#0a3069"> completed (no result returned).&#34;</span><span style="color:#1f2328">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Stamp a human-readable message so the agent confirms completion</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#6639ba">isinstance</span><span style="color:#1f2328">(</span>blender_res<span style="color:#1f2328">,</span> <span style="color:#6639ba">dict</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">and</span> <span style="color:#0a3069">&#34;message&#34;</span> <span style="color:#0550ae">not</span> <span style="color:#0550ae">in</span> blender_res<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> blender_res<span style="color:#0550ae">.</span>get<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;status&#34;</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">==</span> <span style="color:#0a3069">&#34;success&#34;</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>            blender_res<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;message&#34;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;</span><span style="color:#0a3069">{</span>name<span style="color:#0a3069">}</span><span style="color:#0a3069"> completed successfully.&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">return</span> <span style="color:#1f2328">[</span>types<span style="color:#0550ae">.</span>TextContent<span style="color:#1f2328">(</span><span style="color:#6639ba">type</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;text&#34;</span><span style="color:#1f2328">,</span> text<span style="color:#0550ae">=</span>json<span style="color:#0550ae">.</span>dumps<span style="color:#1f2328">(</span>blender_res<span style="color:#1f2328">,</span> indent<span style="color:#0550ae">=</span><span style="color:#0550ae">2</span><span style="color:#1f2328">))]</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h4 id="recording-mode-code">Recording Mode Code</h4>
+<p><strong>Recording mode</strong> saves every tool call to a JSON session file. This is achieved by plugging a <code>SessionRecorder</code> into the main tool call handler:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># src/server.py</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#0550ae">@app.call_tool</span><span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">call_tool</span><span style="color:#1f2328">(</span>name<span style="color:#1f2328">:</span> <span style="color:#6639ba">str</span><span style="color:#1f2328">,</span> arguments<span style="color:#1f2328">:</span> <span style="color:#6639ba">dict</span><span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> recorder<span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>        recorder<span style="color:#0550ae">.</span>record_command<span style="color:#1f2328">(</span>name<span style="color:#1f2328">,</span> clean_args<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    blender_res <span style="color:#0550ae">=</span> blender<span style="color:#0550ae">.</span>send_command<span style="color:#1f2328">(</span>name<span style="color:#1f2328">,</span> clean_args<span style="color:#1f2328">,</span> rid<span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># ...</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>To start recording:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python -m src.main serve --record path/to/session.json --name <span style="color:#0a3069">&#34;My Project&#34;</span> --description <span style="color:#0a3069">&#34;Optional description&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Any tool calls made by n8n or other clients will be automatically saved to the JSON file.</p>
+<h4 id="playback-mode-code">Playback Mode Code</h4>
+<p><strong>Playback mode</strong> enables replaying recorded executions via a reliable <code>SessionPlayer</code> that supports both stateful and stateless transports:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># src/sessions.py</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#cf222e">class</span> <span style="color:#1f2328">SessionPlayer</span><span style="color:#1f2328">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">async</span> <span style="color:#cf222e">def</span> <span style="color:#6639ba">play</span><span style="color:#1f2328">(</span><span style="color:#6a737d">self</span><span style="color:#1f2328">,</span> session<span style="color:#1f2328">:</span> BridgeSession<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>        client <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#6a737d">self</span><span style="color:#0550ae">.</span>_get_client<span style="color:#1f2328">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">for</span> i<span style="color:#1f2328">,</span> cmd <span style="color:#0550ae">in</span> <span style="color:#6639ba">enumerate</span><span style="color:#1f2328">(</span>session<span style="color:#0550ae">.</span>commands<span style="color:#1f2328">):</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6639ba">print</span><span style="color:#1f2328">(</span><span style="color:#0a3069">f</span><span style="color:#0a3069">&#34;Calling </span><span style="color:#0a3069">{</span>cmd<span style="color:#0550ae">.</span>tool<span style="color:#0a3069">}</span><span style="color:#0a3069">...&#34;</span><span style="color:#1f2328">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">await</span> client<span style="color:#0550ae">.</span>call_tool_async<span style="color:#1f2328">(</span>cmd<span style="color:#0550ae">.</span>tool<span style="color:#1f2328">,</span> cmd<span style="color:#0550ae">.</span>arguments<span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>To playback a previously recorded session:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#57606a"># Stateful (fast — persistent connection)</span>
+</span></span><span style="display:flex;"><span>python -m src.main play path/to/session.json
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Stateless (standard HTTP — slower due to per-call handshake)</span>
+</span></span><span style="display:flex;"><span>python -m src.main play path/to/session.json --transport stateless</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Sessions are plain JSON files containing metadata (name, description, timestamp) and an ordered list of command objects, making them easy to version-control or share.</p>
+<h3 id="3-session-editor">3. Session Editor</h3>
+<p>The project ships a built-in static web editor (<code>session_editor/index.html</code>) for inspecting and editing recorded sessions without writing code:</p>
+<ul>
+<li><strong>Load</strong> any <code>session.json</code> and browse every command.</li>
+<li><strong>Filter</strong> commands by tool name.</li>
+<li><strong>Add &amp; Edit Commands</strong> using an interactive modal with live schema validation — safely modify arguments or insert entirely new steps.</li>
+<li><strong>Reorder or Delete</strong> commands to clean up failed experiments.</li>
+<li><strong>Export JSON</strong> to save the cleaned session file.</li>
+</ul>
+<p>The Session Editor is particularly useful before sharing a recording with the community: load, trim the mistakes, and export a clean replay.</p>
+<h4 id="static-web-architecture">Static Web Architecture</h4>
+<p>The editor is a <strong>pure frontend application</strong> (HTML/JS/CSS). It uses the browser&rsquo;s <code>Blob</code> and <code>URL.createObjectURL</code> APIs to &ldquo;download&rdquo; your edited session as a new JSON file without needing a backend for file storage:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#57606a">// session_editor/app.js
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">saveBtn</span><span style="color:#1f2328">.</span><span style="color:#1f2328">addEventListener</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;click&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">()</span> <span style="color:#1f2328">=&gt;</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">!</span><span style="color:#1f2328">currentSession</span><span style="color:#1f2328">)</span> <span style="color:#cf222e">return</span><span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a">// Create a blob from the modified session object
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">data</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">JSON</span><span style="color:#1f2328">.</span><span style="color:#1f2328">stringify</span><span style="color:#1f2328">(</span><span style="color:#1f2328">currentSession</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">null</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">blob</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">new</span> <span style="color:#1f2328">Blob</span><span style="color:#1f2328">([</span><span style="color:#1f2328">data</span><span style="color:#1f2328">],</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">type</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;application/json&#39;</span> <span style="color:#1f2328">});</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#57606a">// Generate a temporary URL and trigger a virtual click to download
+</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">url</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">URL</span><span style="color:#1f2328">.</span><span style="color:#1f2328">createObjectURL</span><span style="color:#1f2328">(</span><span style="color:#1f2328">blob</span><span style="color:#1f2328">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">a</span> <span style="color:#0550ae">=</span> <span style="color:#6639ba">document</span><span style="color:#1f2328">.</span><span style="color:#1f2328">createElement</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;a&#39;</span><span style="color:#1f2328">);</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">a</span><span style="color:#1f2328">.</span><span style="color:#1f2328">href</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">url</span><span style="color:#1f2328">;</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">a</span><span style="color:#1f2328">.</span><span style="color:#1f2328">download</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;session_edited.json&#39;</span><span style="color:#1f2328">;</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">a</span><span style="color:#1f2328">.</span><span style="color:#1f2328">click</span><span style="color:#1f2328">();</span>
+</span></span><span style="display:flex;"><span><span style="color:#1f2328">});</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="4-integration-tests">4. Integration Tests</h3>
+<p>The project includes a CLI-driven integration test suite that actually calls Blender tools and verifies the resulting scene against a stored benchmark snapshot.</p>
+<h4 id="running-tests">Running Tests</h4>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#57606a"># Grid scenario — primitives, modifiers, collections, booleans, transforms</span>
+</span></span><span style="display:flex;"><span>python tests/run_integration.py run --scenario grid
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Arch scenario — full 3D floor plan with walls, columns, doors, and room labels</span>
+</span></span><span style="display:flex;"><span>python tests/run_integration.py run --scenario arch
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#57606a"># Run and verify against the stored benchmark in a single step</span>
+</span></span><span style="display:flex;"><span>python tests/run_integration.py run -s grid --verify</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong>Grid Scenario</strong> builds a structured grid of Blender objects:</p>
+<ul>
+<li><strong>Row 1</strong> — Primitives: Cube, Sphere, Cylinder, Torus, Plane, IcoSphere</li>
+<li><strong>Row 2</strong> — Modifiers: Bevel, Array, Subdivision Surface</li>
+<li><strong>Row 3</strong> — Collections with hierarchy and visibility</li>
+<li><strong>Row 4</strong> — Boolean operations: Union, Difference, Intersect</li>
+<li><strong>Row 5</strong> — Transforms: Move, Rotate, Scale, Duplicate, Batch</li>
+<li><strong>Row 6</strong> — Systems (MEP): Parametric pipe runs (Fire, Gas, Chiller, Drainage) and cable trays with automated supports (Trapeze, Cantilever)</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/blender/grid_scenario_result.png"   alt="grid_scenario_result" class="sc-image sc-image-default"
+       >
+
+
+<p><strong>Arch Scenario</strong> constructs a complete parametric floor plan:</p>
+<ul>
+<li>Outer shell with floor slab, exterior walls (0.2 m), and hidden ceiling</li>
+<li>Structural columns merged with walls via Boolean Union</li>
+<li>Bedroom partitions with door and window cutouts</li>
+<li>3D text labels for each room with rotation support</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/blender/arch_scenario_result.png"   alt="arch_scenario_result" class="sc-image sc-image-default"
+       >
+
+
+<h4 id="benchmark-workflow">Benchmark Workflow</h4>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#57606a"># Approve the current run as the new baseline</span>
+</span></span><span style="display:flex;"><span>python tests/run_integration.py approve -s arch</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Baselines live in <code>tests/benchmarks/</code> as JSON snapshots. If you intentionally change addon logic, run the scenario and approve the result to update the expected state.</p>
+<h4 id="integration-testing-in-action">Integration Testing in Action</h4>
+<p>The video below demonstrates the significant performance difference between the two transport modes during execution of the same recorded session:</p>
+<ul>
+<li><strong>Stateless</strong> (JSON-RPC over HTTP): Robust and standard, but overhead accumulates as every single tool call requires a full TCP handshake and MCP initialization sequence.</li>
+<li><strong>Stateful</strong> (Persistent SSE/WebSocket): Up to 10x faster for complex scenes. By maintaining a live session, commands are dispatched instantly through the persistent connection.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="video-shortcode-wrapper ">
+  <video class="video-shortcode__player"
+         controls
+         
+         
+         
+         preload="auto"
+         
+         
+         >
+    <source src="/videos/blender/mcp-stateless-vs-stateful.webm" type="video/webm">
+    Your browser does not seem to support the HTML5 video tag. You can <a href="/videos/blender/mcp-stateless-vs-stateful.webm">download the video</a> instead.
+  </video>
+</div>
+<hr>
+<h2 id="community">Community</h2>
+<p>The <code>community/</code> directory serves as a replayable gallery of recorded AI-driven build sessions. Each project demonstrates a different modeling strategy, tool composition pattern, or architectural workflow.</p>
+<h3 id="condominium-tower">Condominium Tower</h3>
+<p><em>Model: Claude Haiku 4.5</em></p>
+<p>A complete 20-storey procedural tower built entirely from natural language prompts — 20 arrayed floor slabs, glass facades, torus railings, vertical facade fins, a penthouse level, and 30 randomly distributed landscape trees. Finished with golden-hour sun lighting, an HDRI sky, and a cinematic hero-shot camera.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#57606a"># Playback in Stateless mode (Standard JSON-RPC over HTTP)</span>
+</span></span><span style="display:flex;"><span>python -m src.main play community/condominium_tower/session.json --transport stateless</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><em>Highlight: This session illustrates the <strong>stateless transport</strong> model used by n8n, where each tool call is executed as an isolated, self-contained request.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="video-shortcode-wrapper ">
+  <video class="video-shortcode__player"
+         controls
+         
+         
+         
+         preload="auto"
+         
+         
+         >
+    <source src="/videos/blender/mcp-condominium-tower.webm" type="video/webm">
+    Your browser does not seem to support the HTML5 video tag. You can <a href="/videos/blender/mcp-condominium-tower.webm">download the video</a> instead.
+  </video>
+</div>
+<h3 id="boolean-pavilion">Boolean Pavilion</h3>
+<p><em>Model: gpt-5-nano</em></p>
+<p>A modern architectural pavilion demonstrating boolean workflows: four tapered pillars (sheared inward with <code>shear_mesh</code>) unified with a torus dome via a single <code>join_objects</code> call, finished with frosted glass and gold-metal materials, warm sun and cool interior area lights, and a dramatic camera setup.</p>
+<p><strong>Playback via Session Editor</strong></p>
+<ol>
+<li>Open <code>session_editor/index.html</code>.</li>
+<li>Load <code>community/boolean_pavilion/session.json</code>.</li>
+<li>Hit <strong>Play All</strong> to watch the session execute in real-time.</li>
+</ol>
+<p><em>Highlight: This project showcases the <strong>Visual Editor experience</strong>, allowing you to inspect, prune, and execute recorded sessions through a clean web interface.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="video-shortcode-wrapper ">
+  <video class="video-shortcode__player"
+         controls
+         
+         
+         
+         preload="auto"
+         
+         
+         >
+    <source src="/videos/blender/mcp-boolean-pavilion.webm" type="video/webm">
+    Your browser does not seem to support the HTML5 video tag. You can <a href="/videos/blender/mcp-boolean-pavilion.webm">download the video</a> instead.
+  </video>
+</div>
+<h3 id="data-center-with-mep-systems">Data Center with MEP Systems</h3>
+<p><em>Model: gpt-4.1</em></p>
+<p>A realistic 18 m × 16 m server hall featuring parametric rack libraries (Boolean hollowed frames, shelves, glass doors), 24-rack hot-aisle rows duplicated across three hot aisles, layered LADDER and SOLID cable trays for power and data routing at different heights, vertical tray risers along the side wall, and a full <code>build_room_shell</code> enclosure with door and conduit sleeve openings.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#57606a"># Playback in Default Stateful mode (Persistent HTTP Streamable)</span>
+</span></span><span style="display:flex;"><span>python -m src.main play community/data_center_with_mep/session.json</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><em>Highlight: Replaying this large infrastructure session in <strong>stateful mode</strong> highlights the performance and stability advantages of persistent MCP transport.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="video-shortcode-wrapper ">
+  <video class="video-shortcode__player"
+         controls
+         
+         
+         
+         preload="auto"
+         
+         
+         >
+    <source src="/videos/blender/mcp-data-center.webm" type="video/webm">
+    Your browser does not seem to support the HTML5 video tag. You can <a href="/videos/blender/mcp-data-center.webm">download the video</a> instead.
+  </video>
+</div>
+<blockquote>
+<p>💡 <strong>Share Your Work</strong>: Record your build session, clean it with the Session Editor, and open a Pull Request to add your project under <code>community/your_project/</code>.</p></blockquote>
+<hr>
+<h2 id="limitations--future-work">Limitations &amp; Future Work</h2>
+<ul>
+<li><strong>Stateless transport introduces measurable overhead</strong>: Each n8n tool call performs a full MCP handshake. On large scenes, repeated initialization cycles may increase latency or trigger rate limits depending on the upstream AI provider. Use bulk tools like <code>create_and_array</code>, <code>batch_transform</code>, and <code>create_material(pattern=...)</code> to minimise round-trips.</li>
+<li><strong>Blender version dependency</strong>: The addon targets Blender 4.x. Older versions may have different Python API signatures.</li>
+<li><strong>Planned</strong>: An indexed community gallery (e.g. Firestore-backed catalog), more MEP tool categories, and direct Geometry Nodes support.</li>
+</ul>
+<hr>
+<h2 id="conclusion">Conclusion</h2>
+<p>Blender MCP for n8n transforms Blender from a tool that traditionally requires custom Python scripting for automation into a programmable environment that can be orchestrated entirely through natural language. By exposing 70+ carefully designed tools — from simple primitive creation to full architectural shells and MEP cable routing — and combining them with a record-and-replay session system, the project makes complex Blender workflows reproducible, testable, and accessible to anyone who can describe what they want.</p>
+<p>The showcase sessions demonstrate that even intricate, multi-step scenes can be constructed deterministically and replayed reliably through AI-directed tool calls — turning Blender into a controllable execution engine rather than a one-off script generation target.</p>
+<p>Give it a try, record your own session, and share it with the community!</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/02/engineering-a-narrative-multiverse/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Engineering a Narrative Multiverse</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
