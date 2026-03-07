@@ -72,6 +72,8 @@
     
     <link rel="stylesheet" href="/css/content_elements.css">
     
+    <link rel="stylesheet" href="/css/chroma.css">
+    
     <link rel="stylesheet" href="/css/codeblocks.css">
     
     <link rel="stylesheet" href="/css/page_specific.css">
@@ -537,119 +539,119 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// CALL 1: Get the raw response from Gemini (WITH METRICS)
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#cf222e">async</span> <span style="color:#cf222e">function</span> <span style="color:#1f2328">getGeminiRawResponse</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">history</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">[],</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">query</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">context</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">isNarrationRequest</span>: <span style="color:#cf222e">boolean</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">voiceMode</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;standard&#39;</span> <span style="color:#0550ae">|</span> <span style="color:#0a3069">&#39;expressive&#39;</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;standard&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">trafficType</span>: <span style="color:#cf222e">string</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;user&#39;</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">Promise</span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">string</span><span style="color:#1f2328">&gt;</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#cf222e">const</span> <span style="color:#1f2328">startTime</span> <span style="color:#0550ae">=</span> <span style="color:#6639ba">Date</span><span style="color:#1f2328">.</span><span style="color:#1f2328">now</span><span style="color:#1f2328">();</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#cf222e">return</span> <span style="color:#1f2328">tracer</span><span style="color:#1f2328">.</span><span style="color:#1f2328">trace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;gemini.request&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">resource</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;getGeminiRawResponse&#39;</span> <span style="color:#1f2328">},</span> <span style="color:#cf222e">async</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">span</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">=&gt;</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;voice_mode&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call1:getGeminiRawResponse] Getting raw response from Gemini&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">model</span>: <span style="color:#cf222e">GenerativeModel</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">getVertexAI</span><span style="color:#1f2328">().</span><span style="color:#1f2328">getGenerativeModel</span><span style="color:#1f2328">({</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">model</span>: <span style="color:#cf222e">modelName</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">generationConfig</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">maxOutputTokens</span>: <span style="color:#cf222e">8192</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">temperature</span>: <span style="color:#cf222e">0.7</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">validHistory</span>: <span style="color:#cf222e">Content</span><span style="color:#1f2328">[]</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">history</span><span style="color:#1f2328">.</span><span style="color:#1f2328">map</span><span style="color:#1f2328">((</span><span style="color:#1f2328">h</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">=&gt;</span> <span style="color:#1f2328">({</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">role</span>: <span style="color:#cf222e">h.role</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">parts</span>: <span style="color:#cf222e">h.parts</span> <span style="color:#0550ae">||</span> <span style="color:#1f2328">[{</span> <span style="color:#1f2328">text</span>: <span style="color:#cf222e">h.text</span> <span style="color:#1f2328">}]</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}));</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">let</span> <span style="color:#1f2328">systemPrompt</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">let</span> <span style="color:#1f2328">textToRead</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">context</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">isNarrationRequest</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">extracted</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">extractSection</span><span style="color:#1f2328">(</span><span style="color:#1f2328">context</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">query</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">extracted</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">textToRead</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">extracted</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call1] Extracted chapter/section&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">systemPrompt</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">`You are a professional audiobook narrator. Read the following text aloud EXACTLY as written, word-for-word. 
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">CRITICAL RULES:
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">1. Do NOT summarize.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">2. Do NOT paraphrase.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">3. Do NOT skip any words.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">4. Output the spoken text ONLY.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">5. Do NOT include narration notes, stage directions, or descriptions of tone (e.g., (softly), (muttering), (friendly)).
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">6. Do NOT include speaker labels.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">TEXT TO READ:
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span><span style="color:#0a3069">${</span><span style="color:#1f2328">textToRead</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">systemPrompt</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">`You are a voice assistant answering questions about a document. Answer based STRICTLY on the provided context. Do NOT use training data to fill gaps.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">CONTEXT:
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span><span style="color:#0a3069">${</span><span style="color:#1f2328">context</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.model&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">modelName</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.is_narration&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">isNarrationRequest</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">chat</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">model</span><span style="color:#1f2328">.</span><span style="color:#1f2328">startChat</span><span style="color:#1f2328">({</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">history</span>: <span style="color:#cf222e">validHistory</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">systemInstruction</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">role</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;system&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">parts</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[{</span> <span style="color:#1f2328">text</span>: <span style="color:#cf222e">systemPrompt</span> <span style="color:#1f2328">}]</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">message</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">isNarrationRequest</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">extractSection</span><span style="color:#1f2328">(</span><span style="color:#1f2328">context</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">query</span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">?</span> <span style="color:#0a3069">`Please begin reading.`</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#0550ae">:</span> <span style="color:#1f2328">query</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">result</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">chat</span><span style="color:#1f2328">.</span><span style="color:#1f2328">sendMessage</span><span style="color:#1f2328">(</span><span style="color:#1f2328">message</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">response</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">result</span><span style="color:#1f2328">.</span><span style="color:#1f2328">response</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">rawText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">response</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidates</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">].</span><span style="color:#1f2328">content</span><span style="color:#1f2328">.</span><span style="color:#1f2328">parts</span><span style="color:#1f2328">[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">].</span><span style="color:#1f2328">text</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">usage</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">response</span><span style="color:#1f2328">.</span><span style="color:#1f2328">usageMetadata</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">usage</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.prompt_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.completion_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.total_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">totalTokenCount</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// 📊 RECORD METRICS
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordTokens</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">trafficType</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordLLMCost</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">trafficType</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call1] Got raw response, length:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">rawText</span><span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">return</span> <span style="color:#1f2328">rawText</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">catch</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;error&#39;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">true</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;error.message&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">message</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// 📊 RECORD ERROR METRIC
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordError</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;call1_error&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">throw</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="c1">// ============================================================================
+</span></span></span><span class="line"><span class="cl"><span class="c1">// CALL 1: Get the raw response from Gemini (WITH METRICS)
+</span></span></span><span class="line"><span class="cl"><span class="c1">// ============================================================================
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">async</span> <span class="kd">function</span> <span class="nx">getGeminiRawResponse</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">history</span>: <span class="kt">any</span><span class="p">[],</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">query</span>: <span class="kt">string</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">context</span>: <span class="kt">string</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">isNarrationRequest</span>: <span class="kt">boolean</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">voiceMode</span><span class="o">:</span> <span class="s1">&#39;standard&#39;</span> <span class="o">|</span> <span class="s1">&#39;expressive&#39;</span> <span class="o">=</span> <span class="s1">&#39;standard&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">trafficType</span>: <span class="kt">string</span> <span class="o">=</span> <span class="s1">&#39;user&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span><span class="o">:</span> <span class="nx">Promise</span><span class="p">&lt;</span><span class="nt">string</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">startTime</span> <span class="o">=</span> <span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nx">tracer</span><span class="p">.</span><span class="nx">trace</span><span class="p">(</span><span class="s1">&#39;gemini.request&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">resource</span><span class="o">:</span> <span class="s1">&#39;getGeminiRawResponse&#39;</span> <span class="p">},</span> <span class="kr">async</span> <span class="p">(</span><span class="nx">span</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;voice_mode&#39;</span><span class="p">,</span> <span class="nx">voiceMode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[Call1:getGeminiRawResponse] Getting raw response from Gemini&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">model</span>: <span class="kt">GenerativeModel</span> <span class="o">=</span> <span class="nx">getVertexAI</span><span class="p">().</span><span class="nx">getGenerativeModel</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">model</span>: <span class="kt">modelName</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">generationConfig</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">maxOutputTokens</span>: <span class="kt">8192</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">temperature</span>: <span class="kt">0.7</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">validHistory</span>: <span class="kt">Content</span><span class="p">[]</span> <span class="o">=</span> <span class="nx">history</span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">h</span>: <span class="kt">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">role</span>: <span class="kt">h.role</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">parts</span>: <span class="kt">h.parts</span> <span class="o">||</span> <span class="p">[{</span> <span class="nx">text</span>: <span class="kt">h.text</span> <span class="p">}]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">let</span> <span class="nx">systemPrompt</span>: <span class="kt">string</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">let</span> <span class="nx">textToRead</span> <span class="o">=</span> <span class="nx">context</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nx">isNarrationRequest</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="kr">const</span> <span class="nx">extracted</span> <span class="o">=</span> <span class="nx">extractSection</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">query</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="nx">extracted</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">textToRead</span> <span class="o">=</span> <span class="nx">extracted</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[Call1] Extracted chapter/section&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="nx">systemPrompt</span> <span class="o">=</span> <span class="sb">`You are a professional audiobook narrator. Read the following text aloud EXACTLY as written, word-for-word. 
+</span></span></span><span class="line"><span class="cl"><span class="sb">
+</span></span></span><span class="line"><span class="cl"><span class="sb">CRITICAL RULES:
+</span></span></span><span class="line"><span class="cl"><span class="sb">1. Do NOT summarize.
+</span></span></span><span class="line"><span class="cl"><span class="sb">2. Do NOT paraphrase.
+</span></span></span><span class="line"><span class="cl"><span class="sb">3. Do NOT skip any words.
+</span></span></span><span class="line"><span class="cl"><span class="sb">4. Output the spoken text ONLY.
+</span></span></span><span class="line"><span class="cl"><span class="sb">5. Do NOT include narration notes, stage directions, or descriptions of tone (e.g., (softly), (muttering), (friendly)).
+</span></span></span><span class="line"><span class="cl"><span class="sb">6. Do NOT include speaker labels.
+</span></span></span><span class="line"><span class="cl"><span class="sb">
+</span></span></span><span class="line"><span class="cl"><span class="sb">TEXT TO READ:
+</span></span></span><span class="line"><span class="cl"><span class="sb"></span><span class="si">${</span><span class="nx">textToRead</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">systemPrompt</span> <span class="o">=</span> <span class="sb">`You are a voice assistant answering questions about a document. Answer based STRICTLY on the provided context. Do NOT use training data to fill gaps.
+</span></span></span><span class="line"><span class="cl"><span class="sb">
+</span></span></span><span class="line"><span class="cl"><span class="sb">CONTEXT:
+</span></span></span><span class="line"><span class="cl"><span class="sb"></span><span class="si">${</span><span class="nx">context</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;llm.model&#39;</span><span class="p">,</span> <span class="nx">modelName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;llm.is_narration&#39;</span><span class="p">,</span> <span class="nx">isNarrationRequest</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">chat</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">startChat</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">history</span>: <span class="kt">validHistory</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">systemInstruction</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">role</span><span class="o">:</span> <span class="s1">&#39;system&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">parts</span><span class="o">:</span> <span class="p">[{</span> <span class="nx">text</span>: <span class="kt">systemPrompt</span> <span class="p">}]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">message</span> <span class="o">=</span> <span class="nx">isNarrationRequest</span> <span class="o">&amp;&amp;</span> <span class="nx">extractSection</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">query</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="o">?</span> <span class="sb">`Please begin reading.`</span>
+</span></span><span class="line"><span class="cl">      <span class="o">:</span> <span class="nx">query</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="kr">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">chat</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="kr">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">result</span><span class="p">.</span><span class="nx">response</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="kr">const</span> <span class="nx">rawText</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">candidates</span><span class="o">?</span><span class="p">.[</span><span class="mi">0</span><span class="p">].</span><span class="nx">content</span><span class="p">.</span><span class="nx">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">text</span> <span class="o">||</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="kr">const</span> <span class="nx">usage</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">usageMetadata</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="nx">usage</span> <span class="o">&amp;&amp;</span> <span class="nx">usage</span><span class="p">.</span><span class="nx">promptTokenCount</span> <span class="o">&amp;&amp;</span> <span class="nx">usage</span><span class="p">.</span><span class="nx">candidatesTokenCount</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;llm.prompt_tokens&#39;</span><span class="p">,</span> <span class="nx">usage</span><span class="p">.</span><span class="nx">promptTokenCount</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;llm.completion_tokens&#39;</span><span class="p">,</span> <span class="nx">usage</span><span class="p">.</span><span class="nx">candidatesTokenCount</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;llm.total_tokens&#39;</span><span class="p">,</span> <span class="nx">usage</span><span class="p">.</span><span class="nx">totalTokenCount</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 📊 RECORD METRICS
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nx">MetricsCollector</span><span class="p">.</span><span class="nx">recordTokens</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">usage</span><span class="p">.</span><span class="nx">promptTokenCount</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">usage</span><span class="p">.</span><span class="nx">candidatesTokenCount</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">voiceMode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">trafficType</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">MetricsCollector</span><span class="p">.</span><span class="nx">recordLLMCost</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">usage</span><span class="p">.</span><span class="nx">promptTokenCount</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">usage</span><span class="p">.</span><span class="nx">candidatesTokenCount</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">voiceMode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">trafficType</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[Call1] Got raw response, length:&#39;</span><span class="p">,</span> <span class="nx">rawText</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="nx">rawText</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span>: <span class="kt">any</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;error.message&#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="c1">// 📊 RECORD ERROR METRIC
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="nx">MetricsCollector</span><span class="p">.</span><span class="nx">recordError</span><span class="p">(</span><span class="s1">&#39;call1_error&#39;</span><span class="p">,</span> <span class="nx">voiceMode</span><span class="p">,</span> <span class="nx">trafficType</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="k">throw</span> <span class="nx">error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">});</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -675,114 +677,114 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// CALL 2: Add emotion tags using few-shot learning (WITH METRICS)
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#cf222e">async</span> <span style="color:#cf222e">function</span> <span style="color:#1f2328">addEmotionTagsWithFewShot</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">rawText</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">persona</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">contextHint?</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">voiceMode</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;standard&#39;</span> <span style="color:#0550ae">|</span> <span style="color:#0a3069">&#39;expressive&#39;</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;expressive&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">trafficType</span>: <span style="color:#cf222e">string</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;user&#39;</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">Promise</span><span style="color:#1f2328">&lt;</span><span style="color:#0550ae">string</span><span style="color:#1f2328">&gt;</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#cf222e">return</span> <span style="color:#1f2328">tracer</span><span style="color:#1f2328">.</span><span style="color:#1f2328">trace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;gemini.request&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">resource</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;addEmotionTagsWithFewShot&#39;</span> <span style="color:#1f2328">},</span> <span style="color:#cf222e">async</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">span</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">=&gt;</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;voice_mode&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call2:addEmotionTagsWithFewShot] Starting with text length:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">rawText</span><span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">model</span>: <span style="color:#cf222e">GenerativeModel</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">getVertexAI</span><span style="color:#1f2328">().</span><span style="color:#1f2328">getGenerativeModel</span><span style="color:#1f2328">({</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">model</span>: <span style="color:#cf222e">modelName</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">generationConfig</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">temperature</span>: <span style="color:#cf222e">0.2</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">topP</span>: <span style="color:#cf222e">0.7</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">fewShotExamples</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">getFewShotExamples</span><span style="color:#1f2328">(</span><span style="color:#1f2328">persona</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">history</span>: <span style="color:#cf222e">Content</span><span style="color:#1f2328">[]</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">[];</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">for</span> <span style="color:#1f2328">(</span><span style="color:#cf222e">const</span> <span style="color:#1f2328">example</span> <span style="color:#cf222e">of</span> <span style="color:#1f2328">fewShotExamples</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">history</span><span style="color:#1f2328">.</span><span style="color:#1f2328">push</span><span style="color:#1f2328">({</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">role</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;user&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">parts</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[{</span> <span style="color:#1f2328">text</span>: <span style="color:#cf222e">example.userInput</span> <span style="color:#1f2328">}]</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">history</span><span style="color:#1f2328">.</span><span style="color:#1f2328">push</span><span style="color:#1f2328">({</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">role</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;assistant&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">parts</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[{</span> <span style="color:#1f2328">text</span>: <span style="color:#cf222e">example.expectedOutput</span> <span style="color:#1f2328">}]</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">systemPrompt</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">`SYSTEM: You add emotion tags to text ONLY. Nothing else.
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">TAGS ONLY: [excited] [nervous] [frustrated] [sorrowful] [calm] [sigh] [laughs] [gulps] [gasps] [whispers] [pauses] [hesitates] [wearily] [warmly] [playfully] [stunned] [intrigued] [reflectively] [passionately] [poetically]
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">YOUR JOB:
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">1. Take input text
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">2. Add [tag] BEFORE words - no parentheses, no narration notes
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">3. Keep EVERY word exactly the same
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">4. Return ONLY the tagged text
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">NEVER add: (notes), descriptions, or stage directions. 
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">ONLY add: [emotion_tag] tags in square brackets.`</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.model&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">modelName</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.persona&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">persona</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">chat</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">model</span><span style="color:#1f2328">.</span><span style="color:#1f2328">startChat</span><span style="color:#1f2328">({</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">history</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">systemInstruction</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">role</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;system&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">parts</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">[{</span> <span style="color:#1f2328">text</span>: <span style="color:#cf222e">systemPrompt</span> <span style="color:#1f2328">}]</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">userMessage</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">`Add ONLY emotion tags [like this] to this text. Do NOT add parentheses or narration notes. PRESERVE ALL WORDS:
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span><span style="color:#0a3069">${</span><span style="color:#1f2328">rawText</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call2] Sending to Gemini...&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">result</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">chat</span><span style="color:#1f2328">.</span><span style="color:#1f2328">sendMessage</span><span style="color:#1f2328">(</span><span style="color:#1f2328">userMessage</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">response</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">result</span><span style="color:#1f2328">.</span><span style="color:#1f2328">response</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">let</span> <span style="color:#1f2328">taggedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">response</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidates</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">].</span><span style="color:#1f2328">content</span><span style="color:#1f2328">.</span><span style="color:#1f2328">parts</span><span style="color:#1f2328">[</span><span style="color:#0550ae">0</span><span style="color:#1f2328">].</span><span style="color:#1f2328">text</span> <span style="color:#0550ae">||</span> <span style="color:#1f2328">rawText</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">usage</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">response</span><span style="color:#1f2328">.</span><span style="color:#1f2328">usageMetadata</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">usage</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.prompt_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.completion_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;llm.total_tokens&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">totalTokenCount</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// 📊 RECORD METRICS
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordTokens</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">trafficType</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordLLMCost</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">promptTokenCount</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">usage</span><span style="color:#1f2328">.</span><span style="color:#1f2328">candidatesTokenCount</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>          <span style="color:#1f2328">trafficType</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">taggedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">taggedText</span><span style="color:#1f2328">.</span><span style="color:#1f2328">replace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">/\([^)]*?\)/g</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">).</span><span style="color:#1f2328">trim</span><span style="color:#1f2328">();</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[Call2] After cleanup, length:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">taggedText</span><span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">return</span> <span style="color:#1f2328">taggedText</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">catch</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;error&#39;</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">true</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">span</span><span style="color:#0550ae">?</span><span style="color:#1f2328">.</span><span style="color:#1f2328">setTag</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;error.message&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">message</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// 📊 RECORD ERROR METRIC
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordError</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;call2_error&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">throw</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="c1">// ============================================================================
+</span></span></span><span class="line"><span class="cl"><span class="c1">// CALL 2: Add emotion tags using few-shot learning (WITH METRICS)
+</span></span></span><span class="line"><span class="cl"><span class="c1">// ============================================================================
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">async</span> <span class="kd">function</span> <span class="nx">addEmotionTagsWithFewShot</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">rawText</span>: <span class="kt">string</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">persona</span>: <span class="kt">string</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">contextHint?</span>: <span class="kt">string</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">voiceMode</span><span class="o">:</span> <span class="s1">&#39;standard&#39;</span> <span class="o">|</span> <span class="s1">&#39;expressive&#39;</span> <span class="o">=</span> <span class="s1">&#39;expressive&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">trafficType</span>: <span class="kt">string</span> <span class="o">=</span> <span class="s1">&#39;user&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span><span class="o">:</span> <span class="nx">Promise</span><span class="p">&lt;</span><span class="nt">string</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nx">tracer</span><span class="p">.</span><span class="nx">trace</span><span class="p">(</span><span class="s1">&#39;gemini.request&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">resource</span><span class="o">:</span> <span class="s1">&#39;addEmotionTagsWithFewShot&#39;</span> <span class="p">},</span> <span class="kr">async</span> <span class="p">(</span><span class="nx">span</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;voice_mode&#39;</span><span class="p">,</span> <span class="nx">voiceMode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[Call2:addEmotionTagsWithFewShot] Starting with text length:&#39;</span><span class="p">,</span> <span class="nx">rawText</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">model</span>: <span class="kt">GenerativeModel</span> <span class="o">=</span> <span class="nx">getVertexAI</span><span class="p">().</span><span class="nx">getGenerativeModel</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">model</span>: <span class="kt">modelName</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">generationConfig</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">temperature</span>: <span class="kt">0.2</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">topP</span>: <span class="kt">0.7</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">fewShotExamples</span> <span class="o">=</span> <span class="nx">getFewShotExamples</span><span class="p">(</span><span class="nx">persona</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">history</span>: <span class="kt">Content</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kr">const</span> <span class="nx">example</span> <span class="k">of</span> <span class="nx">fewShotExamples</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">history</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">role</span><span class="o">:</span> <span class="s1">&#39;user&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">parts</span><span class="o">:</span> <span class="p">[{</span> <span class="nx">text</span>: <span class="kt">example.userInput</span> <span class="p">}]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">});</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">history</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">role</span><span class="o">:</span> <span class="s1">&#39;assistant&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">parts</span><span class="o">:</span> <span class="p">[{</span> <span class="nx">text</span>: <span class="kt">example.expectedOutput</span> <span class="p">}]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">});</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">systemPrompt</span> <span class="o">=</span> <span class="sb">`SYSTEM: You add emotion tags to text ONLY. Nothing else.
+</span></span></span><span class="line"><span class="cl"><span class="sb">
+</span></span></span><span class="line"><span class="cl"><span class="sb">TAGS ONLY: [excited] [nervous] [frustrated] [sorrowful] [calm] [sigh] [laughs] [gulps] [gasps] [whispers] [pauses] [hesitates] [wearily] [warmly] [playfully] [stunned] [intrigued] [reflectively] [passionately] [poetically]
+</span></span></span><span class="line"><span class="cl"><span class="sb">
+</span></span></span><span class="line"><span class="cl"><span class="sb">YOUR JOB:
+</span></span></span><span class="line"><span class="cl"><span class="sb">1. Take input text
+</span></span></span><span class="line"><span class="cl"><span class="sb">2. Add [tag] BEFORE words - no parentheses, no narration notes
+</span></span></span><span class="line"><span class="cl"><span class="sb">3. Keep EVERY word exactly the same
+</span></span></span><span class="line"><span class="cl"><span class="sb">4. Return ONLY the tagged text
+</span></span></span><span class="line"><span class="cl"><span class="sb">
+</span></span></span><span class="line"><span class="cl"><span class="sb">NEVER add: (notes), descriptions, or stage directions. 
+</span></span></span><span class="line"><span class="cl"><span class="sb">ONLY add: [emotion_tag] tags in square brackets.`</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;llm.model&#39;</span><span class="p">,</span> <span class="nx">modelName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;llm.persona&#39;</span><span class="p">,</span> <span class="nx">persona</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">chat</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">startChat</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">history</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">systemInstruction</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">role</span><span class="o">:</span> <span class="s1">&#39;system&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">parts</span><span class="o">:</span> <span class="p">[{</span> <span class="nx">text</span>: <span class="kt">systemPrompt</span> <span class="p">}]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">userMessage</span> <span class="o">=</span> <span class="sb">`Add ONLY emotion tags [like this] to this text. Do NOT add parentheses or narration notes. PRESERVE ALL WORDS:
+</span></span></span><span class="line"><span class="cl"><span class="sb">
+</span></span></span><span class="line"><span class="cl"><span class="sb"></span><span class="si">${</span><span class="nx">rawText</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[Call2] Sending to Gemini...&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="kr">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">chat</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">userMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="kr">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">result</span><span class="p">.</span><span class="nx">response</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="kd">let</span> <span class="nx">taggedText</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">candidates</span><span class="o">?</span><span class="p">.[</span><span class="mi">0</span><span class="p">].</span><span class="nx">content</span><span class="p">.</span><span class="nx">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">text</span> <span class="o">||</span> <span class="nx">rawText</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="kr">const</span> <span class="nx">usage</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">usageMetadata</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="nx">usage</span> <span class="o">&amp;&amp;</span> <span class="nx">usage</span><span class="p">.</span><span class="nx">promptTokenCount</span> <span class="o">&amp;&amp;</span> <span class="nx">usage</span><span class="p">.</span><span class="nx">candidatesTokenCount</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;llm.prompt_tokens&#39;</span><span class="p">,</span> <span class="nx">usage</span><span class="p">.</span><span class="nx">promptTokenCount</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;llm.completion_tokens&#39;</span><span class="p">,</span> <span class="nx">usage</span><span class="p">.</span><span class="nx">candidatesTokenCount</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;llm.total_tokens&#39;</span><span class="p">,</span> <span class="nx">usage</span><span class="p">.</span><span class="nx">totalTokenCount</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 📊 RECORD METRICS
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nx">MetricsCollector</span><span class="p">.</span><span class="nx">recordTokens</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">usage</span><span class="p">.</span><span class="nx">promptTokenCount</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">usage</span><span class="p">.</span><span class="nx">candidatesTokenCount</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">voiceMode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">trafficType</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">MetricsCollector</span><span class="p">.</span><span class="nx">recordLLMCost</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">usage</span><span class="p">.</span><span class="nx">promptTokenCount</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">usage</span><span class="p">.</span><span class="nx">candidatesTokenCount</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">voiceMode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">trafficType</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="nx">taggedText</span> <span class="o">=</span> <span class="nx">taggedText</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\([^)]*?\)/g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">).</span><span class="nx">trim</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[Call2] After cleanup, length:&#39;</span><span class="p">,</span> <span class="nx">taggedText</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="nx">taggedText</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span>: <span class="kt">any</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">span</span><span class="o">?</span><span class="p">.</span><span class="nx">setTag</span><span class="p">(</span><span class="s1">&#39;error.message&#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="c1">// 📊 RECORD ERROR METRIC
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="nx">MetricsCollector</span><span class="p">.</span><span class="nx">recordError</span><span class="p">(</span><span class="s1">&#39;call2_error&#39;</span><span class="p">,</span> <span class="nx">voiceMode</span><span class="p">,</span> <span class="nx">trafficType</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="k">throw</span> <span class="nx">error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">});</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -808,73 +810,73 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// STREAMING RESPONSE (WITH METRICS)
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a">// ============================================================================
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#cf222e">export</span> <span style="color:#cf222e">async</span> <span style="color:#cf222e">function</span><span style="color:#0550ae">*</span> <span style="color:#1f2328">getGeminiStream</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">history</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">Content</span><span style="color:#1f2328">[],</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">query</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">string</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">context</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">string</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">isNarrationRequest</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">boolean</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">expressiveMode</span><span style="color:#0550ae">:</span> <span style="color:#cf222e">boolean</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">persona</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">string</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;narrative&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">trafficType</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">string</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;user&#39;</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#cf222e">const</span> <span style="color:#1f2328">startTime</span> <span style="color:#0550ae">=</span> <span style="color:#6639ba">Date</span><span style="color:#1f2328">.</span><span style="color:#1f2328">now</span><span style="color:#1f2328">();</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] 🚀 Starting two-call process&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">expressiveMode</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">persona</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span> <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#cf222e">try</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] Is narration request:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">isNarrationRequest</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#57606a">// CALL 1: Get raw response
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] ========== CALL 1: RAW RESPONSE ==========&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">voiceMode</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">expressiveMode</span> <span style="color:#0550ae">?</span> <span style="color:#0a3069">&#39;expressive&#39;</span> <span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;standard&#39;</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">rawResponse</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">getGeminiRawResponse</span><span style="color:#1f2328">(</span><span style="color:#1f2328">history</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">query</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">context</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">isNarrationRequest</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] CALL 1 OUTPUT (length:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">rawResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;)&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">!</span><span style="color:#1f2328">rawResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">trim</span><span style="color:#1f2328">())</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">yield</span> <span style="color:#0a3069">&#39;No response generated.&#39;</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// 📊 RECORD METRICS
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#cf222e">const</span> <span style="color:#1f2328">duration</span> <span style="color:#0550ae">=</span> <span style="color:#6639ba">Date</span><span style="color:#1f2328">.</span><span style="color:#1f2328">now</span><span style="color:#1f2328">()</span> <span style="color:#0550ae">-</span> <span style="color:#1f2328">startTime</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#cf222e">return</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#57606a">// CALL 2: Add emotion tags if expressive mode
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#cf222e">let</span> <span style="color:#1f2328">finalResponse</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">string</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">expressiveMode</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] ========== CALL 2: ADD EMOTION TAGS ==========&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">finalResponse</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">addEmotionTagsWithFewShot</span><span style="color:#1f2328">(</span><span style="color:#1f2328">rawResponse</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">persona</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">undefined</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">voiceMode</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] CALL 2 OUTPUT (length:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">finalResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">length</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;)&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#57606a">// Cleanup any hallucinations like (narrative tone) or [pauses] that might leak in Standard mode
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>      <span style="color:#1f2328">finalResponse</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">rawResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">replace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">/\([^)]*?\)/g</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">).</span><span style="color:#1f2328">replace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">/\[[^\]]*?\]/g</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">).</span><span style="color:#1f2328">trim</span><span style="color:#1f2328">();</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] Standard mode - cleanup applied and Call 2 skipped&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] ✅ Complete, yielding final response&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">yield</span> <span style="color:#1f2328">finalResponse</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">}</span> <span style="color:#cf222e">catch</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] ❌ Fatal error:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#57606a">// 📊 RECORD ERROR
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#1f2328">MetricsCollector</span><span style="color:#1f2328">.</span><span style="color:#1f2328">recordError</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;fatal_error&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">expressiveMode</span> <span style="color:#0550ae">?</span> <span style="color:#0a3069">&#39;expressive&#39;</span> <span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;standard&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">trafficType</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span> <span style="color:#cf222e">instanceof</span> <span style="color:#6639ba">Error</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] Message:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">message</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;[getGeminiStream] Stack:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">stack</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">yield</span> <span style="color:#0a3069">`\n\nERROR: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">error</span> <span style="color:#cf222e">instanceof</span> <span style="color:#6639ba">Error</span> <span style="color:#0550ae">?</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">message</span> <span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;Unknown error&#39;</span><span style="color:#0a3069">}</span><span style="color:#0a3069">\n`</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">throw</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="c1">// ============================================================================
+</span></span></span><span class="line"><span class="cl"><span class="c1">// STREAMING RESPONSE (WITH METRICS)
+</span></span></span><span class="line"><span class="cl"><span class="c1">// ============================================================================
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">export</span> <span class="kr">async</span> <span class="kd">function</span><span class="o">*</span> <span class="nx">getGeminiStream</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">history</span><span class="o">:</span> <span class="nx">Content</span><span class="p">[],</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">query</span><span class="o">:</span> <span class="nx">string</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">context</span><span class="o">:</span> <span class="nx">string</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">isNarrationRequest</span><span class="o">:</span> <span class="kr">boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">expressiveMode</span><span class="o">:</span> <span class="kr">boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">persona</span><span class="o">:</span> <span class="nx">string</span> <span class="o">=</span> <span class="s1">&#39;narrative&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">trafficType</span><span class="o">:</span> <span class="nx">string</span> <span class="o">=</span> <span class="s1">&#39;user&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">startTime</span> <span class="o">=</span> <span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] 🚀 Starting two-call process&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">expressiveMode</span><span class="p">,</span> <span class="nx">persona</span><span class="p">,</span> <span class="nx">trafficType</span> <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] Is narration request:&#39;</span><span class="p">,</span> <span class="nx">isNarrationRequest</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// CALL 1: Get raw response
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] ========== CALL 1: RAW RESPONSE ==========&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">voiceMode</span> <span class="o">=</span> <span class="nx">expressiveMode</span> <span class="o">?</span> <span class="s1">&#39;expressive&#39;</span> <span class="o">:</span> <span class="s1">&#39;standard&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">rawResponse</span> <span class="o">=</span> <span class="kr">await</span> <span class="nx">getGeminiRawResponse</span><span class="p">(</span><span class="nx">history</span><span class="p">,</span> <span class="nx">query</span><span class="p">,</span> <span class="nx">context</span><span class="p">,</span> <span class="nx">isNarrationRequest</span><span class="p">,</span> <span class="nx">voiceMode</span><span class="p">,</span> <span class="nx">trafficType</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] CALL 1 OUTPUT (length:&#39;</span><span class="p">,</span> <span class="nx">rawResponse</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">rawResponse</span><span class="p">.</span><span class="nx">trim</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">yield</span> <span class="s1">&#39;No response generated.&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="c1">// 📊 RECORD METRICS
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="kr">const</span> <span class="nx">duration</span> <span class="o">=</span> <span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span> <span class="o">-</span> <span class="nx">startTime</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// CALL 2: Add emotion tags if expressive mode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">let</span> <span class="nx">finalResponse</span><span class="o">:</span> <span class="nx">string</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nx">expressiveMode</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] ========== CALL 2: ADD EMOTION TAGS ==========&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="nx">finalResponse</span> <span class="o">=</span> <span class="kr">await</span> <span class="nx">addEmotionTagsWithFewShot</span><span class="p">(</span><span class="nx">rawResponse</span><span class="p">,</span> <span class="nx">persona</span><span class="p">,</span> <span class="kc">undefined</span><span class="p">,</span> <span class="nx">voiceMode</span><span class="p">,</span> <span class="nx">trafficType</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] CALL 2 OUTPUT (length:&#39;</span><span class="p">,</span> <span class="nx">finalResponse</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// Cleanup any hallucinations like (narrative tone) or [pauses] that might leak in Standard mode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="nx">finalResponse</span> <span class="o">=</span> <span class="nx">rawResponse</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\([^)]*?\)/g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\[[^\]]*?\]/g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">).</span><span class="nx">trim</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] Standard mode - cleanup applied and Call 2 skipped&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] ✅ Complete, yielding final response&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">yield</span> <span class="nx">finalResponse</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] ❌ Fatal error:&#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 📊 RECORD ERROR
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">MetricsCollector</span><span class="p">.</span><span class="nx">recordError</span><span class="p">(</span><span class="s1">&#39;fatal_error&#39;</span><span class="p">,</span> <span class="nx">expressiveMode</span> <span class="o">?</span> <span class="s1">&#39;expressive&#39;</span> <span class="o">:</span> <span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="nx">trafficType</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nx">error</span> <span class="k">instanceof</span> <span class="nb">Error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] Message:&#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;[getGeminiStream] Stack:&#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">yield</span> <span class="sb">`\n\nERROR: </span><span class="si">${</span><span class="nx">error</span> <span class="k">instanceof</span> <span class="nb">Error</span> <span class="o">?</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span> <span class="o">:</span> <span class="s1">&#39;Unknown error&#39;</span><span class="si">}</span><span class="sb">\n`</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">throw</span> <span class="nx">error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -901,89 +903,89 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#cf222e">export</span> <span style="color:#cf222e">async</span> <span style="color:#cf222e">function</span> <span style="color:#1f2328">POST</span><span style="color:#1f2328">(</span><span style="color:#1f2328">req</span>: <span style="color:#cf222e">NextRequest</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;=== Transcribe API Called ===&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">formData</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">req</span><span style="color:#1f2328">.</span><span style="color:#1f2328">formData</span><span style="color:#1f2328">();</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">audioFile</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">formData</span><span style="color:#1f2328">.</span><span style="color:#cf222e">get</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;audio&#39;</span><span style="color:#1f2328">)</span> <span style="color:#cf222e">as</span> <span style="color:#1f2328">File</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">!</span><span style="color:#1f2328">audioFile</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;No audio file provided&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">{</span> <span style="color:#1f2328">error</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;No audio file provided&#39;</span> <span style="color:#1f2328">},</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">{</span> <span style="color:#1f2328">status</span>: <span style="color:#cf222e">400</span> <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">`📦 Received audio file: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">audioFile</span><span style="color:#1f2328">.</span><span style="color:#1f2328">name</span><span style="color:#0a3069">}</span><span style="color:#0a3069">, size: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">audioFile</span><span style="color:#1f2328">.</span><span style="color:#1f2328">size</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> bytes, type: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">audioFile</span><span style="color:#1f2328">.</span><span style="color:#cf222e">type</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// Convert File to Blob
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">arrayBuffer</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">audioFile</span><span style="color:#1f2328">.</span><span style="color:#1f2328">arrayBuffer</span><span style="color:#1f2328">();</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">audioBlob</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">new</span> <span style="color:#1f2328">Blob</span><span style="color:#1f2328">([</span><span style="color:#1f2328">arrayBuffer</span><span style="color:#1f2328">],</span> <span style="color:#1f2328">{</span> <span style="color:#cf222e">type</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">audioFile</span><span style="color:#1f2328">.</span><span style="color:#cf222e">type</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;audio/webm&#39;</span> <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;🎙️ Calling ElevenLabs speechToText.convert()...&#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">transcription</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">getClient</span><span style="color:#1f2328">().</span><span style="color:#1f2328">speechToText</span><span style="color:#1f2328">.</span><span style="color:#1f2328">convert</span><span style="color:#1f2328">({</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">file</span>: <span style="color:#cf222e">audioBlob</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">modelId</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;scribe_v1&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">tagAudioEvents</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">languageCode</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;eng&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">diarize</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;✅ Transcription successful:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">JSON</span><span style="color:#1f2328">.</span><span style="color:#1f2328">stringify</span><span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span><span style="color:#1f2328">,</span> <span style="color:#cf222e">null</span><span style="color:#1f2328">,</span> <span style="color:#0550ae">2</span><span style="color:#1f2328">));</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// Handle different response structures
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">let</span> <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// Check various possible response structures
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">if</span> <span style="color:#1f2328">((</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">text</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">text</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#cf222e">if</span> <span style="color:#1f2328">((</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">transcription</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">transcription</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#cf222e">if</span> <span style="color:#1f2328">((</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">result</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">result</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#cf222e">if</span> <span style="color:#1f2328">((</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">chunks</span> <span style="color:#0550ae">&amp;&amp;</span> <span style="color:#6639ba">Array</span><span style="color:#1f2328">.</span><span style="color:#1f2328">isArray</span><span style="color:#1f2328">((</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">chunks</span><span style="color:#1f2328">))</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// If it&#39;s multichannel with chunks
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">).</span><span style="color:#1f2328">chunks</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">.</span><span style="color:#1f2328">map</span><span style="color:#1f2328">((</span><span style="color:#1f2328">chunk</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">=&gt;</span> <span style="color:#1f2328">chunk</span><span style="color:#1f2328">.</span><span style="color:#1f2328">text</span> <span style="color:#0550ae">||</span> <span style="color:#1f2328">chunk</span><span style="color:#1f2328">.</span><span style="color:#1f2328">transcript</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">.</span><span style="color:#1f2328">join</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39; &#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span> <span style="color:#cf222e">else</span> <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#6639ba">Array</span><span style="color:#1f2328">.</span><span style="color:#1f2328">isArray</span><span style="color:#1f2328">(</span><span style="color:#1f2328">transcription</span><span style="color:#1f2328">))</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#57606a">// If it&#39;s an array response
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>            <span style="color:#1f2328">transcribedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">transcription</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">.</span><span style="color:#1f2328">map</span><span style="color:#1f2328">((</span><span style="color:#1f2328">item</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#0550ae">=&gt;</span> <span style="color:#1f2328">item</span><span style="color:#1f2328">.</span><span style="color:#1f2328">text</span> <span style="color:#0550ae">||</span> <span style="color:#1f2328">item</span><span style="color:#1f2328">.</span><span style="color:#1f2328">transcript</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">.</span><span style="color:#1f2328">join</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39; &#39;</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;📝 Extracted text:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">transcribedText</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">({</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">text</span>: <span style="color:#cf222e">transcribedText</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">success</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">transcription</span>: <span style="color:#cf222e">transcription</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">catch</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;❌ Transcription error:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// Log detailed error info
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span> <span style="color:#cf222e">instanceof</span> <span style="color:#6639ba">Error</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;Error message:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">message</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;Error stack:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">error</span><span style="color:#1f2328">.</span><span style="color:#1f2328">stack</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">errorMessage</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">error</span> <span style="color:#cf222e">instanceof</span> <span style="color:#6639ba">Error</span> <span style="color:#0550ae">?</span> <span style="color:#1f2328">error.message</span> : <span style="color:#cf222e">String</span><span style="color:#1f2328">(</span><span style="color:#1f2328">error</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">error</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;Transcription failed&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#1f2328">details</span>: <span style="color:#cf222e">errorMessage</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">},</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span> <span style="color:#1f2328">status</span>: <span style="color:#cf222e">500</span> <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="kr">export</span> <span class="kr">async</span> <span class="kd">function</span> <span class="nx">POST</span><span class="p">(</span><span class="nx">req</span>: <span class="kt">NextRequest</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;=== Transcribe API Called ===&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">formData</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">req</span><span class="p">.</span><span class="nx">formData</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">audioFile</span> <span class="o">=</span> <span class="nx">formData</span><span class="p">.</span><span class="kr">get</span><span class="p">(</span><span class="s1">&#39;audio&#39;</span><span class="p">)</span> <span class="kr">as</span> <span class="nx">File</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">audioFile</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;No audio file provided&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nx">json</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span> <span class="nx">error</span><span class="o">:</span> <span class="s1">&#39;No audio file provided&#39;</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span> <span class="nx">status</span>: <span class="kt">400</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`📦 Received audio file: </span><span class="si">${</span><span class="nx">audioFile</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb">, size: </span><span class="si">${</span><span class="nx">audioFile</span><span class="p">.</span><span class="nx">size</span><span class="si">}</span><span class="sb"> bytes, type: </span><span class="si">${</span><span class="nx">audioFile</span><span class="p">.</span><span class="kr">type</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// Convert File to Blob
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kr">const</span> <span class="nx">arrayBuffer</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">audioFile</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">audioBlob</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Blob</span><span class="p">([</span><span class="nx">arrayBuffer</span><span class="p">],</span> <span class="p">{</span> <span class="kr">type</span><span class="o">:</span> <span class="nx">audioFile</span><span class="p">.</span><span class="kr">type</span> <span class="o">||</span> <span class="s1">&#39;audio/webm&#39;</span> <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;🎙️ Calling ElevenLabs speechToText.convert()...&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">transcription</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">getClient</span><span class="p">().</span><span class="nx">speechToText</span><span class="p">.</span><span class="nx">convert</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">file</span>: <span class="kt">audioBlob</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">modelId</span><span class="o">:</span> <span class="s1">&#39;scribe_v1&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">tagAudioEvents</span>: <span class="kt">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">languageCode</span><span class="o">:</span> <span class="s1">&#39;eng&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">diarize</span>: <span class="kt">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;✅ Transcription successful:&#39;</span><span class="p">,</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">transcription</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// Handle different response structures
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kd">let</span> <span class="nx">transcribedText</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// Check various possible response structures
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">((</span><span class="nx">transcription</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">text</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">transcribedText</span> <span class="o">=</span> <span class="p">(</span><span class="nx">transcription</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">text</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="nx">transcription</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">transcription</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">transcribedText</span> <span class="o">=</span> <span class="p">(</span><span class="nx">transcription</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">transcription</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="nx">transcription</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">transcribedText</span> <span class="o">=</span> <span class="p">(</span><span class="nx">transcription</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="nx">transcription</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">chunks</span> <span class="o">&amp;&amp;</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span><span class="p">((</span><span class="nx">transcription</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">chunks</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// If it&#39;s multichannel with chunks
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="nx">transcribedText</span> <span class="o">=</span> <span class="p">(</span><span class="nx">transcription</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">chunks</span>
+</span></span><span class="line"><span class="cl">                <span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">chunk</span>: <span class="kt">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">chunk</span><span class="p">.</span><span class="nx">text</span> <span class="o">||</span> <span class="nx">chunk</span><span class="p">.</span><span class="nx">transcript</span> <span class="o">||</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">transcription</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// If it&#39;s an array response
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="nx">transcribedText</span> <span class="o">=</span> <span class="nx">transcription</span>
+</span></span><span class="line"><span class="cl">                <span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">item</span>: <span class="kt">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">item</span><span class="p">.</span><span class="nx">text</span> <span class="o">||</span> <span class="nx">item</span><span class="p">.</span><span class="nx">transcript</span> <span class="o">||</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;📝 Extracted text:&#39;</span><span class="p">,</span> <span class="nx">transcribedText</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nx">json</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">text</span>: <span class="kt">transcribedText</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">success</span>: <span class="kt">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">transcription</span>: <span class="kt">transcription</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;❌ Transcription error:&#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// Log detailed error info
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="nx">error</span> <span class="k">instanceof</span> <span class="nb">Error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;Error message:&#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;Error stack:&#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">errorMessage</span> <span class="o">=</span> <span class="nx">error</span> <span class="k">instanceof</span> <span class="nb">Error</span> <span class="o">?</span> <span class="nx">error.message</span> : <span class="kt">String</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nx">json</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">error</span><span class="o">:</span> <span class="s1">&#39;Transcription failed&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">details</span>: <span class="kt">errorMessage</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span> <span class="nx">status</span>: <span class="kt">500</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -1009,70 +1011,70 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#cf222e">export</span> <span style="color:#cf222e">async</span> <span style="color:#cf222e">function</span> <span style="color:#1f2328">POST</span><span style="color:#1f2328">(</span><span style="color:#1f2328">req</span>: <span style="color:#cf222e">NextRequest</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">try</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">text</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">persona</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">expressiveMode</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">false</span><span style="color:#1f2328">,</span>   <span style="color:#57606a">// 🔑 mirrors Gemini pipeline
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#1f2328">}</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">text</span>: <span style="color:#cf222e">string</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">persona?</span>: <span style="color:#cf222e">Persona</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">expressiveMode?</span>: <span style="color:#cf222e">boolean</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">req</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">();</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#0550ae">!</span><span style="color:#1f2328">text</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#cf222e">return</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">({</span> <span style="color:#1f2328">error</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;Text is required&#39;</span> <span style="color:#1f2328">},</span> <span style="color:#1f2328">{</span> <span style="color:#1f2328">status</span>: <span style="color:#cf222e">400</span> <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">voiceId</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">getVoiceIdForPersona</span><span style="color:#1f2328">(</span><span style="color:#1f2328">persona</span> <span style="color:#cf222e">as</span> <span style="color:#1f2328">Persona</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// 🎭 Model selection
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">modelId</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">expressiveMode</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">?</span> <span style="color:#0a3069">&#39;eleven_v3&#39;</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;eleven_flash_v2_5&#39;</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">inferredExpressive</span> <span style="color:#0550ae">=</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">expressiveMode</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">/\[[^\]]+\]/</span><span style="color:#1f2328">.</span><span style="color:#1f2328">test</span><span style="color:#1f2328">(</span><span style="color:#1f2328">text</span><span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">finalExpressiveMode</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">inferredExpressive</span><span style="color:#1f2328">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#57606a">// 🧹 Strip emotion tags in standard mode
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">processedText</span> <span style="color:#0550ae">=</span> <span style="color:#1f2328">finalExpressiveMode</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#0550ae">?</span> <span style="color:#1f2328">text</span>
-</span></span><span style="display:flex;"><span>            : <span style="color:#cf222e">text.replace</span><span style="color:#1f2328">(</span><span style="color:#0a3069">/\[[^\]]*?\]/g</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#39;&#39;</span><span style="color:#1f2328">).</span><span style="color:#1f2328">trim</span><span style="color:#1f2328">();</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">log</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">`🎙️ TTS Request | Persona: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">persona</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;narrative&#39;</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | `</span> <span style="color:#0550ae">+</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">`Mode: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">expressiveMode</span> <span style="color:#0550ae">?</span> <span style="color:#0a3069">&#39;expressive&#39;</span> <span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;standard&#39;</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | `</span> <span style="color:#0550ae">+</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#0a3069">`Model: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">modelId</span><span style="color:#0a3069">}</span><span style="color:#0a3069"> | VoiceID: </span><span style="color:#0a3069">${</span><span style="color:#1f2328">voiceId</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">const</span> <span style="color:#1f2328">audio</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">getClient</span><span style="color:#1f2328">().</span><span style="color:#1f2328">textToSpeech</span><span style="color:#1f2328">.</span><span style="color:#1f2328">convert</span><span style="color:#1f2328">(</span><span style="color:#1f2328">voiceId</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">text</span>: <span style="color:#cf222e">processedText</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">modelId</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">outputFormat</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;mp3_44100_128&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#cf222e">new</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">(</span><span style="color:#1f2328">audio</span> <span style="color:#cf222e">as</span> <span style="color:#cf222e">any</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">headers</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#0a3069">&#39;Content-Type&#39;</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;audio/mpeg&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">},</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span> <span style="color:#cf222e">catch</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">error</span>: <span style="color:#cf222e">any</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">console</span><span style="color:#1f2328">.</span><span style="color:#1f2328">error</span><span style="color:#1f2328">(</span><span style="color:#0a3069">&#39;❌ TTS Error:&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">message</span>: <span style="color:#cf222e">error.message</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">statusCode</span>: <span style="color:#cf222e">error.statusCode</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">body</span>: <span style="color:#cf222e">error.body</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">});</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#cf222e">return</span> <span style="color:#1f2328">NextResponse</span><span style="color:#1f2328">.</span><span style="color:#1f2328">json</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span> <span style="color:#1f2328">error</span>: <span style="color:#cf222e">error.message</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;TTS failed&#39;</span><span style="color:#1f2328">,</span> <span style="color:#1f2328">details</span>: <span style="color:#cf222e">error.body</span> <span style="color:#0550ae">||</span> <span style="color:#0a3069">&#39;&#39;</span> <span style="color:#1f2328">},</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">{</span> <span style="color:#1f2328">status</span>: <span style="color:#cf222e">error.statusCode</span> <span style="color:#0550ae">||</span> <span style="color:#0550ae">500</span> <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="kr">export</span> <span class="kr">async</span> <span class="kd">function</span> <span class="nx">POST</span><span class="p">(</span><span class="nx">req</span>: <span class="kt">NextRequest</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">text</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">persona</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">expressiveMode</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>   <span class="c1">// 🔑 mirrors Gemini pipeline
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">}</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">text</span>: <span class="kt">string</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">persona?</span>: <span class="kt">Persona</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">expressiveMode?</span>: <span class="kt">boolean</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">req</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">text</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nx">json</span><span class="p">({</span> <span class="nx">error</span><span class="o">:</span> <span class="s1">&#39;Text is required&#39;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">status</span>: <span class="kt">400</span> <span class="p">});</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">voiceId</span> <span class="o">=</span> <span class="nx">getVoiceIdForPersona</span><span class="p">(</span><span class="nx">persona</span> <span class="kr">as</span> <span class="nx">Persona</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 🎭 Model selection
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kr">const</span> <span class="nx">modelId</span> <span class="o">=</span> <span class="nx">expressiveMode</span>
+</span></span><span class="line"><span class="cl">            <span class="o">?</span> <span class="s1">&#39;eleven_v3&#39;</span>
+</span></span><span class="line"><span class="cl">            <span class="o">:</span> <span class="s1">&#39;eleven_flash_v2_5&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">inferredExpressive</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">expressiveMode</span> <span class="o">||</span> <span class="sr">/\[[^\]]+\]/</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">text</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">finalExpressiveMode</span> <span class="o">=</span> <span class="nx">inferredExpressive</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 🧹 Strip emotion tags in standard mode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kr">const</span> <span class="nx">processedText</span> <span class="o">=</span> <span class="nx">finalExpressiveMode</span>
+</span></span><span class="line"><span class="cl">            <span class="o">?</span> <span class="nx">text</span>
+</span></span><span class="line"><span class="cl">            : <span class="kt">text.replace</span><span class="p">(</span><span class="sr">/\[[^\]]*?\]/g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">).</span><span class="nx">trim</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="sb">`🎙️ TTS Request | Persona: </span><span class="si">${</span><span class="nx">persona</span> <span class="o">||</span> <span class="s1">&#39;narrative&#39;</span><span class="si">}</span><span class="sb"> | `</span> <span class="o">+</span>
+</span></span><span class="line"><span class="cl">            <span class="sb">`Mode: </span><span class="si">${</span><span class="nx">expressiveMode</span> <span class="o">?</span> <span class="s1">&#39;expressive&#39;</span> <span class="o">:</span> <span class="s1">&#39;standard&#39;</span><span class="si">}</span><span class="sb"> | `</span> <span class="o">+</span>
+</span></span><span class="line"><span class="cl">            <span class="sb">`Model: </span><span class="si">${</span><span class="nx">modelId</span><span class="si">}</span><span class="sb"> | VoiceID: </span><span class="si">${</span><span class="nx">voiceId</span><span class="si">}</span><span class="sb">`</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">audio</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">getClient</span><span class="p">().</span><span class="nx">textToSpeech</span><span class="p">.</span><span class="nx">convert</span><span class="p">(</span><span class="nx">voiceId</span><span class="p">,</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">text</span>: <span class="kt">processedText</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">modelId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">outputFormat</span><span class="o">:</span> <span class="s1">&#39;mp3_44100_128&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="k">new</span> <span class="nx">NextResponse</span><span class="p">(</span><span class="nx">audio</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">,</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">headers</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span> <span class="s1">&#39;audio/mpeg&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span>: <span class="kt">any</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;❌ TTS Error:&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">message</span>: <span class="kt">error.message</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">statusCode</span>: <span class="kt">error.statusCode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">body</span>: <span class="kt">error.body</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nx">json</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span> <span class="nx">error</span>: <span class="kt">error.message</span> <span class="o">||</span> <span class="s1">&#39;TTS failed&#39;</span><span class="p">,</span> <span class="nx">details</span>: <span class="kt">error.body</span> <span class="o">||</span> <span class="s1">&#39;&#39;</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span> <span class="nx">status</span>: <span class="kt">error.statusCode</span> <span class="o">||</span> <span class="mi">500</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -1102,17 +1104,17 @@ Implementation: <code>src/components/DatadogInit.tsx</code>:</p>
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#1f2328">datadogRum</span><span style="color:#1f2328">.</span><span style="color:#1f2328">init</span><span style="color:#1f2328">({</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">applicationId</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">clientToken</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">site</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">service</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;voicedoc-agent&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">sessionSampleRate</span>: <span style="color:#cf222e">100</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">sessionReplaySampleRate</span>: <span style="color:#cf222e">20</span><span style="color:#1f2328">,</span> <span style="color:#57606a">// 100% for development/testing
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span>    <span style="color:#1f2328">trackUserInteractions</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">trackResources</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">trackLongTasks</span>: <span style="color:#cf222e">true</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">})</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="nx">datadogRum</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">applicationId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">clientToken</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">site</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">service</span><span class="o">:</span> <span class="s1">&#39;voicedoc-agent&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">sessionSampleRate</span>: <span class="kt">100</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">sessionReplaySampleRate</span>: <span class="kt">20</span><span class="p">,</span> <span class="c1">// 100% for development/testing
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">trackUserInteractions</span>: <span class="kt">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">trackResources</span>: <span class="kt">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">trackLongTasks</span>: <span class="kt">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">})</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -1131,8 +1133,8 @@ Implementation: <code>src/components/DatadogInit.tsx</code>:</p>
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#57606a">// Start Session Replay Recording
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#1f2328">datadogRum</span><span style="color:#1f2328">.</span><span style="color:#1f2328">startSessionReplayRecording</span><span style="color:#1f2328">();</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="c1">// Start Session Replay Recording
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">datadogRum</span><span class="p">.</span><span class="nx">startSessionReplayRecording</span><span class="p">();</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -1151,17 +1153,17 @@ Implementation: <code>src/components/DatadogInit.tsx</code>:</p>
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#57606a">// PATH 1: AGENTLESS (HTTPS API) - Best for Hackathons
-</span></span></span><span style="display:flex;"><span><span style="color:#57606a"></span><span style="color:#cf222e">if</span> <span style="color:#1f2328">(</span><span style="color:#1f2328">DD_API_KEY</span><span style="color:#1f2328">)</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#cf222e">const</span> <span style="color:#1f2328">response</span> <span style="color:#0550ae">=</span> <span style="color:#cf222e">await</span> <span style="color:#1f2328">fetch</span><span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#0a3069">`https://api.</span><span style="color:#0a3069">${</span><span style="color:#1f2328">DD_SITE</span><span style="color:#0a3069">}</span><span style="color:#0a3069">/api/v1/series?api_key=</span><span style="color:#0a3069">${</span><span style="color:#1f2328">DD_API_KEY</span><span style="color:#0a3069">}</span><span style="color:#0a3069">`</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">method</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;POST&#39;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">headers</span><span style="color:#0550ae">:</span> <span style="color:#1f2328">{</span> <span style="color:#0a3069">&#39;Content-Type&#39;</span><span style="color:#0550ae">:</span> <span style="color:#0a3069">&#39;application/json&#39;</span> <span style="color:#1f2328">},</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#1f2328">body</span>: <span style="color:#cf222e">JSON.stringify</span><span style="color:#1f2328">({</span> <span style="color:#1f2328">series</span> <span style="color:#1f2328">})</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">);</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ts" data-lang="ts"><span class="line"><span class="cl"><span class="c1">// PATH 1: AGENTLESS (HTTPS API) - Best for Hackathons
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="p">(</span><span class="nx">DD_API_KEY</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">fetch</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="sb">`https://api.</span><span class="si">${</span><span class="nx">DD_SITE</span><span class="si">}</span><span class="sb">/api/v1/series?api_key=</span><span class="si">${</span><span class="nx">DD_API_KEY</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">method</span><span class="o">:</span> <span class="s1">&#39;POST&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">headers</span><span class="o">:</span> <span class="p">{</span> <span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span> <span class="s1">&#39;application/json&#39;</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">body</span>: <span class="kt">JSON.stringify</span><span class="p">({</span> <span class="nx">series</span> <span class="p">})</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -1418,7 +1420,7 @@ Implementation: <code>src/components/DatadogInit.tsx</code>:</p>
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>npm run dev</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -1654,7 +1656,7 @@ Implementation: <code>src/components/DatadogInit.tsx</code>:</p>
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python scripts<span style="color:#0a3069">\t</span>raffic-generator.py</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">python scripts<span class="se">\t</span>raffic-generator.py</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>

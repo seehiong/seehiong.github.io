@@ -33,7 +33,7 @@
   <meta itemprop="datePublished" content="2024-10-20T08:00:00+08:00">
   <meta itemprop="dateModified" content="2024-10-20T08:00:00+08:00">
   <meta itemprop="wordCount" content="1155">
-  <meta itemprop="keywords" content="MLOps,MLflow,Kubeflow,Talos,Homelab,K9s,NFS,Metallb"><title>Integrating MLflow and Kubeflow on Talos | See Hiong&#39;s Blog</title>
+  <meta itemprop="keywords" content="MLOps,MLflow,Kubeflow,Talos,Homelab,K9s,NFS,MetalLB"><title>Integrating MLflow and Kubeflow on Talos | See Hiong&#39;s Blog</title>
 
     <link rel="canonical" href="https://seehiong.github.io/posts/2024/10/integrating-mlflow-and-kubeflow-on-talos/">
 
@@ -71,6 +71,8 @@
     <link rel="stylesheet" href="/css/cards.css">
     
     <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
     
     <link rel="stylesheet" href="/css/codeblocks.css">
     
@@ -242,33 +244,33 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#0550ae">machine</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">network</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span><span style="color:#0550ae">hostname</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>control<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">install</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">disk</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>/dev/nvme0n1<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">image</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>ghcr.io/siderolabs/installer:v1.7.6<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">wipe</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#cf222e">true</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">kubelet</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">defaultRuntimeSeccompProfileEnabled</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#cf222e">false</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">cluster</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">apiServer</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">admissionControl</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">            </span>- <span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>PodSecurity<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">              </span><span style="color:#0550ae">configuration</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#0550ae">apiVersion</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>pod-security.admission.config.k8s.io/v1alpha1<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#0550ae">defaults</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#0550ae">audit</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>privileged  <span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#0550ae">audit-version</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>latest<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#0550ae">enforce</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>privileged  <span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#0550ae">enforce-version</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>latest<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#0550ae">warn</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>privileged  <span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#0550ae">warn-version</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>latest<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#0550ae">exemptions</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#0550ae">namespaces</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#1f2328">[]</span><span style="color:#fff"> </span><span style="color:#57606a"># Apply to all namespaces</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#0550ae">runtimeClasses</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#1f2328">[]</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                    </span><span style="color:#0550ae">usernames</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#1f2328">[]</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">                </span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>PodSecurityConfiguration</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">machine</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">network</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="l">control</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">install</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">disk</span><span class="p">:</span><span class="w"> </span><span class="l">/dev/nvme0n1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">ghcr.io/siderolabs/installer:v1.7.6</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">wipe</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">kubelet</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">defaultRuntimeSeccompProfileEnabled</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">cluster</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">apiServer</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">admissionControl</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">PodSecurity</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">              </span><span class="nt">configuration</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">pod-security.admission.config.k8s.io/v1alpha1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="nt">defaults</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="nt">audit</span><span class="p">:</span><span class="w"> </span><span class="l">privileged  </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="nt">audit-version</span><span class="p">:</span><span class="w"> </span><span class="l">latest</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l">privileged  </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="nt">enforce-version</span><span class="p">:</span><span class="w"> </span><span class="l">latest</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="nt">warn</span><span class="p">:</span><span class="w"> </span><span class="l">privileged  </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="nt">warn-version</span><span class="p">:</span><span class="w"> </span><span class="l">latest</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="nt">exemptions</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="nt">namespaces</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="c"># Apply to all namespaces</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="nt">runtimeClasses</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="nt">usernames</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">PodSecurityConfiguration</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -295,8 +297,8 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#57606a"># Edit control node</span>
-</span></span><span style="display:flex;"><span>talosctl edit machineconfig -n 192.168.68.115</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Edit control node</span>
+</span></span><span class="line"><span class="cl">talosctl edit machineconfig -n 192.168.68.115</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -313,11 +315,11 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#0550ae">machine</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">time</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">disabled</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#cf222e">false</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">servers</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span>- time.cloudflare.com</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">machine</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">time</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">disabled</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">servers</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">time.cloudflare.com</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -338,21 +340,21 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#0550ae">machine</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">network</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">hostname</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>worker-1<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">install</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span><span style="color:#0550ae">disk</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>/dev/nvme0n1<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span><span style="color:#0550ae">image</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>ghcr.io/siderolabs/installer:v1.7.6<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span><span style="color:#0550ae">wipe</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#cf222e">true</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">kubelet</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">    </span><span style="color:#0550ae">extraMounts</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">      </span>- <span style="color:#0550ae">destination</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>/var/mnt<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">type</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>bind<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">source</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>/var/mnt<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">options</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">          </span>- bind<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">          </span>- rw</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">machine</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">network</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="l">worker-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">install</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">disk</span><span class="p">:</span><span class="w"> </span><span class="l">/dev/nvme0n1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">ghcr.io/siderolabs/installer:v1.7.6</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">wipe</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">kubelet</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">extraMounts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">destination</span><span class="p">:</span><span class="w"> </span><span class="l">/var/mnt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">bind</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l">/var/mnt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">options</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">bind</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">rw</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -370,16 +372,16 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#57606a"># Single master node</span>
-</span></span><span style="display:flex;"><span>talosctl gen config homelab https://192.168.68.115:6443
-</span></span><span style="display:flex;"><span>talosctl disks --insecure -n 192.168.68.115
-</span></span><span style="display:flex;"><span>talosctl machineconfig patch controlplane.yaml --patch @control.patch --output control.yaml
-</span></span><span style="display:flex;"><span>talosctl apply-config --insecure -n 192.168.68.115 --file control.yaml
-</span></span><span style="display:flex;"><span>talosctl bootstrap --nodes 192.168.68.115 --endpoints 192.168.68.115 --talosconfig talosconfig
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Worker nodes</span>
-</span></span><span style="display:flex;"><span>talosctl machineconfig patch worker.yaml --patch @worker-1.patch --output worker-1.yaml
-</span></span><span style="display:flex;"><span>talosctl apply-config --insecure -n 192.168.68.117 --file worker-1.yaml</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Single master node</span>
+</span></span><span class="line"><span class="cl">talosctl gen config homelab https://192.168.68.115:6443
+</span></span><span class="line"><span class="cl">talosctl disks --insecure -n 192.168.68.115
+</span></span><span class="line"><span class="cl">talosctl machineconfig patch controlplane.yaml --patch @control.patch --output control.yaml
+</span></span><span class="line"><span class="cl">talosctl apply-config --insecure -n 192.168.68.115 --file control.yaml
+</span></span><span class="line"><span class="cl">talosctl bootstrap --nodes 192.168.68.115 --endpoints 192.168.68.115 --talosconfig talosconfig
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Worker nodes</span>
+</span></span><span class="line"><span class="cl">talosctl machineconfig patch worker.yaml --patch @worker-1.patch --output worker-1.yaml
+</span></span><span class="line"><span class="cl">talosctl apply-config --insecure -n 192.168.68.117 --file worker-1.yaml</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -398,7 +400,7 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.28/deploy/local-path-storage.yaml -O</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.28/deploy/local-path-storage.yaml -O</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -416,29 +418,29 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#24292e">---</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">apiVersion</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>storage.k8s.io/v1<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>StorageClass<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">metadata</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>local-path<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">annotations</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">        </span><span style="color:#0550ae">storageclass.kubernetes.io/is-default-class</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#0a3069">&#34;true&#34;</span><span style="color:#fff"> </span><span style="color:#57606a"># around line 120</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#24292e">---</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>ConfigMap<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">apiVersion</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>v1<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">metadata</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>local-path-config<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">namespace</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>local-path-storage<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">data</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#57606a"># below section around line 131</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">config.json</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span><span style="color:#1f2328">|-</span><span style="color:#0a3069">
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    {
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">            &#34;nodePathMap&#34;:[
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">            {
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">                    &#34;node&#34;:&#34;DEFAULT_PATH_FOR_NON_LISTED_NODES&#34;,
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">                    &#34;paths&#34;:[&#34;/var/mnt&#34;]
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">            }
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">            ]
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069">    }</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nn">---</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">storage.k8s.io/v1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">StorageClass</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">local-path</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">storageclass.kubernetes.io/is-default-class</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;true&#34;</span><span class="w"> </span><span class="c"># around line 120</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nn">---</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">ConfigMap</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">local-path-config</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">local-path-storage</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">data</span><span class="p">:</span><span class="w"> </span><span class="c"># below section around line 131</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">config.json</span><span class="p">:</span><span class="w"> </span><span class="p">|-</span><span class="sd">
+</span></span></span><span class="line"><span class="cl"><span class="sd">    {
+</span></span></span><span class="line"><span class="cl"><span class="sd">            &#34;nodePathMap&#34;:[
+</span></span></span><span class="line"><span class="cl"><span class="sd">            {
+</span></span></span><span class="line"><span class="cl"><span class="sd">                    &#34;node&#34;:&#34;DEFAULT_PATH_FOR_NON_LISTED_NODES&#34;,
+</span></span></span><span class="line"><span class="cl"><span class="sd">                    &#34;paths&#34;:[&#34;/var/mnt&#34;]
+</span></span></span><span class="line"><span class="cl"><span class="sd">            }
+</span></span></span><span class="line"><span class="cl"><span class="sd">            ]
+</span></span></span><span class="line"><span class="cl"><span class="sd">    }</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -457,12 +459,12 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
-</span></span><span style="display:flex;"><span>helm repo update
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>    --set nfs.server<span style="color:#0550ae">=</span>192.168.68.111 <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>    --set nfs.path<span style="color:#0550ae">=</span>/mnt/public</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+</span></span><span class="line"><span class="cl">helm repo update
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --set nfs.server<span class="o">=</span>192.168.68.111 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --set nfs.path<span class="o">=</span>/mnt/public</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -481,11 +483,11 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml -O
-</span></span><span style="display:flex;"><span>kubectl apply -f metallb-native.yaml
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>kubectl apply -f metallb-ipaddresspool.yaml
-</span></span><span style="display:flex;"><span>kubectl apply -f metallb-l2advertisement.yaml</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml -O
+</span></span><span class="line"><span class="cl">kubectl apply -f metallb-native.yaml
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">kubectl apply -f metallb-ipaddresspool.yaml
+</span></span><span class="line"><span class="cl">kubectl apply -f metallb-l2advertisement.yaml</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -503,14 +505,14 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#0550ae">apiVersion</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>metallb.io/v1beta1<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>IPAddressPool<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">metadata</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>first-pool<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">namespace</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>metallb-system<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">spec</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">addresses</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span>- <span style="color:#0550ae">192.168.68.220-192.168.68.240</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">metallb.io/v1beta1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">IPAddressPool</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">first-pool</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">metallb-system</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">addresses</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="m">192.168.68.220-192.168.68.240</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -528,14 +530,14 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#0550ae">apiVersion</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>metallb.io/v1beta1<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">kind</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>L2Advertisement<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">metadata</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">name</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>first-advert<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">namespace</span><span style="color:#1f2328">:</span><span style="color:#fff"> </span>metallb-system<span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff"></span><span style="color:#0550ae">spec</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span><span style="color:#0550ae">ipAddressPools</span><span style="color:#1f2328">:</span><span style="color:#fff">
-</span></span></span><span style="display:flex;"><span><span style="color:#fff">  </span>- first-pool</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">metallb.io/v1beta1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">L2Advertisement</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">first-advert</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">metallb-system</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">ipAddressPools</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="l">first-pool</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -562,10 +564,10 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/kubeflow/manifests.git
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6639ba">cd</span> manifests
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">while</span> ! kustomize build example <span style="color:#1f2328">|</span> kubectl apply -f -<span style="color:#1f2328">;</span> <span style="color:#cf222e">do</span> <span style="color:#6639ba">echo</span> <span style="color:#0a3069">&#34;Retrying to apply resources&#34;</span><span style="color:#1f2328">;</span> sleep 20<span style="color:#1f2328">;</span> <span style="color:#cf222e">done</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git clone https://github.com/kubeflow/manifests.git
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> manifests
+</span></span><span class="line"><span class="cl"><span class="k">while</span> ! kustomize build example <span class="p">|</span> kubectl apply -f -<span class="p">;</span> <span class="k">do</span> <span class="nb">echo</span> <span class="s2">&#34;Retrying to apply resources&#34;</span><span class="p">;</span> sleep 20<span class="p">;</span> <span class="k">done</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -639,43 +641,43 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>helm install mlflow oci://registry-1.docker.io/bitnamicharts/mlflow --namespace mlflow --create-namespace
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Sample output</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># CHART NAME: mlflow</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># CHART VERSION: 2.0.2</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># APP VERSION: 2.17.0</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># ** Please be patient while the chart is being deployed **</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># You didn&#39;t specify any entrypoint to your code.</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># To run it, you can either deploy again using the `source.launchCommand` option to specify your entrypoint, or # # execute it manually by jumping into the pods:</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># 1. Get the running pods</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a">#     kubectl get pods --namespace mlflow -l &#34;app.kubernetes.io/name=mlflow,app.kubernetes.io/instance=mlflow&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># 2. Get into a pod</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a">#     kubectl exec -ti [POD_NAME] bash</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># 3. Execute your script as you would normally do.</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># MLflow Tracking Server can be accessed through the following DNS name from within your cluster:</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a">#     mlflow-tracking.mlflow.svc.cluster.local (port 80)</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># To access your MLflow site from outside the cluster follow the steps below:</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># 1. Get the MLflow URL by running these commands:</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a">#   NOTE: It may take a few minutes for the LoadBalancer IP to be available.</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a">#         Watch the status with: &#39;kubectl get svc --namespace mlflow -w mlflow-tracking&#39;</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a">#    export SERVICE_IP=$(kubectl get svc --namespace mlflow mlflow-tracking --template &#34;{{ range (index .status.# # loadBalancer.ingress 0) }}{{ . }}{{ end }}&#34;)</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a">#    echo &#34;MLflow URL: http://$SERVICE_IP/&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># 2. Open a browser and access MLflow using the obtained URL.</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># 3. Login with the following credentials below to see your blog:</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># </span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a">#   echo Username: $(kubectl get secret --namespace mlflow mlflow-tracking -o jsonpath=&#34;{ .data.admin-user }&#34; | base64 -d)</span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a">#   echo Password: $(kubectl get secret --namespace mlflow mlflow-tracking -o jsonpath=&#34;{.data.admin-password }&#34; | base64 -d)</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">helm install mlflow oci://registry-1.docker.io/bitnamicharts/mlflow --namespace mlflow --create-namespace
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Sample output</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># CHART NAME: mlflow</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># CHART VERSION: 2.0.2</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># APP VERSION: 2.17.0</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1"># ** Please be patient while the chart is being deployed **</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># You didn&#39;t specify any entrypoint to your code.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># To run it, you can either deploy again using the `source.launchCommand` option to specify your entrypoint, or # # execute it manually by jumping into the pods:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 1. Get the running pods</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#     kubectl get pods --namespace mlflow -l &#34;app.kubernetes.io/name=mlflow,app.kubernetes.io/instance=mlflow&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 2. Get into a pod</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#     kubectl exec -ti [POD_NAME] bash</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 3. Execute your script as you would normally do.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># MLflow Tracking Server can be accessed through the following DNS name from within your cluster:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1">#     mlflow-tracking.mlflow.svc.cluster.local (port 80)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1"># To access your MLflow site from outside the cluster follow the steps below:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 1. Get the MLflow URL by running these commands:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1">#   NOTE: It may take a few minutes for the LoadBalancer IP to be available.</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#         Watch the status with: &#39;kubectl get svc --namespace mlflow -w mlflow-tracking&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1">#    export SERVICE_IP=$(kubectl get svc --namespace mlflow mlflow-tracking --template &#34;{{ range (index .status.# # loadBalancer.ingress 0) }}{{ . }}{{ end }}&#34;)</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#    echo &#34;MLflow URL: http://$SERVICE_IP/&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 2. Open a browser and access MLflow using the obtained URL.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 3. Login with the following credentials below to see your blog:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># </span>
+</span></span><span class="line"><span class="cl"><span class="c1">#   echo Username: $(kubectl get secret --namespace mlflow mlflow-tracking -o jsonpath=&#34;{ .data.admin-user }&#34; | base64 -d)</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#   echo Password: $(kubectl get secret --namespace mlflow mlflow-tracking -o jsonpath=&#34;{.data.admin-password }&#34; | base64 -d)</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -741,8 +743,8 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#6639ba">echo</span> Username: <span style="color:#cf222e">$(</span>kubectl get secret --namespace mlflow mlflow-tracking -o <span style="color:#953800">jsonpath</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;{ .data.admin-user }&#34;</span> <span style="color:#1f2328">|</span> base64 -d<span style="color:#cf222e">)</span>
-</span></span><span style="display:flex;"><span><span style="color:#6639ba">echo</span> Password: <span style="color:#cf222e">$(</span>kubectl get secret --namespace mlflow mlflow-tracking -o <span style="color:#953800">jsonpath</span><span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;{.data.admin-password }&#34;</span> <span style="color:#1f2328">|</span> base64 -d<span style="color:#cf222e">)</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> Username: <span class="k">$(</span>kubectl get secret --namespace mlflow mlflow-tracking -o <span class="nv">jsonpath</span><span class="o">=</span><span class="s2">&#34;{ .data.admin-user }&#34;</span> <span class="p">|</span> base64 -d<span class="k">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> Password: <span class="k">$(</span>kubectl get secret --namespace mlflow mlflow-tracking -o <span class="nv">jsonpath</span><span class="o">=</span><span class="s2">&#34;{.data.admin-password }&#34;</span> <span class="p">|</span> base64 -d<span class="k">)</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -913,7 +915,7 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>pip install <span style="color:#953800">mlflow</span><span style="color:#0550ae">==</span>2.14.0rc0</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">pip install <span class="nv">mlflow</span><span class="o">==</span>2.14.0rc0</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -979,9 +981,9 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">mlflow</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>mlflow<span style="color:#0550ae">.</span>set_tracking_uri<span style="color:#1f2328">(</span>uri<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;http://mlflow-tracking.mlflow&#34;</span><span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">mlflow</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">mlflow</span><span class="o">.</span><span class="n">set_tracking_uri</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="s2">&#34;http://mlflow-tracking.mlflow&#34;</span><span class="p">)</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -1001,41 +1003,41 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">mlflow</span>
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">mlflow.models</span> <span style="color:#cf222e">import</span> infer_signature
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">import</span> <span style="color:#24292e">pandas</span> <span style="color:#cf222e">as</span> <span style="color:#24292e">pd</span>
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">sklearn</span> <span style="color:#cf222e">import</span> datasets
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">sklearn.model_selection</span> <span style="color:#cf222e">import</span> train_test_split
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">sklearn.linear_model</span> <span style="color:#cf222e">import</span> LogisticRegression
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">from</span> <span style="color:#24292e">sklearn.metrics</span> <span style="color:#cf222e">import</span> accuracy_score<span style="color:#1f2328">,</span> precision_score<span style="color:#1f2328">,</span> recall_score<span style="color:#1f2328">,</span> f1_score
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Load the Iris dataset</span>
-</span></span><span style="display:flex;"><span>X<span style="color:#1f2328">,</span> y <span style="color:#0550ae">=</span> datasets<span style="color:#0550ae">.</span>load_iris<span style="color:#1f2328">(</span>return_X_y<span style="color:#0550ae">=</span><span style="color:#cf222e">True</span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Split the data into training and test sets</span>
-</span></span><span style="display:flex;"><span>X_train<span style="color:#1f2328">,</span> X_test<span style="color:#1f2328">,</span> y_train<span style="color:#1f2328">,</span> y_test <span style="color:#0550ae">=</span> train_test_split<span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>    X<span style="color:#1f2328">,</span> y<span style="color:#1f2328">,</span> test_size<span style="color:#0550ae">=</span><span style="color:#0550ae">0.2</span><span style="color:#1f2328">,</span> random_state<span style="color:#0550ae">=</span><span style="color:#0550ae">42</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Define the model hyperparameters</span>
-</span></span><span style="display:flex;"><span>params <span style="color:#0550ae">=</span> <span style="color:#1f2328">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;solver&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;lbfgs&#34;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;max_iter&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">1000</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;multi_class&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0a3069">&#34;auto&#34;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#0a3069">&#34;random_state&#34;</span><span style="color:#1f2328">:</span> <span style="color:#0550ae">8888</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span><span style="color:#1f2328">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Train the model</span>
-</span></span><span style="display:flex;"><span>lr <span style="color:#0550ae">=</span> LogisticRegression<span style="color:#1f2328">(</span><span style="color:#0550ae">**</span>params<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>lr<span style="color:#0550ae">.</span>fit<span style="color:#1f2328">(</span>X_train<span style="color:#1f2328">,</span> y_train<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Predict on the test set</span>
-</span></span><span style="display:flex;"><span>y_pred <span style="color:#0550ae">=</span> lr<span style="color:#0550ae">.</span>predict<span style="color:#1f2328">(</span>X_test<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Calculate metrics</span>
-</span></span><span style="display:flex;"><span>accuracy <span style="color:#0550ae">=</span> accuracy_score<span style="color:#1f2328">(</span>y_test<span style="color:#1f2328">,</span> y_pred<span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">mlflow</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">mlflow.models</span> <span class="kn">import</span> <span class="n">infer_signature</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">datasets</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">precision_score</span><span class="p">,</span> <span class="n">recall_score</span><span class="p">,</span> <span class="n">f1_score</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Load the Iris dataset</span>
+</span></span><span class="line"><span class="cl"><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_iris</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Split the data into training and test sets</span>
+</span></span><span class="line"><span class="cl"><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Define the model hyperparameters</span>
+</span></span><span class="line"><span class="cl"><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;solver&#34;</span><span class="p">:</span> <span class="s2">&#34;lbfgs&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;max_iter&#34;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;multi_class&#34;</span><span class="p">:</span> <span class="s2">&#34;auto&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;random_state&#34;</span><span class="p">:</span> <span class="mi">8888</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Train the model</span>
+</span></span><span class="line"><span class="cl"><span class="n">lr</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">lr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Predict on the test set</span>
+</span></span><span class="line"><span class="cl"><span class="n">y_pred</span> <span class="o">=</span> <span class="n">lr</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Calculate metrics</span>
+</span></span><span class="line"><span class="cl"><span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -1055,34 +1057,34 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># Set our tracking server uri for logging</span>
-</span></span><span style="display:flex;"><span>mlflow<span style="color:#0550ae">.</span>set_tracking_uri<span style="color:#1f2328">(</span>uri<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;http://mlflow-tracking.mlflow&#34;</span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Create a new MLflow Experiment</span>
-</span></span><span style="display:flex;"><span>mlflow<span style="color:#0550ae">.</span>set_experiment<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;MLflow Quickstart&#34;</span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#57606a"># Start an MLflow run</span>
-</span></span><span style="display:flex;"><span><span style="color:#cf222e">with</span> mlflow<span style="color:#0550ae">.</span>start_run<span style="color:#1f2328">():</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Log the hyperparameters</span>
-</span></span><span style="display:flex;"><span>    mlflow<span style="color:#0550ae">.</span>log_params<span style="color:#1f2328">(</span>params<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Log the loss metric</span>
-</span></span><span style="display:flex;"><span>    mlflow<span style="color:#0550ae">.</span>log_metric<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;accuracy&#34;</span><span style="color:#1f2328">,</span> accuracy<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Set a tag that we can use to remind ourselves what this run was for</span>
-</span></span><span style="display:flex;"><span>    mlflow<span style="color:#0550ae">.</span>set_tag<span style="color:#1f2328">(</span><span style="color:#0a3069">&#34;Training Info&#34;</span><span style="color:#1f2328">,</span> <span style="color:#0a3069">&#34;Basic LR model for iris data&#34;</span><span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Infer the model signature</span>
-</span></span><span style="display:flex;"><span>    signature <span style="color:#0550ae">=</span> infer_signature<span style="color:#1f2328">(</span>X_train<span style="color:#1f2328">,</span> lr<span style="color:#0550ae">.</span>predict<span style="color:#1f2328">(</span>X_train<span style="color:#1f2328">))</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#57606a"># Log the model</span>
-</span></span><span style="display:flex;"><span>    model_info <span style="color:#0550ae">=</span> mlflow<span style="color:#0550ae">.</span>sklearn<span style="color:#0550ae">.</span>log_model<span style="color:#1f2328">(</span>
-</span></span><span style="display:flex;"><span>        sk_model<span style="color:#0550ae">=</span>lr<span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        artifact_path<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;iris_model&#34;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        signature<span style="color:#0550ae">=</span>signature<span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        input_example<span style="color:#0550ae">=</span>X_train<span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>        registered_model_name<span style="color:#0550ae">=</span><span style="color:#0a3069">&#34;tracking-quickstart&#34;</span><span style="color:#1f2328">,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#1f2328">)</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Set our tracking server uri for logging</span>
+</span></span><span class="line"><span class="cl"><span class="n">mlflow</span><span class="o">.</span><span class="n">set_tracking_uri</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="s2">&#34;http://mlflow-tracking.mlflow&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Create a new MLflow Experiment</span>
+</span></span><span class="line"><span class="cl"><span class="n">mlflow</span><span class="o">.</span><span class="n">set_experiment</span><span class="p">(</span><span class="s2">&#34;MLflow Quickstart&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Start an MLflow run</span>
+</span></span><span class="line"><span class="cl"><span class="k">with</span> <span class="n">mlflow</span><span class="o">.</span><span class="n">start_run</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Log the hyperparameters</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mlflow</span><span class="o">.</span><span class="n">log_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Log the loss metric</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mlflow</span><span class="o">.</span><span class="n">log_metric</span><span class="p">(</span><span class="s2">&#34;accuracy&#34;</span><span class="p">,</span> <span class="n">accuracy</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Set a tag that we can use to remind ourselves what this run was for</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mlflow</span><span class="o">.</span><span class="n">set_tag</span><span class="p">(</span><span class="s2">&#34;Training Info&#34;</span><span class="p">,</span> <span class="s2">&#34;Basic LR model for iris data&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Infer the model signature</span>
+</span></span><span class="line"><span class="cl">    <span class="n">signature</span> <span class="o">=</span> <span class="n">infer_signature</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">lr</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_train</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Log the model</span>
+</span></span><span class="line"><span class="cl">    <span class="n">model_info</span> <span class="o">=</span> <span class="n">mlflow</span><span class="o">.</span><span class="n">sklearn</span><span class="o">.</span><span class="n">log_model</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">sk_model</span><span class="o">=</span><span class="n">lr</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">artifact_path</span><span class="o">=</span><span class="s2">&#34;iris_model&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">signature</span><span class="o">=</span><span class="n">signature</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">input_example</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">registered_model_name</span><span class="o">=</span><span class="s2">&#34;tracking-quickstart&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">)</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -1102,10 +1104,10 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir ~/.mlflow
-</span></span><span style="display:flex;"><span><span style="color:#6639ba">echo</span> <span style="color:#0a3069">&#34;[mlflow]&#34;</span> &gt; ~/.mlflow/credentials
-</span></span><span style="display:flex;"><span><span style="color:#6639ba">echo</span> <span style="color:#0a3069">&#34;mlflow_tracking_username = user&#34;</span> &gt;&gt; ~/.mlflow/credentials
-</span></span><span style="display:flex;"><span><span style="color:#6639ba">echo</span> <span style="color:#0a3069">&#34;mlflow_tracking_password = 39VpDZdVLr&#34;</span> &gt;&gt; ~/.mlflow/credentials</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">mkdir ~/.mlflow
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;[mlflow]&#34;</span> &gt; ~/.mlflow/credentials
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;mlflow_tracking_username = user&#34;</span> &gt;&gt; ~/.mlflow/credentials
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;mlflow_tracking_password = 39VpDZdVLr&#34;</span> &gt;&gt; ~/.mlflow/credentials</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -1218,18 +1220,18 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#57606a"># Load the model back for predictions as a generic Python Function model</span>
-</span></span><span style="display:flex;"><span>loaded_model <span style="color:#0550ae">=</span> mlflow<span style="color:#0550ae">.</span>pyfunc<span style="color:#0550ae">.</span>load_model<span style="color:#1f2328">(</span>model_info<span style="color:#0550ae">.</span>model_uri<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>predictions <span style="color:#0550ae">=</span> loaded_model<span style="color:#0550ae">.</span>predict<span style="color:#1f2328">(</span>X_test<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>iris_feature_names <span style="color:#0550ae">=</span> datasets<span style="color:#0550ae">.</span>load_iris<span style="color:#1f2328">()</span><span style="color:#0550ae">.</span>feature_names
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>result <span style="color:#0550ae">=</span> pd<span style="color:#0550ae">.</span>DataFrame<span style="color:#1f2328">(</span>X_test<span style="color:#1f2328">,</span> columns<span style="color:#0550ae">=</span>iris_feature_names<span style="color:#1f2328">)</span>
-</span></span><span style="display:flex;"><span>result<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;actual_class&#34;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> y_test
-</span></span><span style="display:flex;"><span>result<span style="color:#1f2328">[</span><span style="color:#0a3069">&#34;predicted_class&#34;</span><span style="color:#1f2328">]</span> <span style="color:#0550ae">=</span> predictions
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>result<span style="color:#1f2328">[:</span><span style="color:#0550ae">4</span><span style="color:#1f2328">]</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Load the model back for predictions as a generic Python Function model</span>
+</span></span><span class="line"><span class="cl"><span class="n">loaded_model</span> <span class="o">=</span> <span class="n">mlflow</span><span class="o">.</span><span class="n">pyfunc</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">model_info</span><span class="o">.</span><span class="n">model_uri</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">predictions</span> <span class="o">=</span> <span class="n">loaded_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">iris_feature_names</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_iris</span><span class="p">()</span><span class="o">.</span><span class="n">feature_names</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">iris_feature_names</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">result</span><span class="p">[</span><span class="s2">&#34;actual_class&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_test</span>
+</span></span><span class="line"><span class="cl"><span class="n">result</span><span class="p">[</span><span class="s2">&#34;predicted_class&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="n">predictions</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">result</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>

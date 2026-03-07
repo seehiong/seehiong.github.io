@@ -70,6 +70,8 @@
     
     <link rel="stylesheet" href="/css/content_elements.css">
     
+    <link rel="stylesheet" href="/css/chroma.css">
+    
     <link rel="stylesheet" href="/css/codeblocks.css">
     
     <link rel="stylesheet" href="/css/page_specific.css">
@@ -242,10 +244,10 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mkdir -p certs
-</span></span><span style="display:flex;"><span>openssl req <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  -x509 -days <span style="color:#0550ae">365</span> -out certs/domain.crt</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">mkdir -p certs
+</span></span><span class="line"><span class="cl">openssl req <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -x509 -days <span class="m">365</span> -out certs/domain.crt</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -263,11 +265,11 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo mkdir -p /etc/docker/certs.d/myregistrydomain.com:5000
-</span></span><span style="display:flex;"><span>sudo cp certs/domain.crt /etc/docker/certs.d/myregistrydomain.com:5000/ca.crt
-</span></span><span style="display:flex;"><span>sudo cp certs/domain.crt /usr/local/share/ca-certificates/myregistrydomain.com.crt
-</span></span><span style="display:flex;"><span>sudo update-ca-certificates
-</span></span><span style="display:flex;"><span>sudo systemctl restart docker</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo mkdir -p /etc/docker/certs.d/myregistrydomain.com:5000
+</span></span><span class="line"><span class="cl">sudo cp certs/domain.crt /etc/docker/certs.d/myregistrydomain.com:5000/ca.crt
+</span></span><span class="line"><span class="cl">sudo cp certs/domain.crt /usr/local/share/ca-certificates/myregistrydomain.com.crt
+</span></span><span class="line"><span class="cl">sudo update-ca-certificates
+</span></span><span class="line"><span class="cl">sudo systemctl restart docker</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -293,15 +295,15 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker run -d <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  --restart<span style="color:#0550ae">=</span>always <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  --name registry <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  -v <span style="color:#0a3069">&#34;</span><span style="color:#cf222e">$(</span><span style="color:#6639ba">pwd</span><span style="color:#cf222e">)</span><span style="color:#0a3069">&#34;</span>/certs:/certs <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  -e <span style="color:#953800">REGISTRY_HTTP_ADDR</span><span style="color:#0550ae">=</span>0.0.0.0:443 <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  -e <span style="color:#953800">REGISTRY_HTTP_TLS_CERTIFICATE</span><span style="color:#0550ae">=</span>/certs/domain.crt <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  -e <span style="color:#953800">REGISTRY_HTTP_TLS_KEY</span><span style="color:#0550ae">=</span>/certs/domain.key <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  -p 443:443 <span style="color:#0a3069">\
-</span></span></span><span style="display:flex;"><span><span style="color:#0a3069"></span>  registry:2</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker run -d <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --restart<span class="o">=</span>always <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --name registry <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -v <span class="s2">&#34;</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">&#34;</span>/certs:/certs <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -e <span class="nv">REGISTRY_HTTP_ADDR</span><span class="o">=</span>0.0.0.0:443 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -e <span class="nv">REGISTRY_HTTP_TLS_CERTIFICATE</span><span class="o">=</span>/certs/domain.crt <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -e <span class="nv">REGISTRY_HTTP_TLS_KEY</span><span class="o">=</span>/certs/domain.key <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -p 443:443 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  registry:2</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -329,9 +331,9 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker tag seehiong/jenkins-agent:1.0 myregistrydomain.com/my-jenkins-agent
-</span></span><span style="display:flex;"><span>docker push myregistrydomain.com/my-jenkins-agent
-</span></span><span style="display:flex;"><span>docker pull myregistrydomain.com/my-jenkins-agent</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker tag seehiong/jenkins-agent:1.0 myregistrydomain.com/my-jenkins-agent
+</span></span><span class="line"><span class="cl">docker push myregistrydomain.com/my-jenkins-agent
+</span></span><span class="line"><span class="cl">docker pull myregistrydomain.com/my-jenkins-agent</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -370,7 +372,7 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vi /etc/hosts</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo vi /etc/hosts</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -387,7 +389,7 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-vim" data-lang="vim"><span style="display:flex;"><span><span style="color:#0550ae">192</span>.<span style="color:#0550ae">168</span>.<span style="color:#0550ae">100</span>.<span style="color:#0550ae">100</span> <span style="color:#1f2328">myregistrydomain</span>.<span style="color:#1f2328">com</span></span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vim" data-lang="vim"><span class="line"><span class="cl"><span class="m">192</span>.<span class="m">168</span>.<span class="m">100</span>.<span class="m">100</span> <span class="nx">myregistrydomain</span>.<span class="nx">com</span></span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -406,9 +408,9 @@
 
 
 <div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo cp certs/domain.crt /usr/local/share/ca-certificates/myregistrydomain.com.crt
-</span></span><span style="display:flex;"><span>sudo update-ca-certificates
-</span></span><span style="display:flex;"><span>sudo systemctl restart docker</span></span></code></pre></div>
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo cp certs/domain.crt /usr/local/share/ca-certificates/myregistrydomain.com.crt
+</span></span><span class="line"><span class="cl">sudo update-ca-certificates
+</span></span><span class="line"><span class="cl">sudo systemctl restart docker</span></span></code></pre></div>
   <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
       <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
