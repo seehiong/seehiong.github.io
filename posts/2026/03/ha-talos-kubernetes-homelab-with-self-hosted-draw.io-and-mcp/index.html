@@ -32,7 +32,7 @@
   <meta itemprop="description" content="This post documents my homelab setup built around a highly available Talos Linux Kubernetes cluster with three control plane nodes and a dedicated worker. MetalLB provides bare-metal load balancing while the local path provisioner handles persistent storage. Caddy is deployed as a reverse proxy with mkcert-issued TLS certificates to securely expose internal services using .local hostnames. On top of this cluster, I run a fully self-hosted draw.io instance and a patched DrawIO-MCP server, enabling AI assistants to generate and open diagrams directly in the local editor. The result is a resilient, privacy-preserving environment where infrastructure, diagramming, and AI tooling all run locally.">
   <meta itemprop="datePublished" content="2026-03-07T10:00:00+08:00">
   <meta itemprop="dateModified" content="2026-03-07T10:00:00+08:00">
-  <meta itemprop="wordCount" content="3242">
+  <meta itemprop="wordCount" content="3304">
   <meta itemprop="keywords" content="Homelab,Kubernetes,Talos,MetalLB,Caddy,MCP,Drawio"><title>HA Talos Kubernetes Homelab with Self-Hosted Draw.io and MCP | See Hiong&#39;s Blog</title>
 
     <link rel="canonical" href="https://seehiong.github.io/posts/2026/03/ha-talos-kubernetes-homelab-with-self-hosted-draw.io-and-mcp/">
@@ -1522,7 +1522,7 @@ mcp ..&gt; drawio : open / create diagram
 
 <hr>
 <h2 id="in-action">In Action</h2>
-<p>With the full stack running, the DrawIO-MCP server can be used from two different Claude clients. Both connect to the same local MCP endpoint (<code>https://mcp.drawio.local/mcp</code>) — they differ only in how MCP servers are configured.</p>
+<p>With the full stack running, the DrawIO-MCP server is accessible from Claude Code via <code>.mcp.json</code>. Below is the working setup, along with a note on why Claude Desktop&rsquo;s custom connector cannot connect to a local MCP server without OAuth.</p>
 <h3 id="claude-code-vscode-extension">Claude Code (VSCode Extension)</h3>
 <p>Claude Code reads MCP server configuration from a <code>.mcp.json</code> file at the root of your project. Add the following to wire it up:</p>
 
@@ -1558,7 +1558,7 @@ mcp ..&gt; drawio : open / create diagram
     <span class="admonition-title">Note</span>
   </div>
   <div class="admonition-content">
-    Claude Desktop requires an HTTPS endpoint for remote MCP connectors. This is why the Caddy setup with mkcert is a prerequisite — it provides the trusted HTTPS termination for <code>mcp.drawio.local</code>.
+    Claude Code requires an HTTPS endpoint for remote MCP servers. This is why the Caddy setup with mkcert is a prerequisite — it provides the trusted HTTPS termination for <code>mcp.drawio.local</code>.
   </div>
 </div>
 <p>With this in place, prompt Claude Code: <em>Create a draw.io diagram of my Kubernetes setup.</em> Claude Code requests permission before calling the MCP tool:</p>
@@ -1698,100 +1698,20 @@ mcp ..&gt; drawio : open / create diagram
 
 
 <h3 id="claude-desktop">Claude Desktop</h3>
-<p>For Claude Desktop, navigate to <strong>Settings → Integrations</strong> and use <strong>Add custom connector</strong>. Set the name to <code>drawio</code> and the remote MCP server URL to <code>https://mcp.drawio.local/mcp</code>. Once successfully connected, the button label changes to <strong>Configure</strong>.</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-  
-  
-
-
-
-
-
-  <img src="/images/talos-drawio/talos-drawio-claude-code-custom-connector.png"   alt="talos-drawio-claude-code-custom-connector" class="sc-image sc-image-default"
-       >
-
-
-<p>With the project context provided, I prompted: <em>Create a draw.io diagram of my Kubernetes setup.</em> Claude Desktop invokes the same <code>create_diagram</code> tool via the local MCP server, with all diagram data staying within the network:</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-  
-  
-
-
-
-
-
-  <img src="/images/talos-drawio/talos-drawio-claude-code-drawio-mcp.png"   alt="talos-drawio-claude-code-drawio-mcp" class="sc-image sc-image-default"
-       >
-
-
+<p>Claude Desktop&rsquo;s <strong>Settings → Integrations → Add custom connector</strong> supports remote MCP servers, but it requires the server to implement <strong>OAuth 2.0</strong> — it performs an OAuth discovery handshake before establishing the connection. The local DrawIO-MCP server does not implement OAuth, so this approach will not work against a self-hosted endpoint.</p>
+
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    MCP Inspector (used above for verification) works because it manages its own session token and proxies the connection — it does not require OAuth from the upstream MCP server. The <strong>Add custom connector</strong> UI in Claude Desktop has a stricter requirement.
+  </div>
+</div>
+<p>For Claude Desktop integration, the currently supported path is to wait for local MCP support (STDIO transport) or use an MCP-capable client that does not impose an OAuth requirement, such as <strong>Claude Code</strong> via <code>.mcp.json</code>.</p>
 <hr>
 <h2 id="going-further-full-local-inference">Going Further: Full Local Inference</h2>
 <p>The setup so far keeps all diagram data local, but inference still calls out to Anthropic&rsquo;s API. For a fully air-gapped environment — no external network calls at all — the final step is replacing the cloud-hosted LLM with a locally hosted model.</p>
