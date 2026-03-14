@@ -17,9 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let textToCopy = '';
 
             if (codeElement) {
-                textToCopy = codeElement.innerText;
+                textToCopy = codeElement.textContent;
             } else {
-                textToCopy = preElement.innerText;
+                textToCopy = preElement.textContent;
             }
 
             try {
