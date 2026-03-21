@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MergeDocs | Premium PDF Merger</title>
+    <script>
+        // Apply saved theme before paint to avoid flash
+        if (localStorage.getItem('theme') === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +19,12 @@
     <div class="container">
         <main class="app-card">
             <header>
-                <h1>MergeDocs</h1>
+                <div class="header-row">
+                    <h1>MergeDocs</h1>
+                    <button id="theme-toggle" class="theme-toggle" title="Toggle light/dark mode" aria-label="Toggle theme">
+                        <span id="theme-icon">☀</span>
+                    </button>
+                </div>
                 <p class="subtitle">Combine multiple PDF files into one, securely in your browser.</p>
             </header>
 
@@ -28,9 +37,28 @@
                 </div>
             </section>
 
+            <section class="filename-section">
+                <label class="filename-label" for="filename-input">Output filename</label>
+                <div class="filename-input-wrap">
+                    <input type="text" id="filename-input" class="filename-input" value="merged_document" spellcheck="false">
+                    <span class="filename-ext">.pdf</span>
+                </div>
+            </section>
+
             <section id="file-list-section" style="display: none;">
                 <div id="file-list" class="file-list">
                     <!-- Files will be listed here -->
+                </div>
+
+                <div id="summary-bar" class="summary-bar">
+                    <div class="summary-stats">
+                        <span id="summary-files" class="summary-highlight-indigo"></span>
+                        <span class="summary-sep">·</span>
+                        <span id="summary-pages" class="summary-highlight-accent"></span>
+                        <span class="summary-sep">·</span>
+                        <span id="summary-size"></span>
+                    </div>
+                    <span class="privacy-badge">🔒 100% Private</span>
                 </div>
 
                 <div class="actions">
@@ -38,11 +66,20 @@
                         <span>Clear All</span>
                     </button>
                     <button id="merge-btn" class="btn btn-primary" disabled>
-                        <div class="loader" id="merge-loader"></div>
                         <span id="merge-btn-text">Merge & Download</span>
                     </button>
                 </div>
-                
+
+                <div id="progress-wrap" class="progress-wrap" style="display:none;">
+                    <div class="progress-meta">
+                        <span id="progress-label">Merging…</span>
+                        <span id="progress-pct">0%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+                    </div>
+                </div>
+
                 <div id="status-message" class="status-message"></div>
             </section>
         </main>
