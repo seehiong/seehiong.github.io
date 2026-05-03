@@ -32,7 +32,7 @@
   <meta itemprop="description" content="A practical homelab setup for self-hosting SigNoz and LiteLLM on Kubernetes, with OpenTelemetry-based tracing and metrics for local AI workloads like PDFusion.">
   <meta itemprop="datePublished" content="2026-04-04T10:00:00+08:00">
   <meta itemprop="dateModified" content="2026-04-04T10:00:00+08:00">
-  <meta itemprop="wordCount" content="2015">
+  <meta itemprop="wordCount" content="2119">
   <meta itemprop="keywords" content="Homelab,Kubernetes,Talos,Observability,OpenTelemetry,SigNoz,LiteLLM,Ollama,LLMOps,PDFusion"><title>Self-Hosting SigNoz Observability with LiteLLM | See Hiong&#39;s Blog</title>
 
     <link rel="canonical" href="https://seehiong.github.io/posts/2026/04/self-hosting-signoz-observability-with-litellm/">
@@ -520,7 +520,32 @@ SigNoz frontend metadata: 1Gi</p>
 </div>
   </div>
 </details>
-<h3 id="caddy-setup">Caddy Setup</h3>
+<p>Deploy Signoz:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">helm</span> <span class="n">repo</span> <span class="n">add</span> <span class="n">signoz</span> <span class="n">https</span><span class="err">:</span><span class="p">//</span><span class="n">charts</span><span class="p">.</span><span class="py">signoz</span><span class="p">.</span><span class="py">io</span>
+</span></span><span class="line"><span class="cl"><span class="n">helm</span> <span class="n">repo</span> <span class="n">update</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">kubectl</span> <span class="n">create</span> <span class="n">ns</span> <span class="n">signoz</span> <span class="p">-</span><span class="n">-dry-run</span><span class="p">=</span><span class="n">client</span> <span class="n">-o</span> <span class="n">yaml</span> <span class="p">|</span> <span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-f</span> <span class="p">-</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">helm</span> <span class="n">upgrade</span> <span class="p">-</span><span class="n">-install</span> <span class="n">signoz</span> <span class="n">signoz</span><span class="p">/</span><span class="n">signoz</span> <span class="p">-</span><span class="n">-namespace</span> <span class="n">signoz</span> <span class="o">-f</span> <span class="n">values</span><span class="p">.</span><span class="py">yaml</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">kubectl</span> <span class="n">rollout</span> <span class="n">status</span> <span class="n">deployment</span><span class="p">/</span><span class="n">signoz</span> <span class="n">-n</span> <span class="n">signoz</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="caddy-setup">Caddy Setup</h3>
 <p>Caddy acts as the entry point for both the human-facing dashboard and the machine-facing OTLP ingestion endpoints. In this setup, it handles TLS termination and reverse proxying for both the SigNoz UI and the OpenTelemetry collectors.</p>
 <h4 id="1-dashboard-access">1. Dashboard Access</h4>
 <p>The frontend is exposed at <code>https://signoz.local</code> with TLS certificates mounted from Kubernetes secrets.</p>
@@ -575,7 +600,7 @@ SigNoz frontend metadata: 1Gi</p>
 </span></span></span><span class="line"><span class="cl"><span class="sd">    # Dashboard and Metrics
 </span></span></span><span class="line"><span class="cl"><span class="sd">    signoz.local {
 </span></span></span><span class="line"><span class="cl"><span class="sd">      tls /certs/signoz/tls.crt /certs/signoz/tls.key
-</span></span></span><span class="line"><span class="cl"><span class="sd">      reverse_proxy signoz-frontend.signoz.svc.cluster.local:3301
+</span></span></span><span class="line"><span class="cl"><span class="sd">      reverse_proxy signoz.signoz.svc.cluster.local:8080
 </span></span></span><span class="line"><span class="cl"><span class="sd">    }
 </span></span></span><span class="line"><span class="cl"><span class="sd">
 </span></span></span><span class="line"><span class="cl"><span class="sd">    litellm.local {
@@ -654,7 +679,7 @@ SigNoz frontend metadata: 1Gi</p>
 <li>model routing across local and hosted providers</li>
 <li>built-in OpenTelemetry instrumentation for traces and metrics</li>
 </ul>
-<p>I am using the image <code>ghcr.io/berriai/litellm:v1.82.3-stable.patch.2</code> and have integrated it with the cluster’s <strong>PostgreSQL</strong> instance and the <strong>SigNoz</strong> OpenTelemetry collector.</p>
+<p>I am using the image <code>ghcr.io/berriai/litellm:v1.83.10-stable</code> and have integrated it with the cluster’s <strong>PostgreSQL</strong> instance and the <strong>SigNoz</strong> OpenTelemetry collector.</p>
 
 <div class="admonition warning">
   <div class="admonition-heading">
@@ -664,16 +689,48 @@ SigNoz frontend metadata: 1Gi</p>
     <span class="admonition-title">Warning</span>
   </div>
   <div class="admonition-content">
-    <p><strong>Security note (March 2026):</strong> LiteLLM versions <code>1.82.7</code> and <code>1.82.8</code> published on PyPI were part of a reported supply-chain compromise and were later quarantined.</p>
-<p>My deployment here uses the pinned container image <code>ghcr.io/berriai/litellm:v1.82.3-stable.patch.2</code>, which is <strong>not</strong> one of the affected PyPI package versions. Still, if you install LiteLLM via <code>pip</code> or use it in local Python tooling, it is worth reviewing the official 
+    <p><strong>Security note (April 2026)</strong>:</p>
+<p>LiteLLM has had multiple recent security concerns that are worth being explicit about when deploying in a homelab or production setup:</p>
+<ol>
+<li>
+<p>Supply chain incident (PyPI)
+Versions <code>1.82.7</code> and <code>1.82.8</code> published on PyPI were part of a reported compromise and later quarantined.
+This primarily impacts pip-based installs or unpinned Python environments.</p>
+</li>
+<li>
+<p>CVE-2026-42208 (SQL Injection in proxy)
+Affects versions <code>v1.81.16</code> through <code>v1.83.6</code>, impacting the LiteLLM proxy layer.
+This is more critical for deployments exposing the proxy as a shared gateway.</p>
+</li>
+</ol>
+<p>What I recommend now:</p>
+<ul>
+<li>Use v1.83.10-stable or later for all deployments</li>
+<li>Avoid unpinned pip install litellm usage</li>
+<li>Prefer pinned container images from trusted registries</li>
+<li>Review the official advisories:
+<ul>
+<li>
 
 
 
 
 
 
-  <a href="https://docs.litellm.ai/blog/security-update-march-2026" target="_blank" rel="noopener noreferrer" >incident write-up</a>
- and avoiding unpinned installs.</p>
+  <a href="https://docs.litellm.ai/blog/security-update-march-2026" target="_blank" rel="noopener noreferrer" >https://docs.litellm.ai/blog/security-update-march-2026</a>
+</li>
+<li>
+
+
+
+
+
+
+  <a href="https://docs.litellm.ai/blog/cve-2026-42208-litellm-proxy-sql-injection" target="_blank" rel="noopener noreferrer" >https://docs.litellm.ai/blog/cve-2026-42208-litellm-proxy-sql-injection</a>
+</li>
+</ul>
+</li>
+</ul>
 
   </div>
 </div>
@@ -763,7 +820,7 @@ SigNoz frontend metadata: 1Gi</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litellm</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">ghcr.io/berriai/litellm:v1.82.3-stable.patch.2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">ghcr.io/berriai/litellm:v1.83.10-stable</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">args</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span>- --<span class="l">config</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">/app/config.yaml</span><span class="w">
@@ -848,7 +905,29 @@ SigNoz frontend metadata: 1Gi</p>
 </div>
   </div>
 </details>
-<hr>
+<p>Deploy LiteLLM:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">echo </span><span class="n">Applying</span> <span class="n">LiteLLM</span> <span class="n">manifests</span><span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-f</span> <span class="n">litellm</span><span class="p">.</span><span class="py">yaml</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">echo </span><span class="n">Waiting</span> <span class="k">for</span> <span class="n">LiteLLM</span> <span class="n">deployment</span><span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="n">kubectl</span> <span class="n">rollout</span> <span class="n">status</span> <span class="n">deployment</span><span class="p">/</span><span class="n">litellm</span> <span class="n">-n</span> <span class="n">litellm</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><hr>
 <h2 id="in-action-verification">In Action (Verification)</h2>
 
 <div class="admonition note">
@@ -1530,6 +1609,13 @@ SigNoz frontend metadata: 1Gi</p>
             </a>
           </div>
         
+        
+          <div class="nav-next">
+            <a href="/posts/2026/05/building-a-self-hosted-hdb-knowledge-chatbot-with-dify/" rel="next">
+              <span class="meta-nav">Next →</span>
+              <span class="post-title">Building a Self-Hosted HDB Knowledge Chatbot with Dify</span>
+            </a>
+          </div>
         
       </div>
     </nav>
