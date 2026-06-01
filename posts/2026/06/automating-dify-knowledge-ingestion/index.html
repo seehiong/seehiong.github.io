@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/06/automating-dify-knowledge-ingestion/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Automating Dify Knowledge Ingestion">
+  <meta property="og:description" content="This guide demonstrates how to automate document ingestion for a self-hosted Dify Knowledge Base using n8n. We build a stateless workflow that monitors Singapore HDB Town Design Guides, detects newly published PDFs, compares them against existing Dify documents, and automatically uploads new content through Dify’s Dataset API. The result is a self-maintaining RAG pipeline that keeps chatbot knowledge synchronized with authoritative source documents without manual intervention.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-06-01T08:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-01T08:00:00+08:00">
+    <meta property="article:tag" content="Homelab">
+    <meta property="article:tag" content="Dify">
+    <meta property="article:tag" content="N8n">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="article:tag" content="RAG">
+    <meta property="article:tag" content="Knowledge Base">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Automating Dify Knowledge Ingestion">
+  <meta name="twitter:description" content="This guide demonstrates how to automate document ingestion for a self-hosted Dify Knowledge Base using n8n. We build a stateless workflow that monitors Singapore HDB Town Design Guides, detects newly published PDFs, compares them against existing Dify documents, and automatically uploads new content through Dify’s Dataset API. The result is a self-maintaining RAG pipeline that keeps chatbot knowledge synchronized with authoritative source documents without manual intervention.">
+
+  <meta itemprop="name" content="Automating Dify Knowledge Ingestion">
+  <meta itemprop="description" content="This guide demonstrates how to automate document ingestion for a self-hosted Dify Knowledge Base using n8n. We build a stateless workflow that monitors Singapore HDB Town Design Guides, detects newly published PDFs, compares them against existing Dify documents, and automatically uploads new content through Dify’s Dataset API. The result is a self-maintaining RAG pipeline that keeps chatbot knowledge synchronized with authoritative source documents without manual intervention.">
+  <meta itemprop="datePublished" content="2026-06-01T08:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-06-01T08:00:00+08:00">
+  <meta itemprop="wordCount" content="1549">
+  <meta itemprop="keywords" content="Homelab,Dify,N8n,Kubernetes,RAG,Knowledge Base,Automation,LLM"><title>Automating Dify Knowledge Ingestion | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/06/automating-dify-knowledge-ingestion/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Automating Dify Knowledge Ingestion</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-06-01T08:00:00&#43;08:00">June 1, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/homelab">Homelab</a>
+            
+              , <a href="/tags/dify">Dify</a>
+            
+              , <a href="/tags/n8n">n8n</a>
+            
+              , <a href="/tags/kubernetes">Kubernetes</a>
+            
+              , <a href="/tags/rag">RAG</a>
+            
+              , <a href="/tags/knowledge-base">Knowledge Base</a>
+            
+              , <a href="/tags/automation">Automation</a>
+            
+              , <a href="/tags/llm">LLM</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/n8n-dify/cover.png');"></div>
+          <img src="/images/n8n-dify/cover.png" alt="Automating Dify Knowledge Ingestion cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>In my 
+
+
+
+
+
+
+  <a href="/posts/2026/05/building-a-self-hosted-hdb-knowledge-chatbot-with-dify/" >previous homelab post</a>
+, we built a self-hosted conversational assistant using Dify, grounding it in Singapore HDB township planning guidelines. While the results were excellent, the setup relied on manually downloading PDFs and uploading them to Dify&rsquo;s Knowledge Base.</p>
+<p>For static data, manual uploads are acceptable. But what happens when HDB publishes a new town guide (e.g., Tengah&rsquo;s final masterplan), or updates existing guidelines? To avoid manual maintenance and ensure the knowledge base remains current, we need an automated ingestion pipeline.</p>
+<p>This guide demonstrates how to bridge the gap by combining <strong>n8n</strong> (our automation engine—see our 
+
+
+
+
+
+
+  <a href="/posts/2025/07/automating-workflows-with-n8n/" >n8n deployment guide</a>
+) and <strong>Dify</strong> (our RAG platform). We will build a pipeline that monitors the HDB Town Design Guides website, detects new files, downloads them, and uploads them to Dify&rsquo;s Dataset API—all running inside our homelab Kubernetes cluster.</p>
+<hr>
+<h2 id="the-pipeline-architecture">The Pipeline Architecture</h2>
+<p>Instead of maintaining a separate state store (such as PostgreSQL or Redis) to track ingested documents, we can treat Dify itself as the source of truth. TThe workflow queries Dify for the current document inventory, compares it against the live HDB website, and ingests only newly discovered files.</p>
+
+
+
+
+
+
+
+  
+  
+
+  
+    
+    
+    <script src="/js/plantuml-bundle.6a8276b7a4f6ba2161545379939a85839f01e6cb3d0afd36cdd36a5d32bde30c.js" defer></script>
+    
+  
+
+
+<span id="plantuml-pipeline-architecture" style="display:none;">
+@startuml
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+:n8n Cron Scheduler\n(Runs Weekly);
+:Scrape HDB Website\n(Fetch PDF URLs);
+:Query Dify API\n(Fetch list of indexed files);
+:Filter Difference\n(Find files not in Dify);
+:Download New PDFs\n(Retrieve as Binary);
+:Upload to Dify API\n(Multipart Upload &amp; Index);
+@enduml
+</span>
+<img class="plantuml" id="plantuml-pipeline-architecture" alt="PlantUML Diagram pipeline-architecture" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<p>This design keeps the workflow simple and operationally lightweight. Since Dify already maintains metadata for indexed documents, there is no need to introduce an additional persistence layer solely for tracking ingestion state.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/n8n-dify/n8n-dify-upload-document.png"   alt="n8n-dify-upload-document" class="sc-image sc-image-default"
+       >
+
+
+<hr>
+<h2 id="1-prepare-dify-dataset-api-key">1. Prepare Dify Dataset API Key</h2>
+<p>Before writing the workflow, we need to authorize n8n to talk to Dify&rsquo;s Knowledge Base.</p>
+<ol>
+<li>Navigate to your Dify console (<code>https://dify.lan</code>) and go to the <strong>Knowledge</strong> tab.</li>
+<li>Select your existing Knowledge Base (e.g., <code>HDB Township Planning</code>).</li>
+<li>In the bottom-left corner of the <code>Knowledge Base</code>, click on <strong>Service API</strong>.</li>
+<li>Click <strong>Create API Key</strong> and copy the token. It will look like <code>dataset-xxxxxxxxxxxx</code>.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/n8n-dify/n8n-dify-knowledge-api-key.png"   alt="n8n-dify-knowledge-api-key" class="sc-image sc-image-default"
+       >
+
+
+
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    Make sure you have Admin or Editor permissions for that specific knowledge base. If you don&rsquo;t see the &ldquo;Service API&rdquo; section, you likely need to ask the workspace owner to grant you access.
+  </div>
+</div>
+<hr>
+<h2 id="2-dify-api-reference-for-ingestion">2. Dify API Reference for Ingestion</h2>
+<p>We will interact with two Dify Dataset API endpoints:</p>
+<h3 id="21-list-documents-in-dataset">2.1. List Documents in Dataset</h3>
+<p>To fetch the existing documents in our knowledge base:</p>
+<ul>
+<li><strong>Method</strong>: <code>GET</code></li>
+<li><strong>URL</strong>: <code>http://dify-release-api-svc.dify.svc.cluster.local:5001/v1/datasets/{dataset_id}/documents</code></li>
+<li><strong>Headers</strong>:
+<ul>
+<li><code>Authorization: Bearer &lt;DATASET_API_KEY&gt;</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="22-upload-document-from-file">2.2. Upload Document from File</h3>
+<p>To upload a new binary file and trigger automatic chunking and indexing:</p>
+<ul>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>URL</strong>: <code>http://dify-release-api-svc.dify.svc.cluster.local:5001/v1/datasets/{dataset_id}/document/create-by-file</code></li>
+<li><strong>Headers</strong>:
+<ul>
+<li><code>Authorization: Bearer &lt;DATASET_API_KEY&gt;</code></li>
+<li><code>Content-Type: multipart/form-data</code></li>
+</ul>
+</li>
+<li><strong>Body Form Data</strong>:
+<ul>
+<li><code>file</code>: The binary PDF file.</li>
+<li><code>data</code>: A stringified JSON configuration specifying chunking parameters:
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;indexing_technique&#34;</span><span class="p">:</span> <span class="s2">&#34;high_quality&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;doc_form&#34;</span><span class="p">:</span> <span class="s2">&#34;hierarchical_model&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;process_rule&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;mode&#34;</span><span class="p">:</span> <span class="s2">&#34;hierarchical&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;rules&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;pre_processing_rules&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span> <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;remove_extra_spaces&#34;</span><span class="p">,</span> <span class="nt">&#34;enabled&#34;</span><span class="p">:</span> <span class="kc">true</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span> <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;remove_urls_emails&#34;</span><span class="p">,</span> <span class="nt">&#34;enabled&#34;</span><span class="p">:</span> <span class="kc">false</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;parent_mode&#34;</span><span class="p">:</span> <span class="s2">&#34;paragraph&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;segmentation&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;separator&#34;</span><span class="p">:</span> <span class="s2">&#34;\n\n&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;max_tokens&#34;</span><span class="p">:</span> <span class="mi">1000</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;subchunk_segmentation&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;separator&#34;</span><span class="p">:</span> <span class="s2">&#34;\n&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;max_tokens&#34;</span><span class="p">:</span> <span class="mi">500</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="3-designing-the-n8n-workflow">3. Designing the n8n Workflow</h2>
+<p>The workflow consists of the following n8n nodes:</p>
+<h3 id="31-schedule-trigger">3.1 Schedule Trigger</h3>
+<p>Configure the workflow to trigger on a schedule—for example, every Sunday night at 2:00 AM, since planning guidelines do not change frequently.</p>
+<h3 id="32-fetch-hdb-webpage">3.2 Fetch HDB Webpage</h3>
+<p>Add an <strong>HTTP Request</strong> node to fetch the target HTML page:</p>
+<ul>
+<li><strong>Method</strong>: <code>GET</code></li>
+<li><strong>URL</strong>: <code>https://www.hdb.gov.sg/about-us/our-role/plan-and-design-towns/town-design-guides</code></li>
+<li><strong>Response Format</strong>: <code>Text (HTML)</code></li>
+<li><strong>Headers</strong>: Add a <code>User-Agent</code> header with a browser value (e.g. <code>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36</code>) to bypass HDB&rsquo;s CloudFront/WAF bot blocking.</li>
+</ul>
+<h3 id="33-fetch-existing-dify-documents">3.3 Fetch Existing Dify Documents</h3>
+<p>Add another <strong>HTTP Request</strong> node to query Dify&rsquo;s Dataset API:</p>
+<ul>
+<li><strong>Method</strong>: <code>GET</code></li>
+<li><strong>URL</strong>: <code>http://dify-release-api-svc.dify.svc.cluster.local:5001/v1/datasets/{{ $vars.datasetId }}/documents?page=1&amp;limit=100</code></li>
+<li><strong>Headers</strong>:
+<ul>
+<li><code>Authorization</code>: <code>Bearer dataset-xxxxxxxxxxxxxxxxxxxx</code></li>
+</ul>
+</li>
+</ul>
+
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    The example retrieves only the first 100 documents from Dify. For larger datasets, implement pagination to ensure the complete document inventory is retrieved before comparison.
+  </div>
+</div>
+<h3 id="34-identify-new-documents">3.4 Identify New Documents</h3>
+<p>Add a <strong>Code</strong> node (JavaScript) to extract the PDF links from the raw HDB HTML page and filter out the ones already uploaded to Dify:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="c1">// Retrieve inputs from Dify documents API node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">const</span> <span class="nx">difyDocs</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;Fetch Dify Docs&#39;</span><span class="p">).</span><span class="nx">first</span><span class="p">().</span><span class="nx">json</span><span class="p">.</span><span class="nx">data</span> <span class="o">||</span> <span class="p">[];</span>
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">difyFilenames</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Set</span><span class="p">(</span><span class="nx">difyDocs</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">doc</span> <span class="p">=&gt;</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">name</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Retrieve raw HTML from Fetch HDB Site node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">const</span> <span class="nx">hdbHtml</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;Fetch HDB Site&#39;</span><span class="p">).</span><span class="nx">first</span><span class="p">().</span><span class="nx">json</span><span class="p">.</span><span class="nx">data</span> <span class="o">||</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Extract all PDF links from the raw HTML using regex (works with client-side Next.js hydration data)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">const</span> <span class="nx">pdfRegex</span> <span class="o">=</span> <span class="sr">/\/-\/media\/[a-zA-Z0-9\-_\/]+\.pdf/g</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">webUrls</span> <span class="o">=</span> <span class="nx">hdbHtml</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">pdfRegex</span><span class="p">)</span> <span class="o">||</span> <span class="p">[];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">newDocuments</span> <span class="o">=</span> <span class="p">[];</span>
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">processedUrls</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Set</span><span class="p">();</span> <span class="c1">// Prevent duplicates if the URL appears multiple times on the page
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kr">const</span> <span class="nx">url</span> <span class="k">of</span> <span class="nx">webUrls</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nx">processedUrls</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">url</span><span class="p">))</span> <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">processedUrls</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">url</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">  <span class="c1">// Extract filename from URL (e.g. Tampines-Town-Design-Guide.pdf)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kr">const</span> <span class="nx">decodedUrl</span> <span class="o">=</span> <span class="nb">decodeURIComponent</span><span class="p">(</span><span class="nx">url</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">filename</span> <span class="o">=</span> <span class="nx">decodedUrl</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="nx">decodedUrl</span><span class="p">.</span><span class="nx">lastIndexOf</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">  <span class="c1">// If the document name is not in Dify, add it to the download list
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">difyFilenames</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">filename</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">newDocuments</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">json</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">url</span><span class="o">:</span> <span class="sb">`https://www.hdb.gov.sg</span><span class="si">${</span><span class="nx">url</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">filename</span><span class="o">:</span> <span class="nx">filename</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">return</span> <span class="nx">newDocuments</span><span class="p">;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>In production, I would normally prefer parsing the DOM structure directly. However, the HDB site exposes the PDF links within its rendered content in a predictable format, making a lightweight regex sufficient for this use case.</p>
+<h3 id="35-download-pdf">3.5 Download PDF</h3>
+<p>Add an <strong>HTTP Request</strong> node to download the PDF:</p>
+<ul>
+<li><strong>Method</strong>: <code>GET</code></li>
+<li><strong>URL</strong>: <code>={{ $json.url }}</code></li>
+<li><strong>Response Format</strong>: <code>File</code> (This saves the PDF as binary data in n8n&rsquo;s memory/disk)</li>
+<li><strong>Headers</strong>: Add the same browser <code>User-Agent</code> header to prevent 403 Forbidden errors when downloading the PDF binary files.</li>
+</ul>
+<h3 id="36-upload-into-dify">3.6 Upload into Dify</h3>
+<p>Add the final <strong>HTTP Request</strong> node to upload the binary file to Dify:</p>
+<ul>
+<li><strong>Method</strong>: <code>POST</code></li>
+<li><strong>URL</strong>: <code>http://dify-release-api-svc.dify.svc.cluster.local:5001/v1/datasets/YOUR_DATASET_ID/document/create-by-file</code></li>
+<li><strong>Headers</strong>:
+<ul>
+<li><code>Authorization</code>: <code>Bearer dataset-xxxxxxxxxxxxxxxxxxxx</code></li>
+</ul>
+</li>
+<li><strong>Send Body</strong>: <code>true</code></li>
+<li><strong>Body Content Type</strong>: <code>n8n-nodes-base.multipart</code> (Form-Data)</li>
+<li><strong>Parameters</strong>:
+<ul>
+<li>Name: <code>file</code>, Value: <code>={{ $binary.data }}</code> (Select binary file parameter)</li>
+<li>Name: <code>data</code>, Value: (Paste the stringified JSON chunking configuration shown in Step 2)</li>
+</ul>
+</li>
+</ul>
+<h3 id="37-operational-considerations">3.7 Operational Considerations</h3>
+<p>In a production environment, consider adding:</p>
+<ul>
+<li>Retry logic for transient network failures.</li>
+<li>Notifications (e.g. Slack, email, or Discord) when ingestion fails.</li>
+<li>Pagination support for large datasets.</li>
+<li>Validation checks to ensure downloaded files are valid PDFs before upload.</li>
+</ul>
+<hr>
+<h2 id="4-complete-n8n-workflow-json">4. Complete n8n Workflow JSON</h2>
+<p>You can copy the entire workflow definition below and paste it directly into your n8n workspace canvas:</p>
+
+<details class="details-shortcode " >
+  <summary class="details-shortcode__summary">
+    Show full n8n workflow JSON
+  </summary>
+  <div class="details-shortcode__content">
+    
+    
+    
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Dify Knowledge Base Autopilot (HDB Guides)&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;nodes&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;url&#34;</span><span class="p">:</span> <span class="s2">&#34;={{ $json.url }}&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;sendHeaders&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;headerParameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;User-Agent&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">          <span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;n8n-nodes-base.httpRequest&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;typeVersion&#34;</span><span class="p">:</span> <span class="mf">4.1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;position&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">900</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">300</span>
+</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;download-pdf&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Download PDF&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;executeOnce&#34;</span><span class="p">:</span> <span class="kc">false</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;method&#34;</span><span class="p">:</span> <span class="s2">&#34;POST&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;url&#34;</span><span class="p">:</span> <span class="s2">&#34;http://dify-release-api-svc.dify.svc.cluster.local:5001/v1/datasets/YOUR_DATASET_ID/document/create-by-file&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;sendHeaders&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;headerParameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Authorization&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;Bearer dataset-YOUR_API_KEY&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">          <span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;sendBody&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;contentType&#34;</span><span class="p">:</span> <span class="s2">&#34;multipart-form-data&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;bodyParameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;parameterType&#34;</span><span class="p">:</span> <span class="s2">&#34;formBinaryData&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;file&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;inputDataFieldName&#34;</span><span class="p">:</span> <span class="s2">&#34;data&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;data&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;{\&#34;indexing_technique\&#34;:\&#34;high_quality\&#34;,\&#34;doc_form\&#34;:\&#34;hierarchical_model\&#34;,\&#34;process_rule\&#34;:{\&#34;mode\&#34;:\&#34;hierarchical\&#34;,\&#34;rules\&#34;:{\&#34;pre_processing_rules\&#34;:[{\&#34;id\&#34;:\&#34;remove_extra_spaces\&#34;,\&#34;enabled\&#34;:true},{\&#34;id\&#34;:\&#34;remove_urls_emails\&#34;,\&#34;enabled\&#34;:false}],\&#34;parent_mode\&#34;:\&#34;paragraph\&#34;,\&#34;segmentation\&#34;:{\&#34;separator\&#34;:\&#34;\\n\\n\&#34;,\&#34;max_tokens\&#34;:1000},\&#34;subchunk_segmentation\&#34;:{\&#34;separator\&#34;:\&#34;\\n\&#34;,\&#34;max_tokens\&#34;:500}}}}&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">          <span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;n8n-nodes-base.httpRequest&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;typeVersion&#34;</span><span class="p">:</span> <span class="mf">4.1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;position&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">1100</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">300</span>
+</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;upload-dify&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Upload to Dify&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;url&#34;</span><span class="p">:</span> <span class="s2">&#34;https://www.hdb.gov.sg/about-us/our-role/plan-and-design-towns/town-design-guides&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;sendHeaders&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;headerParameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;User-Agent&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">          <span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;options&#34;</span><span class="p">:</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;n8n-nodes-base.httpRequest&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;typeVersion&#34;</span><span class="p">:</span> <span class="mf">4.1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;position&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">300</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">300</span>
+</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;fetch-hdb-site&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Fetch HDB Site&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;url&#34;</span><span class="p">:</span> <span class="s2">&#34;http://dify-release-api-svc.dify.svc.cluster.local:5001/v1/datasets/YOUR_DATASET_ID/documents&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;sendHeaders&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;headerParameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Authorization&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;Bearer dataset-YOUR_API_KEY&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">          <span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;options&#34;</span><span class="p">:</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;n8n-nodes-base.httpRequest&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;typeVersion&#34;</span><span class="p">:</span> <span class="mf">4.1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;position&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">480</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">140</span>
+</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;fetch-dify-docs&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Fetch Dify Docs&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;jsCode&#34;</span><span class="p">:</span> <span class="s2">&#34;const difyDocs = $(&#39;Fetch Dify Docs&#39;).first().json.data || [];\nconst difyFilenames = new Set(difyDocs.map(doc =&gt; doc.name));\nconst hdbHtml = $(&#39;Fetch HDB Site&#39;).first().json.data || &#39;&#39;;\nconst pdfRegex = /\\/-\\/media\\/[a-zA-Z0-9\\-_\\/]+\\.pdf/g;\nconst webUrls = hdbHtml.match(pdfRegex) || [];\nconst newDocuments = [];\nconst processedUrls = new Set();\n\nfor (const url of webUrls) {\n  if (processedUrls.has(url)) continue;\n  processedUrls.add(url);\n  const decodedUrl = decodeURIComponent(url);\n  const filename = decodedUrl.substring(decodedUrl.lastIndexOf(&#39;/&#39;) + 1);\n  \n  if (!difyFilenames.has(filename)) {\n    newDocuments.push({\n      json: {\n        url: `https://www.hdb.gov.sg${url}`,\n        filename: filename\n      }\n    });\n  }\n}\nreturn newDocuments;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;n8n-nodes-base.code&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;typeVersion&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;position&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">700</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">300</span>
+</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;filter-new-docs&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Filter New Docs&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;triggerTimes&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">              <span class="nt">&#34;hour&#34;</span><span class="p">:</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">          <span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;n8n-nodes-base.cron&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;typeVersion&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;position&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">100</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">300</span>
+</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;weekly-trigger&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Weekly Trigger&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">],</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;connections&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Weekly Trigger&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;main&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;node&#34;</span><span class="p">:</span> <span class="s2">&#34;Fetch HDB Site&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;main&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;index&#34;</span><span class="p">:</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Fetch HDB Site&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;main&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;node&#34;</span><span class="p">:</span> <span class="s2">&#34;Fetch Dify Docs&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;main&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;index&#34;</span><span class="p">:</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">          <span class="p">},</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;node&#34;</span><span class="p">:</span> <span class="s2">&#34;Filter New Docs&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;main&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;index&#34;</span><span class="p">:</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Fetch Dify Docs&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;main&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;node&#34;</span><span class="p">:</span> <span class="s2">&#34;Filter New Docs&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;main&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;index&#34;</span><span class="p">:</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Filter New Docs&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;main&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;node&#34;</span><span class="p">:</span> <span class="s2">&#34;Download PDF&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;main&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;index&#34;</span><span class="p">:</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Download PDF&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;main&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;node&#34;</span><span class="p">:</span> <span class="s2">&#34;Upload to Dify&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;main&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;index&#34;</span><span class="p">:</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">]</span>
+</span></span><span class="line"><span class="cl">      <span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;settings&#34;</span><span class="p">:</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+  </div>
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/n8n-dify/n8n-dify-documents-indexing.png"   alt="n8n-dify-documents-indexing" class="sc-image sc-image-default"
+       >
+
+
+<hr>
+<h2 id="conclusion">Conclusion</h2>
+<p>By hooking n8n&rsquo;s workflow capability into Dify&rsquo;s Dataset API, we&rsquo;ve automated the most tedious part of self-hosted RAG: document synchronization. The result is a self-maintaining RAG pipeline that continuously synchronizes its knowledge base with authoritative source documents, eliminating the need for manual uploads and reducing operational overhead.</p>
+<p>This pattern is highly reusable. You can easily adapt this workflow to monitor other sources—such as homelab wiki pages, RSS feeds of release notes, or local log directories—and feed them directly into your self-hosted LLM assistants.</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/05/building-a-self-hosted-hdb-knowledge-chatbot-with-dify/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Building a Self-Hosted HDB Knowledge Chatbot with Dify</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>

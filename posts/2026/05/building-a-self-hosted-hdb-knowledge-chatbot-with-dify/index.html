@@ -32,7 +32,7 @@
   <meta itemprop="description" content="A practical walkthrough of building a self-hosted, knowledge-driven chatbot using Dify. This guide covers deploying Dify with Docker Compose, creating a Knowledge Base from HDB township planning documents, designing a conversational Chatflow, and exploring Kubernetes deployment options using community-supported Helm charts and manifests.">
   <meta itemprop="datePublished" content="2026-05-03T20:00:00+08:00">
   <meta itemprop="dateModified" content="2026-05-03T20:00:00+08:00">
-  <meta itemprop="wordCount" content="1363">
+  <meta itemprop="wordCount" content="1615">
   <meta itemprop="keywords" content="Homelab,Dify,Docker,Kubernetes,RAG,Knowledge Base,Chatbot,AI,HDB,Ollama"><title>Building a Self-Hosted HDB Knowledge Chatbot with Dify | See Hiong&#39;s Blog</title>
 
     <link rel="canonical" href="https://seehiong.github.io/posts/2026/05/building-a-self-hosted-hdb-knowledge-chatbot-with-dify/">
@@ -1062,111 +1062,144 @@ Use queries like:</p>
 
 <hr>
 <h2 id="migrating-to-kubernetes">Migrating to Kubernetes</h2>
-<p>Once the stack is stable on Docker Compose, there are several paths to Kubernetes.</p>
-<p>The Dify repository links to community-maintained options:</p>
+<p>While Docker Compose is excellent for local prototyping, bringing Dify into a homelab Kubernetes cluster requires a more declarative setup.</p>
+<p>To keep the deployment lightweight and state-free, we can compile the community Helm templates into a single, raw <code>dify.yaml</code> manifest. This eliminates the need to manage Helm client repositories or chart dependencies at deployment time.</p>
+<h3 id="the-homelab-architecture">The Homelab Architecture</h3>
+<p>Here is how our self-hosted Kubernetes setup is structured:</p>
+<ul>
+<li><strong>State-Free Manifests</strong>: All Helm chart templates are compiled into 
 
-<div class="admonition note">
-  <div class="admonition-heading">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+
+
+
+
+
+  <a href="/yaml/dify.yaml" >dify.yaml</a>
+.</li>
+<li><strong>Persistent Storage</strong>: All persistent volume claims (for PostgreSQL, Redis, Weaviate, and the Plugin Daemon) are overridden to use the <code>local-path</code> storage class (ReadWriteOnce).</li>
+<li><strong>Dedicated Vector Database</strong>: A self-contained Weaviate service is deployed within the cluster to manage the RAG knowledge embeddings.</li>
+<li><strong>Unified Routing via Caddy</strong>: Instead of exposing individual NodePorts, we route traffic through the homelab&rsquo;s central Caddy gateway using hostnames (<code>dify.lan</code>, <code>dify-app.lan</code>, <code>dify-api.lan</code>, <code>dify-files.lan</code>). HTTPS termination is handled locally using <code>mkcert</code> certificate secrets.</li>
+</ul>
+<h3 id="1-the-deployment-configurations">1. The Deployment Configurations</h3>
+<p>To adapt the standard Helm values for a custom local cluster, we configure 
+
+
+
+
+
+
+  <a href="/yaml/values.yaml" >values.yaml</a>
+:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global configuration for Dify Community Edition</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">global</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">edition</span><span class="p">:</span><span class="w"> </span><span class="l">SELF_HOSTED</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">useTLS</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">consoleWebDomain</span><span class="p">:</span><span class="w"> </span><span class="l">dify.lan</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">consoleApiDomain</span><span class="p">:</span><span class="w"> </span><span class="l">dify.lan</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">appWebDomain</span><span class="p">:</span><span class="w"> </span><span class="l">dify-app.lan</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">appApiDomain</span><span class="p">:</span><span class="w"> </span><span class="l">dify-app.lan</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">filesDomain</span><span class="p">:</span><span class="w"> </span><span class="l">dify-files.lan</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">serviceApiDomain</span><span class="p">:</span><span class="w"> </span><span class="l">dify-api.lan</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Storage class overrides</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">api</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">persistence</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">storageClass</span><span class="p">:</span><span class="w"> </span><span class="l">local-path</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">size</span><span class="p">:</span><span class="w"> </span><span class="l">10Gi</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Dedicated Weaviate configuration</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">weaviate</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">persistence</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">storageClass</span><span class="p">:</span><span class="w"> </span><span class="l">local-path</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">size</span><span class="p">:</span><span class="w"> </span><span class="l">10Gi</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
     </svg>
-    <span class="admonition-title">Note</span>
-  </div>
-  <div class="admonition-content">
-    <p><strong>Deployment Options</strong></p>
-<table>
-  <thead>
-      <tr>
-          <th>Type</th>
-          <th>Maintainer</th>
-          <th>Notes</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Helm Chart</td>
-          <td>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="2-streamlined-lifecycle-scripts">2. Streamlined Lifecycle Scripts</h3>
+<p>For painless operations, we manage the rollout using simple automation scripts:</p>
+<p><strong>Installation (<code>install.bat</code>):</strong></p>
 
 
 
 
 
 
-  <a href="https://github.com/douban/charts/tree/master/charts/dify" target="_blank" rel="noopener noreferrer" >@LeoQuote</a>
-</td>
-          <td>Well-maintained, configurable via <code>values.yaml</code></td>
-      </tr>
-      <tr>
-          <td>Helm Chart</td>
-          <td>
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bat" data-lang="bat"><span class="line"><span class="cl"><span class="p">@</span><span class="k">echo</span> off
+</span></span><span class="line"><span class="cl">kubectl create namespace dify --dry-run=client -o yaml <span class="p">|</span> kubectl apply -f -
+</span></span><span class="line"><span class="cl">kubectl apply -f dify.yaml
+</span></span><span class="line"><span class="cl"><span class="k">echo</span> Waiting for deployment rollout...
+</span></span><span class="line"><span class="cl">kubectl rollout status deployment/dify-release-api -n dify
+</span></span><span class="line"><span class="cl">kubectl rollout status deployment/dify-release-web -n dify</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong>Uninstallation (<code>uninstall.bat</code>):</strong></p>
 
 
 
 
 
 
-  <a href="https://github.com/BorisPolonsky/dify-helm" target="_blank" rel="noopener noreferrer" >@BorisPolonsky</a>
-</td>
-          <td>Alternative Helm packaging</td>
-      </tr>
-      <tr>
-          <td>Helm Chart</td>
-          <td>
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bat" data-lang="bat"><span class="line"><span class="cl"><span class="p">@</span><span class="k">echo</span> off
+</span></span><span class="line"><span class="cl">kubectl delete -f dify.yaml
+</span></span><span class="line"><span class="cl">kubectl delete namespace dify</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="3-local-ingress-resolution">3. Local Ingress Resolution</h3>
+<p>To access Dify securely, add the following hostnames pointing to your Caddy LoadBalancer IP (e.g., <code>192.168.68.220</code>) in your Windows <code>hosts</code> file:</p>
 
 
 
 
 
 
-  <a href="https://github.com/magicsong/ai-charts" target="_blank" rel="noopener noreferrer" >@magicsong</a>
-</td>
-          <td>Another community Helm variant</td>
-      </tr>
-      <tr>
-          <td>YAML files</td>
-          <td>
-
-
-
-
-
-
-  <a href="https://github.com/Winson-030/dify-kubernetes" target="_blank" rel="noopener noreferrer" >@Winson-030</a>
-</td>
-          <td>Plain manifests, supports Dify 1.13.2</td>
-      </tr>
-      <tr>
-          <td>YAML files</td>
-          <td>
-
-
-
-
-
-
-  <a href="https://github.com/wyy-holding/dify-k8s" target="_blank" rel="noopener noreferrer" >@wyy-holding</a>
-</td>
-          <td>Supports Dify 1.9.2</td>
-      </tr>
-      <tr>
-          <td>YAML files</td>
-          <td>
-
-
-
-
-
-
-  <a href="https://github.com/Zhoneym/DifyAI-Kubernetes" target="_blank" rel="noopener noreferrer" >@Zhoneym</a>
-</td>
-          <td>Supports Dify v1.7.0</td>
-      </tr>
-  </tbody>
-</table>
-<p>For most users, a Helm chart or newer YAML set is the fastest path to a production-style deployment.</p>
-
-  </div>
-</div>
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code class="language-hosts" data-lang="hosts">192.168.68.220 dify.lan
+192.168.68.220 dify-app.lan
+192.168.68.220 dify-api.lan
+192.168.68.220 dify-files.lan</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Once running, navigating to <code>https://dify.lan</code> loads the console directly, fully terminated with local TLS.</p>
 <h2 id="conclusion">Conclusion</h2>
 <p>Dify fills an interesting gap in the self-hosted AI stack. Where tools like n8n excel at orchestration and automation, Dify focuses on making knowledge accessible through structured, conversational interfaces. The built-in RAG pipeline, Knowledge Base management, and Chatflow builder significantly reduce the amount of glue code typically required to build these systems from scratch.</p>
 <p>In this walkthrough, we went from a clean Docker Compose deployment to a working, domain-specific chatbot grounded in HDB township planning documents. More importantly, the same setup can be extended beyond this use case—whether for internal documentation search, homelab observability insights, or personal knowledge assistants.</p>
@@ -1185,6 +1218,13 @@ Use queries like:</p>
             </a>
           </div>
         
+        
+          <div class="nav-next">
+            <a href="/posts/2026/06/automating-dify-knowledge-ingestion/" rel="next">
+              <span class="meta-nav">Next →</span>
+              <span class="post-title">Automating Dify Knowledge Ingestion</span>
+            </a>
+          </div>
         
       </div>
     </nav>
