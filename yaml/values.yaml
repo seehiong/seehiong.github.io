@@ -1,0 +1,151 @@
+# Global configuration for Dify Community Edition
+# dummy credentials for testing only
+# not real secrets
+global:
+  edition: SELF_HOSTED
+  useTLS: true
+  consoleWebDomain: dify.lan
+  consoleApiDomain: dify.lan
+  appWebDomain: dify-app.lan
+  appApiDomain: dify-app.lan
+  filesDomain: dify-files.lan
+  serviceApiDomain: dify-api.lan
+  dbMigrationEnabled: true
+  appSecretKey: "dify-dummy-app-secret-key-placeholder"
+  innerApiKey: "UY8Qri0LOKpDO9eckiY8dvOgtJynMGaO6XikQ6J1Tjdsafon0OeBYrXW"
+
+# API backend configurations
+api:
+  logLevel: DEBUG
+  persistence:
+    enabled: true
+    persistentVolumeClaim:
+      storageClass: local-path
+      accessModes:
+        - ReadWriteOnce
+      size: 10Gi
+  extraEnv:
+    - name: HTTP_PROTOCOL
+      value: http
+    - name: TRUSTED_PROXIES
+      value: '*'
+    - name: CONSOLE_WEB_URL
+      value: https://dify.lan
+    - name: CONSOLE_API_URL
+      value: https://dify.lan
+    - name: APP_WEB_URL
+      value: https://dify-app.lan
+    - name: APP_API_URL
+      value: https://dify-app.lan
+    - name: FILES_URL
+      value: https://dify-files.lan
+    - name: SERVICE_API_URL
+      value: https://dify-api.lan
+    - name: ENTERPRISE_ENABLED
+      value: "false"
+    - name: UPLOAD_FILE_SIZE_LIMIT
+      value: "100"
+    - name: UPLOAD_IMAGE_FILE_SIZE_LIMIT
+      value: "30"
+
+# Web frontend configurations
+web:
+  extraEnv:
+    - name: NEXT_PUBLIC_API_URL
+      value: https://dify.lan
+    - name: NEXT_PUBLIC_PUBLIC_API_URL
+      value: https://dify-app.lan
+
+# Disable all enterprise components
+enterprise:
+  enabled: false
+enterpriseAudit:
+  enabled: false
+enterpriseFrontend:
+  enabled: false
+plugin_connector:
+  enabled: false
+plugin_controller:
+  enabled: false
+plugin_manager:
+  enabled: false
+
+# Configure local Plugin Daemon
+plugin_daemon:
+  enabled: true
+  platform: local
+  image:
+    repository: langgenius/dify-plugin-daemon
+    tag: 0.5.8-local
+  extraEnv:
+    - name: PLATFORM
+      value: local
+    - name: DB_HOST
+      value: dify-release-postgresql
+    - name: DB_PORT
+      value: "5432"
+    - name: DB_USERNAME
+      value: postgres
+    - name: DB_PASSWORD
+      value: dGVzdHNlY3JldGtleQ==
+  persistence:
+    enabled: true
+    persistentVolumeClaim:
+      storageClass: local-path
+      accessModes:
+        - ReadWriteOnce
+      size: 5Gi
+
+# Enable Sandbox and SSRF Proxy
+sandbox:
+  enabled: true
+ssrfProxy:
+  enabled: true
+  sandboxHost: dify-release-sandbox.dify.svc.cluster.local
+
+# Internal Vector Database configuration
+vectorDB:
+  useExternal: false
+weaviate:
+  enabled: true
+  image:
+    tag: 1.27.0
+  authentication:
+    apikey:
+      enabled: false
+  persistence:
+    enabled: true
+    storageClass: local-path
+    size: 10Gi
+
+# Internal databases
+postgresql:
+  enabled: true
+  global:
+    postgresql:
+      auth:
+        database: dify
+        postgresPassword: dGVzdHNlY3JldGtleQ==
+  primary:
+    persistence:
+      enabled: true
+      storageClass: local-path
+    initdb:
+      scripts:
+        my_init_script.sh: |
+          #!/bin/bash
+          set -e
+          echo "Creating database..."
+          PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U postgres << 'EOF'
+          SELECT 'CREATE DATABASE dify_plugin_daemon' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'dify_plugin_daemon')\gexec
+          EOF
+
+redis:
+  enabled: true
+  global:
+    redis:
+      password: dGVzdHNlY3JldGtleQ==
+  master:
+    persistence:
+      enabled: true
+      storageClass: local-path

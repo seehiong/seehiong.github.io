@@ -32,7 +32,7 @@
   <meta itemprop="description" content="A practical walkthrough of building a self-hosted, knowledge-driven chatbot using Dify. This guide covers deploying Dify with Docker Compose, creating a Knowledge Base from HDB township planning documents, designing a conversational Chatflow, and exploring Kubernetes deployment options using community-supported Helm charts and manifests.">
   <meta itemprop="datePublished" content="2026-05-03T20:00:00+08:00">
   <meta itemprop="dateModified" content="2026-05-03T20:00:00+08:00">
-  <meta itemprop="wordCount" content="1615">
+  <meta itemprop="wordCount" content="1613">
   <meta itemprop="keywords" content="Homelab,Dify,Docker,Kubernetes,RAG,Knowledge Base,Chatbot,AI,HDB,Ollama"><title>Building a Self-Hosted HDB Knowledge Chatbot with Dify | See Hiong&#39;s Blog</title>
 
     <link rel="canonical" href="https://seehiong.github.io/posts/2026/05/building-a-self-hosted-hdb-knowledge-chatbot-with-dify/">
@@ -1067,29 +1067,13 @@ Use queries like:</p>
 <h3 id="the-homelab-architecture">The Homelab Architecture</h3>
 <p>Here is how our self-hosted Kubernetes setup is structured:</p>
 <ul>
-<li><strong>State-Free Manifests</strong>: All Helm chart templates are compiled into 
-
-
-
-
-
-
-  <a href="/yaml/dify.yaml" >dify.yaml</a>
-.</li>
+<li><strong>State-Free Manifests</strong>: All Helm chart templates are compiled into <code>dify.yaml</code>.</li>
 <li><strong>Persistent Storage</strong>: All persistent volume claims (for PostgreSQL, Redis, Weaviate, and the Plugin Daemon) are overridden to use the <code>local-path</code> storage class (ReadWriteOnce).</li>
 <li><strong>Dedicated Vector Database</strong>: A self-contained Weaviate service is deployed within the cluster to manage the RAG knowledge embeddings.</li>
 <li><strong>Unified Routing via Caddy</strong>: Instead of exposing individual NodePorts, we route traffic through the homelab&rsquo;s central Caddy gateway using hostnames (<code>dify.lan</code>, <code>dify-app.lan</code>, <code>dify-api.lan</code>, <code>dify-files.lan</code>). HTTPS termination is handled locally using <code>mkcert</code> certificate secrets.</li>
 </ul>
 <h3 id="1-the-deployment-configurations">1. The Deployment Configurations</h3>
-<p>To adapt the standard Helm values for a custom local cluster, we configure 
-
-
-
-
-
-
-  <a href="/yaml/values.yaml" >values.yaml</a>
-:</p>
+<p>To adapt the standard Helm values for a custom local cluster, we configure <code>values.yaml</code>:</p>
 
 
 
