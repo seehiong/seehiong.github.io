@@ -32,7 +32,7 @@
   <meta itemprop="description" content="Explore how Local AI Starter brings private, browser-based AI to life with WebGPU, LiteRT-LM, local model caching, persistent memory, voice agents, PWA support, and optional neural TTS — all without a traditional AI backend.">
   <meta itemprop="datePublished" content="2026-08-09T08:00:00+08:00">
   <meta itemprop="dateModified" content="2026-08-09T08:00:00+08:00">
-  <meta itemprop="wordCount" content="3332">
+  <meta itemprop="wordCount" content="3198">
   <meta itemprop="keywords" content="AI,Agentic AI,WebGPU,LiteRT,Local AI,PWA,Voice AI,Text to Speech,Open Source,Web Application"><title>Owning Your Private AI Assistant | See Hiong&#39;s Blog</title>
 
     <link rel="canonical" href="https://seehiong.github.io/posts/2026/08/owning-your-private-ai-assistant/">
@@ -283,7 +283,7 @@ Wishing everyone in Singapore and around the world a wonderful, restful holiday.
     <span class="copy-text">Copy</span>
   </button>
 </div><p>The browser becomes the application runtime, inference engine, and local data store.</p>
-<h2 id="hahahugoshortcode135s0hbhb">
+<h2 id="hahahugoshortcode128s0hbhb">
 
 
 
@@ -384,34 +384,39 @@ Wishing everyone in Singapore and around the world a wonderful, restful holiday.
 
 
 
-<div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">┌─────────────────────────────────────────────────────┐
-</span></span><span class="line"><span class="cl">│                   Local Browser Sandbox             │
-</span></span><span class="line"><span class="cl">│                                                     │
-</span></span><span class="line"><span class="cl">│  ┌────────────────────┐     ┌────────────────────┐  │
-</span></span><span class="line"><span class="cl">│  │ IndexedDB / OPFS   │     │    GPU VRAM / RAM  │  │
-</span></span><span class="line"><span class="cl">│  │                    │◄───►│                    │  │
-</span></span><span class="line"><span class="cl">│  │ • Sessions         │     │ • LiteRT Runtime   │  │
-</span></span><span class="line"><span class="cl">│  │ • Messages         │     │ • Model Execution  │  │
-</span></span><span class="line"><span class="cl">│  │ • Memories         │     │                    │  │
-</span></span><span class="line"><span class="cl">│  │ • Cached Models    │     │                    │  │
-</span></span><span class="line"><span class="cl">│  └────────────────────┘     └────────────────────┘  │
-</span></span><span class="line"><span class="cl">│             │                         │             │
-</span></span><span class="line"><span class="cl">│             └──────────────┬──────────┘             │
-</span></span><span class="line"><span class="cl">│                            ▼                        │
-</span></span><span class="line"><span class="cl">│                     Local Export                    │
-</span></span><span class="line"><span class="cl">│                    (.md / .txt / .json)             │
-</span></span><span class="line"><span class="cl">└─────────────────────────────────────────────────────┘</span></span></code></pre></div>
-  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
-      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-    </svg>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
-      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-    </svg>
-    <span class="copy-text">Copy</span>
-  </button>
-</div><h3 id="1-no-application-backend-for-core-inference">1. No Application Backend for Core Inference</h3>
+
+  
+  
+
+  
+    
+    
+    <script src="/js/plantuml-bundle.6a8276b7a4f6ba2161545379939a85839f01e6cb3d0afd36cdd36a5d32bde30c.js" defer></script>
+    
+  
+
+
+<span id="plantuml-local-browser-sandbox" style="display:none;">
+@startuml
+left to right direction
+
+rectangle &#34;Local Browser Sandbox&#34; as Sandbox {
+
+    rectangle &#34;IndexedDB / OPFS\n\n• Sessions\n• Messages\n• Memories\n• Cached Models&#34; as Storage
+
+    rectangle &#34;GPU VRAM / RAM\n\n• LiteRT Runtime\n• Model Execution&#34; as Runtime
+
+    rectangle &#34;Local Export\n(.md / .txt / .json)&#34; as Export
+
+    Storage &lt;--&gt; Runtime
+    Storage --&gt; Export
+    Runtime --&gt; Export
+}
+
+@enduml
+</span>
+<img class="plantuml" id="plantuml-local-browser-sandbox" alt="PlantUML Diagram local-browser-sandbox" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<h3 id="1-no-application-backend-for-core-inference">1. No Application Backend for Core Inference</h3>
 <p>The LLM inference pipeline runs locally through WebGPU. Prompts, conversation history, and persistent memories used by the local assistant do not need to be sent to an application server.</p>
 <p>This is one of the main architectural differences between this project and a conventional cloud-hosted AI application.</p>
 <h3 id="2-offline-capability">2. Offline Capability</h3>
@@ -532,37 +537,37 @@ Wishing everyone in Singapore and around the world a wonderful, restful holiday.
 
 
 
-<div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">┌────────────────────────────────────────────────────────────────────┐
-</span></span><span class="line"><span class="cl">│                       Client Browser                               │
-</span></span><span class="line"><span class="cl">│                                                                    │
-</span></span><span class="line"><span class="cl">│  ┌─────────────────┐    ┌─────────────────┐    ┌────────────────┐  │
-</span></span><span class="line"><span class="cl">│  │   index.html    │    │     app.js      │    │  OPFS / Cache  │  │
-</span></span><span class="line"><span class="cl">│  │   UI Shell      │◄──►│  LiteRT Engine  │◄──►│ Gemma Weights  │  │
-</span></span><span class="line"><span class="cl">│  └─────────────────┘    └────────┬────────┘    └────────────────┘  │
-</span></span><span class="line"><span class="cl">│                                  │                                 │
-</span></span><span class="line"><span class="cl">│                                  ▼                                 │
-</span></span><span class="line"><span class="cl">│                       ┌─────────────────────┐                      │
-</span></span><span class="line"><span class="cl">│                       │  voice-agent.js     │                      │
-</span></span><span class="line"><span class="cl">│                       │  VAD / Voice Loop   │                      │
-</span></span><span class="line"><span class="cl">│                       └──────────┬──────────┘                      │
-</span></span><span class="line"><span class="cl">│                                  │                                 │
-</span></span><span class="line"><span class="cl">│                                  ▼                                 │
-</span></span><span class="line"><span class="cl">│                       ┌─────────────────────┐                      │
-</span></span><span class="line"><span class="cl">│                       │   WebGPU Pipeline   │                      │
-</span></span><span class="line"><span class="cl">│                       │ On-Device Inference │                      │
-</span></span><span class="line"><span class="cl">│                       └─────────────────────┘                      │
-</span></span><span class="line"><span class="cl">└────────────────────────────────────────────────────────────────────┘</span></span></code></pre></div>
-  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
-      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-    </svg>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
-      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-    </svg>
-    <span class="copy-text">Copy</span>
-  </button>
-</div><hr>
+
+
+<span id="plantuml-local-browser-architecture" style="display:none;">
+@startuml
+title Local Browser AI Architecture
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package &#34;Client Browser&#34; {
+
+    component &#34;index.html\nUI Shell&#34; as UI
+
+    component &#34;app.js\nLiteRT Engine&#34; as Engine
+
+    database &#34;OPFS / Cache\nGemma Weights&#34; as Cache
+
+    component &#34;voice-agent.js\nVAD / Voice Loop&#34; as Voice
+
+    component &#34;WebGPU Pipeline\nOn-Device Inference&#34; as WebGPU
+
+    UI &lt;--&gt; Engine
+    Engine &lt;--&gt; Cache
+    Engine --&gt; Voice
+    Voice --&gt; WebGPU
+}
+
+@enduml
+</span>
+<img class="plantuml" id="plantuml-local-browser-architecture" alt="PlantUML Diagram local-browser-architecture" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<hr>
 <h2 id="1-webgpu-on-device-inference-pipeline">1. WebGPU On-Device Inference Pipeline</h2>
 <p>The application imports <code>@litert-lm/core</code> directly into the browser. Model weights are downloaded as <code>.litertlm</code> files and cached locally. The application first attempts to use OPFS, followed by browser cache and buffered-blob fallbacks where necessary.</p>
 <p>Once available, the model is passed to the LiteRT engine and compiled for WebGPU execution. A simplified version looks like this:</p>
@@ -955,33 +960,26 @@ Wishing everyone in Singapore and around the world a wonderful, restful holiday.
 
 
 
-<div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">┌──────────────────────────────────────────────────────────────┐
-</span></span><span class="line"><span class="cl">│                  Sliding Context Window                      │
-</span></span><span class="line"><span class="cl">│                                                              │
-</span></span><span class="line"><span class="cl">│  ┌────────────────────────────────────────────────────────┐  │
-</span></span><span class="line"><span class="cl">│  │ Pinned System Context                                  │  │
-</span></span><span class="line"><span class="cl">│  │ System Prompt + Persona Rules + Memory                 │  │
-</span></span><span class="line"><span class="cl">│  └────────────────────────────────────────────────────────┘  │
-</span></span><span class="line"><span class="cl">│                                                              │
-</span></span><span class="line"><span class="cl">│  ┌────────────────────────────────────────────────────────┐  │
-</span></span><span class="line"><span class="cl">│  │ Recent Conversation                                    │  │
-</span></span><span class="line"><span class="cl">│  │                                                        │  │
-</span></span><span class="line"><span class="cl">│  │ User Turn N-2       → Assistant Turn N-2               │  │
-</span></span><span class="line"><span class="cl">│  │ User Turn N-1       → Assistant Turn N-1               │  │
-</span></span><span class="line"><span class="cl">│  │ Current User Turn N                                    │  │
-</span></span><span class="line"><span class="cl">│  └────────────────────────────────────────────────────────┘  │
-</span></span><span class="line"><span class="cl">└──────────────────────────────────────────────────────────────┘</span></span></code></pre></div>
-  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
-      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-    </svg>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
-      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-    </svg>
-    <span class="copy-text">Copy</span>
-  </button>
-</div><h3 id="1-token-budget--persona-design">1. Token Budget &amp; Persona Design</h3>
+
+
+<span id="plantuml-sliding-context-window" style="display:none;">
+@startuml
+top to bottom direction
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+package &#34;Sliding Context Window&#34; {
+
+    component &#34;Pinned System Context\n\nSystem Prompt &#43; Persona Rules &#43; Memory&#34; as Pinned
+
+    component &#34;Recent Conversation\n\nUser Turn N-2  →  Assistant Turn N-2\nUser Turn N-1  →  Assistant Turn N-1\nCurrent User Turn N&#34; as Recent
+}
+
+@enduml
+</span>
+<img class="plantuml" id="plantuml-sliding-context-window" alt="PlantUML Diagram sliding-context-window" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<h3 id="1-token-budget--persona-design">1. Token Budget &amp; Persona Design</h3>
 <p>Persona prompts are intentionally concise. The objective is to avoid unnecessary preambles, repetition, and conversational filler that consume valuable context-window space. This becomes particularly important when running smaller models locally.</p>
 <h3 id="2-persistent-memory">2. Persistent Memory</h3>
 <p>Instead of keeping every historical conversation turn in the active context, important facts can be promoted into persistent memory. Those memories are stored in IndexedDB and re-injected into the system context when a conversation is reconstructed. This allows the assistant to retain useful information without continuously expanding the active conversation history.</p>
@@ -1187,38 +1185,34 @@ Wishing everyone in Singapore and around the world a wonderful, restful holiday.
 
 
 
-<div class="code-block-wrapper">
-  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">                ┌───────────────────────────┐
-</span></span><span class="line"><span class="cl">                │       Web Browser         │
-</span></span><span class="line"><span class="cl">                │                           │
-</span></span><span class="line"><span class="cl">                │  ┌─────────────────────┐  │
-</span></span><span class="line"><span class="cl">                │  │    Local LLM        │  │
-</span></span><span class="line"><span class="cl">                │  │    WebGPU           │  │
-</span></span><span class="line"><span class="cl">                │  └──────────┬──────────┘  │
-</span></span><span class="line"><span class="cl">                │             │             │
-</span></span><span class="line"><span class="cl">                │  ┌──────────▼──────────┐  │
-</span></span><span class="line"><span class="cl">                │  │ Persona + Memory    │  │
-</span></span><span class="line"><span class="cl">                │  └──────────┬──────────┘  │
-</span></span><span class="line"><span class="cl">                │             │             │
-</span></span><span class="line"><span class="cl">                │  ┌──────────▼──────────┐  │
-</span></span><span class="line"><span class="cl">                │  │ Voice Agent / VAD   │  │
-</span></span><span class="line"><span class="cl">                │  └──────────┬──────────┘  │
-</span></span><span class="line"><span class="cl">                │             │             │
-</span></span><span class="line"><span class="cl">                │  ┌──────────▼──────────┐  │
-</span></span><span class="line"><span class="cl">                │  │ IndexedDB / OPFS    │  │
-</span></span><span class="line"><span class="cl">                │  └─────────────────────┘  │
-</span></span><span class="line"><span class="cl">                │                           │
-</span></span><span class="line"><span class="cl">                └───────────────────────────┘</span></span></code></pre></div>
-  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
-      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-    </svg>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
-      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-    </svg>
-    <span class="copy-text">Copy</span>
-  </button>
-</div><p>There is no mandatory application backend. No remote database is required for the core assistant. No API key is required for local inference. And the entire project can be deployed as a static website.</p>
+
+
+<span id="plantuml-browser-architecture" style="display:none;">
+@startuml
+top to bottom direction
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+package &#34;Web Browser&#34; {
+
+    component &#34;Local LLM\nWebGPU&#34; as LLM
+
+    component &#34;Persona &#43; Memory&#34; as Persona
+
+    component &#34;Voice Agent / VAD&#34; as Voice
+
+    database &#34;IndexedDB / OPFS&#34; as Storage
+
+    LLM --&gt; Persona
+    Persona --&gt; Voice
+    Voice --&gt; Storage
+}
+
+@enduml
+</span>
+<img class="plantuml" id="plantuml-browser-architecture" alt="PlantUML Diagram browser-architecture" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<p>There is no mandatory application backend. No remote database is required for the core assistant. No API key is required for local inference. And the entire project can be deployed as a static website.</p>
 <p>That is what makes <strong>Local AI Starter</strong> interesting to me. It is less about building yet another chatbot and more about exploring what a <strong>local-first AI application</strong> can look like when the browser itself becomes the runtime.</p>
 <hr>
 <h1 id="summary--happy-national-day">Summary &amp; Happy National Day!</h1>
@@ -1272,6 +1266,13 @@ Wishing everyone in Singapore and around the world a wonderful, restful holiday.
             </a>
           </div>
         
+        
+          <div class="nav-next">
+            <a href="/posts/2026/08/running-llama.cpp-on-amd-strix-halo/" rel="next">
+              <span class="meta-nav">Next →</span>
+              <span class="post-title">Running Llama.cpp on AMD Strix Halo</span>
+            </a>
+          </div>
         
       </div>
     </nav>

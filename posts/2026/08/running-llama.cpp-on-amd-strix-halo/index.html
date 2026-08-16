@@ -1,0 +1,3015 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/08/running-llama.cpp-on-amd-strix-halo/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Running Llama.cpp on AMD Strix Halo">
+  <meta property="og:description" content="Getting llama.cpp running on the AMD Radeon 8060S with ROCm, gfx1151, and unified memory on Ubuntu 26.04 — covering BIOS and TTM memory configuration, custom gfx1151 compilation, and benchmarks across 7B, 27B, 30B, 72B, and GPT-OSS 120B.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-08-16T08:00:00+08:00">
+    <meta property="article:modified_time" content="2026-08-16T08:00:00+08:00">
+    <meta property="article:tag" content="AMD">
+    <meta property="article:tag" content="Strix Halo">
+    <meta property="article:tag" content="Radeon 8060S">
+    <meta property="article:tag" content="ROCm">
+    <meta property="article:tag" content="Llama.cpp">
+    <meta property="article:tag" content="Local AI">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Running Llama.cpp on AMD Strix Halo">
+  <meta name="twitter:description" content="Getting llama.cpp running on the AMD Radeon 8060S with ROCm, gfx1151, and unified memory on Ubuntu 26.04 — covering BIOS and TTM memory configuration, custom gfx1151 compilation, and benchmarks across 7B, 27B, 30B, 72B, and GPT-OSS 120B.">
+
+  <meta itemprop="name" content="Running Llama.cpp on AMD Strix Halo">
+  <meta itemprop="description" content="Getting llama.cpp running on the AMD Radeon 8060S with ROCm, gfx1151, and unified memory on Ubuntu 26.04 — covering BIOS and TTM memory configuration, custom gfx1151 compilation, and benchmarks across 7B, 27B, 30B, 72B, and GPT-OSS 120B.">
+  <meta itemprop="datePublished" content="2026-08-16T08:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-08-16T08:00:00+08:00">
+  <meta itemprop="wordCount" content="4495">
+  <meta itemprop="keywords" content="AMD,Strix Halo,Radeon 8060S,ROCm,Llama.cpp,Local AI,LLM,Linux,Ubuntu,Homelab"><title>Running Llama.cpp on AMD Strix Halo | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/08/running-llama.cpp-on-amd-strix-halo/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Running Llama.cpp on AMD Strix Halo</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-08-16T08:00:00&#43;08:00">August 16, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/amd">AMD</a>
+            
+              , <a href="/tags/strix-halo">Strix Halo</a>
+            
+              , <a href="/tags/radeon-8060s">Radeon 8060S</a>
+            
+              , <a href="/tags/rocm">ROCm</a>
+            
+              , <a href="/tags/llama.cpp">llama.cpp</a>
+            
+              , <a href="/tags/local-ai">Local AI</a>
+            
+              , <a href="/tags/llm">LLM</a>
+            
+              , <a href="/tags/linux">Linux</a>
+            
+              , <a href="/tags/ubuntu">Ubuntu</a>
+            
+              , <a href="/tags/homelab">Homelab</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/strix-halo/cover.png');"></div>
+          <img src="/images/strix-halo/cover.png" alt="Running Llama.cpp on AMD Strix Halo cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>In my previous post, 
+
+
+
+
+
+
+  <a href="/posts/2025/08/run-gpt-oss-locally-on-ryzen-ai/" >Run gpt-oss Locally on Ryzen AI</a>
+, I shared my initial experiments testing OpenAI&rsquo;s <strong>gpt-oss</strong> models on the newly acquired <strong>GMKtec EVO-X2</strong>, powered by the <strong>AMD Ryzen AI Max+ 395</strong> with 128 GB of memory.</p>
+<p>While Ollama on Windows handled smaller models reasonably well, running the much larger <strong>gpt-oss 120B</strong> model was not fast enough for my day-to-day use. The default CLI also did not expose the level of tokens-per-second metrics I wanted for proper benchmarking.</p>
+<p>Interestingly, 
+
+
+
+
+
+
+  <a href="https://www.amd.com/en/blogs/2025/how-to-run-openai-gpt-oss-20b-120b-models-on-amd-ryzen-ai-radeon.html" target="_blank" rel="noopener noreferrer" >AMD&rsquo;s official material</a>
+ has demonstrated large models such as GPT-OSS 120B on AMD Ryzen and Radeon hardware using a Windows-based software stack. At the same time, I found that practical, reproducible benchmarks for native Linux ROCm inference on the <strong>gfx1151</strong> Radeon 8060S were less readily available.</p>
+<p>That led me to try a different approach.</p>
+<p>The AMD Strix Halo platform is particularly interesting for local AI because the integrated <strong>Radeon 8060S</strong> uses a unified memory architecture. Unlike a conventional discrete GPU with a fixed amount of dedicated VRAM, the GPU can access a large portion of the system&rsquo;s LPDDR5X memory through the Linux graphics and memory-management stack.</p>
+<p>On my 128 GB machine, this makes it possible to experiment with models that would normally require substantially more dedicated GPU memory. The goal of this experiment was simple:</p>
+<blockquote>
+<p><strong>Run llama.cpp locally on the Radeon 8060S using ROCm, configure the Linux memory subsystem appropriately, and measure actual inference performance across increasingly large models.</strong></p></blockquote>
+<p>This post documents the setup, the memory configuration, the ROCm and llama.cpp build process, the problems encountered along the way, and the resulting benchmarks from 7B through 120B models.</p>
+<hr>
+<h2 id="high-level-architecture">High-Level Architecture</h2>
+<p>Getting GPU acceleration working on Strix Halo involves several layers:</p>
+
+
+
+
+
+
+
+  
+  
+
+  
+    
+    
+    <script src="/js/plantuml-bundle.6a8276b7a4f6ba2161545379939a85839f01e6cb3d0afd36cdd36a5d32bde30c.js" defer></script>
+    
+  
+
+
+<span id="plantuml-strix-halo-llama-architecture" style="display:none;">
+@startuml
+title AMD Strix Halo llama.cpp ROCm Architecture
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+package &#34;Operating System &amp; Kernel&#34; {
+    [Ubuntu 26.04 LTS\nLinux Kernel 7.0] as OS
+    [amdgpu Kernel Driver] as KMOD
+    interface &#34;/dev/kfd\n(Compute)&#34; as KFD
+    interface &#34;/dev/dri/renderD128\n(Render)&#34; as DRI
+
+    OS --&gt; KMOD
+    KMOD --&gt; KFD
+    KMOD --&gt; DRI
+}
+
+package &#34;Hardware &amp; Unified Memory&#34; {
+    [AMD Ryzen AI Max&#43; 395\n(Strix Halo APU)] as APU
+    [Radeon 8060S Graphics\ngfx1151 (40 CUs)] as GPU
+    database &#34;128 GB Unified LPDDR5X\n(~115 GB GTT Compute Pool)&#34; as UMA
+
+    KMOD &lt;--&gt; GPU
+    APU *-- GPU
+    GPU &lt;--&gt; UMA
+}
+
+package &#34;ROCm &amp; Runtime Stack&#34; {
+    [ROCm 7.x / HIP Runtime\n(libhipblas, hipcc)] as ROCM
+
+    KFD --&gt; ROCM
+    DRI --&gt; ROCM
+}
+
+package &#34;LLM Inference Engine&#34; {
+    [llama.cpp (GGML_HIP)\nTarget: gfx1151] as LLAMA
+    [llama-cli-rocm\nllama-server-rocm] as BIN
+    artifact &#34;GGUF Quantized Models\n(7B / 27B / 30B / 72B / 120B)&#34; as MODELS
+
+    ROCM --&gt; LLAMA
+    LLAMA --&gt; BIN
+    MODELS --&gt; BIN
+}
+
+@enduml
+</span>
+<img class="plantuml" id="plantuml-strix-halo-llama-architecture" alt="PlantUML Diagram strix-halo-llama-architecture" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<p>The important point is that the model does not communicate directly with the hardware. The path is approximately:</p>
+<p><strong>Linux → amdgpu → /dev/kfd → ROCm/HIP → llama.cpp → GGUF model</strong></p>
+<p>The remainder of the post walks through each layer.</p>
+<hr>
+<h2 id="1-os-installation-moving-to-ubuntu-2604-lts">1. OS Installation: Moving to Ubuntu 26.04 LTS</h2>
+<p>The GMKtec EVO-X2 ships with Windows 11 Pro on its primary drive. Windows worked well for my initial experiments, but native Linux provides much more direct access to the kernel memory subsystem, device nodes, sysfs parameters, and ROCm tooling.</p>
+<p>To keep the environments separate, I installed Ubuntu onto a <strong>dedicated M.2 NVMe SSD</strong>.</p>
+<ol>
+<li>Download the standard 64-bit desktop ISO from 
+
+
+
+
+
+
+  <a href="https://ubuntu.com/download/desktop" target="_blank" rel="noopener noreferrer" >Ubuntu Desktop</a>
+.</li>
+<li>Use 
+
+
+
+
+
+
+  <a href="https://rufus.ie/" target="_blank" rel="noopener noreferrer" >Rufus</a>
+ on Windows to flash the ISO to a USB drive.</li>
+<li>Boot the EVO-X2 from the USB drive and install <strong>Ubuntu 26.04 LTS</strong> onto the separate NVMe SSD.</li>
+</ol>
+<p>This gives me a clean Linux environment without modifying the original Windows installation.</p>
+<hr>
+<h2 id="2-hardware-detection">2. Hardware Detection</h2>
+<p>The test machine is based on AMD Strix Halo with the <strong>Radeon 8060S Graphics</strong> controller.</p>
+<p>First, verify that Linux detects the GPU:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">lspci -nn <span class="p">|</span> grep -Ei <span class="s1">&#39;vga|display|amd&#39;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Output:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">c6:00.0 Display controller [0380]: Advanced Micro Devices, Inc. [AMD/ATI] Strix Halo [Radeon Graphics / Radeon 8050S Graphics / Radeon 8060S Graphics] [1002:1586] (rev c1)</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The important detail is the GPU architecture, <code>gfx1151</code>. This target becomes important later when compiling llama.cpp.</p>
+<hr>
+<h2 id="3-bios-configuration-the-framebuffer-misconception">3. BIOS Configuration: The Framebuffer Misconception</h2>
+<p>One of the biggest differences between my Windows and Linux configurations is how memory is exposed to the integrated GPU.</p>
+<p>During my previous Windows experiments, I configured the BIOS to allocate 96 GB out of the 128 GB system memory to the integrated graphics:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># Previous Windows Configuration:
+</span></span><span class="line"><span class="cl">Integrated Graphics
+</span></span><span class="line"><span class="cl">    └── UMA Frame Buffer Size
+</span></span><span class="line"><span class="cl">            └── 96 GB (static hardware partition)</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This makes the memory appear more like dedicated graphics memory to the Windows software stack. On Linux, I found that I did not need to reserve such a large static framebuffer. Instead, I configured:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># Linux Configuration:
+</span></span><span class="line"><span class="cl">Integrated Graphics
+</span></span><span class="line"><span class="cl">    └── UMA Frame Buffer Size
+</span></span><span class="line"><span class="cl">            └── 512 MB (display framebuffer only)</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    The 512 MB framebuffer setting does not represent the total memory available to the Radeon 8060S for compute. On this Linux configuration, the amdgpu driver and Linux memory-management stack expose a much larger portion of system memory through GTT (Graphics Translation Table) space. In my setup, this resulted in roughly 115 GiB of GPU-accessible memory while retaining the rest of the system&rsquo;s unified memory architecture.
+  </div>
+</div>
+<hr>
+<h2 id="4-verifying-linux-gpu-driver--device-nodes">4. Verifying Linux GPU Driver &amp; Device Nodes</h2>
+<p>After booting Ubuntu, confirm that the AMD GPU driver is loaded:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">lsmod <span class="p">|</span> grep amdgpu</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Example output:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">amdgpu              21569536  48
+</span></span><span class="line"><span class="cl">amdxcp                 12288  1 amdgpu
+</span></span><span class="line"><span class="cl">drm_panel_backlight_quirks    12288  1 amdgpu
+</span></span><span class="line"><span class="cl">drm_buddy              28672  1 amdgpu
+</span></span><span class="line"><span class="cl">drm_ttm_helper         20480  1 amdgpu
+</span></span><span class="line"><span class="cl">ttm                   135168  2 amdgpu,drm_ttm_helper
+</span></span><span class="line"><span class="cl">drm_exec               12288  1 amdgpu
+</span></span><span class="line"><span class="cl">drm_suballoc_helper    24576  1 amdgpu
+</span></span><span class="line"><span class="cl">drm_display_helper    303104  1 amdgpu
+</span></span><span class="line"><span class="cl">gpu_sched              69632  2 amdxdna,amdgpu
+</span></span><span class="line"><span class="cl">cec                   106496  2 drm_display_helper,amdgpu
+</span></span><span class="line"><span class="cl">i2c_algo_bit           16384  1 amdgpu
+</span></span><span class="line"><span class="cl">video                  77824  1 amdgpu</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then check the kernel messages:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo dmesg <span class="p">|</span> grep -i amdgpu <span class="p">|</span> tail -10</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Example:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">[drm] Initialized amdgpu 3.64.0 for 0000:c6:00.0 on minor 1
+</span></span><span class="line"><span class="cl">fbcon: amdgpudrmfb (fb0) is primary device</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="compute--render-devices">Compute &amp; Render Devices</h3>
+<p>ROCm accesses AMD GPUs through the AMD Kernel Fusion Driver and the DRM render interface. Check:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">ls -l /dev/kfd /dev/dri/renderD128</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Example:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">crw-rw-rw-+ 1 root render 511,   0 Aug 15 14:56 /dev/kfd
+</span></span><span class="line"><span class="cl">crw-rw-rw-+ 1 root render 226, 128 Aug 15 14:56 /dev/dri/renderD128</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>To access these devices without running the inference process as root, add your user to the render group:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo usermod -aG render <span class="nv">$USER</span>
+</span></span><span class="line"><span class="cl">groups</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>A new login session may be required before the group membership takes effect.</p>
+<hr>
+<h2 id="5-validating-compute-capability-with-rocminfo">5. Validating Compute Capability with <code>rocminfo</code></h2>
+<p>Next, verify that ROCm can see the compute device:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo apt install rocminfo
+</span></span><span class="line"><span class="cl">rocminfo <span class="p">|</span> grep -A40 <span class="s2">&#34;Agent 2&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>On this machine, the important part of the output is:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">*******
+</span></span><span class="line"><span class="cl">Agent 2
+</span></span><span class="line"><span class="cl">*******
+</span></span><span class="line"><span class="cl">  Name:                    gfx1151
+</span></span><span class="line"><span class="cl">  Uuid:                    GPU-XX
+</span></span><span class="line"><span class="cl">  Marketing Name:          Radeon 8060S Graphics
+</span></span><span class="line"><span class="cl">  Vendor Name:             AMD
+</span></span><span class="line"><span class="cl">  Feature:                 KERNEL_DISPATCH
+</span></span><span class="line"><span class="cl">  Profile:                 BASE_PROFILE
+</span></span><span class="line"><span class="cl">  Float Round Mode:        NEAR
+</span></span><span class="line"><span class="cl">  Max Queue Number:        128(0x80)
+</span></span><span class="line"><span class="cl">  ...
+</span></span><span class="line"><span class="cl">  Chip ID:                 5510(0x1586)
+</span></span><span class="line"><span class="cl">  Max Clock Freq. (MHz):   2900
+</span></span><span class="line"><span class="cl">  Compute Unit:            40
+</span></span><span class="line"><span class="cl">  Memory Properties:       APU
+</span></span><span class="line"><span class="cl">  Fast F16 Operation:      TRUE</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>And the ISA details:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">ISA Info:
+</span></span><span class="line"><span class="cl">    ISA 1
+</span></span><span class="line"><span class="cl">      Name:                    amdgcn-amd-amdhsa--gfx1151
+</span></span><span class="line"><span class="cl">      Machine Models:          HSA_MACHINE_MODEL_LARGE
+</span></span><span class="line"><span class="cl">      Profiles:                HSA_PROFILE_BASE
+</span></span><span class="line"><span class="cl">      Fast f16:                TRUE
+</span></span><span class="line"><span class="cl">      Workgroup Max Size:      1024(0x400)</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This confirms that ROCm is seeing the Radeon 8060S as a gfx1151 compute device with 40 compute units.</p>
+<hr>
+<h2 id="6-demystifying-the-memory-vram-vs-gtt-vs-ttm">6. Demystifying the Memory: VRAM vs GTT vs TTM</h2>
+<p>Understanding the memory model is probably the most important part of getting large models running on Strix Halo. There are three different concepts to keep separate:</p>
+<h3 id="61-the-three-layers-of-apu-memory">6.1. The Three Layers of APU Memory</h3>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Concept</th>
+          <th style="text-align: left">What It Is</th>
+          <th style="text-align: left">Size on My 128 GB Machine</th>
+          <th style="text-align: left">Role in Local AI</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>VRAM</strong></td>
+          <td style="text-align: left">Dedicated Framebuffer allocation</td>
+          <td style="text-align: left"><code>512 MiB</code></td>
+          <td style="text-align: left">Primarily used for display/framebuffer purposes</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>GTT</strong></td>
+          <td style="text-align: left">GPU-accessible address space</td>
+          <td style="text-align: left"><code>~115 GiB</code></td>
+          <td style="text-align: left">Allows the GPU to access system memory</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>TTM</strong></td>
+          <td style="text-align: left">Linux graphics memory-management layer</td>
+          <td style="text-align: left"><code>~115 GiB</code> configured</td>
+          <td style="text-align: left">Manages memory used by GPU workloads</td>
+      </tr>
+  </tbody>
+</table>
+<p>Inspect the memory information through sysfs:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># Display framebuffer</span>
+</span></span><span class="line"><span class="cl">cat /sys/class/drm/card1/device/mem_info_vram_total
+</span></span><span class="line"><span class="cl"><span class="c1"># Output: 536870912 (512 MiB)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># GPU-accessible GTT space</span>
+</span></span><span class="line"><span class="cl">cat /sys/class/drm/card1/device/mem_info_gtt_total
+</span></span><span class="line"><span class="cl"><span class="c1"># Output: 123480309760 (~115 GiB)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Conceptually, the memory layout looks like this:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">┌──────────────────────────────────────────────────────────────┐
+</span></span><span class="line"><span class="cl">│                    128 GB System RAM (LPDDR5X)               │
+</span></span><span class="line"><span class="cl">├─────────────────┬────────────────────────────────────────────┤
+</span></span><span class="line"><span class="cl">│  VRAM (512 MB)  │             GTT (~115 GB)                  │
+</span></span><span class="line"><span class="cl">│  (Display Only) │    (GPU Compute Space for Model &amp; KV)      │
+</span></span><span class="line"><span class="cl">│                 ├────────────────────────────────────────────┤
+</span></span><span class="line"><span class="cl">│                 │ TTM Configured Pool: ~115 GB               │
+</span></span><span class="line"><span class="cl">│                 │ (30,146,560 pages via ttm.pages_limit)     │
+</span></span><span class="line"><span class="cl">└─────────────────┴────────────────────────────────────────────┘</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The key takeaway is that the 512 MB framebuffer value should not be interpreted as the amount of memory available for GPU inference.</p>
+<hr>
+<h3 id="62-configuring-ttm-for-a-larger-gpu-memory-pool">6.2. Configuring TTM for a Larger GPU Memory Pool</h3>
+<p>On this particular installation, the default TTM configuration did not expose the entire useful memory pool to the GPU. I therefore configured ttm.pages_limit through GRUB. For reference, the page calculation for approximately 115 GiB is:</p>
+$$\frac{115 \times 1024 \times 1024 \times 1024 \text{ bytes}}{4096 \text{ bytes/page}} = 30,146,560 \text{ pages}$$<p>Edit GRUB:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo nano /etc/default/grub</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Set:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">GRUB_CMDLINE_LINUX_DEFAULT=&#34;quiet splash amd_iommu=off ttm.pages_limit=30146560&#34;</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo update-grub
+</span></span><span class="line"><span class="cl">sudo reboot</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>After rebooting:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">cat /sys/module/ttm/parameters/pages_limit
+</span></span><span class="line"><span class="cl"><span class="c1"># Output: 30146560 (~115 GiB)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>I also checked the complete set of TTM parameters:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="k">for</span> f in /sys/module/ttm/parameters/*<span class="p">;</span> <span class="k">do</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">echo</span> <span class="s2">&#34;=== </span><span class="nv">$f</span><span class="s2"> ===&#34;</span>
+</span></span><span class="line"><span class="cl">    sudo cat <span class="s2">&#34;</span><span class="nv">$f</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="k">done</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The relevant value was:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">=== /sys/module/ttm/parameters/pages_limit ===
+</span></span><span class="line"><span class="cl">30146560</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This configuration gave llama.cpp enough GPU-accessible memory to load the larger models tested later in this post.</p>
+
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    The exact TTM configuration is hardware- and kernel-dependent. The 30146560 value shown here is the configuration I used on this 128 GB Strix Halo system; it should not be treated as a universal value for every AMD APU.
+  </div>
+</div>
+<hr>
+<h2 id="7-rocm-installation-on-ubuntu-2604">7. ROCm Installation on Ubuntu 26.04</h2>
+<p>The ROCm installation was another area where I initially ran into package differences. Rather than blindly applying repository instructions intended for older Ubuntu releases, I used the ROCm packages available for my Ubuntu installation. One notable package naming difference was:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># Do not assume this package exists:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># sudo apt install hipblas-dev</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># On this installation:</span>
+</span></span><span class="line"><span class="cl">sudo apt install -y libhipblas-dev libhipblas3 libhipblaslt-dev libhipblaslt1</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then verify the HIP compiler:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hipcc --version</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Example:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">HIP version: 7.1.52801-9999
+</span></span><span class="line"><span class="cl">clang version 20.0.0rocm7.1.0
+</span></span><span class="line"><span class="cl">Target: x86_64-unknown-linux-gnu
+</span></span><span class="line"><span class="cl">InstalledDir: /usr/lib/rocm/llvm/bin</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The exact package versions will naturally change as Ubuntu and ROCm packages evolve.</p>
+<hr>
+<h2 id="8-the-initial-out-of-memory-false-alarm">8. The Initial &ldquo;Out of Memory&rdquo; False Alarm</h2>
+<p>After installing ROCm, my first attempt to run a generic llama.cpp binary failed during startup:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">ROCm error: out of memory
+</span></span><span class="line"><span class="cl">hipStreamCreateWithFlags(...)</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This was confusing because the system had plenty of free unified memory. The important clue was that the binary I was using was not built specifically for the gfx1151 target. This led to an important lesson:</p>
+<blockquote>
+<p>Detecting the GPU with rocminfo is not enough. The inference engine also needs an appropriate GPU backend and architecture target.</p></blockquote>
+<p>For llama.cpp on this machine, compiling with HIP support and explicitly targeting gfx1151 produced a working configuration.</p>
+<hr>
+<h2 id="9-container-exploration-with-distrobox">9. Container Exploration with Distrobox</h2>
+<p>Before building llama.cpp directly on the host, I also tested the ROCm environment through Distrobox. For example:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo apt install podman -y
+</span></span><span class="line"><span class="cl">curl -s https://raw.githubusercontent.com/89luca89/distrobox/main/install <span class="p">|</span> sudo sh</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then enter the container:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">distrobox enter llama-rocm</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Inside the Fedora environment, I checked the ROCm installation:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">cat /etc/os-release <span class="p">|</span> grep PRETTY_NAME
+</span></span><span class="line"><span class="cl"><span class="c1"># &#34;Fedora Linux 43 (Container Image)&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>and:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">readlink -f /opt/rocm
+</span></span><span class="line"><span class="cl"><span class="c1"># /opt/rocm-6.4.4</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">llama-cli --version</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The llama.cpp binary could also see the GPU:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">ggml_cuda_init: found 1 ROCm devices:
+</span></span><span class="line"><span class="cl">  Device 0: Radeon 8060S Graphics, gfx1151 (0x1151), VMM: no, Wave Size: 32
+</span></span><span class="line"><span class="cl">version: 7690 (9ac2693a3)
+</span></span><span class="line"><span class="cl">built with GNU 15.2.1 for Linux x86_64</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This was useful as a sanity check: the kernel driver, hardware and device passthrough were working. For the final setup, however, I preferred a native host build.</p>
+<hr>
+<h2 id="10-compiling-llamacpp-for-gfx1151">10. Compiling llama.cpp for <code>gfx1151</code></h2>
+<p>I cloned llama.cpp and built it with the HIP backend enabled:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">git clone https://github.com/ggerganov/llama.cpp.git
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> llama.cpp
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">cmake -B build -S . <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -DGGML_HIP<span class="o">=</span>ON <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -DAMDGPU_TARGETS<span class="o">=</span><span class="s2">&#34;gfx1151&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">cmake --build build --config Release -j<span class="k">$(</span>nproc<span class="k">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">~/llama.cpp/build/bin/llama-cli --list-devices</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Output:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Available devices:
+</span></span><span class="line"><span class="cl">  ROCm0: Radeon 8060S Graphics (62815 MiB, 120274 MiB free)</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The important result was that the custom build could see the Radeon 8060S through the ROCm backend and expose a large amount of available GPU-accessible memory.</p>
+<hr>
+<h2 id="11-avoid-the-distro-package-confusion">11. Avoid the Distro Package Confusion</h2>
+<p>Ubuntu also provides a llama.cpp-tools package:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo apt install llama.cpp-tools</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>However, the packaged binary on my system was a CPU-oriented build:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">load_backend: loaded CPU backend from /usr/lib/x86_64-linux-gnu/ggml/backends0/libggml-cpu-zen4.so
+</span></span><span class="line"><span class="cl">warning: no usable GPU found
+</span></span><span class="line"><span class="cl">warning: one possible reason is that llama.cpp was compiled without GPU support</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Rather than replacing the distribution package, I kept the two builds separate. I created dedicated symlinks for the ROCm build:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo ln -sf ~/llama.cpp/build/bin/llama-cli /usr/local/bin/llama-cli-rocm
+</span></span><span class="line"><span class="cl">sudo ln -sf ~/llama.cpp/build/bin/llama-server /usr/local/bin/llama-server-rocm</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This gives me:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">llama-cli
+</span></span><span class="line"><span class="cl">    └── Ubuntu packaged binary
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">llama-cli-rocm
+</span></span><span class="line"><span class="cl">    └── Custom gfx1151 ROCm/HIP build
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">llama-server-rocm
+</span></span><span class="line"><span class="cl">    └── Custom gfx1151 ROCm/HIP server</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><hr>
+<h2 id="12-performance-testing-llama-2-7b">12. Performance Testing: Llama 2 7B</h2>
+<p>I started with a small model to verify the complete inference path. Download the model:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo apt install pipx -y
+</span></span><span class="line"><span class="cl">pipx ensurepath
+</span></span><span class="line"><span class="cl">pipx install <span class="s2">&#34;huggingface-hub[cli]&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hf download TheBloke/Llama-2-7B-GGUF llama-2-7b.Q4_K_M.gguf --local-dir ~/models</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Run the model with all layers offloaded:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">llama-cli-rocm <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -m ~/models/llama-2-7b.Q4_K_M.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -ngl <span class="m">99</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -c <span class="m">512</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -p <span class="s2">&#34;Explain quantum computing in simple terms.&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -n <span class="m">64</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The banner confirms the ROCm backend:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">build      : b10440-6b4344ecc
+</span></span><span class="line"><span class="cl">model      : /home/pi/models/llama-2-7b.Q4_K_M.gguf
+</span></span><span class="line"><span class="cl">ftype      : Q4_K - Medium
+</span></span><span class="line"><span class="cl">modalities : text</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/strix-halo/strix-halo-llama-cli-7b.png"   alt="strix-halo-llama-cli-7b" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="benchmark-results">Benchmark Results</h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Prompt Processing : 581.5 tokens/sec
+</span></span><span class="line"><span class="cl">Token Generation  :  43.6 tokens/sec</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The important result here was not simply the 43.6 tokens/sec number. It demonstrated that the custom ROCm llama.cpp build was successfully executing inference on the Radeon 8060S.</p>
+<hr>
+<h2 id="13-serving-large-models-muse-glimmer-30b">13. Serving Large Models: Muse-Glimmer 30B</h2>
+<p>A 7B model is only the starting point. The more interesting question for a 128 GB unified-memory machine is whether significantly larger models can remain entirely within the GPU-accessible memory pool. I started with Muse-Glimmer 30B using the Q4_K_XL quantization:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hf download unsloth/Muse-Glimmer-30B-GGUF <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --local-dir ~/models <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --include <span class="s2">&#34;*UD-Q4_K_XL*&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then launched llama.cpp&rsquo;s <strong>OpenAI-compatible server</strong>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">llama-server-rocm <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --model ~/models/Muse-Glimmer-30B-UD-Q4_K_XL.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --n-gpu-layers <span class="m">99</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --ctx-size <span class="m">4096</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --parallel <span class="m">1</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --flash-attn on <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --temp 1.0 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-p 0.95 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-k <span class="m">64</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --host 0.0.0.0 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --port <span class="m">8080</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --alias muse-glimmer</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The server exposes an OpenAI-compatible endpoint. For example:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">curl http://127.0.0.1:8080/v1/chat/completions <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -d <span class="s1">&#39;{
+</span></span></span><span class="line"><span class="cl"><span class="s1">    &#34;model&#34;: &#34;muse-glimmer&#34;,
+</span></span></span><span class="line"><span class="cl"><span class="s1">    &#34;messages&#34;: [
+</span></span></span><span class="line"><span class="cl"><span class="s1">      {
+</span></span></span><span class="line"><span class="cl"><span class="s1">        &#34;role&#34;: &#34;user&#34;,
+</span></span></span><span class="line"><span class="cl"><span class="s1">        &#34;content&#34;: &#34;Hello! Tell me about yourself.&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s1">      }
+</span></span></span><span class="line"><span class="cl"><span class="s1">    ],
+</span></span></span><span class="line"><span class="cl"><span class="s1">    &#34;max_tokens&#34;: 128
+</span></span></span><span class="line"><span class="cl"><span class="s1">  }&#39;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Response payload:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;choices&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;finish_reason&#34;</span><span class="p">:</span> <span class="s2">&#34;length&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;index&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;assistant&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;content&#34;</span><span class="p">:</span> <span class="s2">&#34;Hello! I am an AI assistant...&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">],</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;model&#34;</span><span class="p">:</span> <span class="s2">&#34;muse-glimmer&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;timings&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;prompt_n&#34;</span><span class="p">:</span> <span class="mi">63</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;prompt_per_second&#34;</span><span class="p">:</span> <span class="mf">143.48</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;predicted_n&#34;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;predicted_per_second&#34;</span><span class="p">:</span> <span class="mf">12.94</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The server reported approximately:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Prompt Processing : 143.5 tokens/sec
+</span></span><span class="line"><span class="cl">Token Generation  :  13.0 tokens/sec</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This was enough to make a 30B model genuinely usable for local interactive experimentation.</p>
+<hr>
+<h3 id="131-testing-qwen-38-27b">13.1 Testing Qwen 3.8 27B</h3>
+<p>I then moved to Qwen3.8 27B, using an Unsloth GGUF quantization. For the UD-Q4_K_XL variant:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># Qwen 27B (UD-Q4_K_XL)</span>
+</span></span><span class="line"><span class="cl">hf download unsloth/Qwen3.8-27B-GGUF Qwen3.8-27B-UD-Q4_K_XL.gguf --local-dir ~/models</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>I used:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">llama-cli-rocm <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --model ~/models/Qwen3.8-27B-UD-Q4_K_XL.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --n-gpu-layers <span class="m">99</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --ctx-size <span class="m">8192</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --flash-attn on <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --temp 0.7 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-p 0.8 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-k <span class="m">20</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -p <span class="s2">&#34;Explain how quantum computing works, including qubits, superposition, entanglement, and why quantum computers may be useful.&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -n <span class="m">256</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/strix-halo/strix-halo-llama-cli-qwen-27b.png"   alt="strix-halo-llama-cli-qwen-27b" class="sc-image sc-image-default"
+       >
+
+
+<p>I also used a simple arithmetic test:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/strix-halo/strix-halo-llama-cli-qwen-27b-math.png"   alt="strix-halo-llama-cli-qwen-27b-math" class="sc-image sc-image-default"
+       >
+
+
+<p>And a longer prompt:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/strix-halo/strix-halo-llama-cli-qwen-27b-prompt.png"   alt="strix-halo-llama-cli-qwen-27b-prompt" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="132-comparing-q4_k_xl-and-q4_k_m">13.2 Comparing Q4_K_XL and Q4_K_M</h3>
+<p>I also tested the more conventional Q4_K_M quantization:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hf download unsloth/Qwen3.8-27B-GGUF --include <span class="s2">&#34;*Q4_K_M*.gguf&#34;</span> --local-dir ~/models</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">llama-cli-rocm <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --model ~/models/Qwen3.8-27B-Q4_K_M.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --n-gpu-layers <span class="m">99</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --ctx-size <span class="m">8192</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --flash-attn on <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --temp 0.7 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-p 0.8 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-k <span class="m">20</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -p <span class="s2">&#34;Explain how quantum computing works, including qubits, superposition, entanglement, quantum gates, measurement, and why quantum computers may be useful.&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -n <span class="m">256</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/strix-halo/strix-halo-llama-cli-qwen-27b-q4km.png"   alt="strix-halo-llama-cli-qwen-27b-q4km" class="sc-image sc-image-default"
+       >
+
+
+<p>The observed results were:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Qwen3.8 27B Q4_K_XL
+</span></span><span class="line"><span class="cl">Prompt Processing : 176.3 tokens/sec
+</span></span><span class="line"><span class="cl">Token Generation  :  11.3 tokens/sec
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Qwen3.8 27B Q4_K_M
+</span></span><span class="line"><span class="cl">Prompt Processing : 146.7 tokens/sec
+</span></span><span class="line"><span class="cl">Token Generation  :  11.9 tokens/sec</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The generation speeds were very close despite the different quantizations. That was an interesting result because it suggests that, for this workload, simply choosing a larger or smaller quantization does not necessarily translate directly into a proportional change in generation speed.</p>
+<hr>
+<h3 id="133-muse-glimmer-30b">13.3 Muse-Glimmer 30B</h3>
+<p>I also tested the 30B model directly from the CLI:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">llama-cli-rocm <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --model models/Muse-Glimmer-30B-UD-Q4_K_XL.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --temp 1.0 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-p 0.95 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-k <span class="m">64</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/strix-halo/strix-halo-llama-cli-muse-glimmer-30b.png"   alt="strix-halo-llama-cli-muse-glimmer-30b" class="sc-image sc-image-default"
+       >
+
+
+<p>Across the 27B and 30B dense models tested, prompt processing generally landed around 130–177 tokens/sec, while generation was approximately 11–13 tokens/sec. For interactive local use, this is a much more comfortable range than the larger dense models that came later.</p>
+<hr>
+<h2 id="14-pushing-dense-limits-qwen-25-72b">14. Pushing Dense Limits: Qwen 2.5 72B</h2>
+<p>The next test was a full 72B parameter dense model. This was where the unified memory architecture became particularly interesting.</p>
+<h3 id="141-qwen-25-72b--q5_k_m">14.1 Qwen 2.5 72B — Q5_K_M</h3>
+<p>Download the split GGUF files:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hf download Qwen/Qwen2.5-72B-Instruct-GGUF --include <span class="s2">&#34;qwen2.5-72b-instruct-q5_k_m*.gguf&#34;</span> --local-dir ~/models</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The repository provides the model as multiple GGUF split files. I merged them using llama.cpp:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">~/llama.cpp/build/bin/llama-gguf-split <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --merge <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  ~/models/qwen2.5-72b-instruct-q5_k_m-00001-of-00014.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  ~/models/qwen2.5-72b-instruct-q5_k_m.gguf</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">llama-cli-rocm <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --model ~/models/qwen2.5-72b-instruct-q5_k_m.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --n-gpu-layers <span class="m">99</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --ctx-size <span class="m">4096</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --flash-attn on <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --temp 0.7 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-p 0.8 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-k <span class="m">20</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -p <span class="s2">&#34;Explain how quantum computing works, including qubits, superposition, entanglement, and why quantum computers may be useful.&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -n <span class="m">128</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/strix-halo/strix-halo-llama-cli-qwen-72b.png"   alt="strix-halo-llama-cli-qwen-72b" class="sc-image sc-image-default"
+       >
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/strix-halo/strix-halo-llama-cli-qwen-72b-detail.png"   alt="strix-halo-llama-cli-qwen-72b-detail" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="142-qwen-25-72b--q6_k">14.2 Qwen 2.5 72B — Q6_K</h3>
+<p>I also tested the higher-precision Q6_K variant:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hf download Qwen/Qwen2.5-72B-Instruct-GGUF --include <span class="s2">&#34;qwen2.5-72b-instruct-q6_k*.gguf&#34;</span> --local-dir ~/models</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The split files were merged:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">~/llama.cpp/build/bin/llama-gguf-split <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --merge <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  ~/models/qwen2.5-72b-instruct-q6_k-00001-of-00016.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  ~/models/qwen2.5-72b-instruct-q6_k.gguf</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Then:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">llama-cli-rocm <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --model ~/models/qwen2.5-72b-instruct-q6_k.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --n-gpu-layers <span class="m">99</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --ctx-size <span class="m">4096</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --flash-attn on <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --temp 0.7 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-p 0.8 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-k <span class="m">20</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -p <span class="s2">&#34;Write a detailed technical explanation of how quantum computing works, including qubits, superposition, entanglement, quantum gates, measurement, quantum algorithms, error correction, and practical applications.&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -n <span class="m">512</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/strix-halo/strix-halo-llama-cli-qwen-72b-q6k.png"   alt="strix-halo-llama-cli-qwen-72b-q6k" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="benchmark-results-1">Benchmark Results</h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Qwen 2.5 72B Q5_K_M
+</span></span><span class="line"><span class="cl">Prompt Processing : 102.0 tokens/sec
+</span></span><span class="line"><span class="cl">Token Generation  :   4.1 tokens/sec
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Qwen 2.5 72B Q6_K
+</span></span><span class="line"><span class="cl">Prompt Processing :  73.4 tokens/sec
+</span></span><span class="line"><span class="cl">Token Generation  :   3.7 tokens/sec</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Both models loaded successfully with all 99 layers offloaded to the ROCm device. The important result was not that a 72B dense model suddenly became a fast interactive model. At roughly 4 tokens/sec, it is noticeably slower for conversational use.</p>
+<p>Instead, the result demonstrates that the 128 GB unified-memory configuration can accommodate models at this scale without requiring multiple discrete GPUs. For long-form generation, batch processing, experimentation, and workloads where throughput is less important than model size, this is still useful.</p>
+<hr>
+<h2 id="15-the-120b-frontier-gpt-oss-120b-moe">15. The 120B Frontier: GPT-OSS 120B MoE</h2>
+<p>The most interesting result came from GPT-OSS 120B.</p>
+<p>Unlike the dense 72B model, GPT-OSS 120B uses a Mixture-of-Experts (MoE) architecture. This means that although the model has around 120B total parameters, only a subset of those parameters are activated for each token. I downloaded the GGUF release:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hf download ggml-org/gpt-oss-120b-GGUF --local-dir ~/models</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The repository provides several quantization variants. I tested the MXFP4 version:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">llama-cli-rocm <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --model ~/models/gpt-oss-120b-MXFP4.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --n-gpu-layers <span class="m">99</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --ctx-size <span class="m">8192</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --flash-attn on <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --jinja <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --temp 1.0 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-p 1.0 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-k <span class="m">0</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -p <span class="s2">&#34;Explain how quantum computing works, including qubits, superposition, entanglement, quantum gates, measurement, and why quantum computers may be useful.&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -n <span class="m">512</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/strix-halo/strix-halo-llama-cli-gpt-oss-120b.png"   alt="strix-halo-llama-cli-gpt-oss-120b" class="sc-image sc-image-default"
+       >
+
+
+<p>I also ran a longer generation benchmark:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">llama-cli-rocm <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --model ~/models/gpt-oss-120b-MXFP4.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --n-gpu-layers <span class="m">99</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --ctx-size <span class="m">8192</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --flash-attn on <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --jinja <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --temp 1.0 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-p 1.0 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --top-k <span class="m">0</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -p <span class="s2">&#34;Write a detailed 2000-word technical explanation of how quantum computing works, including qubits, superposition, entanglement, quantum gates, measurement, quantum algorithms, error correction, and practical applications.&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -n <span class="m">2000</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="152-benchmark-results">15.2 Benchmark Results</h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Hardware  : AMD Radeon 8060S (40 CUs, gfx1151)
+</span></span><span class="line"><span class="cl">ROCm      : Native ROCm 7.x
+</span></span><span class="line"><span class="cl">Engine    : llama.cpp b10440 (commit 6b4344ecc)
+</span></span><span class="line"><span class="cl">Model     : GPT-OSS 120B MXFP4 MoE GGUF
+</span></span><span class="line"><span class="cl">Config    : GPU layers 99, Context 8192, Flash Attention ON
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Prompt Processing : 165.9 tokens/sec
+</span></span><span class="line"><span class="cl">Token Generation  :  49.0 tokens/sec</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The 49 tokens/sec generation speed was by far the most surprising result of the entire experiment. A 120B model running faster than the dense 72B model sounds counterintuitive at first. The explanation is the architecture.</p>
+<h3 id="153-why-does-120b-moe-run-faster-than-72b-dense">15.3 Why does 120B MoE run faster than 72B Dense?</h3>
+<p>The parameter count alone does not determine inference speed. The Qwen 2.5 72B model tested above is a dense model. Its layers involve the full parameter set for each token. GPT-OSS 120B is a Mixture-of-Experts model. Only a subset of its parameters are active for a particular token. That means:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">72B Dense
+</span></span><span class="line"><span class="cl">    └── Most of the model participates in every token
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">120B MoE
+</span></span><span class="line"><span class="cl">    └── 120B total parameters
+</span></span><span class="line"><span class="cl">        └── Only selected experts participate per token</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The result is that a model with a larger total parameter count can have substantially lower per-token compute requirements than a smaller dense model. This is why comparing models purely by parameter count can be misleading when evaluating inference performance.</p>
+<h3 id="154-what-is-mxfp4-quantization">15.4 What is MXFP4 Quantization?</h3>
+<p>GPT-OSS is also distributed using MXFP4, a microscaling floating-point format designed for efficient low-bit inference. This differs from the more familiar GGML integer-style quantizations such as:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Q4_K_M
+</span></span><span class="line"><span class="cl">Q5_K_M
+</span></span><span class="line"><span class="cl">Q6_K
+</span></span><span class="line"><span class="cl">Q8_0</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>MXFP4 uses a 4-bit floating-point representation together with block-level scaling. In practical terms, the combination of:</p>
+<ul>
+<li>low-bit weight representation,</li>
+<li>block-level scaling,</li>
+<li>and MoE architecture</li>
+</ul>
+<p>makes it possible to fit and execute a very large model within the unified memory available on this system.</p>
+<p>The important point for this experiment is not that MXFP4 is universally better than every other quantization format. Rather, GPT-OSS 120B is a particularly good match for this hardware/software combination because its architecture and low-bit representation reduce the amount of computation and memory bandwidth required per generated token.</p>
+<hr>
+<h2 id="16-gpu-monitoring-with-rocm-smi">16. GPU Monitoring with <code>rocm-smi</code></h2>
+<p>I also wanted to verify what the GPU was doing during inference. When the system is idle:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">rocm-smi</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The output looked similar to:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">======================================== ROCm System Management Interface ========================================
+</span></span><span class="line"><span class="cl">================================================== Concise Info ==================================================
+</span></span><span class="line"><span class="cl">Device  Node  IDs              Temp    Power     Partitions          SCLK  MCLK  Fan  Perf  PwrCap  VRAM%  GPU%
+</span></span><span class="line"><span class="cl">              (DID,     GUID)  (Edge)  (Socket)  (Mem, Compute, ID)
+</span></span><span class="line"><span class="cl">==================================================================================================================
+</span></span><span class="line"><span class="cl">0       1     0x1586,   35903  39.0°C  11.039W   N/A, N/A, 0         N/A   N/A   0%   auto  N/A     96%    0%
+</span></span><span class="line"><span class="cl">==================================================================================================================</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+<div class="admonition info">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Info</span>
+  </div>
+  <div class="admonition-content">
+    When the GPU is idle, rocm-smi may report a low-power state warning. This is normal power-management behaviour and does not by itself indicate an inference problem.
+  </div>
+</div>
+<p>During active generation, I monitored utilization with:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">watch -n <span class="m">1</span> rocm-smi</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The GPU utilization rose to close to 100% during active generation, with power consumption reaching approximately 45–54 W in my observations. When generation stopped, utilization and power quickly returned toward the idle state. This behaviour is consistent with the inference workload being executed on the Radeon 8060S rather than simply running as a CPU-only workload.</p>
+<hr>
+<h2 id="17-performance-summary-table">17. Performance Summary Table</h2>
+<p>Here is the complete benchmark summary from the models tested on the AMD Radeon 8060S with 128 GB unified memory:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Parameters</th>
+          <th style="text-align: left">Quantization</th>
+          <th style="text-align: left">Architecture</th>
+          <th style="text-align: left">Prompt Speed</th>
+          <th style="text-align: left">Generation Speed</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>Llama 2 7B</strong></td>
+          <td style="text-align: left">7B</td>
+          <td style="text-align: left">Q4_K_M</td>
+          <td style="text-align: left">Dense</td>
+          <td style="text-align: left"><code>581.5 t/s</code></td>
+          <td style="text-align: left"><code>43.6 t/s</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Qwen 3.8 27B</strong></td>
+          <td style="text-align: left">27B</td>
+          <td style="text-align: left">Q4_K_XL</td>
+          <td style="text-align: left">Dense</td>
+          <td style="text-align: left"><code>177.3 t/s</code></td>
+          <td style="text-align: left"><code>11.3 t/s</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Qwen 3.8 27B</strong></td>
+          <td style="text-align: left">27B</td>
+          <td style="text-align: left">Q4_K_M</td>
+          <td style="text-align: left">Dense</td>
+          <td style="text-align: left"><code>146.7 t/s</code></td>
+          <td style="text-align: left"><code>11.9 t/s</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Muse-Glimmer 30B</strong></td>
+          <td style="text-align: left">30B</td>
+          <td style="text-align: left">Q4_K_XL</td>
+          <td style="text-align: left">Dense</td>
+          <td style="text-align: left"><code>143.5 t/s</code></td>
+          <td style="text-align: left"><code>13.0 t/s</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Qwen 2.5 72B</strong></td>
+          <td style="text-align: left">72B</td>
+          <td style="text-align: left">Q5_K_M</td>
+          <td style="text-align: left">Dense</td>
+          <td style="text-align: left"><code>102.0 t/s</code></td>
+          <td style="text-align: left"><code>4.1 t/s</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Qwen 2.5 72B</strong></td>
+          <td style="text-align: left">72B</td>
+          <td style="text-align: left">Q6_K</td>
+          <td style="text-align: left">Dense</td>
+          <td style="text-align: left"><code>73.4 t/s</code></td>
+          <td style="text-align: left"><code>3.7 t/s</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>GPT-OSS 120B</strong></td>
+          <td style="text-align: left">120B</td>
+          <td style="text-align: left">MXFP4</td>
+          <td style="text-align: left"><strong>MoE</strong></td>
+          <td style="text-align: left"><strong><code>165.9 t/s</code></strong></td>
+          <td style="text-align: left"><strong><code>49.0 t/s</code></strong></td>
+      </tr>
+  </tbody>
+</table>
+
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    <p>These are measurements from my own machine and configuration. They should not be interpreted as universal performance numbers for the Radeon 8060S.</p>
+<p>Inference speed depends heavily on the llama.cpp build, ROCm version, quantization, context size, prompt length, batch size, sampling configuration, model architecture, and whether features such as speculative decoding are enabled.</p>
+<p>For example, AMD&rsquo;s own Qwen3.8 27B testing uses a different software and benchmark configuration, so its published numbers should not be directly compared against these llama.cpp measurements without matching the test conditions.</p>
+
+  </div>
+</div>
+<hr>
+<h2 id="18-what-i-learned">18. What I Learned</h2>
+<p>This experiment changed my view of what is practical on a small unified-memory machine.</p>
+<h3 id="181-unified-memory-changes-the-model-size-equation">18.1 Unified Memory Changes the Model-Size Equation</h3>
+<p>The Radeon 8060S is not a discrete GPU with a conventional fixed VRAM ceiling. With the Linux configuration used here, the GPU can access a much larger portion of the 128 GB system memory through the unified-memory/GTT path. That makes models such as 70B-class and even 120B-class models technically practical on a small desktop system.</p>
+<p>The trade-off is that memory capacity and compute throughput are different constraints. Being able to fit a model does not automatically make it fast.</p>
+<h3 id="182-dense-models-become-memory-bandwidth-bound">18.2 Dense Models Become Memory-Bandwidth Bound</h3>
+<p>The 72B Qwen results illustrate this clearly.</p>
+<p>Moving from:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">27B dense → ~12 t/s
+</span></span><span class="line"><span class="cl">72B dense → ~4 t/s</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>shows how quickly generation throughput can fall as the amount of model data that must be processed per token increases. For these larger dense models, the 128 GB unified memory is primarily solving the capacity problem. It does not magically turn the Radeon 8060S into a high-end multi-GPU inference server.</p>
+<h3 id="183-moe-changes-the-equation">18.3 MoE Changes the Equation</h3>
+<p>The GPT-OSS 120B result was the real surprise. Despite having substantially more total parameters than the 72B dense model, the MoE architecture only activates a subset of the model for each token. Combined with MXFP4 quantization, this produced:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">GPT-OSS 120B
+</span></span><span class="line"><span class="cl">49.0 tokens/sec</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>on the same Radeon 8060S.</p>
+<p>This is a good demonstration of why model architecture matters as much as parameter count when evaluating local inference.</p>
+<h3 id="184-the-software-stack-matters">18.4 The Software Stack Matters</h3>
+<p>The hardware was only one part of the puzzle. The successful configuration required:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Ubuntu
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">amdgpu
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">Linux GTT / TTM
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">ROCm / HIP
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">gfx1151-targeted llama.cpp
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">GGUF</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>A generic CPU-only llama.cpp package or an incorrectly targeted GPU build can completely change the result. For AMD hardware, the inference backend and architecture target deserve as much attention as the model itself.</p>
+<h3 id="185-a-small-apu-can-be-a-surprisingly-capable-local-ai-server">18.5 A Small APU Can Be a Surprisingly Capable Local AI Server</h3>
+<p>The most interesting conclusion is not that the Radeon 8060S can replace a high-end discrete GPU. It cannot. The interesting part is that a relatively compact <strong>Ryzen AI Max+ 395 system with 128 GB of unified memory</strong> can run models ranging from 7B all the way to a 120B MoE model without requiring a rack full of GPUs. The resulting performance varies dramatically by architecture:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">7B Dense
+</span></span><span class="line"><span class="cl">    → very fast
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">27–30B Dense
+</span></span><span class="line"><span class="cl">    → comfortable interactive inference
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">72B Dense
+</span></span><span class="line"><span class="cl">    → large-model experimentation, but slow generation
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">120B MoE
+</span></span><span class="line"><span class="cl">    → surprisingly high generation throughput</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>For a homelab, developer workstation, or private local AI server, that is a very interesting capability.</p>
+<hr>
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>The original motivation for this experiment was simple: I wanted to understand whether the <strong>128 GB unified-memory architecture of Strix Halo</strong> could make genuinely large local models practical. The answer is yes — but with an important qualification.</p>
+<p><strong>Memory capacity determines what you can load. Model architecture, quantization, memory bandwidth, and the inference engine determine how fast you can run it.</strong></p>
+<p>The Radeon 8060S is not competing with high-end discrete accelerators on raw compute throughput. Instead, its combination of:</p>
+<ul>
+<li>128 GB unified system memory</li>
+<li>40 GPU compute units</li>
+<li>high-bandwidth LPDDR5X</li>
+<li>ROCm support</li>
+<li>gfx1151-targeted llama.cpp</li>
+<li>and low-bit GGUF models</li>
+</ul>
+<p>creates a surprisingly capable platform for experimenting with large local models.</p>
+<p>The most compelling result from this experiment was not the 7B benchmark or even the 72B model. It was seeing a 120B MoE model generate around 49 tokens/sec on a small desktop APU. That is the point where unified-memory local AI starts to become genuinely interesting. Local AI on unified-memory APUs is becoming a very practical homelab workload.</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/08/owning-your-private-ai-assistant/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Owning Your Private AI Assistant</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
