@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/08/from-photos-to-printable-3d/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="From Photos to Printable 3D">
+  <meta property="og:description" content="Building a local AI pipeline that turns photos into watertight, slicer-ready STLs on AMD hardware.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-08-30T08:00:00+08:00">
+    <meta property="article:modified_time" content="2026-08-30T08:00:00+08:00">
+    <meta property="article:tag" content="3D Printing">
+    <meta property="article:tag" content="AI">
+    <meta property="article:tag" content="ROCm">
+    <meta property="article:tag" content="AMD Strix Halo">
+    <meta property="article:tag" content="Hunyuan3D">
+    <meta property="article:tag" content="TripoSR">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="From Photos to Printable 3D">
+  <meta name="twitter:description" content="Building a local AI pipeline that turns photos into watertight, slicer-ready STLs on AMD hardware.">
+
+  <meta itemprop="name" content="From Photos to Printable 3D">
+  <meta itemprop="description" content="Building a local AI pipeline that turns photos into watertight, slicer-ready STLs on AMD hardware.">
+  <meta itemprop="datePublished" content="2026-08-30T08:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-08-30T08:00:00+08:00">
+  <meta itemprop="wordCount" content="4285">
+  <meta itemprop="keywords" content="3D Printing,AI,ROCm,AMD Strix Halo,Hunyuan3D,TripoSR,Open Source,VLM,Python"><title>From Photos to Printable 3D | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/08/from-photos-to-printable-3d/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">From Photos to Printable 3D</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-08-30T08:00:00&#43;08:00">August 30, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/3d-printing">3D Printing</a>
+            
+              , <a href="/tags/ai">AI</a>
+            
+              , <a href="/tags/rocm">ROCm</a>
+            
+              , <a href="/tags/amd-strix-halo">AMD Strix Halo</a>
+            
+              , <a href="/tags/hunyuan3d">Hunyuan3D</a>
+            
+              , <a href="/tags/triposr">TripoSR</a>
+            
+              , <a href="/tags/open-source">Open Source</a>
+            
+              , <a href="/tags/vlm">VLM</a>
+            
+              , <a href="/tags/python">Python</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/printable/cover.png');"></div>
+          <img src="/images/printable/cover.png" alt="From Photos to Printable 3D cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>If you have experimented with commercial 3D generation tools like 
+
+
+
+
+
+
+  <a href="https://www.meshy.ai/" target="_blank" rel="noopener noreferrer" >Meshy.ai</a>
+, 
+
+
+
+
+
+
+  <a href="https://hi3d.ai/" target="_blank" rel="noopener noreferrer" >Hi3D</a>
+, or CSM (Common Sense Machines), you know how magical it feels to drop in a single 2D photograph and get a 3D model in return. But as a maker and developer with an AMD workstation, I kept asking myself two questions:</p>
+<ol>
+<li><strong>How do these pipelines actually work under the hood using modern open-source models?</strong></li>
+<li><strong>Can we build a complete, local pipeline that outputs physical, slicer-ready STLs rather than just unprintable visual meshes?</strong></li>
+</ol>
+<p>While an open-source hobby project is not trying to displace commercial multi-view reconstruction engines overnight, I wanted to experience firsthand what it takes to build a photo-to-3D tool from scratch using open-source building blocks.</p>
+<p>The result is 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/printable" target="_blank" rel="noopener noreferrer" ><strong><code>printable</code></strong></a>
+ — a Python toolkit that turns photos, character turnaround sheets, and engineering design specs into watertight, millimeter-scaled STLs validated against real 3D printer constraints.</p>
+<p>Here is the story of how it was built, the hurdles of running modern 3D AI on AMD hardware (Strix Halo / ROCm), and what worked best.</p>
+<hr>
+<h2 id="1-the-real-problem-here-is-a-mesh-vs-here-is-a-print">1. The Real Problem: &ldquo;Here is a Mesh&rdquo; vs &ldquo;Here is a Print&rdquo;</h2>
+<p>Most open-source generative 3D projects stop at generating a visually convincing mesh. The result might be an OBJ, PLY, or GLB that looks great in a 3D viewer, but when you load it into OrcaSlicer, PrusaSlicer, or Bambu Studio, reality strikes:</p>
+<ul>
+<li><strong>Non-manifold geometry &amp; open edges</strong>: Holes in the mesh cause slicers to drop walls or fill cavities incorrectly.</li>
+<li><strong>Disconnected floating debris</strong>: Floating islands ruin resin and FDM prints alike.</li>
+<li><strong>Arbitrary coordinate systems &amp; scale</strong>: The mesh is sized to an arbitrary \([-1, 1]\) bounding box with no real-world millimeter scale.</li>
+<li><strong>No stable print bed contact</strong>: Auto-orienting purely for shape visual aesthetics often places standing figures flat on their backs or balances models on tiny contact points without a flat base plate.</li>
+</ul>
+<p>In <code>printable</code>, AI generation is only <strong>Stage 2</strong> of a 5-stage pipeline:</p>
+
+
+
+
+
+
+
+  
+  
+
+  
+    
+    
+    <script src="/js/plantuml-bundle.6a8276b7a4f6ba2161545379939a85839f01e6cb3d0afd36cdd36a5d32bde30c.js" defer></script>
+    
+  
+
+
+<span id="plantuml-printable-pipeline" style="display:none;">
+@startuml
+left to right direction
+
+rectangle &#34;2D Photo / Spec Sheet&#34; as A
+rectangle &#34;Preprocess &amp; Background Keying&#34; as B
+rectangle &#34;Geometry Backend\n(Hunyuan3D / TripoSR / CPU)&#34; as C
+rectangle &#34;Repair Ladder\n(Manifold, Islands, Poisson)&#34; as D
+rectangle &#34;Print Prep\n(Scale mm, Auto-Orient, Base, Hollow)&#34; as E
+rectangle &#34;Validation Gate\n(Thin walls, Overhangs)&#34; as F
+rectangle &#34;Slicer-Ready STL&#34; as G
+
+A --&gt; B
+B --&gt; C
+C --&gt; D
+D --&gt; E
+E --&gt; F
+F --&gt; G
+
+@enduml
+</span>
+<img class="plantuml" id="plantuml-printable-pipeline" alt="PlantUML Diagram printable-pipeline" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<p>If a mesh cannot be made watertight, or if it violates minimum wall thickness rules, the pipeline fails loudly at the validation gate rather than handing you a broken STL that fails 8 hours into a 3D print.</p>
+<hr>
+<h2 id="2-the-hardware-challenge-running-3d-ai-on-amd-rocm-strix-halo">2. The Hardware Challenge: Running 3D AI on AMD ROCm (Strix Halo)</h2>
+<p>Most cutting-edge 3D generative AI repos (such as Microsoft&rsquo;s TRELLIS, Pixel3D, or SPAR3D) are tightly coupled to NVIDIA CUDA. They frequently rely on custom CUDA extensions like <code>nvdiffrast</code>, <code>spconv</code>, and <code>flash-attn</code>, making them tricky to run on AMD hardware.</p>
+<p>My development machine runs an <strong>AMD Ryzen AI Max+ 395 (Strix Halo)</strong> APU on Ubuntu 26.04 LTS. As covered in my 
+
+
+
+
+
+
+  <a href="/posts/2026/08/running-llama.cpp-on-amd-strix-halo/" >previous post on setting up ROCm on Strix Halo</a>
+, the unified memory architecture (128 GB LPDDR5X) gives us substantial headroom for running large models locally — provided the compute stack and individual native extensions are compatible with <code>gfx1151</code>.</p>
+<ul>
+<li>
+<p><strong>BIOS Configuration</strong>: Set <code>UMA Frame Buffer Size</code> to <strong>512 MB</strong>, allowing the Linux <code>amdgpu</code> driver to dynamically manage compute memory from system RAM via GTT.</p>
+</li>
+<li>
+<p><strong>PyTorch Stack</strong>: For this project, the known-good environment uses AMD&rsquo;s ROCm/TheRock builds targeting <code>gfx1151</code>. The exact nightly index is important, however: AMD has been restructuring the ROCm/TheRock distribution layout, so an index that worked at one point may not actually provide a current rolling build.</p>
+</li>
+</ul>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Example of the gfx1151-specific PyTorch environment</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Use the currently published TheRock index appropriate to your installation.</span>
+</span></span><span class="line"><span class="cl">uv pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch torchvision</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><blockquote>
+<p><strong>**Important**</strong>: Treat the command above as an environment-specific snapshot rather than a permanent installation recipe. During this project I discovered that the index could return an older pinned nightly even though it looked like a current nightly source. A later <code>TheRock</code> layout used a different index and package naming scheme, but that newer stack introduced native-extension and CMake compatibility problems on this machine. See §9 for the full A/B test and rollback.</p>
+<p>AMD&rsquo;s 
+
+
+
+
+
+
+  <a href="https://rocm.blogs.amd.com/ecosystems-and-partners/rocm-x-blog/README.html" target="_blank" rel="noopener noreferrer" >ROCm 10.0 announcement</a>
+ provides the broader context for this transition: <strong>TheRock is now the automated build and release foundation behind ROCm 10.0</strong>, bringing the ROCm components and framework packages into a more unified release pipeline.</p></blockquote>
+<hr>
+<h2 id="3-evaluating-the-backends-what-works-and-what-doesnt">3. Evaluating the Backends: What Works and What Doesn&rsquo;t</h2>
+<p>I experimented with several generative approaches to see how they handled single-image and multi-view inputs.</p>
+<p>The important distinction is between <strong>experiments</strong> and <strong>the backends that actually ship in <code>printable</code> today</strong>. TRELLIS and SPAR3D were useful experiments during development, but neither survived into the current backend registry because their generated topology was consistently problematic for downstream printable processing.</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Backend</th>
+          <th style="text-align: left">Hardware</th>
+          <th style="text-align: left">Typical Speed</th>
+          <th style="text-align: left">Mesh Quality</th>
+          <th style="text-align: left">Slicer Watertightness</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>TRELLIS (AMD experiment)</strong></td>
+          <td style="text-align: left">GPU</td>
+          <td style="text-align: left">~30s</td>
+          <td style="text-align: left">Good visual details</td>
+          <td style="text-align: left">⚠️ Fragmented / disconnected topology</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>SPAR3D (AMD experiment)</strong></td>
+          <td style="text-align: left">GPU</td>
+          <td style="text-align: left">—</td>
+          <td style="text-align: left">Promising</td>
+          <td style="text-align: left">⚠️ Multi-body fragments on complex poses</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>TripoSR</strong></td>
+          <td style="text-align: left">GPU + CPU</td>
+          <td style="text-align: left">~10s</td>
+          <td style="text-align: left">Coarse / Draft</td>
+          <td style="text-align: left">✅ Clean enough for fast print pipeline</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Tencent Hunyuan3D 2.1</strong></td>
+          <td style="text-align: left">GPU</td>
+          <td style="text-align: left">~1–2 min</td>
+          <td style="text-align: left">⭐ <strong>High fidelity</strong></td>
+          <td style="text-align: left">⭐ <strong>Best: Dense, coherent single-body solids</strong></td>
+      </tr>
+  </tbody>
+</table>
+<p>The <strong>current <code>printable</code> backend lineup is four backends</strong>:</p>
+<ol>
+<li><code>heightmap</code></li>
+<li><code>lithophane</code></li>
+<li><code>triposr</code></li>
+<li><code>hunyuan3d</code></li>
+</ol>
+<p>TRELLIS and SPAR3D remain relevant historically because they explain why the pipeline ended up favoring Hunyuan3D, but they are no longer selectable backends in the released codebase.</p>
+<ul>
+<li>
+<p><strong>TRELLIS &amp; SPAR3D</strong>: Both were promising visually, but their failure modes became apparent only after sending the generated meshes through the actual printable pipeline. TRELLIS frequently produced disconnected outer shells that failed boolean unions, while SPAR3D could fragment complex character poses into multiple bodies. Once Hunyuan3D proved consistently more suitable for downstream repair and print preparation, both were removed rather than left behind as misleading &ldquo;supported&rdquo; options.</p>
+</li>
+<li>
+<p><strong>Hi3DGen: considered, never attempted.</strong> It looked promising on paper, but its sparse-convolution dependency made it unattractive for this AMD-first pipeline. It remains a candidate for future evaluation if its ROCm story improves.</p>
+</li>
+<li>
+<p><strong>TripoSR</strong>: Incredibly fast (~10s) with minimal exotic dependencies. It serves as the draft-mode generator and accelerator spike test. By querying the triplane decoder at surface vertices (<code>--opt texture=true</code>), it can export a colored <code>.glb</code> preview alongside the STL.</p>
+</li>
+<li>
+<p><strong>Tencent Hunyuan3D 2.1</strong>: <strong>The clear winner on my AMD workstation.</strong> The shape model (<code>hunyuan3d-dit-v2-1</code>, ~7.4 GB) generates dense, structurally sound geometry that survives quadric decimation and interior wall hollowing without collapsing.</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>ROCm Tip</strong>: Hunyuan3D 2.1 flow matching on ROCm requires enabling PyTorch&rsquo;s experimental AOTriton attention kernel dispatcher:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nv">TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL</span><span class="o">=</span><span class="m">1</span> printable generate assets/examples/figure.jpg <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -b hunyuan3d --size <span class="m">80</span> --hollow --hollow-wall 1.6 --max-faces <span class="m">500000</span> --no-base</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div></blockquote>
+<hr>
+<h2 id="4-benchmark-assets--antigravity-examples">4. Benchmark Assets &amp; Antigravity Examples</h2>
+<p>To systematically test each pipeline without relying on external web URLs, reference assets were curated in <code>assets/examples/</code> (mostly created and benchmarked using Google Antigravity and Stable Diffusion 1.5):</p>
+<ul>
+<li><strong>Turnaround Sheet (<code>character_female_turnaround.png</code>)</strong>: Single-image 3D models hallucinate whatever they cannot see. Multi-view sheets provide 4 angles (Front, Back, Left, Right). With <code>printable generate --sheet</code>, the pipeline splits the sheet along real seams, runs full reconstruction across all panels, and automatically keeps the one that yields the most watertight, printable result.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/printable/character_female_turnaround.png"   alt="character_female_turnaround.png" class="sc-image sc-image-default"
+       >
+
+
+<ul>
+<li><strong>Miniature Figurine (<code>figure.jpg</code>)</strong>: A paladin figurine used to test interior wall hollowing (<code>--hollow --hollow-wall 1.6</code>) to save resin and filament.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/printable/figure.jpg"   alt="figure.jpg" class="sc-image sc-image-default"
+       >
+
+
+<ul>
+<li><strong>Infographic Design Spec (<code>keychain_boba_spec.jpg</code>)</strong>: A blueprint with orthographic views and dimension callouts (60 mm height, 4 mm keyring hole).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/printable/keychain_boba_spec.jpg"   alt="keychain_boba_spec.jpg" class="sc-image sc-image-default"
+       >
+
+
+<ul>
+<li><strong>Stress Tests (<code>figure_medusa_scale_statue.jpg</code>, <code>figure_xuner_scale_statue.jpg</code>)</strong>: Complex collectible statues with sheer translucent fabrics and floating crystal formations. These turned out to be genuine edge cases, not just visually busy ones, and worth understanding why: the flowing wing/veil structures behind the figure came out of <code>hunyuan3d</code> as a flat, featureless slab instead of their actual lattice detail — for two <em>compounding</em> reasons, not one bug. First, <code>u2net</code>&rsquo;s background remover is trained mostly on opaque subjects, so a translucent region with soft, low-contrast edges against the backdrop often gets stripped out as &ldquo;background&rdquo; or kept as a shapeless blob rather than segmented cleanly. Second, even with a perfect mask, single-image 3D reconstruction models — trained mostly on solid, everyday objects — tend to flatten fine lace-like or sheer geometry rather than reproduce it. For a subject built from opaque material this is a non-issue; for one built from sheer fabric, glass, or crystal, expect a simplified result. No flag fixes this today — it&rsquo;s a real capability ceiling, and the honest answer for a piece this intricate is photogrammetry (30+ real photos), not a better single-image model.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/printable/figure_medusa_scale_statue.jpg"   alt="figure_medusa_scale_statue.jpg" class="sc-image sc-image-default"
+       >
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/printable/figure_xuner_scale_statue.jpg"   alt="figure_xuner_scale_statue.jpg" class="sc-image sc-image-default"
+       >
+
+
+<hr>
+<h2 id="5-vision-language-models-what-theyre-actually-good-at">5. Vision-Language Models: What They&rsquo;re Actually Good At</h2>
+<p>One exciting feature in <code>printable</code> is <strong>VLM-guided spec-to-3D generation</strong>. When a user hands the pipeline a design spec sheet — dimension arrows, text callouts, orthographic front/back/side renders — standard 3D AI treats all of that text and layout as geometry, creating noisy artifacts. The fix is a local Vision-Language Model that reads the sheet first and extracts structured metadata (<code>design_spec.json</code>) plus clean crops of the actual object, before any geometry generation runs:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1. Extract physical dimensions and clean crops via local VLM</span>
+</span></span><span class="line"><span class="cl">printable generate-spec assets/examples/keychain_boba_spec.jpg
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 2. Reconstruct 3D mesh and automatically enforce target dimensions</span>
+</span></span><span class="line"><span class="cl">printable generate --spec interim/design_spec.json --spec-all-views -b hunyuan3d</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Worth flagging plainly: step 1 needs an external VLM server that isn&rsquo;t part of this repo — two separate processes on this box, <code>llama-server-rocm</code> actually holding the model in memory, and a thin FastAPI proxy in front of it that does no model loading of its own. Neither <code>printable generate</code> (without <code>--spec</code>) nor manual-backend web UI uploads need any of this; it&rsquo;s only the spec-sheet and Auto-detect paths that do.</p>
+<p>For reference, this is the actual Qwen3.8-27B setup used during development:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Download the vision projector</span>
+</span></span><span class="line"><span class="cl">hf download unsloth/Qwen3.8-27B-GGUF mmproj-F16.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --local-dir ~/models
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">mv ~/models/mmproj-F16.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>   ~/models/mmproj-Qwen3.8-27B-f16.gguf
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Start the resident VLM server</span>
+</span></span><span class="line"><span class="cl">llama-server-rocm <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --model ~/models/Qwen3.8-27B-Q4_K_M.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --mmproj ~/models/mmproj-Qwen3.8-27B-f16.gguf <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --alias qwen3.8-27b <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --n-gpu-layers <span class="m">99</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --ctx-size <span class="m">32768</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --parallel <span class="m">1</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --flash-attn on <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --jinja <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --temp 0.7 --top-p 0.8 --top-k <span class="m">20</span> --min-p <span class="m">0</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --spec-type draft-mtp --spec-draft-n-max <span class="m">2</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --kv-unified --fit off <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --image-min-tokens <span class="m">1024</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --host 0.0.0.0 --port <span class="m">8080</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><blockquote>
+<p><strong>Why <code>--ctx-size 32768</code>?</strong> Earlier experiments used <code>262144</code>, which unnecessarily pre-allocated a huge KV cache and contributed to memory pressure. For the short image classification and extraction prompts used here, 32K provides ample headroom without reserving hundreds of thousands of tokens.</p></blockquote>
+<p>That much of the plan survived intact. Getting there did not — and the detour taught me more about what local VLMs are actually reliable at than the working feature itself.</p>
+<h3 id="the-detour-two-different-bugs-two-different-models">The detour: two different bugs, two different models</h3>
+<p>First attempt: <strong>Qwen2.5-VL-7B-Instruct</strong>, the obvious choice for a lightweight vision-capable model. It hit a real, documented problem immediately: llama.cpp&rsquo;s ROCm/HIP vision path garbles any image input on <code>gfx1151</code> (
+
+
+
+
+
+
+  <a href="https://github.com/ggml-org/llama.cpp/issues/17797" target="_blank" rel="noopener noreferrer" >ggml-org/llama.cpp#17797</a>
+) — a driver-level bug, not something a config flag works around. The fix was to stop using <code>llama.cpp</code> for this model entirely and serve it through <code>transformers</code>/PyTorch directly instead.</p>
+<p>That solved the garbling, but revealed a second, unrelated bug: asking the model for multiple bounding boxes in one image — &ldquo;find the front view, the back view, and the side view&rdquo; — reliably returned a correct box for the first one and then drifted onto unrelated text blocks for the rest. This is also documented upstream (
+
+
+
+
+
+
+  <a href="https://github.com/QwenLM/Qwen2.5-VL/issues/1257" target="_blank" rel="noopener noreferrer" >QwenLM/Qwen2.5-VL#1257</a>
+): the model was trained on referring expressions that uniquely identify <em>one</em> instance, so its accuracy degrades hard past the first when asked to locate several similar things at once. Restructuring the extraction into one bounding-box call per view (rather than one call asking for everything) didn&rsquo;t fix it. Neither did rewriting the prompt to explicitly describe the sheet&rsquo;s layout. The failure mode held.</p>
+<p>Switching models — to <strong>Qwen3.8-27B</strong>, served through this box&rsquo;s resident <code>llama-server-rocm</code> (the same tool already running this box&rsquo;s text models, over its OpenAI-compatible endpoint) — sidestepped the ROCm garbling bug entirely: verified with real description and grounding calls, it reads images correctly. But it had its <em>own</em> version of the same underlying weakness: reliably grounding the first/most visually distinct view in a sheet, then either mislabeling or entirely failing to perceive the remaining captions, even after raising the vision token budget (<code>--image-min-tokens 1024</code>) and rewriting the prompt to anchor explicitly on printed caption text rather than visual guessing.</p>
+<h3 id="the-actual-finding">The actual finding</h3>
+<p>Two different model families, two different serving stacks, the same shape of failure: <strong>a single holistic judgement about an image is reliable. Locating and correctly labeling several regions in one image is not.</strong> Every test that asked &ldquo;what is this, as a whole&rdquo; — describe it, classify it, extract dimensions — came back accurate. Every test that asked &ldquo;where are these N things, specifically&rdquo; degraded past the first.</p>
+<p>That reframed the actual engineering problem. Reading the pipeline code confirmed something worth stating plainly: <strong>no backend in <code>printable</code> fuses multiple views into one reconstruction.</strong> <code>--spec-all-views</code> was already just trying each extracted crop as an independent single-image candidate and keeping whichever one reconstructed best. So correct view <em>labeling</em> was never load-bearing for output quality — only crop <em>completeness</em> was. Chasing reliable multi-view grounding was solving a problem that didn&rsquo;t need solving, using the one capability these models don&rsquo;t reliably have.</p>
+<h3 id="auto-detect-playing-to-the-strength-instead-of-fighting-the-weakness">Auto-detect: playing to the strength instead of fighting the weakness</h3>
+<p>If a single holistic judgement is what these models do well, the useful move is to ask for exactly that — once — and use it to route into whichever pipeline already exists and already works, instead of asking the model to label multiple regions correctly.</p>
+<p><code>printable serve</code>&rsquo;s web UI now has an <strong>Auto-detect</strong> option. One classification call categorizes the upload (design spec sheet, character turnaround, portrait, single-object photo, or &ldquo;unclear&rdquo; — never guessed if the model isn&rsquo;t confident), and the result routes into an existing, already-proven pipeline:</p>
+
+
+
+
+
+
+
+
+<span id="plantuml-auto-detect-flow" style="display:none;">
+@startuml
+left to right direction
+
+rectangle &#34;Upload&#34; as A
+rectangle &#34;One VLM call:\nclassify(image)&#34; as B
+rectangle &#34;category&#34; as C
+
+rectangle &#34;spec extraction\n→ hunyuan3d/triposr&#34; as D
+rectangle &#34;grid-split-and-pick-best\n→ hunyuan3d/triposr&#34; as E
+rectangle &#34;lithophane&#34; as F
+rectangle &#34;hunyuan3d\n(falls back to triposr)&#34; as G
+rectangle &#34;no mesh --\nask the user&#34; as H
+
+A --&gt; B
+B --&gt; C
+C --&gt; D : design spec sheet
+C --&gt; E : character turnaround
+C --&gt; F : portrait photo
+C --&gt; G : object photo
+C --&gt; H : unclear
+
+@enduml
+</span>
+<img class="plantuml" id="plantuml-auto-detect-flow" alt="PlantUML Diagram auto-detect-flow" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<p>The decision — category, a one-sentence rationale, and the chosen backend — shows up in the progress panel before generation starts, so it&rsquo;s never a silent guess. Nothing about routing is new engineering; every branch was an existing, working command. The only new code is the classify-then-route step, and it works precisely because it only ever asks the model the one question it answers reliably.</p>
+<hr>
+<h2 id="6-the-web-interface-printable-serve">6. The Web Interface: <code>printable serve</code></h2>
+<p>Everything up to here has been the CLI. <code>printable serve</code> wraps the same pipeline in a lightweight local web app — for actually looking at what a spec sheet&rsquo;s crops turned into before committing to a slicer run, or for anyone who&rsquo;d rather drag-and-drop than remember flags.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># ROCm: needs TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1 prefixed, same as any hunyuan3d CLI run</span>
+</span></span><span class="line"><span class="cl"><span class="nv">TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL</span><span class="o">=</span><span class="m">1</span> printable serve --host 0.0.0.0 --port <span class="m">8000</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Open the printed URL, drop in a photo, and either pick a backend manually (the same choices as <code>-b</code>) or leave <strong>Auto-detect</strong> on — the classify-then-route behavior described above.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/printable/printable-web-ui.png"   alt="printable web interface" class="sc-image sc-image-default"
+       >
+
+
+<p>Submitting starts a job and streams live progress over Server-Sent Events — no polling, no page refresh. With Auto-detect on, the first thing that shows up is the classification result itself: category, a one-sentence rationale, and which backend it routed into, before generation even starts.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/printable/printable-figure-hunyuan3d-in-progress.png"   alt="printable figure hunyuan 3d in progress" class="sc-image sc-image-default"
+       >
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/printable/printable-figure-hunyuan3d.png"   alt="printable figure hunyuan 3d" class="sc-image sc-image-default"
+       >
+
+
+<p>Once the job finishes, the result panel offers both the print-target <code>.stl</code> and, for backends that support it (TripoSR with <code>texture=true</code>), a colored <code>.glb</code> preview download — the same pair covered in §3&rsquo;s TripoSR overview and §10&rsquo;s status summary.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/printable/printable-figure-hunyuan3d-printed.jpeg"   alt="printed figure hunyuan 3d" class="sc-image sc-image-default"
+       >
+
+
+<hr>
+<h2 id="7-hardening-for-production-three-independent-memory-bugs">7. Hardening for Production: Three Independent Memory Bugs</h2>
+<p>Running a long-lived web server against real GPU workloads surfaced a run of out-of-memory crashes. The instructive part wasn&rsquo;t any single fix — it&rsquo;s that &ldquo;OOM&rdquo; was never one bug across this whole investigation. It was three unrelated causes that happened to produce the same symptom, and treating them as one problem would have meant chasing the wrong fix repeatedly.</p>
+<ol>
+<li>
+<p><strong>Orphaned duplicate processes.</strong> Every time the local VLM server got relaunched (a new flag, a recovery from an earlier crash), the previous <code>llama-server-rocm</code> process sometimes ended up <em>stopped</em> rather than terminated — still holding its full model weights in memory, just suspended. Three of these accumulated silently over one long session, quietly consuming ~9 GB of dead memory before anyone noticed. <code>ps</code> showing multiple instances of the same server was the tell; <code>kill -9</code> on the stale ones (<code>kill</code> alone doesn&rsquo;t reach a stopped process) recovered the memory immediately.</p>
+</li>
+<li>
+<p><strong>An oversized KV cache.</strong> The VLM server was launched with <code>--ctx-size 262144</code> — a quarter-million tokens of pre-allocated context, sized at startup regardless of actual use. Real usage for this pipeline&rsquo;s classify/extract calls — one image, a short prompt, a capped completion — never came close to needing more than roughly 13,500 tokens. Dropping to <code>--ctx-size 32768</code> (still generous headroom, 8x smaller than before) resolved crashes on exactly the image that had previously triggered them.</p>
+</li>
+<li>
+<p><strong>A model reload on every single call.</strong> This one was in <code>printable</code>&rsquo;s own code, not the VLM server. The backend registry created a brand-new backend instance — and reloaded the entire model from disk — on <em>every</em> generation call, including repeated calls to the same backend within one CLI invocation&rsquo;s own multi-panel or multi-view loop, not just separate web requests. Three consecutive <code>hunyuan3d</code> generations in one server process, each a full ~110-second reload, eventually exhausted memory on the third. The fix was to cache backend instances per name, invalidated automatically if the underlying factory changes — a detail that mattered in practice, since it&rsquo;s exactly what let the existing test suite catch a real regression (a test that swaps in a fake backend for testing was getting shadowed by a stale cached real instance) before calling the fix done.</p>
+</li>
+</ol>
+<p>None of these fixes were guessed. Each one was root-caused from a kernel OOM-killer log line, a <code>systemctl</code>/<code>journalctl</code> trace, or a reproducible test failure, and each fix was verified by reproducing the original failure and confirming it no longer happened — not assumed fixed because the reasoning sounded right.</p>
+<hr>
+<h2 id="8-evaluating-lemonade-sdk-as-an-alternative">8. Evaluating lemonade-sdk as an Alternative</h2>
+<p>
+
+
+
+
+
+
+  <a href="https://github.com/lemonade-sdk/lemonade" target="_blank" rel="noopener noreferrer" >lemonade-sdk/lemonade</a>
+ is a community project with AMD engineer contributions, explicitly targeting Strix Halo/gfx1151, with its own maintained ROCm <code>llama.cpp</code> fork rather than wrapping stock builds. It looked like a promising, lower-maintenance alternative to hand-running <code>llama-server-rocm</code> — unified server management, a model catalog, AMD-tuned defaults instead of hand-derived flags.</p>
+<p>The evaluation surfaced real friction, worth recording honestly rather than glossing over:</p>
+<ul>
+<li><strong>A version gap.</strong> The PPA-installed CLI reported <code>10.2.0</code>; the project&rsquo;s own website catalog reflected a newer <code>11.8.0</code>. A model shown on the website with a ready-to-copy <code>lemonade pull &lt;name&gt;</code> command failed locally with a namespace error, because it simply wasn&rsquo;t in the older, installed catalog yet. Manual registration (<code>--checkpoint main/mmproj</code>, <code>--recipe llamacpp</code>) worked around it.</li>
+<li><strong>A cache-location surprise.</strong> <code>lemonade pull</code>&rsquo;s first run returned success suspiciously fast, with no real download progress — turned out to be a false read of &ldquo;shares the same model cache&rdquo; based on file timestamps that predated the pull entirely. Lemonade actually runs as its own systemd service under a dedicated system user, with a completely separate model cache — a second run showed genuine transfer progress into that separate location. Good reminder that a fast &ldquo;success&rdquo; message is not proof of what a service actually did; its own logs (<code>journalctl -u lemonade-server</code>) were the only reliable source of truth throughout this evaluation.</li>
+<li><strong>Their own suggested model failed to load.</strong> Verified byte-for-byte against Lemonade&rsquo;s own model registry (not just the website) that the pull command used was exactly correct — and it&rsquo;s their <code>&quot;suggested&quot;: true</code> model for this use case. It still failed: <code>llama_model_load: error loading model: missing tensor 'blk.64.ssm_conv1d.weight'</code> on their ROCm backend on this hardware. The tensor name is its own small discovery — <code>ssm_conv1d</code>/<code>ssm_d_inner</code>/<code>ssm_d_state</code> confirm Qwen3.8-27B is a hybrid SSM/Mamba+attention architecture, not a plain transformer, which is likely exactly why a general-purpose GGUF conversion pipeline could miss a tensor one of its SSM layers needs. Not a mistake on this end; a real gap in their gfx1151 ROCm support for this specific model as of this writing.</li>
+</ul>
+<p>Parked, not abandoned. The practical question this evaluation existed to answer — should the hand-run setup be replaced — is already settled: not yet, and the existing <code>llama-server-rocm</code> setup keeps running untouched. Worth revisiting once Lemonade&rsquo;s ROCm support for this model matures.</p>
+<hr>
+<h2 id="9-evaluating-the-newer-rocmtherock-stack-a-same-day-regression-reverted-safely">9. Evaluating the Newer ROCm/TheRock Stack: A Same-Day Regression, Reverted Safely</h2>
+<p>The ROCm/TheRock stack was moving quickly enough that it was worth testing the newer packages against the known-good environment rather than assuming the older setup was still the best option.</p>
+<p>The experiment produced an interesting result: the newer PyTorch build showed a <strong>real improvement in the ROCm attention path</strong>, but upgrading the entire environment also exposed compatibility problems in native extensions that <code>printable</code> depends on.</p>
+<p>The older environment was therefore kept as the production baseline while the newer stack was treated as an experimental branch.</p>
+<p><strong>What worked, verified with real numbers, not assumed:</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">PyTorch build</th>
+          <th style="text-align: right">Unflagged attention</th>
+          <th style="text-align: right">AOTriton experimental flag</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>7.13.0a20260513</strong> (known-good)</td>
+          <td style="text-align: right">106ms/call, warning fires</td>
+          <td style="text-align: right">8.66ms/call</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>10.1.0a20260829</strong> (experimental)</td>
+          <td style="text-align: right">~4.7ms/call, no warning</td>
+          <td style="text-align: right">~4.7ms/call</td>
+      </tr>
+  </tbody>
+</table>
+<p>The result was significant: <strong>unflagged attention on the newer build was already faster than flagged attention on the old build</strong>. So there is a genuine performance reason to keep watching the newer ROCm stack.</p>
+<h3 id="what-broke-actual-printable-use">What broke actual <code>printable</code> use</h3>
+<p>Regenerating a test mesh through <code>triposr</code> — which compiles <code>torchmcubes</code>, a native marching-cubes extension from source — failed with:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">vol must be a CPU tensor</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The immediate cause was an old <code>torchmcubes</code> build being reused from <code>uv</code>&rsquo;s cache after the torch upgrade. Clearing that cache and forcing a clean rebuild removed that particular failure.</p>
+<p>That exposed a second problem: the new nightly&rsquo;s ROCm/CMake packaging itself was not yet compatible with the native-extension build used by this pipeline. Torch&rsquo;s <code>LoadHIP.cmake</code> failed while parsing an empty HIP version variable:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">math cannot parse the expression: &#34;( * 100) + &#34;: syntax error</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The newer environment also required additional ROCm SDK setup because the expected <code>hip-lang</code> CMake configuration was not present until the corresponding development package was initialized.</p>
+<h4 id="the-call-revert-dont-push-through">The call: revert, don&rsquo;t push through</h4>
+<p>At that point the correct engineering decision was to <strong>revert rather than destabilize a working production environment</strong>.</p>
+<p>I reinstalled the known-good PyTorch build, clean-rebuilt <code>torchmcubes</code> against it, restored printable&rsquo;s pinned dependencies, and verified the complete path again:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">printable generate character.png --backend triposr --size 80 --sheet
+</span></span><span class="line"><span class="cl">→ PRINTABLE</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The full test suite was green again.</p>
+<p>The conclusion is therefore not &ldquo;the newer ROCm stack is bad.&rdquo; Quite the opposite: the attention benchmark is encouraging. The conclusion is that the <strong>newer stack was not yet a drop-in replacement for this particular mixed Python/native-extension workload at the time of testing</strong>.</p>
+<p>For <code>printable</code>, the older environment remains the known-good baseline. The newer TheRock stack is worth retesting as its packaging and native-extension compatibility mature.</p>
+<hr>
+<h2 id="10-whats-next-hunyuan3d-texture-painting">10. What&rsquo;s Next: Hunyuan3D Texture Painting</h2>
+<p>The immediate next milestone is <strong>not basic colored GLB export</strong> — that already works through TripoSR and is covered above. The unfinished piece is getting Hunyuan3D&rsquo;s texture-painting pipeline running reliably on AMD.</p>
+<p>Worth being precise about this one, because &ldquo;ROCm doesn&rsquo;t support it yet&rdquo; undersells how far it actually got. Hunyuan3D-2.1&rsquo;s own README has no ROCm or AMD support story for this pipeline — the porting work described here is entirely this project&rsquo;s own adaptation.</p>
+<p><strong>Shape generation</strong> (the part <code>printable</code> actually ships) needed real work but no GPU-kernel porting: a self-contradicting <code>requirements.txt</code> had to be filtered by hand, a missing <code>setup.py</code> was written for <code>hy3dshape</code>, and <code>TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1</code> was required to work around PyTorch&rsquo;s ROCm attention dispatcher. Underneath, the shape model is largely composed of PyTorch operations, which is why it can run successfully with the native ROCm build.</p>
+<p><strong>Texture painting</strong> is a different story. Genuine kernel-level porting was attempted rather than stopping at dependency installation. <code>custom_rasterizer</code> and a second extension, <code>DifferentiableRenderer</code>, were compiled natively for <code>gfx1151</code> using a hipified build.</p>
+<p>Getting the pipeline to construct required fixing six separate compatibility problems:</p>
+<ul>
+<li><code>diffusers</code> version drift</li>
+<li>missing Blender Python wheel</li>
+<li>changed <code>torchvision</code> API</li>
+<li>inconsistent upstream checkpoint path</li>
+<li>missing system OpenGL library</li>
+<li><code>trimesh</code> version drift</li>
+</ul>
+<p>After all of that, the remaining failure was a real GPU fault.</p>
+<p><code>custom_rasterizer</code>&rsquo;s hipified kernels reproducibly triggered a <code>[gfxhub] page fault</code>, with <code>dmesg</code> showing an <code>amdgpu</code> ring timeout and GPU reset. The driver recovered without a reboot, but because the Radeon 8060S is an integrated GPU, the reset temporarily affected other GPU clients on the machine as well.</p>
+<p>That makes this fundamentally different from the earlier dependency problems: <strong>the pipeline can be made to build, but the rasterizer kernel itself is not yet reliable on this ROCm configuration.</strong></p>
+<p>Full setup and troubleshooting details are kept in 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/printable/blob/main/docs/SETUP.md" target="_blank" rel="noopener noreferrer" ><code>docs/SETUP.md</code></a>
+.</p>
+<p>For now:</p>
+<ul>
+<li><strong>STL generation:</strong> Hunyuan3D 2.1</li>
+<li><strong>Fast/draft generation:</strong> TripoSR</li>
+<li><strong>Colored GLB preview:</strong> TripoSR</li>
+<li><strong>Hunyuan3D texture painting:</strong> experimental / blocked on AMD</li>
+<li><strong>Primary engineering priority:</strong> monitor upstream changes or test a different ROCm/kernel combination rather than masking a reproducible GPU page fault</li>
+</ul>
+<hr>
+<h2 id="conclusion--code">Conclusion &amp; Code</h2>
+<p>Building <code>printable</code> showed me that turning 2D images into real-world 3D objects is about much more than raw model weights — the magic lies in the unglamorous stages of <strong>mesh repair, boolean operations, orientation optimization, and physical validation</strong>.</p>
+<p>The complete project is open-source under the MIT license:</p>
+<p>👉 <strong>GitHub Repository</strong>: 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/printable" target="_blank" rel="noopener noreferrer" >seehiong/printable</a>
+</p>
+<p>If you have an AMD or NVIDIA GPU and a 3D printer, clone the repo, run <code>uv sync</code>, and try turning your favorite character sheet or portrait into a physical model!</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/08/from-brackets-to-enclosures/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">From Brackets to Enclosures</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
