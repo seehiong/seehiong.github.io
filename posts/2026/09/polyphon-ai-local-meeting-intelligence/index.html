@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/09/polyphon-ai-local-meeting-intelligence/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Polyphon AI: Local Meeting Intelligence">
+  <meta property="og:description" content="Polyphon AI is an open-source, local-first meeting intelligence engine that captures dual-stream audio, performs real-time and offline speaker diarization, and maintains persistent speaker identities through VoiceDB. It combines low-latency streaming feedback with higher-context post-call reconciliation, then generates self-contained interactive HTML meeting artifacts. Designed for local or private infrastructure, Polyphon AI explores how meeting transcripts can evolve from disposable summaries into a persistent, user-controlled knowledge layer.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-09-05T08:00:00+08:00">
+    <meta property="article:modified_time" content="2026-09-05T08:00:00+08:00">
+    <meta property="article:tag" content="AI">
+    <meta property="article:tag" content="Local AI">
+    <meta property="article:tag" content="Open Source">
+    <meta property="article:tag" content="Meeting Intelligence">
+    <meta property="article:tag" content="Speech-to-Text">
+    <meta property="article:tag" content="Speaker Diarization">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Polyphon AI: Local Meeting Intelligence">
+  <meta name="twitter:description" content="Polyphon AI is an open-source, local-first meeting intelligence engine that captures dual-stream audio, performs real-time and offline speaker diarization, and maintains persistent speaker identities through VoiceDB. It combines low-latency streaming feedback with higher-context post-call reconciliation, then generates self-contained interactive HTML meeting artifacts. Designed for local or private infrastructure, Polyphon AI explores how meeting transcripts can evolve from disposable summaries into a persistent, user-controlled knowledge layer.">
+
+  <meta itemprop="name" content="Polyphon AI: Local Meeting Intelligence">
+  <meta itemprop="description" content="Polyphon AI is an open-source, local-first meeting intelligence engine that captures dual-stream audio, performs real-time and offline speaker diarization, and maintains persistent speaker identities through VoiceDB. It combines low-latency streaming feedback with higher-context post-call reconciliation, then generates self-contained interactive HTML meeting artifacts. Designed for local or private infrastructure, Polyphon AI explores how meeting transcripts can evolve from disposable summaries into a persistent, user-controlled knowledge layer.">
+  <meta itemprop="datePublished" content="2026-09-05T08:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-09-05T08:00:00+08:00">
+  <meta itemprop="wordCount" content="4279">
+  <meta itemprop="keywords" content="AI,Local AI,Open Source,Meeting Intelligence,Speech-to-Text,Speaker Diarization,VoiceDB,Audio Processing,Knowledge Management,Privacy,Self-Hosted,Python,NVIDIA NeMo,Whisper,Homelab"><title>Polyphon AI: Local Meeting Intelligence | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/09/polyphon-ai-local-meeting-intelligence/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Polyphon AI: Local Meeting Intelligence</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-09-05T08:00:00&#43;08:00">September 5, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/ai">AI</a>
+            
+              , <a href="/tags/local-ai">Local AI</a>
+            
+              , <a href="/tags/open-source">Open Source</a>
+            
+              , <a href="/tags/meeting-intelligence">Meeting Intelligence</a>
+            
+              , <a href="/tags/speech-to-text">Speech-to-Text</a>
+            
+              , <a href="/tags/speaker-diarization">Speaker Diarization</a>
+            
+              , <a href="/tags/voicedb">VoiceDB</a>
+            
+              , <a href="/tags/audio-processing">Audio Processing</a>
+            
+              , <a href="/tags/knowledge-management">Knowledge Management</a>
+            
+              , <a href="/tags/privacy">Privacy</a>
+            
+              , <a href="/tags/self-hosted">Self-Hosted</a>
+            
+              , <a href="/tags/python">Python</a>
+            
+              , <a href="/tags/nvidia-nemo">NVIDIA NeMo</a>
+            
+              , <a href="/tags/whisper">Whisper</a>
+            
+              , <a href="/tags/homelab">HomeLab</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/polyphon/cover.png');"></div>
+          <img src="/images/polyphon/cover.png" alt="Polyphon AI: Local Meeting Intelligence cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    <p>Today, I am releasing 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/polyphon-ai" target="_blank" rel="noopener noreferrer" ><strong><code>polyphon-ai</code></strong></a>
+ (Apache-2.0) — now available on 
+
+
+
+
+
+
+  <a href="https://pypi.org/project/polyphon-ai/" target="_blank" rel="noopener noreferrer" >PyPI (<code>pip install &quot;polyphon-ai[all]&quot;</code>)</a>
+.</p>
+<p>Polyphon AI is a <strong>local-first meeting intelligence engine</strong> designed to keep meeting audio, transcripts, speaker embeddings, and generated reports under the user&rsquo;s control. It captures dual-stream audio without kernel-level audio drivers or an always-present meeting bot, delivers low-latency live diarization, maintains persistent speaker identities through <strong>VoiceDB</strong>, and generates self-contained interactive HTML meeting artifacts.</p>
+<p>The core processing pipeline can run entirely on local infrastructure, with optional integration to locally hosted LLM servers for summarization.</p>
+
+  </div>
+</div>
+<hr>
+<h2 id="the-meeting-bot-tax--the-speaker-01-dilemma">The Meeting Bot Tax &amp; The &ldquo;Speaker 01&rdquo; Dilemma</h2>
+<p>Over the past three years, corporate calendars have been overrun by automated transcription bots. Whether it is Otter.ai, Fireflies.ai, Fathom, or Read.ai, joining a Zoom, Google Meet, or Microsoft Teams call now frequently means sharing the virtual room with an uninvited bot participant.</p>
+<p>While the convenience of automated summaries is undeniable, this cloud-first approach has hit three major friction points:</p>
+<ol>
+<li><strong>The &ldquo;Bot Tax&rdquo; &amp; Social Awkwardness</strong>: External clients and executive teams can feel uncomfortable when unannounced third-party bots join confidential calls. In regulated or highly sensitive environments, organizations may also prohibit third-party meeting bots because of privacy, data-residency, retention, or confidentiality requirements.</li>
+<li><strong>The &ldquo;Speaker 01&rdquo; Drift</strong>: Most diarization pipelines treat every meeting as a separate clustering problem. They typically produce labels such as <code>Speaker 00</code>, <code>Speaker 01</code>, and <code>Speaker 02</code>, without persistent identity across sessions. If Sarah speaks on Monday, she may be <code>Speaker 00</code>; when she joins on Wednesday, she could become <code>Speaker 03</code>. Users are then forced into a repetitive cycle of manually re-labeling attendees.</li>
+<li><strong>The Streaming vs. Accuracy Trade-Off</strong>: Real-time meeting assistants must balance latency against diarization and transcription quality. Conversely, high-precision offline pipelines can leave users without useful speaker attribution or polished transcripts until after the conversation has ended.</li>
+</ol>
+<p>To explore how a local-first system can address these trade-offs, I built <strong>Polyphon AI</strong> — an open-source meeting intelligence platform designed to run on a user&rsquo;s local machine or private infrastructure.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">┌─────────────────────────────────────────────────────────────────────────┐
+</span></span><span class="line"><span class="cl">│                    THE POLYPHON AI PHILOSOPHY                           │
+</span></span><span class="line"><span class="cl">│                                                                         │
+</span></span><span class="line"><span class="cl">│  1. Local Processing  : Audio &amp; transcripts stay on your infrastructure │
+</span></span><span class="line"><span class="cl">│  2. Driverless Audio  : Web Audio API tab + mic capture (no bots/cables)│
+</span></span><span class="line"><span class="cl">│  3. Persistent Voice  : VoiceDB recognizes speakers across meetings     │
+</span></span><span class="line"><span class="cl">│  4. Dual-Pass Engine  : Sub-second live HUD + Pyannote batch precision  │
+</span></span><span class="line"><span class="cl">│  5. Portable Reports  : Standalone interactive HTML player artifacts    │
+</span></span><span class="line"><span class="cl">└─────────────────────────────────────────────────────────────────────────┘</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><hr>
+<h2 id="1-market-landscape-four-product-archetypes">1. Market Landscape: Four Product Archetypes</h2>
+<p>To understand where Polyphon AI fits, let us look at the current meeting intelligence landscape:</p>
+
+
+
+
+
+
+
+  
+  
+
+  
+    
+    
+    <script src="/js/plantuml-bundle.6a8276b7a4f6ba2161545379939a85839f01e6cb3d0afd36cdd36a5d32bde30c.js" defer></script>
+    
+  
+
+
+<span id="plantuml-polyphon-market-archetypes" style="display:none;">
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+package &#34;Market Archetypes&#34; {
+    [Archetype 1: Cloud Meeting Bots\n(Otter, Fireflies, Fathom, Read.ai)] as A1
+    [Archetype 2: Local Desktop Recorders\n(Granola, Limitless, MacWhisper)] as A2
+    [Archetype 3: Cloud Speech APIs\n(Deepgram, AssemblyAI, Rev AI)] as A3
+    [Archetype 4: Local-First Full-Stack Engine\n(Polyphon AI)] as A4
+}
+
+note bottom of A1
+  &lt;b&gt;Trade-off:&lt;/b&gt;
+  Seamless calendar sync
+  &lt;b&gt;VS&lt;/b&gt; Privacy risks, bot friction &amp; recurring SaaS costs
+end note
+
+note bottom of A2
+  &lt;b&gt;Trade-off:&lt;/b&gt;
+  No bot in the room
+  &lt;b&gt;VS&lt;/b&gt; Cloud LLM leakage &amp; OS audio capture limits
+end note
+
+note bottom of A3
+  &lt;b&gt;Trade-off:&lt;/b&gt;
+  Developer scale &amp; low latency
+  &lt;b&gt;VS&lt;/b&gt; Per-minute OpEx &amp; custom frontend burden
+end note
+
+note bottom of A4
+  &lt;b&gt;Trade-off:&lt;/b&gt;
+  User-controlled egress, persistent VoiceDB &amp; no SaaS fees
+  &lt;b&gt;VS&lt;/b&gt; Requires local compute (GPU / Apple Silicon)
+end note
+@enduml
+</span>
+<img class="plantuml" id="plantuml-polyphon-market-archetypes" alt="PlantUML Diagram polyphon-market-archetypes" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<h3 id="archetype-1-cloud-meeting-bots-the-intrusive-joiners">Archetype 1: Cloud Meeting Bots (The Intrusive Joiners)</h3>
+<ul>
+<li><strong>Products</strong>: Otter.ai, Fireflies.ai, Fathom, Read.ai.</li>
+<li><strong>Mechanism</strong>: Headless browser or SIP bot joins the call as a participant, streams audio to vendor cloud servers, and runs cloud-hosted ASR and LLMs.</li>
+<li><strong>Pain Points</strong>: Visible bot presence causes attendee friction, raises compliance and consent concerns depending on organizational policy and local jurisdiction, exposes proprietary discussions to multi-tenant cloud storage, and incurs expensive per-seat recurring fees ($18–$40/user/month).</li>
+</ul>
+<h3 id="archetype-2-local-desktop-recorders-the-desktop-listeners">Archetype 2: Local Desktop Recorders (The Desktop Listeners)</h3>
+<ul>
+<li><strong>Products</strong>: Granola, Limitless, Supernormal, MacWhisper.</li>
+<li><strong>Mechanism</strong>: Native desktop applications that capture microphone and/or system audio through OS-level audio facilities.</li>
+<li><strong>Pain Points</strong>: Local capture does not necessarily mean zero egress. Depending on the product and configuration, transcripts or downstream AI processing may still involve cloud services. Desktop recording also introduces OS-specific audio-capture constraints, permissions, virtual devices, or mixed system-audio streams that can make clean speaker separation difficult during crosstalk.</li>
+</ul>
+<h3 id="archetype-3-cloud-speech-apis-the-infrastructure-providers">Archetype 3: Cloud Speech APIs (The Infrastructure Providers)</h3>
+<ul>
+<li><strong>Products</strong>: Deepgram Nova-2, AssemblyAI, Speechmatics.</li>
+<li><strong>Mechanism</strong>: Managed cloud WebSocket/REST APIs for speech recognition and diarization.</li>
+<li><strong>Pain Points</strong>: Unbounded per-minute usage costs ($0.004–$0.015/min) and external data ingestion, requiring developers to build custom user interfaces and storage systems from scratch.</li>
+</ul>
+<h3 id="archetype-4-local-first-full-stack-engine-polyphon-ai">Archetype 4: Local-First Full-Stack Engine (Polyphon AI)</h3>
+<ul>
+<li><strong>Polyphon AI</strong> combines driverless in-browser audio capture with local neural speech models (Faster-Whisper, NeMo Sortformer, Pyannote 3.1) and on-device LLMs (via Ollama/vLLM). Audio never leaves the local machine, speaker identities persist across calls, and the entire system is open source (Apache-2.0).</li>
+</ul>
+<hr>
+<h2 id="2-feature-comparison-matrix">2. Feature Comparison Matrix</h2>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Feature</th>
+          <th style="text-align: center">Cloud Bots (Otter / Fireflies)</th>
+          <th style="text-align: center">Local Recorders (Granola)</th>
+          <th style="text-align: center">Cloud APIs (Deepgram)</th>
+          <th style="text-align: center"><strong>Polyphon AI (Local-First)</strong></th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>Deployment Model</strong></td>
+          <td style="text-align: center">100% Public Cloud SaaS</td>
+          <td style="text-align: center">Hybrid (Local App + Cloud LLM)</td>
+          <td style="text-align: center">Public Cloud API</td>
+          <td style="text-align: center"><strong>Local / Self-Hosted</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Data Privacy &amp; Egress</strong></td>
+          <td style="text-align: center">❌ Vendor-hosted processing</td>
+          <td style="text-align: center">⚠️ Depends on product/configuration</td>
+          <td style="text-align: center">❌ Streamed to vendor API</td>
+          <td style="text-align: center"><strong>✅ Designed for Local / Self-Hosted Processing</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Meeting Join Mechanism</strong></td>
+          <td style="text-align: center">External Bot Invited to Room</td>
+          <td style="text-align: center">Virtual Desktop Audio Hook</td>
+          <td style="text-align: center">N/A (API Only)</td>
+          <td style="text-align: center"><strong>Driverless Web Audio API (Mic + Tab)</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Optional Automated Bot</strong></td>
+          <td style="text-align: center">Native</td>
+          <td style="text-align: center">❌ None</td>
+          <td style="text-align: center">N/A</td>
+          <td style="text-align: center"><strong>✅ Built-in (<code>polyphon bot</code>)</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Live Streaming Diarization</strong></td>
+          <td style="text-align: center">Proprietary Cloud</td>
+          <td style="text-align: center">❌ None (Post-Call Batch)</td>
+          <td style="text-align: center">Streaming Clustering</td>
+          <td style="text-align: center"><strong>✅ NeMo Sortformer (Sub-Second)</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>High-Precision Offline Diarization</strong></td>
+          <td style="text-align: center">Cloud Batch</td>
+          <td style="text-align: center">Cloud Batch</td>
+          <td style="text-align: center">Batch Endpoints</td>
+          <td style="text-align: center"><strong>✅ Pyannote 3.1 Engine</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Persistent Speaker Voiceprints</strong></td>
+          <td style="text-align: center">⚠️ Basic heuristic name tagging</td>
+          <td style="text-align: center">❌ None (Re-clusters per call)</td>
+          <td style="text-align: center">❌ Raw embeddings only</td>
+          <td style="text-align: center"><strong>✅ VoiceDB Embedding Matching</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Word-Level Karaoke Playback</strong></td>
+          <td style="text-align: center">Partial</td>
+          <td style="text-align: center">❌ Plain text notes</td>
+          <td style="text-align: center">Timestamps only</td>
+          <td style="text-align: center"><strong>✅ Dynamic CSS Word-Level Sync</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Clean Verbatim (Timestamp-Preserving)</strong></td>
+          <td style="text-align: center">⚠️ Cloud post-filter</td>
+          <td style="text-align: center">❌ None</td>
+          <td style="text-align: center">Post-processing API</td>
+          <td style="text-align: center"><strong>✅ Frame-Accurate Filler Tagging</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Dual-Pass Model Comparison</strong></td>
+          <td style="text-align: center">❌ None</td>
+          <td style="text-align: center">❌ None</td>
+          <td style="text-align: center">❌ None</td>
+          <td style="text-align: center"><strong>✅ Live vs Batch Side-by-Side Audit</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>LLM Inference Engine</strong></td>
+          <td style="text-align: center">Proprietary Cloud</td>
+          <td style="text-align: center">OpenAI GPT-4o / Claude 3.5</td>
+          <td style="text-align: center">Vendor LeMUR</td>
+          <td style="text-align: center"><strong>✅ Local Ollama / vLLM / ROCm</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Package Distribution</strong></td>
+          <td style="text-align: center">Closed SaaS / Web</td>
+          <td style="text-align: center">Closed Binary (Mac)</td>
+          <td style="text-align: center">SDK / Cloud</td>
+          <td style="text-align: center"><strong>PyPI (<code>polyphon-ai</code>) / CLI / UV</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Export Formats</strong></td>
+          <td style="text-align: center">Proprietary Link / TXT</td>
+          <td style="text-align: center">Markdown</td>
+          <td style="text-align: center">JSON only</td>
+          <td style="text-align: center"><strong>Interactive HTML, MD, SRT, JSON</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Licensing</strong></td>
+          <td style="text-align: center">Proprietary Closed Source</td>
+          <td style="text-align: center">Proprietary Closed Source</td>
+          <td style="text-align: center">Proprietary Commercial</td>
+          <td style="text-align: center"><strong>Open Source (Apache-2.0)</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Cost</strong></td>
+          <td style="text-align: center">$18 – $40 / user / mo</td>
+          <td style="text-align: center">$12 – $20 / user / mo</td>
+          <td style="text-align: center">$0.004 – $0.015 / min</td>
+          <td style="text-align: center"><strong>Open Source ($0 Software License)</strong></td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="3-deep-architectural-breakdown">3. Deep Architectural Breakdown</h2>
+<p>To address these practical engineering constraints, Polyphon AI is organized around four core design pillars:</p>
+
+
+
+
+
+
+
+
+<span id="plantuml-polyphon-system-architecture" style="display:none;">
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+package &#34;Client Layer (Browser &amp; Studio)&#34; {
+    [Web Audio API\nDual-Stream Merger] as AUDIO_IN
+    [Polyphon AI Studio UI\nLive HUD &amp; Karaoke View] as STUDIO_UI
+    [Benchmark Modal\nLive vs Batch Audit] as AUDIT_UI
+}
+
+package &#34;Polyphon AI Local Engine (FastAPI &amp; Python)&#34; {
+    component &#34;WebSocket Audio Ingestion\n(/api/stream/ws)&#34; as WS_INGEST
+    
+    package &#34;Pass 1: Real-Time Stream&#34; {
+        [Faster-Whisper Streaming ASR] as LIVE_ASR
+        [NeMo Sortformer Diarizer] as LIVE_DIAR
+        [Telemetry Engine\n(WPM, Turn Timing)] as TELEMETRY
+    }
+    
+    package &#34;Pass 2: Post-Call Reconciliation&#34; {
+        [Faster-Whisper Large-v3\nFull-Context ASR] as BATCH_ASR
+        [Pyannote 3.1 Diarization Pipeline] as BATCH_DIAR
+        database &#34;VoiceDB\nSpeaker Embedding Store&#34; as VOICEDB
+        [Speaker-Turn Alignment Engine] as ALIGNER
+    }
+    
+    package &#34;Intelligence &amp; Synthesis&#34; {
+        [Local LLM Router\n(Ollama / vLLM / llama.cpp)] as LOCAL_LLM
+        [Standalone HTML Generator\nZero-Dependency Artifact] as EXPORT_GEN
+    }
+}
+
+AUDIO_IN --&gt; WS_INGEST : 16kHz PCM16 Stream
+WS_INGEST --&gt; LIVE_ASR
+WS_INGEST --&gt; LIVE_DIAR
+LIVE_ASR --&gt; TELEMETRY
+LIVE_DIAR --&gt; TELEMETRY
+TELEMETRY --&gt; STUDIO_UI : Real-Time Dialogue Turns
+
+WS_INGEST ..&gt; BATCH_ASR : On Stream Complete (WAV)
+WS_INGEST ..&gt; BATCH_DIAR
+BATCH_DIAR &lt;--&gt; VOICEDB : Cosine Similarity Re-ID
+BATCH_ASR --&gt; ALIGNER
+BATCH_DIAR --&gt; ALIGNER
+ALIGNER --&gt; LOCAL_LLM : Contextual Dialogue Turns
+LOCAL_LLM --&gt; EXPORT_GEN : Summaries &amp; Action Items
+EXPORT_GEN --&gt; STUDIO_UI
+EXPORT_GEN --&gt; AUDIT_UI
+@enduml
+</span>
+<img class="plantuml" id="plantuml-polyphon-system-architecture" alt="PlantUML Diagram polyphon-system-architecture" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<hr>
+<h3 id="pillar-1-driverless-dual-stream-audio-capture">Pillar 1: Driverless Dual-Stream Audio Capture</h3>
+<p>Capturing meeting audio typically involves one of two compromises:</p>
+<ol>
+<li><strong>Inviting a third-party bot</strong> into the call, which introduces social friction and policy compliance hurdles in sensitive environments.</li>
+<li><strong>Installing virtual audio loopback drivers</strong> (such as BlackHole or Virtual Audio Cable), which require administrative privileges often unavailable on enterprise machines and can inadvertently capture unintended system audio.</li>
+</ol>
+<p><strong>Polyphon AI</strong> takes a browser-first approach using standard <strong>HTML5 Web Audio APIs</strong>. By combining <code>getDisplayMedia</code> (capturing remote meeting tab audio) and <code>getUserMedia</code> (capturing the local microphone), the browser captures clean dual-stream audio directly from the meeting tab without requiring virtual soundcards, kernel drivers, or bot participants.</p>
+
+
+
+
+
+
+
+
+<span id="plantuml-polyphon-audio-sequence" style="display:none;">
+@startuml
+autonumber
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+actor User
+participant &#34;Polyphon AI Studio\n(Browser)&#34; as Browser
+participant &#34;Web Audio API\n(ChannelMerger)&#34; as WebAudio
+participant &#34;Polyphon AI Local Engine\n(WebSocket Server)&#34; as Server
+participant &#34;Local LLM\n(Ollama / vLLM)&#34; as LLM
+
+User -&gt; Browser : Click &#34;Capture Dual Stream&#34;
+Browser -&gt; User : Prompt getDisplayMedia (Select Meeting Tab &#43; Share Audio)
+Browser -&gt; User : Prompt getUserMedia (Select Local Microphone)
+Browser -&gt; WebAudio : Merge Tab Audio &#43; Mic into 16kHz Mono Stream
+WebAudio -&gt; Server : Stream PCM16 Chunks over WebSocket (/api/stream/ws)
+
+loop Real-Time Live HUD
+    Server -&gt; Server : NeMo Sortformer Diarization &#43; Faster-Whisper ASR
+    Server --&gt; Browser : Live Turns, WPM &amp; Active Speaker Telemetry
+end
+
+User -&gt; Browser : Click &#34;End Stream&#34;
+Browser -&gt; Server : Signal Stream Complete
+Server -&gt; Server : Pass 2: Offline Pyannote 3.1 &#43; Whisper Large-v3
+Server -&gt; Server : Match Embeddings against VoiceDB
+Server -&gt; LLM : Synthesize Summary &amp; Action Items
+Server --&gt; Browser : Serve Interactive Karaoke Report
+@enduml
+</span>
+<img class="plantuml" id="plantuml-polyphon-audio-sequence" alt="PlantUML Diagram polyphon-audio-sequence" style="display: block; margin: 1.5em auto; background-color: var(--bg-secondary); min-height: 50px; border: 1px solid var(--border-color);">
+<p>Here is the core Web Audio capture pipeline implemented in 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/polyphon-ai/blob/main/src/polyphon/server/static/js/stream.js" target="_blank" rel="noopener noreferrer" ><code>src/polyphon/server/static/js/stream.js</code></a>
+:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="c1">// src/polyphon/server/static/js/stream.js - Web Audio API Dual Stream Mixer
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">async</span> <span class="kd">function</span> <span class="nx">startDualCapture</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 1. Capture local microphone
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kr">const</span> <span class="nx">micStream</span> <span class="o">=</span> <span class="kr">await</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">mediaDevices</span><span class="p">.</span><span class="nx">getUserMedia</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">audio</span><span class="o">:</span> <span class="p">{</span> <span class="nx">channelCount</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">sampleRate</span><span class="o">:</span> <span class="mi">16000</span><span class="p">,</span> <span class="nx">echoCancellation</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">noiseSuppression</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 2. Capture meeting tab audio (remote participants / speaker output)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kr">const</span> <span class="nx">displayStream</span> <span class="o">=</span> <span class="kr">await</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">mediaDevices</span><span class="p">.</span><span class="nx">getDisplayMedia</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">video</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="c1">// Required by browser API to capture tab audio
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nx">audio</span><span class="o">:</span> <span class="p">{</span> <span class="nx">echoCancellation</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">noiseSuppression</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">autoGainControl</span><span class="o">:</span> <span class="kc">false</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Discard video tracks immediately to eliminate CPU/GPU rendering overhead
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">displayStream</span><span class="p">.</span><span class="nx">getVideoTracks</span><span class="p">().</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">track</span> <span class="p">=&gt;</span> <span class="nx">track</span><span class="p">.</span><span class="nx">stop</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 3. Web Audio API Mixing Graph (16kHz AudioContext)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kr">const</span> <span class="nx">audioContext</span> <span class="o">=</span> <span class="k">new</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">AudioContext</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">webkitAudioContext</span><span class="p">)({</span> <span class="nx">sampleRate</span><span class="o">:</span> <span class="mi">16000</span> <span class="p">});</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">mixer</span> <span class="o">=</span> <span class="nx">audioContext</span><span class="p">.</span><span class="nx">createGain</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">micSource</span> <span class="o">=</span> <span class="nx">audioContext</span><span class="p">.</span><span class="nx">createMediaStreamSource</span><span class="p">(</span><span class="nx">micStream</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">micGain</span> <span class="o">=</span> <span class="nx">audioContext</span><span class="p">.</span><span class="nx">createGain</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">micSource</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nx">micGain</span><span class="p">).</span><span class="nx">connect</span><span class="p">(</span><span class="nx">mixer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">displaySource</span> <span class="o">=</span> <span class="nx">audioContext</span><span class="p">.</span><span class="nx">createMediaStreamSource</span><span class="p">(</span><span class="nx">displayStream</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">displayGain</span> <span class="o">=</span> <span class="nx">audioContext</span><span class="p">.</span><span class="nx">createGain</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">displaySource</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nx">displayGain</span><span class="p">).</span><span class="nx">connect</span><span class="p">(</span><span class="nx">mixer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 4. Capture mixed stream via ScriptProcessorNode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kr">const</span> <span class="nx">processorNode</span> <span class="o">=</span> <span class="nx">audioContext</span><span class="p">.</span><span class="nx">createScriptProcessor</span><span class="p">(</span><span class="mi">4096</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">mixer</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nx">processorNode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 5. Connect to a zero-gain silent sink to prevent acoustic feedback/echo
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// while keeping the browser audio processing graph running continuously
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kr">const</span> <span class="nx">silentSink</span> <span class="o">=</span> <span class="nx">audioContext</span><span class="p">.</span><span class="nx">createGain</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">silentSink</span><span class="p">.</span><span class="nx">gain</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">processorNode</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nx">silentSink</span><span class="p">).</span><span class="nx">connect</span><span class="p">(</span><span class="nx">audioContext</span><span class="p">.</span><span class="nx">destination</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 6. Convert float samples to PCM16 and stream over WebSocket (/api/stream/ws)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">processorNode</span><span class="p">.</span><span class="nx">onaudioprocess</span> <span class="o">=</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isLiveStreaming</span> <span class="o">||</span> <span class="nx">ws</span><span class="p">.</span><span class="nx">readyState</span> <span class="o">!==</span> <span class="nx">WebSocket</span><span class="p">.</span><span class="nx">OPEN</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">inputData</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="c1">// 16kHz float32
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kr">const</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ArrayBuffer</span><span class="p">(</span><span class="nx">inputData</span><span class="p">.</span><span class="nx">length</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">view</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">DataView</span><span class="p">(</span><span class="nx">buffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">inputData</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kr">const</span> <span class="nx">s</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">inputData</span><span class="p">[</span><span class="nx">i</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">view</span><span class="p">.</span><span class="nx">setInt16</span><span class="p">(</span><span class="nx">i</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">s</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="nx">s</span> <span class="o">*</span> <span class="mh">0x8000</span> <span class="o">:</span> <span class="nx">s</span> <span class="o">*</span> <span class="mh">0x7FFF</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">ws</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">buffer</span><span class="p">);</span> <span class="c1">// Raw 16kHz PCM16 chunk streamed to backend
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+<div class="admonition note">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+    </svg>
+    <span class="admonition-title">Note</span>
+  </div>
+  <div class="admonition-content">
+    <strong>Zero Feedback Echo Architecture</strong>: The meeting tab audio already plays normally to your headphones/speakers via Chrome. If Web Audio routed that audio back to your physical output, you would hear an annoying delayed duplicate of the remote attendees. Polyphon AI routes the mixer to a <strong>zero-gain silent sink</strong> (<code>silentSink.gain = 0</code>), keeping the recording pipeline fully energized while letting you listen to your call without echo. At the same time, <code>echoCancellation: true</code> on the microphone ensures physical speaker output doesn&rsquo;t bleed back into the mic.
+  </div>
+</div>
+<p>When an unattended recording <em>is</em> needed for open WebRTC platforms (such as Jitsi Meet or public webinars), Polyphon AI also provides a headless virtual attendee powered by Playwright:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Join an open WebRTC meeting room (e.g., Jitsi Meet) as a headless attendee:</span>
+</span></span><span class="line"><span class="cl">polyphon bot <span class="s2">&#34;https://meet.jit.si/my-project-room&#34;</span> --name <span class="s2">&#34;Polyphon AI Notetaker&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+<div class="admonition tip">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.01 4.01 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.06-2.15 3.9z"/>
+    </svg>
+    <span class="admonition-title">Tip</span>
+  </div>
+  <div class="admonition-content">
+    <strong>Why Jitsi for the Bot vs. Dual Capture for Meet/Teams/Zoom?</strong>
+Proprietary platforms like Google Meet, Teams, and Zoom enforce Google/SSO account sign-ins, CAPTCHAs, and aggressive anti-bot heuristics against headless browsers. Rather than playing a brittle cat-and-mouse game with anti-bot shields, Polyphon AI&rsquo;s <strong>Dual Capture (<code>🎙️+💻 Mic &amp; Meeting</code>)</strong> runs directly in your authenticated browser tab via the Web Audio API — giving you reliable zero-bot recording for corporate calls, while reserving <code>polyphon bot</code> for open WebRTC rooms.
+  </div>
+</div>
+<hr>
+<h3 id="pillar-2-persistent-cross-meeting-identity-voicedb">Pillar 2: Persistent Cross-Meeting Identity (VoiceDB)</h3>
+<p>In standard diarization workflows, speakers are re-clustered from scratch on every run. Sarah might be <code>SPEAKER_00</code> on Monday and <code>SPEAKER_02</code> on Wednesday. Existing solutions either force users into tedious manual re-labeling or store raw audio on proprietary clouds.</p>
+<p>Polyphon AI introduces <strong>VoiceDB</strong> — a lightweight, persistent local speaker-embedding database built around Pyannote speaker representations and vectorized NumPy mathematics, requiring no external vector-database daemon or cloud service.</p>
+<p>VoiceDB stores normalized speaker representations locally and uses cosine similarity to associate newly observed diarization clusters with previously enrolled identities.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">┌─────────────────────────┐       Extract Cleanest High-SNR Turns
+</span></span><span class="line"><span class="cl">│  Recorded Audio Stream  │ ──────────────────────────────────────────┐
+</span></span><span class="line"><span class="cl">└─────────────────────────┘                                           │
+</span></span><span class="line"><span class="cl">             │                                                        ▼
+</span></span><span class="line"><span class="cl">             ▼                                           ┌─────────────────────────┐
+</span></span><span class="line"><span class="cl">┌─────────────────────────┐                              │    Pyannote Speaker     │
+</span></span><span class="line"><span class="cl">│  Pyannote Diarization   │                              │     Embedding Model     │
+</span></span><span class="line"><span class="cl">│  Clusters: S0, S1, S2   │                              └─────────────────────────┘
+</span></span><span class="line"><span class="cl">└─────────────────────────┘                                           │
+</span></span><span class="line"><span class="cl">             │                                                        ▼
+</span></span><span class="line"><span class="cl">             │  Vectorized Batch Query                   ┌─────────────────────────┐
+</span></span><span class="line"><span class="cl">             └─────────────────────────────────────────► │ L2 Normalized Vector    │
+</span></span><span class="line"><span class="cl">                                                         │       q ∈ ℝᴰ            │
+</span></span><span class="line"><span class="cl">                                                         └─────────────────────────┘
+</span></span><span class="line"><span class="cl">                                                                      │
+</span></span><span class="line"><span class="cl">                                                                      ▼
+</span></span><span class="line"><span class="cl">                                                         ┌─────────────────────────┐
+</span></span><span class="line"><span class="cl">                                                         │ VoiceDB Unit Vectors    │
+</span></span><span class="line"><span class="cl">                                                         │  emb_matrix · q ≥ 0.65? │
+</span></span><span class="line"><span class="cl">                                                         └─────────────────────────┘
+</span></span><span class="line"><span class="cl">                                                               /             \
+</span></span><span class="line"><span class="cl">                                                        [YES] /               \ [NO]
+</span></span><span class="line"><span class="cl">                                                             ▼                 ▼
+</span></span><span class="line"><span class="cl">                                                 ┌───────────────────────┐   ┌───────────────────────┐
+</span></span><span class="line"><span class="cl">                                                 │ Auto-Map to Identity: │   │ Verbal Discovery / UI │
+</span></span><span class="line"><span class="cl">                                                 │ &#34;Sarah (Lead Eng)&#34;    │   │ Prompt: [👤 Enroll]   │
+</span></span><span class="line"><span class="cl">                                                 └───────────────────────┘   └───────────────────────┘
+</span></span><span class="line"><span class="cl">                                                             │                           │
+</span></span><span class="line"><span class="cl">                                                             ▼                           ▼
+</span></span><span class="line"><span class="cl">                                                 ┌───────────────────────┐   ┌───────────────────────┐
+</span></span><span class="line"><span class="cl">                                                 │ 70/30 Centroid Blend: │   │ Create New Profile:   │
+</span></span><span class="line"><span class="cl">                                                 │ norm(0.7·v_old+0.3·q) │   │ VoiceDB.enroll(name,q)│
+</span></span><span class="line"><span class="cl">                                                 └───────────────────────┘   └───────────────────────┘</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h4 id="production-code-voicedb-core-architecture">Production Code: <code>VoiceDB</code> Core Architecture</h4>
+<p>Below is the production implementation from 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/polyphon-ai/blob/main/src/polyphon/voicedb/base.py" target="_blank" rel="noopener noreferrer" ><code>src/polyphon/voicedb/base.py</code></a>
+, demonstrating normalized centroid updates and vectorized multi-speaker matching:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># src/polyphon/voicedb/base.py - Persistent Local Speaker Embedding Engine</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">json</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">warnings</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">VoiceDB</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;Persistent local database for speaker voice embeddings and identity matching.&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">=</span> <span class="s2">&#34;~/.polyphon/voicedb&#34;</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">db_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">db_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">registry_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_dir</span> <span class="o">/</span> <span class="s2">&#34;registry.json&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">embeddings_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_dir</span> <span class="o">/</span> <span class="s2">&#34;embeddings&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">embeddings_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_cache</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">_load_registry</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">enroll</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">embedding</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">speaker_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">audio_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;Enroll a new speaker or update an existing profile with 70/30 centroid blending.&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">spk_id</span> <span class="o">=</span> <span class="n">speaker_id</span> <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&#34; &#34;</span><span class="p">,</span> <span class="s2">&#34;_&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">embedding_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embeddings_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&#34;</span><span class="si">{</span><span class="n">spk_id</span><span class="si">}</span><span class="s2">.npy&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># L2-normalize input embedding vector</span>
+</span></span><span class="line"><span class="cl">        <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">embedding</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">norm_emb</span> <span class="o">=</span> <span class="p">(</span><span class="n">embedding</span> <span class="o">/</span> <span class="n">norm</span><span class="p">)</span> <span class="k">if</span> <span class="n">norm</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">embedding</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># 70/30 Centroid Blending Adaptation</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">embedding_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">            <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">existing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">embedding_file</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">combined</span> <span class="o">=</span> <span class="mf">0.7</span> <span class="o">*</span> <span class="n">existing</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">norm_emb</span>
+</span></span><span class="line"><span class="cl">                <span class="n">combined_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">norm_emb</span> <span class="o">=</span> <span class="n">combined</span> <span class="o">/</span> <span class="n">combined_norm</span> <span class="k">if</span> <span class="n">combined_norm</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">combined</span>
+</span></span><span class="line"><span class="cl">            <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">                <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">embedding_file</span><span class="p">,</span> <span class="n">norm_emb</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_cache</span><span class="p">[</span><span class="n">spk_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_emb</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">spk_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;id&#34;</span><span class="p">:</span> <span class="n">spk_id</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;embedding_file&#34;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">embedding_file</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;sample_audio&#34;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">audio_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">audio_path</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">_save_registry</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">spk_id</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">identify</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">query_embedding</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.65</span>
+</span></span><span class="line"><span class="cl">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;Match query embedding against enrolled voiceprints using vectorized cosine similarity.&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">0.0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">q_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">query_embedding</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">q_norm</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">0.0</span>
+</span></span><span class="line"><span class="cl">        <span class="n">q_vec</span> <span class="o">=</span> <span class="n">query_embedding</span> <span class="o">/</span> <span class="n">q_norm</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dim</span> <span class="o">=</span> <span class="n">q_vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">spk_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">sid</span> <span class="k">for</span> <span class="n">sid</span><span class="p">,</span> <span class="n">vec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_cache</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">dim</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="ow">not</span> <span class="n">spk_ids</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">0.0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># Vectorized batch cosine similarity via single BLAS matrix-vector product</span>
+</span></span><span class="line"><span class="cl">        <span class="n">emb_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_embedding_cache</span><span class="p">[</span><span class="n">sid</span><span class="p">]</span> <span class="k">for</span> <span class="n">sid</span> <span class="ow">in</span> <span class="n">spk_ids</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">        <span class="n">similarities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">emb_matrix</span><span class="p">,</span> <span class="n">q_vec</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">best_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">similarities</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="n">best_sim</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">similarities</span><span class="p">[</span><span class="n">best_idx</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">        <span class="n">best_spk_id</span> <span class="o">=</span> <span class="n">spk_ids</span><span class="p">[</span><span class="n">best_idx</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">best_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">best_spk_id</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;name&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">best_sim</span> <span class="o">&gt;=</span> <span class="n">threshold</span> <span class="ow">and</span> <span class="n">best_name</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">best_name</span><span class="p">,</span> <span class="n">best_sim</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">best_sim</span><span class="p">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h4 id="addressing-identity-drift-5-key-architectural-properties-of-voicedb">Addressing Identity Drift: 5 Key Architectural Properties of VoiceDB</h4>
+<ol>
+<li>
+<p><strong>Continuous Online Adaptation (70/30 Centroid Blending)</strong>:</p>
+<p>A person&rsquo;s acoustic profile can vary across sessions due to microphone changes, vocal fatigue, background noise, room acoustics, and recording conditions. Rather than discarding the historical profile or creating a completely independent identity, VoiceDB blends the existing representation with the new observation:</p>
+<p>\(\mathbf{v}_{\text{combined}} = \text{norm}\left(0.7 \times \mathbf{v}_{\text{existing}} + 0.3 \times \mathbf{v}_{\text{new}}\right)\)</p>
+<p>This gives historical observations greater weight while allowing the stored representation to adapt gradually to changing acoustic conditions.</p>
+</li>
+<li>
+<p><strong>Vectorized Matrix Dot-Product Matching (<code>O(ND)</code>)</strong>:
+Instead of iterating through speakers in a Python loop, VoiceDB packs cached unit-vectors into a 2D NumPy matrix (<code>emb_matrix</code>). Matching an unknown speaker cluster is then performed using a single optimized matrix-vector operation (<code>np.dot(emb_matrix, q_vec)</code>). For a modest number of enrolled speakers, this keeps matching extremely lightweight while moving the numerical work into optimized native linear-algebra routines.</p>
+</li>
+<li>
+<p><strong>Zero-Touch Verbal Discovery (<code>--infer-names</code> &amp; <code>--auto-enroll</code>)</strong>:</p>
+<p>Users do not necessarily need to enroll every attendee before a meeting. Polyphon AI can inspect early conversational turns for natural self-introductions such as <em>&ldquo;Good morning, this is Marcus&rdquo;</em> or <em>&ldquo;Hi everyone, I&rsquo;m Sarah from backend engineering&rdquo;</em>. When a name can be confidently associated with a diarized speaker, Polyphon AI can map that speaker label to the inferred name and, when <code>--auto-enroll</code> is enabled, store the corresponding speaker embedding in VoiceDB.</p>
+<p>This turns a simple verbal introduction into an optional starting point for persistent speaker recognition in subsequent meetings.</p>
+</li>
+<li>
+<p><strong>Multi-Cluster Resolution for Solo &amp; Uneven Recordings</strong>:
+Unsupervised clustering models often fragment a single speaker into <code>SPEAKER_00</code> and <code>SPEAKER_01</code> due to head turns or dynamic vocal volume. Using <code>polyphon assign --map 0=&quot;Alice&quot; --map 1=&quot;Alice&quot; --enroll</code>, Polyphon AI automatically consolidates the disjoint clusters, normalizes talk-time statistics to 100%, and unifies both acoustic profiles into Alice&rsquo;s single VoiceDB centroid.</p>
+</li>
+<li>
+<p><strong>One-Click Studio Enrollment with Audio Previews</strong>:
+In Polyphon AI Studio, users simply click <code>[👤 Enroll]</code> on any speaker card. Polyphon AI extracts the cleanest speech frames, updates <code>outputs/{id}.json</code>, renames dialogue turns in-place in the web UI, slices a clean 1–5s audio preview (<code>outputs/samples/sample_&lt;slug&gt;.wav</code>) for the VoiceDB catalog player, and regenerates all standalone HTML, Markdown, and SRT reports instantly.</p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/polyphon/polyphon-ai-studio-voicedb.png"   alt="Polyphon AI Studio VoiceDB Catalog - Persistent Speaker Voiceprints and Audio Previews" class="sc-image sc-image-default"
+       >
+
+
+<hr>
+<h3 id="pillar-3-dual-pass-streaming--batch-diarization">Pillar 3: Dual-Pass Streaming &amp; Batch Diarization</h3>
+<p>Meeting intelligence systems must balance responsiveness against the amount of context available to the recognition and diarization models. Streaming inference has strict latency constraints, while offline processing can revisit the complete recording with more context and more computational budget.</p>
+<p>Polyphon AI implements a <strong>Dual-Pass Hybrid Architecture</strong>:</p>
+<ol>
+<li>
+<p><strong>Pass 1 (Real-Time Live HUD)</strong>: Uses Nvidia NeMo&rsquo;s streaming <strong>Sortformer</strong> model paired with streaming Faster-Whisper to provide low-latency speaker attribution, live dialogue turns, speaking cadence (Words Per Minute), and talk-time telemetry.</p>
+</li>
+<li>
+<p><strong>Pass 2 (Post-Call Reconciliation)</strong>: Once the call concludes, Polyphon AI runs an offline reconciliation pass using <strong>Pyannote 3.1</strong> and full-context <strong>Faster-Whisper Large-v3</strong>, refining the transcript and speaker segmentation and matching recognized speakers against <strong>VoiceDB</strong>.</p>
+</li>
+<li>
+<p><strong>Side-by-Side Audit Modal</strong>: Polyphon AI Studio includes a dedicated <strong>Benchmark &amp; Comparison Modal</strong> (<code>compare.js</code>) allowing users to inspect the live streaming output against the processed batch output side by side. This makes the trade-off between low latency and post-call refinement visible rather than hidden.</p>
+</li>
+</ol>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Pass 1 (Live HUD)    : [Sub-Second Stream] ──► Sortformer + Streaming Whisper ──► Live Turns &amp; WPM
+</span></span><span class="line"><span class="cl">                                                                                     │
+</span></span><span class="line"><span class="cl">                                                      ┌──────────────────────────────┘
+</span></span><span class="line"><span class="cl">                                                      ▼
+</span></span><span class="line"><span class="cl">Pass 2 (Post-Call)   : [Full 16kHz WAV]    ──► Pyannote 3.1 + Whisper Large-v3  ──► VoiceDB Match &amp; LLM Notes
+</span></span><span class="line"><span class="cl">                                                                                     │
+</span></span><span class="line"><span class="cl">                                                      ┌──────────────────────────────┘
+</span></span><span class="line"><span class="cl">                                                      ▼
+</span></span><span class="line"><span class="cl">Audit &amp; Verification : [Side-by-Side View] ──► Real-Time WER &amp; Diarization Comparison Modal</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><hr>
+<h3 id="pillar-4-portable-artifacts--timestamp-preserving-clean-verbatim">Pillar 4: Portable Artifacts &amp; Timestamp-Preserving Clean Verbatim</h3>
+<p>Instead of locking meeting notes behind a proprietary SaaS portal, Polyphon AI generates <strong>self-contained, portable artifacts</strong> designed to remain useful independently of the Polyphon AI server or an active cloud subscription:</p>
+<ul>
+<li><strong>Interactive Standalone HTML Report (<code>--format html</code>)</strong>: A single, portable <code>.html</code> file embedding the media player, word-level clickable karaoke synchronization, proportional speaker talk-time visualizer, instant keyword search, speaker isolation filters, checkable action items (<code>- [ ] task (@assignee)</code>), and executive summaries.</li>
+<li><strong>Clean Verbatim Mode (<code>--clean-fillers</code>)</strong>: Professional meeting notes often benefit from removing vocal disfluencies (<em>&ldquo;um&rdquo;</em>, <em>&ldquo;uh&rdquo;</em>, <em>&ldquo;er&rdquo;</em>, <em>&ldquo;ah&rdquo;</em>, <em>&ldquo;hmm&rdquo;</em>). Conventional approaches may either remove words destructively or leave disfluencies intact. Polyphon AI instead tags disfluencies at the token level: text reports and clipboard exports can present a clean transcript while preserving the original token timing information for audio scrubbing and karaoke-style highlighting. Viewers can toggle between raw and clean verbatim in real time using the in-report <code>✨ Clean Verbatim</code> button.</li>
+<li><strong>Standardized Exports</strong>: Markdown (<code>.md</code>), SubRip Subtitles (<code>.srt</code>), and rich JSON manifest (<code>.json</code>).</li>
+</ul>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">outputs/
+</span></span><span class="line"><span class="cl">├── meeting.html       &lt;-- Standalone interactive player, karaoke sync &amp; insights
+</span></span><span class="line"><span class="cl">├── meeting.md         &lt;-- Clean Markdown formatted transcript &amp; action item checklist
+</span></span><span class="line"><span class="cl">├── meeting.srt         &lt;-- Frame-accurate video/audio subtitle track
+</span></span><span class="line"><span class="cl">├── meeting.json       &lt;-- Machine-readable manifest (word timestamps &amp; VoiceDB IDs)
+</span></span><span class="line"><span class="cl">└── audio.wav          &lt;-- 16kHz mono master audio recording</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><hr>
+<h2 id="4-getting-started-with-polyphon-ai">4. Getting Started with Polyphon AI</h2>
+<p>Polyphon AI is designed to run locally across a range of hardware, from capable CPU-based systems to high-VRAM NVIDIA workstations, Apple Silicon Macs, and AMD unified-memory APUs such as Strix Halo. Actual transcription and diarization throughput depends heavily on the selected models and available compute.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>Python 3.10+</li>
+<li><strong>FFmpeg (Shared Build)</strong>: Speaker diarization relies on <code>torchcodec</code>, which dynamically loads FFmpeg shared runtime libraries (<code>avcodec</code>, <code>avformat</code>, <code>avutil</code>). On Windows, install via <code>winget install Gyan.FFmpeg.Shared</code> or download a shared release.</li>
+<li><strong>Hugging Face Token</strong>: Accept model access agreements on 
+
+
+
+
+
+
+  <a href="https://huggingface.co/pyannote/speaker-diarization-3.1" target="_blank" rel="noopener noreferrer" >hf.co/pyannote/speaker-diarization-3.1</a>
+ and export <code>HF_TOKEN=&quot;hf_...&quot;</code>.</li>
+<li><strong>Local LLM Server (Optional for <code>--summarize</code>)</strong>: Any OpenAI-compatible server (Ollama, <code>llama-server</code>, vLLM, LM Studio) running locally or on your LAN.</li>
+</ul>
+<hr>
+<h3 id="installation-options">Installation Options</h3>
+<h4 id="option-a-install-from-pypi-recommended">Option A: Install from PyPI (Recommended)</h4>
+<p>Polyphon AI is officially published on PyPI. You can install the complete pipeline including speech recognition, neural diarization, FastAPI server, and Playwright bot:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Complete offline pipeline</span>
+</span></span><span class="line"><span class="cl">pip install <span class="s2">&#34;polyphon-ai[all]&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Or install as an isolated global CLI tool:</span>
+</span></span><span class="line"><span class="cl">pipx install <span class="s2">&#34;polyphon-ai[all]&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># or:</span>
+</span></span><span class="line"><span class="cl">uv tool install <span class="s2">&#34;polyphon-ai[all]&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Validate runtime dependencies and FFmpeg shared libraries</span>
+</span></span><span class="line"><span class="cl">polyphon doctor</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+<div class="admonition tip">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.01 4.01 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.06-2.15 3.9z"/>
+    </svg>
+    <span class="admonition-title">Tip</span>
+  </div>
+  <div class="admonition-content">
+    <p><strong>Selective Installation Extras:</strong></p>
+<ul>
+<li><code>polyphon-ai</code>: Core lightweight CLI &amp; reconciliation engine (no heavy PyTorch dependencies).</li>
+<li><code>polyphon-ai[asr]</code>: Speech recognition (<code>faster-whisper</code>).</li>
+<li><code>polyphon-ai[diarization]</code>: Neural speaker diarization (<code>pyannote.audio</code> + <code>torch</code>).</li>
+<li><code>polyphon-ai[server]</code>: WebUI dashboard &amp; REST/WebSocket server (<code>fastapi</code> + <code>uvicorn</code>).</li>
+<li><code>polyphon-ai[bot]</code>: Automated meeting bot attendee (<code>playwright</code>).</li>
+<li><code>polyphon-ai[all]</code>: Complete offline meeting intelligence pipeline.</li>
+</ul>
+  </div>
+</div>
+<h4 id="option-b-clone--run-from-source-contributors">Option B: Clone &amp; Run from Source (Contributors)</h4>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1. Clone repository</span>
+</span></span><span class="line"><span class="cl">git clone https://github.com/seehiong/polyphon-ai.git
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> polyphon-ai
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 2. Sync all dependencies using Astral uv</span>
+</span></span><span class="line"><span class="cl">uv sync --all-extras
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 3. Verify environment &amp; dependencies</span>
+</span></span><span class="line"><span class="cl">uv run polyphon doctor</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><hr>
+<h3 id="guided-3-step-cli-tour">Guided 3-Step CLI Tour</h3>
+<p>Polyphon AI&rsquo;s CLI is built around structured manifests, making speaker attribution and voiceprint management effortless:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Step 1: Transcribe media to a structured JSON manifest</span>
+</span></span><span class="line"><span class="cl">polyphon transcribe meeting.mp4 --diarize --format json
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Step 2: Assign real identities, auto-enroll voiceprints into VoiceDB, and synthesize notes</span>
+</span></span><span class="line"><span class="cl">polyphon assign outputs/meeting.json <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --map <span class="nv">SPEAKER_00</span><span class="o">=</span><span class="s2">&#34;Marcus Vance&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --map <span class="nv">SPEAKER_01</span><span class="o">=</span><span class="s2">&#34;David (UI Designer)&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --enroll <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --summarize
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Step 3: Any future meeting now recognizes those enrolled voices via VoiceDB!</span>
+</span></span><span class="line"><span class="cl">polyphon transcribe meeting_q4.mp4 --diarize --identify --summarize --format html</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>You can also run zero-touch transcription where Polyphon AI discovers speaker names verbally and auto-enrolls them on the fly:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">polyphon transcribe meeting.mp4 --diarize --infer-names --auto-enroll --summarize --format html</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><hr>
+<h3 id="launching-polyphon-ai-studio-web-workspace">Launching Polyphon AI Studio (Web Workspace)</h3>
+<p>Polyphon AI Studio offers a 4-tab web workspace (Studio, Live Stream, Archive, VoiceDB) served directly with zero frontend build steps:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Recommended for LAN access (enables HTTPS &amp; microphone permissions across devices):</span>
+</span></span><span class="line"><span class="cl">polyphon serve --self-signed --host 0.0.0.0 --port <span class="m">7860</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+<div class="admonition tip">
+  <div class="admonition-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="admonition-icon">
+      <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.01 4.01 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.06-2.15 3.9z"/>
+    </svg>
+    <span class="admonition-title">Tip</span>
+  </div>
+  <div class="admonition-content">
+    <strong>Why <code>--self-signed</code> is Key for LAN Access:</strong>
+Modern browsers restrict microphone and Web Audio capture strictly to <strong>Secure Contexts (HTTPS)</strong>. When accessing Polyphon AI from other devices on your home or office network (<code>http://192.168.x.x:7860</code>), browsers block microphone recording over plain HTTP. Passing <code>--self-signed</code> automatically generates local SSL certificates, allowing seamless dual-capture and live streaming from any laptop, tablet, or phone on your private network.
+  </div>
+</div>
+<p>Open <code>https://localhost:7860</code>:</p>
+<ol>
+<li>Navigate to <strong>Live Stream</strong> and select <strong><code>🎙️+💻 Mic &amp; Meeting</code> (Dual Capture)</strong>.</li>
+<li>Select your meeting browser tab (Google Meet / Teams / Zoom) and enable <strong>Share tab audio</strong>.</li>
+<li>Select your local microphone.</li>
+<li>Watch real-time dialogue turns, speaking speed (WPM), and active speaker telemetry stream into the Live HUD.</li>
+<li>Click <strong>Stop &amp; Finalize</strong> to generate your interactive report, enroll speaker profiles, and inspect live vs batch benchmarks.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/polyphon/polyphon-ai-studio-preview.png"   alt="Polyphon AI Studio - Interactive Player, Word-Level Karaoke, and Clean Verbatim" class="sc-image sc-image-default"
+       >
+
+
+<hr>
+<h2 id="5-market-outlook--strategic-takeaways">5. Market Outlook &amp; Strategic Takeaways</h2>
+<p>Where is meeting intelligence heading over the next few years?</p>
+<ol>
+<li>
+<p><strong>The Move Toward User-Controlled Capture</strong>: As organizations become more sensitive to meeting data, there is increasing value in architectures where users control how audio is captured, processed, stored, and shared — whether that means local applications, private infrastructure, or enterprise-managed deployments.</p>
+</li>
+<li>
+<p><strong>On-Device Small Language Models (SLMs)</strong>: Compact models running locally can increasingly handle summarization, extraction, classification, and other post-transcription tasks without requiring sensitive meeting transcripts to leave the environment.</p>
+</li>
+<li>
+<p><strong>Persistent Context Beyond Transcription</strong>: Speech recognition is only one layer of meeting intelligence. Persistent speaker identity, historical context, roles, action items, and relationships between conversations can turn independent transcripts into a longitudinal knowledge system.</p>
+</li>
+</ol>
+<p>This is the direction I believe makes local-first meeting intelligence particularly interesting: <strong>the transcript becomes the beginning of the memory layer, rather than the end product.</strong></p>
+<hr>
+<h2 id="summary--open-source-repository">Summary &amp; Open Source Repository</h2>
+<p><strong>Polyphon AI</strong> brings together:</p>
+<ul>
+<li><strong>Local-First Processing</strong>: Runs the core meeting intelligence pipeline on local or private infrastructure without recurring SaaS processing fees.</li>
+<li><strong>Now on PyPI</strong>: Simple installation via <code>pip install &quot;polyphon-ai[all]&quot;</code> or an isolated CLI with <code>uv tool install</code>.</li>
+<li><strong>Driverless Dual-Stream Capture</strong>: Web Audio API captures meeting-tab and microphone audio without requiring virtual soundcard drivers or a persistent meeting bot.</li>
+<li><strong>Persistent Speaker Identity (VoiceDB)</strong>: Local speaker embeddings, 70/30 centroid adaptation, verbal name inference (<code>--infer-names</code>), and vectorized cosine matching reduce repetitive <code>Speaker 01</code> manual labeling across meetings.</li>
+<li><strong>Dual-Pass Processing</strong>: Low-latency Sortformer streaming feedback is paired with higher-context Pyannote 3.1 offline reconciliation.</li>
+<li><strong>Timestamp-Preserving Clean Verbatim</strong>: Token-level filler tagging allows clean transcripts while retaining the original timing information required for synchronized playback.</li>
+<li><strong>Self-Contained Interactive HTML Artifacts</strong>: Portable meeting reports with transcript synchronization, speaker information, search, and meeting insights.</li>
+</ul>
+<p>📦 <strong>PyPI Package</strong>:
+
+
+
+
+
+
+
+  <a href="https://pypi.org/project/polyphon-ai/" target="_blank" rel="noopener noreferrer" >https://pypi.org/project/polyphon-ai/</a>
+</p>
+<p>📦 <strong>GitHub Repository</strong>:
+
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/polyphon-ai" target="_blank" rel="noopener noreferrer" >https://github.com/seehiong/polyphon-ai</a>
+</p>
+<p>Feel free to clone the repository, install it from PyPI, test it with your own meetings, and experiment with persistent speaker profiles through VoiceDB.</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/09/reference-guided-mesh-coloring-with-blender-mcp/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Reference-Guided Mesh Coloring with Blender MCP</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
