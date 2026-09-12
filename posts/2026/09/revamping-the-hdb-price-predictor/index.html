@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/09/revamping-the-hdb-price-predictor/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Revamping the HDB Price Predictor">
+  <meta property="og:description" content="A practical deep dive into revamping a Singapore HDB price predictor into a fully client-side ML application, adding a private non-landed property model, chronological validation, and separate historical/comparable and forward-projection modes. The post covers XGBoost, feature engineering, MRT proximity, project-level pricing signals, browser-based inference, and the assumptions behind index-adjusted forecasts.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-09-12T10:00:00+08:00">
+    <meta property="article:modified_time" content="2026-09-12T10:00:00+08:00">
+    <meta property="article:tag" content="XGBoost">
+    <meta property="article:tag" content="HDB">
+    <meta property="article:tag" content="Machine Learning">
+    <meta property="article:tag" content="Singapore Property">
+    <meta property="article:tag" content="Private Property">
+    <meta property="article:tag" content="URA">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Revamping the HDB Price Predictor">
+  <meta name="twitter:description" content="A practical deep dive into revamping a Singapore HDB price predictor into a fully client-side ML application, adding a private non-landed property model, chronological validation, and separate historical/comparable and forward-projection modes. The post covers XGBoost, feature engineering, MRT proximity, project-level pricing signals, browser-based inference, and the assumptions behind index-adjusted forecasts.">
+
+  <meta itemprop="name" content="Revamping the HDB Price Predictor">
+  <meta itemprop="description" content="A practical deep dive into revamping a Singapore HDB price predictor into a fully client-side ML application, adding a private non-landed property model, chronological validation, and separate historical/comparable and forward-projection modes. The post covers XGBoost, feature engineering, MRT proximity, project-level pricing signals, browser-based inference, and the assumptions behind index-adjusted forecasts.">
+  <meta itemprop="datePublished" content="2026-09-12T10:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-09-12T10:00:00+08:00">
+  <meta itemprop="wordCount" content="2150">
+  <meta itemprop="keywords" content="XGBoost,HDB,Machine Learning,Singapore Property,Private Property,URA,Feature Engineering,Client-Side ML,In-Browser AI"><title>Revamping the HDB Price Predictor | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/09/revamping-the-hdb-price-predictor/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Revamping the HDB Price Predictor</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-09-12T10:00:00&#43;08:00">September 12, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/xgboost">XGBoost</a>
+            
+              , <a href="/tags/hdb">HDB</a>
+            
+              , <a href="/tags/machine-learning">Machine Learning</a>
+            
+              , <a href="/tags/singapore-property">Singapore Property</a>
+            
+              , <a href="/tags/private-property">Private Property</a>
+            
+              , <a href="/tags/ura">URA</a>
+            
+              , <a href="/tags/feature-engineering">Feature Engineering</a>
+            
+              , <a href="/tags/client-side-ml">Client-Side ML</a>
+            
+              , <a href="/tags/in-browser-ai">In-Browser AI</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/hdb-revamp/cover.png');"></div>
+          <img src="/images/hdb-revamp/cover.png" alt="Revamping the HDB Price Predictor cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>Building on the series that started with 
+
+
+
+
+
+
+  <a href="/posts/2025/04/feature-impact-on-hdb-predictions/" >Feature Impact on HDB Predictions</a>
+ and 
+
+
+
+
+
+
+  <a href="/posts/2025/04/from-model-to-hdb-app/" >From Model to HDB App</a>
+, this post documents a significant revamp of the 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/hdb-price-predictor" target="_blank" rel="noopener noreferrer" >HDB Price Predictor</a>
+ - now running entirely in the browser with no server, zero cold starts, and offline capability.</p>
+<p>Three things changed materially:</p>
+<ol>
+<li><strong>A second model</strong> covering private non-landed properties (including condominiums, apartments, and executive condominiums represented in the transaction data) sourced from URA caveats</li>
+<li><strong>Two prediction modes</strong> that make explicit which engine is running and what its error means</li>
+<li><strong>Honest measurement</strong> - chronological holdout instead of random split, and a clear separation between what the model measures and what it assumes</li>
+</ol>
+<h2 id="background-why-the-revamp">Background: Why the Revamp</h2>
+<p>The original predictor was trained on HDB resale data and deployed as a Streamlit app backed by KServe. That worked well for demonstrating the ML pipeline, but it had practical limitations - a server that cold-starts, a single property class, and no way to project beyond the training window.</p>
+<p>The revamp sets a different constraint: <strong>everything runs in the browser</strong>. The model, scaler, and inference logic are all shipped as static files and evaluated in JavaScript. No API call, no waiting, no cost per inference.</p>
+<p>That constraint forced every design decision to be explicit: how to represent the model compactly, how to scale features identically between Python training and JS inference, and - most importantly - how to handle time.</p>
+<h2 id="the-two-models">The Two Models</h2>
+<h3 id="model-1-public-hdb-resale-600-trees">Model 1: Public HDB Resale (600 Trees)</h3>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Metric</th>
+          <th style="text-align: left">Value</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Training data</td>
+          <td style="text-align: left">240,073 resale registrations (HDB via Data.gov.sg, Jan 2017 - Sep 2026)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Holdout</td>
+          <td style="text-align: left">18,278 future sales (chronological split on 2026+)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">MAPE</td>
+          <td style="text-align: left"><strong>4.63%</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left">MAE</td>
+          <td style="text-align: left">S$ 31,090</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">R²</td>
+          <td style="text-align: left">0.9553</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Features</td>
+          <td style="text-align: left">60 (spatial, temporal, flat type/model, MRT proximity)</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="model-2-private-non-landed-77-trees">Model 2: Private Non-Landed (77 Trees)</h3>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Metric</th>
+          <th style="text-align: left">Value</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Training data</td>
+          <td style="text-align: left">71,538 non-landed URA caveats (Jun 2021 - Jun 2026)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Holdout</td>
+          <td style="text-align: left">5,458 future sales (chronological split on 2026+)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">MAPE</td>
+          <td style="text-align: left"><strong>6.27%</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left">MAE</td>
+          <td style="text-align: left">S$ 136,553</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">R²</td>
+          <td style="text-align: left">0.9597</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Features</td>
+          <td style="text-align: left">45 (project encoding, district, segment, floor, tenure, remaining lease)</td>
+      </tr>
+  </tbody>
+</table>
+<p>Both models use XGBoost with max depth 8 and early stopping. The private model stopped after 77 trees versus 600 for HDB. Likely contributors are its shorter training history and the strong project-level encoding, which concentrates much of the price signal into a small number of features.</p>
+<h2 id="feature-engineering">Feature Engineering</h2>
+<h3 id="hdb-features">HDB Features</h3>
+<p>The 60 features fall into four groups:</p>
+<p><strong>Temporal</strong> - <code>sale_year</code>, <code>sale_month</code> capture the market level at the time of sale. These are the features that make the model time-aware - but also the ones that hit a wall at the training boundary, which is why forward projection needs a separate mechanism.</p>
+<p><strong>Flat characteristics</strong> - <code>floor_area_sqm</code>, <code>storey_avg</code>, <code>remaining_lease_years</code>, plus one-hot encodings of <code>flat_type</code> (7 categories) and <code>flat_model</code> (20 categories). Remaining lease is computed as <code>(lease_commence_year + 99) - sale_year</code>, capped at 99 years.</p>
+<p><strong>Location</strong> - One-hot encodings of <code>town</code> (26 towns). This gives the model a discrete location signal without requiring geocoordinates, which are unavailable for all historical records.</p>
+<p><strong>MRT proximity</strong> - <code>mrt_distance_km</code> (continuous, straight-line to nearest exit) and <code>mrt_walkable</code> (binary flag at ≤ 400 m). These were added in a later iteration after measuring a S$2,745 MAE improvement even with ~7% of blocks having averaged distances due to shared block keys.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">FEATURE_NAMES</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;floor_area_sqm&#39;</span><span class="p">,</span> <span class="s1">&#39;storey_avg&#39;</span><span class="p">,</span> <span class="s1">&#39;sale_year&#39;</span><span class="p">,</span> <span class="s1">&#39;sale_month&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;remaining_lease_years&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;flat_type_1 ROOM&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="s1">&#39;flat_type_MULTI-GENERATION&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;flat_model_2-room&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="s1">&#39;flat_model_Type S2&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;town_ANG MO KIO&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="s1">&#39;town_YISHUN&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;mrt_distance_km&#39;</span><span class="p">,</span> <span class="s1">&#39;mrt_walkable&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>All features are MinMax-scaled before tree traversal. The scaler parameters are exported as JSON so the browser can apply the identical transformation without calling Python.</p>
+<h3 id="private-condo-features">Private Condo Features</h3>
+<p>The private model&rsquo;s strongest feature is <strong>project-level price encoding</strong> - a mean PSF (price per square foot) per development, computed on the training set only and smoothed against the global mean for developments with fewer than five transactions. In a variance-decomposition check on the training data, grouping transactions by project accounted for approximately 87% of observed PSF variance, compared with approximately 47% when grouping by district.</p>
+<p>Additional features include: <code>area</code>, <code>floor_mid</code>, <code>remaining_lease</code>, <code>sale_year</code>, <code>sale_month</code>, <code>project_txn_count</code>, <code>street_psf</code> (street-level encoding as a fallback), tenure flags (<code>is_freehold</code>, <code>is_99_yr</code>, <code>is_999_yr</code>), property type dummies, market segment dummies (CCR/RCR/OCR), and 28 district dummies.</p>
+<h2 id="why-chronological-validation">Why Chronological Validation</h2>
+<p>This is the most important methodological decision, and it&rsquo;s the one most often skipped in tutorials.</p>
+<p>A random train/test split lets the model see later sales of the same block during training, then be tested on earlier ones. In a market that rose ~31% between 2017 and 2026, this leaks both price level and trajectory. The result is an accuracy figure that looks good but does not tell you how well the model will perform on a sale that hasn&rsquo;t happened yet - which is exactly the task.</p>
+<p>The shipped models use chronological holdout: all complete calendar years through end-2025 for training, and subsequent unseen future sales (2026 onwards) for evaluation. This ensures that historical comparable valuations (up to 2025) are fully learned by the tree structures, while true forward generalization is evaluated on future transactions. The difference is significant:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Split method</th>
+          <th style="text-align: left">HDB MAPE</th>
+          <th style="text-align: left">Notes</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Random split (shuffled)</td>
+          <td style="text-align: left">~4.1%</td>
+          <td style="text-align: left">Looks good, leaks future market level</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Chronological holdout (2026 unseen sales)</td>
+          <td style="text-align: left"><strong>4.63%</strong></td>
+          <td style="text-align: left">Evaluated on 18,278 unseen transactions</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Multi-year holdout (2025+ sales)</td>
+          <td style="text-align: left"><strong>7.22%</strong></td>
+          <td style="text-align: left">Conservative multi-year evaluation (43,091 transactions)</td>
+      </tr>
+  </tbody>
+</table>
+<p>The 4.63% figure represents immediate forward generalization on unseen 2026 transactions (and 6.27% for private condos). When extending the validation window across multiple unseen years (2025+), error naturally widens to 7.22% for HDB (and 7.52% for private non-landed). Rather than citing only the more flattering single-year metric, the application deliberately incorporates the conservative multi-year bounds (±7.2% for HDB, ±7.5% for condo) when displaying indicative real-world confidence intervals in the UI.</p>
+<h2 id="the-two-prediction-modes">The Two Prediction Modes</h2>
+<p>This is the design decision that prompted the most rethinking.</p>
+<p>A common pattern in property-price demos is to train a model, let users pick any date, and display a number. The problem is that <strong>standard tree ensembles do not extrapolate a continuous trend beyond the range represented by their learned splits</strong>. Once a temporal feature such as <code>sale_year</code> moves beyond the relevant training thresholds, additional increases do not automatically produce further price growth—any query beyond the cutoff simply follows the same branches to the same terminal leaves. The unadjusted &ldquo;future estimate&rdquo; is actually just the training-range endpoint, presented without qualification.</p>
+<p>Initially, one might consider three conceptual modes: historical back-testing, current comparable valuation, and forward projection. But looking closely at the tree mechanics and the codebase, that third split was artificial:</p>
+<p>In the inference engine (<code>getForecastAdjustment()</code> in <code>app.js</code>), there are fundamentally only <strong>two operational regimes</strong>:</p>
+<ol>
+<li><strong>Within training cutoff (<code>sale_year &lt;= cutoff</code>)</strong>: pure XGBoost tree traversal</li>
+<li><strong>Beyond training cutoff (<code>sale_year &gt; cutoff</code>)</strong>: XGBoost base at cutoff clamped + index compounding</li>
+</ol>
+<p>Whether a user queries 2022 (past) or 2025 (latest complete year in training data), the engine executes the exact same code path, feeds the actual <code>sale_year</code> and <code>sale_month</code> into the trees, sets <code>growthFactor = 1.0</code>, and carries the exact same measured holdout error. Splitting that into two separate modes in the UI created unnecessary complexity.</p>
+<p>The revamp aligns the UI directly with the engine into two clear modes:</p>
+<h3 id="mode-1---historical--comparable-valuation-within-cutoff">Mode 1 - Historical / Comparable Valuation (Within Cutoff)</h3>
+<p><strong>When</strong>: user selects any year and month within the model&rsquo;s training range (<code>sale_year &lt;= latest_complete_year</code>, e.g. 2017–2025 for HDB, 2021–2025 for private condos).</p>
+<p><strong>What the engine does</strong>: passes <code>sale_year</code> and <code>sale_month</code> directly to the XGBoost model. <code>growthFactor = 1.0</code>. No macroeconomic index is applied.</p>
+<p><strong>What the error means</strong>: the published chronological holdout MAPE provides the empirical error benchmark for this mode: <strong>4.63% for HDB</strong> and <strong>6.27% for Private Non-Landed</strong> on the evaluated unseen transactions.</p>
+<p><strong>Use cases</strong>:</p>
+<ul>
+<li>&ldquo;What did a comparable flat sell for back in 2022?&rdquo; (historical back-test)</li>
+<li>&ldquo;What is a comparable property worth within the established market data?&rdquo; (comparable valuation)</li>
+</ul>
+<h3 id="mode-2---index-adjusted-forward-projection-beyond-cutoff">Mode 2 - Index-Adjusted Forward Projection (Beyond Cutoff)</h3>
+<p><strong>When</strong>: user selects a year beyond the model&rsquo;s training cutoff (e.g. 2026 through 2032).</p>
+<p><strong>What the engine does</strong>:</p>
+<ol>
+<li>Clamps <code>sale_year</code> to the model&rsquo;s last complete training year (2025).</li>
+<li>Sets <code>modelMonth</code> to a neutral mid-year month (June) to prevent within-year tree splitting thresholds from causing seasonal price cliffs.</li>
+<li>Compounds the baseline price using an annualized historical growth rate derived from official published indices: <code>growthFactor = (1 + annual_growth) ^ years_projected</code>.</li>
+</ol>
+<p>Rates are calculated from the relevant official index levels over the model&rsquo;s selected historical window using compound annual growth, rather than treated as official forecasts. The HDB Resale Price Index (base period 1Q2009 = 100) yields ~6.73% annualized over the public training period, while the URA Property Price Index yields distinct annualized rates when segmented by region for private property:</p>
+<ul>
+<li><strong>Core Central Region (CCR)</strong>: 3.86%/yr</li>
+<li><strong>Rest of Central Region (RCR)</strong>: 5.92%/yr</li>
+<li><strong>Outside Central Region (OCR)</strong>: 7.84%/yr</li>
+</ul>
+<p>Segment-specific rates are crucial: from 2021-Q1 to 2026-Q2, CCR grew ~20%, RCR ~33%, and OCR ~46%. A single blended rate overstates a prime CCR six-year forecast by about 24% (~S$876k on a S$3M condo).</p>
+<p><strong>What the error means</strong>: the base valuation inherits the model&rsquo;s measured error benchmark (with the app&rsquo;s conservative ±7.2% / ±7.5% multi-year margin), while the projection adds an explicit macroeconomic assumption. If market policy, BTO supply, or interest rates pivot, the future trend may diverge. The app explicitly displays the assumed rate and horizon (e.g., <code>• index-adjusted forward valuation: +2.5 yr @ 6.7%/yr</code>) rather than pretending it is an empirical measurement.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="c1">// app.js - getForecastAdjustment()
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">function</span> <span class="nx">getForecastAdjustment</span><span class="p">(</span><span class="nx">scaler</span><span class="p">,</span> <span class="nx">saleYear</span><span class="p">,</span> <span class="nx">saleMonth</span><span class="p">,</span> <span class="nx">segment</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">cutoffYear</span> <span class="o">=</span> <span class="nx">scaler</span> <span class="o">&amp;&amp;</span> <span class="nx">scaler</span><span class="p">.</span><span class="nx">latest_complete_year</span>
+</span></span><span class="line"><span class="cl">    <span class="o">?</span> <span class="nx">scaler</span><span class="p">.</span><span class="nx">latest_complete_year</span>
+</span></span><span class="line"><span class="cl">    <span class="o">:</span> <span class="p">(</span><span class="nx">scaler</span> <span class="o">&amp;&amp;</span> <span class="nx">scaler</span><span class="p">.</span><span class="nx">latest_year</span> <span class="o">?</span> <span class="nx">scaler</span><span class="p">.</span><span class="nx">latest_year</span> <span class="o">:</span> <span class="nx">saleYear</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="nx">saleYear</span> <span class="o">&gt;</span> <span class="nx">cutoffYear</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">{</span> <span class="nx">modelYear</span><span class="o">:</span> <span class="nx">saleYear</span><span class="p">,</span> <span class="nx">modelMonth</span><span class="o">:</span> <span class="nx">saleMonth</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">             <span class="nx">growthFactor</span><span class="o">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="nx">yearsProjected</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">growthRate</span><span class="o">:</span> <span class="mi">0</span> <span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">segmentGrowth</span> <span class="o">=</span> <span class="p">(</span><span class="nx">segment</span> <span class="o">&amp;&amp;</span> <span class="nx">scaler</span> <span class="o">&amp;&amp;</span> <span class="nx">scaler</span><span class="p">.</span><span class="nx">segment_growth</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="o">?</span> <span class="nx">scaler</span><span class="p">.</span><span class="nx">segment_growth</span><span class="p">[</span><span class="nx">segment</span><span class="p">]</span> <span class="o">:</span> <span class="kc">undefined</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">growth</span> <span class="o">=</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">segmentGrowth</span> <span class="o">===</span> <span class="s1">&#39;number&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="o">?</span> <span class="nx">segmentGrowth</span>
+</span></span><span class="line"><span class="cl">    <span class="o">:</span> <span class="p">((</span><span class="nx">scaler</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">scaler</span><span class="p">.</span><span class="nx">annual_growth</span> <span class="o">===</span> <span class="s1">&#39;number&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="o">?</span> <span class="nx">scaler</span><span class="p">.</span><span class="nx">annual_growth</span>
+</span></span><span class="line"><span class="cl">        <span class="o">:</span> <span class="nx">FALLBACK_ANNUAL_GROWTH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">month</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">saleMonth</span> <span class="o">||</span> <span class="mi">6</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">yearsProjected</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="nx">saleYear</span> <span class="o">-</span> <span class="nx">cutoffYear</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="nx">month</span> <span class="o">/</span> <span class="mi">12</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">modelMonth</span> <span class="o">=</span> <span class="nx">NEUTRAL_FORECAST_MONTH</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">modelYear</span><span class="o">:</span> <span class="nx">cutoffYear</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">modelMonth</span><span class="o">:</span> <span class="nx">modelMonth</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">growthFactor</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nx">growth</span><span class="p">,</span> <span class="nx">yearsProjected</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">yearsProjected</span><span class="o">:</span> <span class="nx">yearsProjected</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">growthRate</span><span class="o">:</span> <span class="nx">growth</span>
+</span></span><span class="line"><span class="cl">  <span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The UI dynamically updates the year label (<code>Sale Year (Historical)</code> in green vs <code>Target Sale Year (Forecast)</code>) and the guidance badge based on the active property class&rsquo;s cutoff.</p>
+<h2 id="in-browser-xgboost-inference">In-Browser XGBoost Inference</h2>
+<p>The model is exported as a compact JSON tree structure after training:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># pipeline_public/03_train_model.py</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">export_web_model</span><span class="p">(</span><span class="n">booster</span><span class="p">,</span> <span class="n">best_iteration</span><span class="p">,</span> <span class="n">scaler</span><span class="p">,</span> <span class="n">output_path</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">trees</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">tree_dump</span> <span class="ow">in</span> <span class="n">booster</span><span class="o">.</span><span class="n">get_dump</span><span class="p">(</span><span class="n">dump_format</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">tree</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">tree_dump</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">packed</span> <span class="o">=</span> <span class="n">pack_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>   <span class="c1"># compact {f, c, l, r, w} arrays</span>
+</span></span><span class="line"><span class="cl">        <span class="n">trees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packed</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">web_model</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&#34;b&#34;</span><span class="p">:</span> <span class="n">base_score</span><span class="p">,</span> <span class="s2">&#34;t&#34;</span><span class="p">:</span> <span class="n">trees</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">web_model</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">))</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>In the browser, inference is a typed <code>Float32Array</code> tree walk:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="kd">function</span> <span class="nx">evaluateHdbModel</span><span class="p">(</span><span class="nx">inputFeatures</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 1. MinMax scale: x_scaled = x * scale + min
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kr">const</span> <span class="nx">scaled</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Float32Array</span><span class="p">(</span><span class="nx">featureCount</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">featureCount</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">scaled</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">inputFeatures</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">*</span> <span class="nx">scalerData</span><span class="p">.</span><span class="nx">scale</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">+</span> <span class="nx">scalerData</span><span class="p">.</span><span class="nx">min</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 2. Traverse 600 decision trees
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kd">let</span> <span class="nx">totalScore</span> <span class="o">=</span> <span class="nx">modelData</span><span class="p">.</span><span class="nx">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kr">const</span> <span class="nx">tree</span> <span class="k">of</span> <span class="nx">modelData</span><span class="p">.</span><span class="nx">t</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">let</span> <span class="nx">node</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nx">tree</span><span class="p">.</span><span class="nx">l</span><span class="p">[</span><span class="nx">node</span><span class="p">]</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">node</span> <span class="o">=</span> <span class="nx">scaled</span><span class="p">[</span><span class="nx">tree</span><span class="p">.</span><span class="nx">f</span><span class="p">[</span><span class="nx">node</span><span class="p">]]</span> <span class="o">&lt;</span> <span class="nx">tree</span><span class="p">.</span><span class="nx">c</span><span class="p">[</span><span class="nx">node</span><span class="p">]</span> <span class="o">?</span> <span class="nx">tree</span><span class="p">.</span><span class="nx">l</span><span class="p">[</span><span class="nx">node</span><span class="p">]</span> <span class="o">:</span> <span class="nx">tree</span><span class="p">.</span><span class="nx">r</span><span class="p">[</span><span class="nx">node</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">totalScore</span> <span class="o">+=</span> <span class="nx">tree</span><span class="p">.</span><span class="nx">w</span><span class="p">[</span><span class="nx">node</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nx">totalScore</span> <span class="o">*</span> <span class="nx">adj</span><span class="p">.</span><span class="nx">growthFactor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Inference time: <strong>&lt; 1 millisecond</strong> for 600 trees. The model runs reactively on every slider drag or dropdown change.</p>
+<h2 id="what-the-literature-shows">What the Literature Shows</h2>
+<p>The broader machine learning literature—including the 
+
+
+
+
+
+
+  <a href="https://www.researchgate.net/publication/377065514_An_Optimal_House_Price_Prediction_Algorithm_XGBoost" target="_blank" rel="noopener noreferrer" >XGBoost house price prediction study</a>
+—demonstrates that gradient-boosted tree models are widely used and well suited for tabular property price prediction. The purpose of citing this work is not to claim that it guarantees a specific error rate for Singapore property, but to show that the underlying modelling approach is well established. The empirical results here (4.63% chronological holdout MAPE for HDB and 6.27% for private condos) align naturally with those published benchmarks.</p>
+<p>The forward-projection disclaimer in the README is not a contradiction of that literature. The studies referenced in the literature evaluate against historical observations with known outcomes rather than genuinely unknown future transactions. In contrast, this project adds a UI that lets users query arbitrary future dates—taking the output beyond what any historical validation can measure. The distinction between an empirically measured model error and an unvalidated forward macroeconomic assumption is made explicit rather than hidden.</p>
+<h2 id="results">Results</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/hdb-revamp/hdb-predictor-hero.png"   alt="HDB Price Predictor main screen" class="sc-image sc-image-default"
+       >
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/hdb-revamp/hdb-predictor-property-toggle.png"   alt="Private condo valuation mode" class="sc-image sc-image-default"
+       >
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/hdb-revamp/hdb-predictor-transaction-map.png"   alt="Interactive historical resale transaction map" class="sc-image sc-image-default"
+       >
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/hdb-revamp/hdb-predictor-pipeline-run.png"   alt="Training pipeline terminal output" class="sc-image sc-image-default"
+       >
+
+
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>The key design principles that carried through this revamp:</p>
+<ul>
+<li><strong>Honest measurement over flattering numbers</strong> - chronological holdout, not random split</li>
+<li><strong>Explicit assumptions</strong> - forward projection is labelled with the rate and horizon it assumes</li>
+<li><strong>Two modes, cleanly delineated</strong> - within-training historical/comparable valuation vs forward projection beyond the cutoff carry different confidence and serve different questions</li>
+<li><strong>Offline-first</strong> - the model, scaler, and all inference logic ship as static files; no server needed</li>
+<li><strong>Segment-specific growth rates</strong> - a single blended rate for CCR/RCR/OCR private property can be misleading</li>
+</ul>
+<p>The full source is on GitHub: 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/hdb-price-predictor" target="_blank" rel="noopener noreferrer" >hdb-price-predictor</a>
+. The Python ETL and training pipeline is fully reproducible with a single <code>uv run python pipeline_public/run_pipeline.py</code> command.</p>
+<p>Next up: integrating this valuation engine into the 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/autonomous-hdb-deepagents" target="_blank" rel="noopener noreferrer" >Autonomous HDB DeepAgents</a>
+ pipeline so natural-language queries return both geospatial results and XGBoost price estimates side by side.</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/09/polyphon-ai-local-meeting-intelligence/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Polyphon AI: Local Meeting Intelligence</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
