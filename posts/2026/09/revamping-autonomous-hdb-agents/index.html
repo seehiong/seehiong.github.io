@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/09/revamping-autonomous-hdb-agents/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Revamping Autonomous HDB Agents">
+  <meta property="og:description" content="A technical walkthrough of revamping Autonomous HDB DeepAgents: replacing PostgreSQL/PostGIS with in-memory SQLite and native Python geodetics, integrating XGBoost valuations into LangGraph, and adding temporal comparability checks to avoid misleading price comparisons. Python now renders the numerical tables deterministically, while the LLM interprets the results. The post also covers data refresh, OneMap geocoding verification, reproducible benchmarks, and the design trade-offs behind constrained autonomy.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-09-19T10:00:00+08:00">
+    <meta property="article:modified_time" content="2026-09-19T10:00:00+08:00">
+    <meta property="article:tag" content="DeepAgents">
+    <meta property="article:tag" content="LangGraph">
+    <meta property="article:tag" content="XGBoost">
+    <meta property="article:tag" content="Machine Learning">
+    <meta property="article:tag" content="HDB">
+    <meta property="article:tag" content="Singapore Property">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Revamping Autonomous HDB Agents">
+  <meta name="twitter:description" content="A technical walkthrough of revamping Autonomous HDB DeepAgents: replacing PostgreSQL/PostGIS with in-memory SQLite and native Python geodetics, integrating XGBoost valuations into LangGraph, and adding temporal comparability checks to avoid misleading price comparisons. Python now renders the numerical tables deterministically, while the LLM interprets the results. The post also covers data refresh, OneMap geocoding verification, reproducible benchmarks, and the design trade-offs behind constrained autonomy.">
+
+  <meta itemprop="name" content="Revamping Autonomous HDB Agents">
+  <meta itemprop="description" content="A technical walkthrough of revamping Autonomous HDB DeepAgents: replacing PostgreSQL/PostGIS with in-memory SQLite and native Python geodetics, integrating XGBoost valuations into LangGraph, and adding temporal comparability checks to avoid misleading price comparisons. Python now renders the numerical tables deterministically, while the LLM interprets the results. The post also covers data refresh, OneMap geocoding verification, reproducible benchmarks, and the design trade-offs behind constrained autonomy.">
+  <meta itemprop="datePublished" content="2026-09-19T10:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-09-19T10:00:00+08:00">
+  <meta itemprop="wordCount" content="4938">
+  <meta itemprop="keywords" content="DeepAgents,LangGraph,XGBoost,Machine Learning,HDB,Singapore Property,Geospatial,SQLite,LLM,OneMap,FastAPI,Gradio,Python,AI Engineering"><title>Revamping Autonomous HDB Agents | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/09/revamping-autonomous-hdb-agents/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Revamping Autonomous HDB Agents</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-09-19T10:00:00&#43;08:00">September 19, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/deepagents">DeepAgents</a>
+            
+              , <a href="/tags/langgraph">LangGraph</a>
+            
+              , <a href="/tags/xgboost">XGBoost</a>
+            
+              , <a href="/tags/machine-learning">Machine Learning</a>
+            
+              , <a href="/tags/hdb">HDB</a>
+            
+              , <a href="/tags/singapore-property">Singapore Property</a>
+            
+              , <a href="/tags/geospatial">Geospatial</a>
+            
+              , <a href="/tags/sqlite">SQLite</a>
+            
+              , <a href="/tags/llm">LLM</a>
+            
+              , <a href="/tags/onemap">OneMap</a>
+            
+              , <a href="/tags/fastapi">FastAPI</a>
+            
+              , <a href="/tags/gradio">Gradio</a>
+            
+              , <a href="/tags/python">Python</a>
+            
+              , <a href="/tags/ai-engineering">AI Engineering</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/deepagent/revamping-autonomous-hdb-deepagents.png');"></div>
+          <img src="/images/deepagent/revamping-autonomous-hdb-deepagents.png" alt="Revamping Autonomous HDB Agents cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>In last week&rsquo;s post, 
+
+
+
+
+
+
+  <a href="/posts/2026/09/revamping-the-hdb-price-predictor/" >Revamping the HDB Price Predictor</a>
+, I overhauled my machine learning models into client-side, browser-evaluated engines with chronological holdouts and multi-year projection modes. I concluded that post with a roadmap promise:</p>
+<blockquote>
+<p><em>&ldquo;Next up: integrating this valuation engine into the 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/autonomous-hdb-deepagents" target="_blank" rel="noopener noreferrer" >Autonomous HDB DeepAgents</a>
+ pipeline so natural-language queries return both geospatial results and XGBoost price estimates side by side.&rdquo;</em></p></blockquote>
+<p>This week, that integration is complete. With these changes, a user can submit an open-ended natural-language query to retrieve relevant historical transactions, enrich them with straight-line distances to MRT station exits, and evaluate model-estimated price benchmarks alongside the original transaction data. The local data and valuation pipeline requires no external database setup, while natural-language interpretation uses the configured LLM provider.</p>
+<p>Turning a standalone model into an agentic intelligence tool meant revisiting the foundation I laid back in December 2025 in 
+
+
+
+
+
+
+  <a href="/posts/2025/12/autonomous-deepagents-for-hdb-insights/" >Autonomous DeepAgents for HDB Insights</a>
+.</p>
+<p>In this revamp, four major architectural upgrades transform the project from a heavy database-bound prototype into a leaner intelligence pipeline:</p>
+<ol>
+<li><strong>Removing the External Database Runtime</strong>: Replacing Dockerized PostgreSQL, PostGIS, and MCP Toolbox with an in-memory SQLite table and native Python geodetics.</li>
+<li><strong>Integrating XGBoost-Based Price Estimates</strong>: Inserting an ML valuation node into the LangGraph state machine to compute model-estimated prices, model-error-based indicative ranges, and valuation gaps for retrieved transactions.</li>
+<li><strong>Preventing Misleading Historical Price Comparisons</strong>: Enforcing temporal alignment checks to distinguish elapsed market inflation from relative price signals.</li>
+<li><strong>Deterministic Tables, LLM-Generated Analysis</strong>: Adopting a strict separation of concerns—Python deterministically renders every tabular figure, while the LLM focuses purely on qualitative interpretation.</li>
+</ol>
+<hr>
+<h2 id="1-removing-the-external-database-runtime">1. Removing the External Database Runtime</h2>
+<p>In the original 2025 architecture, the pipeline required running Docker Compose to spin up a PostgreSQL instance with the PostGIS extension, alongside an MCP Toolbox server. While PostGIS is the gold standard for enterprise spatial queries, running a dedicated database daemon added noticeable operational overhead: startup delays, container resource contention, and network hops.</p>
+<p>For ~985,000 historical HDB resale transactions (dating from 1990 to 2026), full-blown database infrastructure is unnecessary.</p>
+<h3 id="in-memory-sqlite-on-first-use">In-Memory SQLite on First Use</h3>
+<p>The revamped <code>local_store.py</code> loads the raw seed CSVs directly from <code>db/init/data/</code> into an in-memory SQLite database:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># autonomous_hdb_deepagents/agent/local_store.py</span>
+</span></span><span class="line"><span class="cl"><span class="n">RESALE_GLOB</span> <span class="o">=</span> <span class="s2">&#34;resale_flat_price_*.csv&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">_ensure_db</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="k">global</span> <span class="n">_conn</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">_conn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">_conn</span>
+</span></span><span class="line"><span class="cl">    <span class="k">with</span> <span class="n">_lock</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">_conn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">_conn</span>
+</span></span><span class="line"><span class="cl">        <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&#34;:memory:&#34;</span><span class="p">,</span> <span class="n">check_same_thread</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_init_schema</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_load_resale_csvs</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_create_indexes</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_conn</span> <span class="o">=</span> <span class="n">conn</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">_conn</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>On first query, parsing and indexing ~985k CSV rows into memory takes approximately 4 seconds. Once the indexes are built, queries like:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">block</span><span class="p">,</span><span class="w"> </span><span class="n">street_name</span><span class="p">,</span><span class="w"> </span><span class="n">flat_type</span><span class="p">,</span><span class="w"> </span><span class="n">floor_area_sqm</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">       </span><span class="n">resale_price</span><span class="p">,</span><span class="w"> </span><span class="k">month</span><span class="p">,</span><span class="w"> </span><span class="n">flat_model</span><span class="p">,</span><span class="w"> </span><span class="n">lease_commence_date</span><span class="p">,</span><span class="w"> </span><span class="n">storey_range</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">resale</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">town</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="p">:</span><span class="n">town</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">flat_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">:</span><span class="n">flat_type</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">resale_price</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">:</span><span class="n">max_price</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">30</span><span class="p">;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>It is worth scoping what &ldquo;fast&rdquo; actually means here, measured end to end rather than assumed. <code>list_hdb_flats</code> &ndash; the tool the pipeline actually calls &ndash; originally matched <code>town</code> with a plain substring <code>LIKE '%...%'</code> (to tolerate loose station-to-town resolution), and <code>EXPLAIN QUERY PLAN</code> showed that pattern could not use the <code>idx_resale</code> index: a full scan over ~985k rows plus a temp B-tree sort, measured at a median of ~143 ms. Every real caller, though, already passes a canonical, upper-cased town name (<code>mrt_resolve_node</code>&rsquo;s station-code lookup, <code>intent_node</code>&rsquo;s LLM extraction) &ndash; a genuine fragment like <code>&quot;BISH&quot;</code> never actually occurs in the pipeline, only in a test that deliberately checks the tool still tolerates one. So <code>list_hdb_flats</code> now tries an exact match against a generated, indexed <code>town_norm</code> column first, and only falls back to the original <code>LIKE</code> scan when that returns nothing. The common path is index-backed and measures a median of <strong>~17.9 ms</strong> over 200 repeated queries rotated across five towns &ndash; about 8x faster &ndash; while the rare fragment case still works, just at the old ~124 ms. Geospatial enrichment across MRT exits for a 30-flat batch measures <strong>~3 ms total</strong> (~0.1 ms per flat), and XGBoost inference for the same batch measures <strong>~15 ms total</strong> (~0.5 ms per flat). The whole pipeline still finishes well under the network latency of the downstream LLM API call either way, but the index fix removes SQLite as the dominant cost in the common case.</p>
+<h3 id="python-geodetics-near-singapores-latitude">Python Geodetics Near Singapore&rsquo;s Latitude</h3>
+<p>In PostGIS, I relied on <code>ST_DWithin</code> and <code>ST_Distance</code> on geography/geometry columns. In Python, because Singapore is situated virtually on the equator at approximately <strong>1.35° N</strong>, an equirectangular projection centered on this latitude offers exceptional accuracy:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">KM_PER_DEG_LAT</span> <span class="o">=</span> <span class="mf">110.57</span>
+</span></span><span class="line"><span class="cl"><span class="n">KM_PER_DEG_LON</span> <span class="o">=</span> <span class="mf">111.32</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">_dist_km</span><span class="p">(</span><span class="n">lat1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lat2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon2</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dlat</span> <span class="o">=</span> <span class="p">(</span><span class="n">lat1</span> <span class="o">-</span> <span class="n">lat2</span><span class="p">)</span> <span class="o">*</span> <span class="n">KM_PER_DEG_LAT</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dlon</span> <span class="o">=</span> <span class="p">(</span><span class="n">lon1</span> <span class="o">-</span> <span class="n">lon2</span><span class="p">)</span> <span class="o">*</span> <span class="n">KM_PER_DEG_LON</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dlat</span> <span class="o">*</span> <span class="n">dlat</span> <span class="o">+</span> <span class="n">dlon</span> <span class="o">*</span> <span class="n">dlon</span><span class="p">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong>Benchmarking the Approximation:</strong>
+In <code>tests/test_local_store.py</code>, this equirectangular calculation was benchmarked against the full spherical Haversine formula across the first 500 real HDB block coordinates loaded from <code>hdb_property_info.csv</code> (out of ~13,200 blocks with usable coordinates, spanning Singapore&rsquo;s geographic bounding box, approx. 1.20°N to 1.47°N, 103.60°E to 104.05°E), each evaluated against all 613 official LTA MRT/LRT station exits loaded from the seed data.</p>
+<p>Across this compact ~50 km × 27 km operating territory, cosine distortion is negligible:</p>
+<ul>
+<li>The <strong>maximum observed discrepancy</strong> is <strong>7.9 metres</strong> (with a median difference under 1 metre). The checked-in test asserts a looser 10-metre budget rather than pinning this exact figure, so it stays green if a future data refresh shifts the worst case by a metre or two; 7.9 m is what that budget currently measures.</li>
+<li>Nearest station exit rankings are identical, diverging only on rare centimeter-scale ties between adjacent exits.</li>
+<li>For pedestrian radius filtering (typically 400 m to 800 m), a 10-metre budget is well within the real-world variance of walking paths.</li>
+</ul>
+<p>The payoff: zero external C-extensions, zero database daemons, and instant execution.</p>
+<hr>
+<h2 id="2-integrating-xgboost-based-price-estimates">2. Integrating XGBoost-Based Price Estimates</h2>
+<p>In the previous system, the pipeline stopped at retrieving historical resale transactions and measuring distance to the nearest MRT station. A user reviewing a recent transaction at S$580,000 had no quantitative baseline to assess whether that transaction aligned with broader market pricing patterns.</p>
+<p>The new pipeline embeds the trained XGBoost model (<code>hdb_model.bst</code> / <code>.ubj</code>) and scaler metadata (<code>hdb_scaler.json</code>) directly from the sibling 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/hdb-price-predictor" target="_blank" rel="noopener noreferrer" ><code>hdb-price-predictor</code></a>
+ project.</p>
+<h3 id="the-langgraph-orchestrator">The LangGraph Orchestrator</h3>
+<p>The LangGraph state machine now places <code>valuation_node</code> between spatial enrichment and summarization:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># autonomous_hdb_deepagents/agent/pipeline.py</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span> <span class="o">=</span> <span class="n">StateGraph</span><span class="p">(</span><span class="n">PipelineState</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">set_entry_point</span><span class="p">(</span><span class="s2">&#34;intent&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;intent&#34;</span><span class="p">,</span>      <span class="n">intent_node</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;mrt_resolve&#34;</span><span class="p">,</span> <span class="n">mrt_resolve_node</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;resale&#34;</span><span class="p">,</span>      <span class="n">resale_node</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;mrt&#34;</span><span class="p">,</span>         <span class="n">mrt_node</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;valuation&#34;</span><span class="p">,</span>   <span class="n">valuation_node</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;summary&#34;</span><span class="p">,</span>     <span class="n">summary_node</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">&#34;intent&#34;</span><span class="p">,</span>      <span class="s2">&#34;mrt_resolve&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">&#34;mrt_resolve&#34;</span><span class="p">,</span> <span class="s2">&#34;resale&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">&#34;resale&#34;</span><span class="p">,</span>      <span class="s2">&#34;mrt&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">&#34;mrt&#34;</span><span class="p">,</span>         <span class="s2">&#34;valuation&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">&#34;valuation&#34;</span><span class="p">,</span>   <span class="s2">&#34;summary&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">&#34;summary&#34;</span><span class="p">,</span>     <span class="n">END</span><span class="p">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code>[User Query]
+     │
+     ▼
+[intent_node]       ──&gt; Extracts town, MRT, flat type, budget
+     │
+     ▼
+[mrt_resolve_node]  ──&gt; Resolves MRT to nearest HDB town
+     │
+     ▼
+[resale_node]       ──&gt; Fetches recent transactions from SQLite
+     │
+     ▼
+[mrt_node]          ──&gt; Calculates straight-line distance to MRT exits
+     │
+     ▼
+[valuation_node]    ──&gt; Feeds features into XGBoost model
+     │
+     ▼
+[summary_node]      ──&gt; Generates Markdown table + LLM analysis
+     │
+     ▼
+   [END]</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="dynamic-feature-mapping--minmax-scaling">Dynamic Feature Mapping &amp; MinMax Scaling</h3>
+<p>The valuation node dynamically maps database fields to the exact 60-feature vector expected by the model:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># autonomous_hdb_deepagents/agent/valuation.py</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">value_flat</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">town</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flat_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">floor_area_sqm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">storey</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">lease_commence_year</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">target_year</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">target_month</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flat_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&#34;Model A&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mrt_distance_km</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.513</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">booster</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">feature_idx</span> <span class="o">=</span> <span class="n">_model</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">adj</span> <span class="o">=</span> <span class="n">_forecast_adjustment</span><span class="p">(</span><span class="n">target_year</span><span class="p">,</span> <span class="n">target_month</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">remaining_lease</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mf">99.0</span><span class="p">,</span> <span class="p">(</span><span class="n">lease_commence_year</span> <span class="o">+</span> <span class="mf">99.0</span><span class="p">)</span> <span class="o">-</span> <span class="n">target_year</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">raw</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="s2">&#34;floor_area_sqm&#34;</span><span class="p">]]</span>        <span class="o">=</span> <span class="n">floor_area_sqm</span>
+</span></span><span class="line"><span class="cl">    <span class="n">raw</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="s2">&#34;storey_avg&#34;</span><span class="p">]]</span>             <span class="o">=</span> <span class="n">storey</span>
+</span></span><span class="line"><span class="cl">    <span class="n">raw</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="s2">&#34;sale_year&#34;</span><span class="p">]]</span>              <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">adj</span><span class="p">[</span><span class="s2">&#34;model_year&#34;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">    <span class="n">raw</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="s2">&#34;sale_month&#34;</span><span class="p">]]</span>             <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">adj</span><span class="p">[</span><span class="s2">&#34;model_month&#34;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">    <span class="n">raw</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="s2">&#34;remaining_lease_years&#34;</span><span class="p">]]</span>  <span class="o">=</span> <span class="n">remaining_lease</span>
+</span></span><span class="line"><span class="cl">    <span class="n">raw</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="s2">&#34;mrt_distance_km&#34;</span><span class="p">]]</span>        <span class="o">=</span> <span class="n">mrt_distance_km</span>
+</span></span><span class="line"><span class="cl">    <span class="n">raw</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="s2">&#34;mrt_walkable&#34;</span><span class="p">]]</span>           <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">mrt_distance_km</span> <span class="o">&lt;=</span> <span class="mf">0.4</span> <span class="k">else</span> <span class="mf">0.0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Categorical one-hot encodings</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ft_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;flat_type_</span><span class="si">{</span><span class="n">flat_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">ft_col</span> <span class="ow">in</span> <span class="n">feature_idx</span><span class="p">:</span> <span class="n">raw</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="n">ft_col</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">1.0</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fm_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;flat_model_</span><span class="si">{</span><span class="n">flat_model</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">fm_col</span> <span class="ow">in</span> <span class="n">feature_idx</span><span class="p">:</span> <span class="n">raw</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="n">fm_col</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">1.0</span>
+</span></span><span class="line"><span class="cl">    <span class="n">town_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;town_</span><span class="si">{</span><span class="n">town</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">town_col</span> <span class="ow">in</span> <span class="n">feature_idx</span><span class="p">:</span> <span class="n">raw</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="n">town_col</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">1.0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># MinMax scale: x_scaled = x * scale + min</span>
+</span></span><span class="line"><span class="cl">    <span class="n">scaled</span> <span class="o">=</span> <span class="n">raw</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&#34;scale&#34;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&#34;min&#34;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dmat</span> <span class="o">=</span> <span class="n">xgb</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">scaled</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_names</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">raw_pred</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">booster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">dmat</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">price</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">150_000.0</span><span class="p">,</span> <span class="n">raw_pred</span> <span class="o">*</span> <span class="n">adj</span><span class="p">[</span><span class="s2">&#34;growth_factor&#34;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;estimated_price&#34;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">price</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;range_low&#34;</span><span class="p">:</span>       <span class="nb">round</span><span class="p">(</span><span class="n">price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">_mape_hdb</span><span class="p">)),</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;range_high&#34;</span><span class="p">:</span>      <span class="nb">round</span><span class="p">(</span><span class="n">price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">_mape_hdb</span><span class="p">)),</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;psf&#34;</span><span class="p">:</span>             <span class="nb">round</span><span class="p">(</span><span class="n">price</span> <span class="o">/</span> <span class="p">(</span><span class="n">floor_area_sqm</span> <span class="o">*</span> <span class="mf">10.7639</span><span class="p">)),</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;mode&#34;</span><span class="p">:</span>            <span class="n">adj</span><span class="p">[</span><span class="s2">&#34;mode&#34;</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="deconstructing-the-valuation-pipeline">Deconstructing the Valuation Pipeline</h3>
+<p>Several critical design choices in this excerpt warrant detailed technical examination:</p>
+<h4 id="1-effective-dates--the-forecast-adjustment">1. Effective Dates &amp; The Forecast Adjustment</h4>
+<p>The <code>_forecast_adjustment(target_year, target_month)</code> helper distinguishes between <strong>pure ML inference</strong> and <strong>macroeconomic index projection</strong>:</p>
+<ul>
+<li><strong>Training Cutoff Date</strong>: The model was trained on historical data up to end-2025 (<code>latest_complete_year = 2025</code>).</li>
+<li><strong>Within-Cutoff Mode (<code>target_year &lt;= 2025</code>)</strong>: The trees run in pure historical or comparable mode (<code>growth_factor = 1.0</code>), where price levels are evaluated directly by the tree splits for that year and month.</li>
+<li><strong>Forward Projection Mode (<code>target_year &gt; 2025</code>)</strong>: Because decision trees cannot extrapolate trends beyond the boundary of their training data, tree inputs are clamped to the cutoff year and a neutral mid-year month (<code>model_year = 2025, model_month = 6</code>, avoiding seasonal boundary cliff effects). The tree prediction is then multiplied by an index-growth multiplier:
+$$\text{growth\_factor} = (1 + g)^{\Delta t}$$
+where \(g\) is the annualized growth rate exported in <code>hdb_scaler.json</code> (currently 6.73%, sourced from the HDB Resale Price Index) and \( \Delta t \) is elapsed time. If <code>hdb_scaler.json</code> omits the field, a conservative 2.5% fallback constant is used instead.</li>
+</ul>
+<p>Distinguishing these two components is vital: the output combines a <strong>learned structural valuation</strong> (capturing location, size, lease, and amenities) with an <strong>explicit, transparent macroeconomic growth assumption</strong>.</p>
+<h4 id="2-feature-vector-contract--reproducibility">2. Feature Vector Contract &amp; Reproducibility</h4>
+<p>To ensure exact parity between Python agent inference and the browser-based predictor:</p>
+<ul>
+<li><strong>Direct Artifact Coupling</strong>: <code>_load_model()</code> reads <code>feature_names</code>, <code>scale</code>, and <code>min</code> directly from <code>hdb_scaler.json</code>. This guarantees that feature ordering and array indices never drift from the compiled model (<code>hdb_model.bst</code>).</li>
+<li><strong>Handling Unrepresented Categoricals</strong>: <code>_normalise_flat_model</code> cleans casing and maps data quirks (such as legacy <code>&quot;MAISONETTE&quot;</code> entries to <code>&quot;Model A-Maisonette&quot;</code>). If an unknown town, flat type, or model appears that was absent from training, all one-hot columns remain zero. This is a deliberate fallback: rather than crashing, the model prices the unit as a baseline generic flat.</li>
+<li><strong>Auditing Assumed Inputs</strong>: The pipeline tracks missing or defaulted fields in <code>assumed_fields</code> (e.g. missing storey range or floor area in older records) and surfaces caveat notes directly under the generated table so the user knows when an estimate carries reduced confidence.</li>
+<li><strong>Parity Testing</strong>: <code>tests/test_valuation.py</code> validates that feature vector construction and scaling math replicate the sibling project&rsquo;s exported formulas exactly.</li>
+</ul>
+<h4 id="3-indicative-range-vs-statistical-confidence-intervals">3. Indicative Range vs. Statistical Confidence Intervals</h4>
+<p>The valuation dictionary outputs:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="s2">&#34;range_low&#34;</span><span class="p">:</span>  <span class="nb">round</span><span class="p">(</span><span class="n">price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">_mape_hdb</span><span class="p">)),</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;range_high&#34;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">_mape_hdb</span><span class="p">)),</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This produces a <strong>model-error-based indicative range</strong> scaled by the holdout Mean Absolute Percentage Error (MAPE), currently <strong>4.63%</strong>, read live from the sibling project&rsquo;s <code>metrics.json</code> at load time (falling back to a conservative 7.22% constant only if that file is absent).</p>
+<p>It is important to clarify that this is <strong>not a formally calibrated prediction interval</strong> or statistical confidence interval (such as those generated via conformal prediction or quantile regression). It does not quantify individual flat uncertainty; rather, it offers a pragmatic, transparent envelope reflecting average model error across the unseen holdout dataset.</p>
+<h4 id="4-mrt-proximity-correlative-feature-not-causal-premium">4. MRT Proximity: Correlative Feature, Not Causal Premium</h4>
+<p>The pipeline passes the unrounded floating-point distance (<code>flat[&quot;dist_km&quot;]</code>), which avoids discretization artifacts from rounded display strings like <code>&quot;1.1km&quot;</code>.</p>
+<p>However, in an XGBoost tree model, MRT proximity is an <strong>observational feature</strong> that interacts non-linearly with town, flat type, and remaining lease. A lower distance correlates with higher prices in historical transactions, but the model does not estimate an isolated causal premium (i.e. it does not prove that moving 100 metres closer independently generates a specific dollar increase). It reflects the complex, learned associations of the Singapore property landscape.</p>
+<hr>
+<h2 id="3-preventing-misleading-historical-price-comparisons">3. Preventing Misleading Historical Price Comparisons</h2>
+<p>Before analyzing price differences, an essential domain distinction must be emphasized: <strong>historical transaction records are not active property listings.</strong> The Singapore public resale dataset records completed, settled sales with fixed historical registration dates—not asking prices open to negotiation today.</p>
+<p>In machine learning, <em>temporal leakage</em> strictly refers to future information leaking into model training or evaluation sets. Here, we face an inference-time temporal alignment problem: treating past completed transaction records as if they were current market prices.</p>
+<p>If a query retrieves a transaction registered in 2021 for S$450,000, and my XGBoost model values the flat in 2026 at S$560,000, is the flat selling at a 20% discount?</p>
+<p><strong>No.</strong> That difference reflects five years of market appreciation, not a below-market bargain. Presenting historical transaction prices as &ldquo;underpriced&rdquo; relative to current valuations conflates market trajectory with a discount.</p>
+<p>To prevent this, <code>valuation_node</code> enforces an explicit temporal comparability check:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">sale_year</span><span class="p">,</span> <span class="n">_sale_month</span> <span class="o">=</span> <span class="n">_parse_sale_period</span><span class="p">(</span><span class="n">flat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;month&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="n">listed</span> <span class="o">=</span> <span class="n">flat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;resale_price&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="n">listed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sale_year</span> <span class="o">==</span> <span class="n">target_year</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">listed</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">listed</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">est</span> <span class="o">=</span> <span class="n">valuation</span><span class="p">[</span><span class="s2">&#34;estimated_price&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">valuation</span><span class="p">[</span><span class="s2">&#34;listed_vs_estimate_pct&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">listed</span> <span class="o">-</span> <span class="n">est</span><span class="p">)</span> <span class="o">/</span> <span class="n">est</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">valuation</span><span class="p">[</span><span class="s2">&#34;comparable_to_listed&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+</span></span><span class="line"><span class="cl"><span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">valuation</span><span class="p">[</span><span class="s2">&#34;comparable_to_listed&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+</span></span><span class="line"><span class="cl">    <span class="n">valuation</span><span class="p">[</span><span class="s2">&#34;listed_sale_year&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sale_year</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>If the sale occurred in an earlier year, the table verdict explicitly marks:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code>sold 2021, not comparable</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>and the LLM context prompt instructs the agent:</p>
+<blockquote>
+<p><em>&ldquo;A row reading &rsquo;not comparable&rsquo; sold in an earlier year than the valuation target, so the difference there is market growth over time, not a discount. Never present it as one.&rdquo;</em></p></blockquote>
+<h3 id="refining-comparability-why-same-year-is-not-always-contemporaneous">Refining Comparability: Why Same-Year Is Not Always Contemporaneous</h3>
+<p>While checking <code>sale_year == target_year</code> prevents comparing a 2017 transaction against a 2026 valuation, it remains a coarse filter. For instance, a transaction registered in January 2026 and an evaluation performed in September 2026 are eight months apart; in an active property cycle, market levels can shift materially within the same calendar year.</p>
+<p>A production refinement is to compare the transaction month against a defined rolling tolerance window (e.g., within 3 to 6 months of the target period), categorizing anything outside that window as historical. Gating by calendar year provides an immediate guardrail against multi-year index distortion, but treating same-year transactions as strictly contemporaneous should always be understood with this window in mind.</p>
+<h3 id="qualifying-fair-value-vs-model-estimates">Qualifying &ldquo;Fair Value&rdquo; vs. Model Estimates</h3>
+<p>It is equally essential to qualify what the valuation actually represents:</p>
+<ul>
+<li><strong>Historical transactions are not asking prices</strong>: The data reflects settled sales, not live listings on the market.</li>
+<li><strong>Model estimates are statistical benchmarks</strong>: An XGBoost prediction is a central tendency based on historical features (holdout MAPE 4.63%), not an independently certified appraisal.</li>
+<li><strong>Valuation gap is a potential value signal</strong>: The percentage difference (<code>listed_vs_estimate_pct</code>) is a comparison with the model&rsquo;s estimate, highlighting potential relative anomalies rather than definitive proof of a bargain.</li>
+</ul>
+<hr>
+<h2 id="4-deterministic-tables-llm-generated-analysis">4. Deterministic Tables, LLM-Generated Analysis</h2>
+<p>Anyone building LLM-based financial or real estate agents encounters the same headache: LLMs struggle with numerical precision. When asked to format a table of 10 properties with prices, square footages, remaining leases, and percentage differences, LLMs will routinely:</p>
+<ul>
+<li>Transpose digits (e.g., reporting S$542,000 as S$524,000)</li>
+<li>Inaccurately calculate percentage differences</li>
+<li>Confuse row alignments between distance and price</li>
+</ul>
+<p>Prompting techniques like <em>&ldquo;Be extremely accurate with arithmetic&rdquo;</em> or <em>&ldquo;Double check your calculations&rdquo;</em> act as gentle suggestions, not guarantees.</p>
+<h3 id="the-architectural-solution">The Architectural Solution</h3>
+<p>In <code>summary.py</code>, I eliminated this problem by stripping the LLM of transcription duties entirely. <strong>Python renders the Markdown table with every number formatted and verified:</strong></p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">_flat_row</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">flat</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">val</span> <span class="o">=</span> <span class="n">flat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;xgb_valuation&#34;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">inputs</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;inputs&#34;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pct</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;listed_vs_estimate_pct&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">gap</span><span class="p">,</span> <span class="n">verdict</span> <span class="o">=</span> <span class="s2">&#34;—&#34;</span><span class="p">,</span> <span class="s2">&#34;not valued&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">elif</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;comparable_to_listed&#34;</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">gap</span><span class="p">,</span> <span class="n">verdict</span> <span class="o">=</span> <span class="s2">&#34;—&#34;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&#34;sold </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;listed_sale_year&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">, not comparable&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">elif</span> <span class="n">pct</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">gap</span><span class="p">,</span> <span class="n">verdict</span> <span class="o">=</span> <span class="s2">&#34;—&#34;</span><span class="p">,</span> <span class="s2">&#34;—&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">gap</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;</span><span class="si">{</span><span class="n">pct</span><span class="si">:</span><span class="s2">+.1f</span><span class="si">}</span><span class="s2">%&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">verdict</span> <span class="o">=</span> <span class="s2">&#34;above estimate&#34;</span> <span class="k">if</span> <span class="n">pct</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&#34;below estimate&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">area</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;floor_area_sqm&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">storey</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;storey_avg&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">lease</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;remaining_lease&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">psf</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;psf&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;#&#34;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;Block / Street&#34;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&#34;</span><span class="si">{</span><span class="n">flat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;block&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">flat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;street_name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&#34;</span><span class="o">.</span><span class="n">strip</span><span class="p">()),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;Sold&#34;</span><span class="p">,</span> <span class="n">flat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;month&#34;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&#34;—&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;Listed&#34;</span><span class="p">,</span> <span class="n">_fmt_price</span><span class="p">(</span><span class="n">flat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;resale_price&#34;</span><span class="p">))),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;ML estimate&#34;</span><span class="p">,</span> <span class="n">_fmt_price</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;estimated_price&#34;</span><span class="p">))),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;Gap&#34;</span><span class="p">,</span> <span class="n">gap</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;Verdict&#34;</span><span class="p">,</span> <span class="n">verdict</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;MRT&#34;</span><span class="p">,</span> <span class="n">flat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;dist_formatted&#34;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&#34;N/A&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;Area&#34;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&#34;</span><span class="si">{</span><span class="n">area</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> sqm&#34;</span> <span class="k">if</span> <span class="n">area</span> <span class="k">else</span> <span class="s2">&#34;—&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;Floor&#34;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&#34;~</span><span class="si">{</span><span class="n">storey</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">&#34;</span> <span class="k">if</span> <span class="n">storey</span> <span class="k">else</span> <span class="s2">&#34;—&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;Lease&#34;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&#34;</span><span class="si">{</span><span class="n">lease</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> yrs&#34;</span> <span class="k">if</span> <span class="n">lease</span> <span class="k">else</span> <span class="s2">&#34;—&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;Model&#34;</span><span class="p">,</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;flat_model&#34;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&#34;—&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="s2">&#34;PSF&#34;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&#34;S$</span><span class="si">{</span><span class="n">psf</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&#34;</span> <span class="k">if</span> <span class="n">psf</span> <span class="k">else</span> <span class="s2">&#34;—&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The column is literally named <code>&quot;Listed&quot;</code> in the code above &ndash; a holdover label that, per the domain distinction in Section 3, undersells what it actually holds: <code>resale_price</code> is a completed, registered transaction, not an active asking price. The rendered table below refers to it by its more accurate meaning, <strong>transaction price</strong>.</p>
+<p><code>Verdict</code> is a mechanical comparison, not a valuation judgment: it labels a row &ldquo;above estimate&rdquo; or &ldquo;below estimate&rdquo; purely from the sign of <code>listed_vs_estimate_pct</code>, nothing more. It is not a claim that the flat is a bargain or overpriced &ndash; a transaction priced below the model&rsquo;s estimate could just as easily reflect a lower floor, an older lease, or a data gap covered by the caveats under the table, as it could reflect genuine relative value.</p>
+<p>The output table produced by Python looks like this:</p>
+<table>
+  <thead>
+      <tr>
+          <th>#</th>
+          <th>Block / Street</th>
+          <th>Sold</th>
+          <th>Transaction price</th>
+          <th>ML estimate</th>
+          <th>Gap</th>
+          <th>Verdict</th>
+          <th>MRT</th>
+          <th>Area</th>
+          <th>Floor</th>
+          <th>Lease</th>
+          <th>Model</th>
+          <th>PSF</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td>215 BUKIT BATOK ST 21</td>
+          <td>2026-05</td>
+          <td>S$580,000</td>
+          <td>S$595,000</td>
+          <td>-2.5%</td>
+          <td>below estimate</td>
+          <td>380m</td>
+          <td>92 sqm</td>
+          <td>~11</td>
+          <td>68 yrs</td>
+          <td>Model A</td>
+          <td>S$601</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td>208 BUKIT BATOK ST 21</td>
+          <td>2026-04</td>
+          <td>S$615,000</td>
+          <td>S$592,000</td>
+          <td>+3.9%</td>
+          <td>above estimate</td>
+          <td>420m</td>
+          <td>93 sqm</td>
+          <td>~8</td>
+          <td>67 yrs</td>
+          <td>Model A</td>
+          <td>S$592</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td>112 BUKIT BATOK CTRL</td>
+          <td>2023-11</td>
+          <td>S$480,000</td>
+          <td>S$565,000</td>
+          <td>—</td>
+          <td>sold 2023, not comparable</td>
+          <td>190m</td>
+          <td>90 sqm</td>
+          <td>~5</td>
+          <td>65 yrs</td>
+          <td>Simplified</td>
+          <td>S$583</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="keeping-table-arithmetic-outside-the-llm">Keeping Table Arithmetic Outside the LLM</h3>
+<p>The prompt sent to the LLM supplies this pre-rendered table as read-only context. While the LLM receives the figures to interpret overall market patterns, it has zero responsibility for calculating or formatting the table cells:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;&#34;&#34;Write a short analysis of HDB resale flats near </span><span class="si">{</span><span class="n">location</span><span class="si">}</span><span class="s2">.
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">The table below is already written and is shown to the user above your text.
+</span></span></span><span class="line"><span class="cl"><span class="s2">Every figure the answer needs is in it.
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2"></span><span class="si">{</span><span class="n">table</span><span class="si">}{</span><span class="n">context</span><span class="si">}</span><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">Rules:
+</span></span></span><span class="line"><span class="cl"><span class="s2">- Refer to flats by row number.
+</span></span></span><span class="line"><span class="cl"><span class="s2">- Do NOT restate a flat&#39;s price, estimate, gap, lease, floor, area, model or MRT distance -- the reader has the table. Describe what the numbers mean.
+</span></span></span><span class="line"><span class="cl"><span class="s2">- Do not introduce any figure that is not in the table.
+</span></span></span><span class="line"><span class="cl"><span class="s2">- No tables of your own.
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">Write 3-4 short paragraphs: the overall picture, which rows look like value or look expensive and why, any pattern worth noting across the rows, and one caveat a buyer should keep in mind.
+</span></span></span><span class="line"><span class="cl"><span class="s2">&#34;&#34;&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="measurable-reliability-what-this-solves-and-what-it-doesnt">Measurable Reliability: What This Solves (and What It Doesn&rsquo;t)</h3>
+<p>By offloading all table formatting and arithmetic to Python, I <strong>remove an entire class of deterministic errors</strong>:</p>
+<ul>
+<li><strong>Eliminated</strong>: Dropped digits, transposed numbers (e.g. S$542k into S$524k), miscalculated percentages, and row-column misalignment in markdown syntax.</li>
+<li><strong>Remaining Risks</strong>: The LLM can still misinterpret qualitative context, reference the wrong row index (e.g. referring to Row 2 when discussing Row 3), or make unsubstantiated claims if not strictly grounded by the rendered table. Furthermore, upstream data errors (such as missing attributes or geocoding approximations) will propagate directly into the table.</li>
+</ul>
+<p>Separating data calculation from semantic prose does not make the agent infallible—it makes the failure modes inspectable and keeps numerical precision strictly in compiled code.</p>
+<hr>
+<h2 id="5-automated-data-refresh--onemap-geocoding-verification">5. Automated Data Refresh &amp; OneMap Geocoding Verification</h2>
+<p>A data-driven assistant is only as good as its underlying datasets. I added unified CLI scripts under <code>db/</code> to maintain the data layers:</p>
+<ul>
+<li><code>refresh_data.py</code>: Central orchestration to pull the latest 2026 resale CSVs, LTA MRT exits, and NParks coordinates.</li>
+<li><code>geocode_schools.py</code>: Reverse geocoding of MOE schools via OneMap.</li>
+</ul>
+<h3 id="handling-shared-postal-code-ambiguity--data-freshness">Handling Shared Postal Code Ambiguity &amp; Data Freshness</h3>
+<p>During school geocoding, I discovered an interesting real-world data anomaly: <strong>postal code collisions</strong>.</p>
+<p>A naive postal-code lookup returns the <em>first</em> building registered to that postal code. In Singapore, several campuses share a postal code with adjacent facilities:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Postal Code</th>
+          <th style="text-align: left">OneMap First Result</th>
+          <th style="text-align: left">Actual School</th>
+          <th style="text-align: right">Distance Error</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">487012</td>
+          <td style="text-align: left">ALL SAINTS&rsquo; CHURCH</td>
+          <td style="text-align: left">Anglican High School</td>
+          <td style="text-align: right">108 m</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">678117</td>
+          <td style="text-align: left">BOYS&rsquo; TOWN</td>
+          <td style="text-align: left">Assumption English School</td>
+          <td style="text-align: right">164 m</td>
+      </tr>
+  </tbody>
+</table>
+<p>Boys&rsquo; Town is not a former or renamed identity of Assumption English School &ndash; the two are distinct institutions (a MOE-aided secondary school and a separate Catholic residential/vocational facility for at-risk youth) that happen to sit side by side on the same Upper Bukit Timah Road compound and share one postal code. If uncorrected, Assumption English School&rsquo;s coordinates would be silently pinned to Boys&rsquo; Town&rsquo;s building instead of its own.</p>
+<p><code>db/geocode_schools.py</code> resolves this automatically: when the building name returned by OneMap does not match the school name, it falls back to querying the school&rsquo;s <strong>name</strong>, confirming the result only if it resolves to the identical postal code.</p>
+<p>When neither the postal code nor the verified name search yields a confident match on OneMap (or coordinates fall outside Singapore&rsquo;s geographic bounding box), the pipeline explicitly <strong>rejects and excludes the school</strong> rather than writing unverified or centroid-defaulted coordinates. The unresolved entity is logged, preserving spatial integrity.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">uv</span> <span class="n">run</span> <span class="n">python</span> <span class="n">db</span><span class="p">\</span><span class="n">geocode_schools</span><span class="p">.</span><span class="py">py</span> <span class="p">-</span><span class="n">-apply</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong>Data Freshness Cutoff:</strong>
+The seed datasets include transactions through September 2026. Because data.gov.sg publishes resale data with a 1-to-2 month registration lag, <code>db/refresh_data.py</code> polls and downloads genuinely new months directly from the data.gov.sg API. Because <code>local_store.py</code> globs <code>resale_flat_price_*.csv</code>, adding new monthly files requires zero code changes—the in-memory SQLite store automatically indexes them on process restart.</p>
+<hr>
+<h2 id="6-running-the-revamped-system">6. Running the Revamped System</h2>
+<p>The repository is fully managed using <code>uv</code>, enabling fast, deterministic dependency resolution.</p>
+<h3 id="1-installation--environment-setup">1. Installation &amp; Environment Setup</h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="err">:</span><span class="p">//</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">seehiong</span><span class="p">/</span><span class="nb">autonomous-hdb</span><span class="n">-deepagents</span><span class="p">.</span><span class="py">git</span>
+</span></span><span class="line"><span class="cl"><span class="nb">cd autonomous-hdb</span><span class="n">-deepagents</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c"># Install dependencies with uv</span>
+</span></span><span class="line"><span class="cl"><span class="n">uv</span> <span class="n">sync</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Copy <code>.env.example</code> to <code>.env</code> and provide your OpenRouter API key:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ini" data-lang="ini"><span class="line"><span class="cl"><span class="na">OPENROUTER_API_KEY</span><span class="o">=</span><span class="s">sk-or-v1-...</span>
+</span></span><span class="line"><span class="cl"><span class="na">LLM_MODEL</span><span class="o">=</span><span class="s">anthropic/claude-3.5-haiku</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Optional: point to sibling model directory if not using default sibling folder</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># HDB_MODELS_DIR=F:/github-proj/hdb-price-predictor/models</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="2-running-via-cli">2. Running via CLI</h3>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">uv</span> <span class="n">run</span> <span class="n">-m</span> <span class="n">autonomous_hdb_deepagents</span><span class="p">.</span><span class="py">agent</span><span class="p">.</span><span class="nb">cli </span><span class="s2">&#34;Find flats near Bukit Batok MRT&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">[MRT-RESOLVE] Resolving MRT station: Bukit Batok
+</span></span><span class="line"><span class="cl">[MRT-RESOLVE] BB -&gt; BUKIT BATOK
+</span></span><span class="line"><span class="cl">[RESALE] Fetching 4 ROOM in BUKIT BATOK &lt;= 600000...
+</span></span><span class="line"><span class="cl">[RESALE] Retrieved 30 flats
+</span></span><span class="line"><span class="cl">[MRT] Enriching 30 flats (radius=800)
+</span></span><span class="line"><span class="cl">[MRT] Example: BT BATOK ST 21 -&gt; BUKIT BATOK MRT STATION (380m)
+</span></span><span class="line"><span class="cl">[VALUATION] Loading XGBoost model  : .../hdb_model.bst
+</span></span><span class="line"><span class="cl">[VALUATION] Loading scaler metadata: .../hdb_scaler.json
+</span></span><span class="line"><span class="cl">[VALUATION] Valued 30/30 flats (target=2026-09, mode=forward projection)
+</span></span><span class="line"><span class="cl">[SUMMARY] Summarizing 30 flats
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">=== FINAL RESPONSE ===
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">### Flats near Bukit Batok MRT
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">| # | Block / Street | Sold | Transaction price | ML estimate | Gap | Verdict | MRT | Area | Floor | Lease | Model | PSF |
+</span></span><span class="line"><span class="cl">...</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="3-running-the-gradio-web-chat-interface">3. Running the Gradio Web Chat Interface</h3>
+<p>For interactive conversational exploration:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">uv</span> <span class="n">run</span> <span class="n">python</span> <span class="n">-m</span> <span class="n">autonomous_hdb_deepagents</span><span class="p">.</span><span class="py">ui</span><span class="p">.</span><span class="n">gradio_app</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>The Gradio UI provides a full-screen chat interface where users can click quick query buttons or type open-ended questions like <em>&ldquo;Show me 5-room flats near Redhill MRT under 950k&rdquo;</em>.</p>
+<h3 id="4-running-the-fastapi-http-server">4. Running the FastAPI HTTP Server</h3>
+<p>For headless integration into web or mobile apps:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">uv</span> <span class="n">run</span> <span class="n">python</span> <span class="n">src</span><span class="p">/</span><span class="n">autonomous_hdb_deepagents</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">api_server_launch</span><span class="p">.</span><span class="n">py</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>You can test the health and query endpoints directly:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="s2">&#34;http://localhost:8000/query&#34;</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="p">`</span>
+</span></span><span class="line"><span class="cl">  <span class="n">-Body</span> <span class="s1">&#39;{&#34;query&#34;:&#34;Find flats near Bishan MRT under 800k&#34;}&#39;</span> <span class="p">`</span>
+</span></span><span class="line"><span class="cl">  <span class="n">-ContentType</span> <span class="s2">&#34;application/json&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><hr>
+<h2 id="7-architectural-reflection-is-this-still-a-deep-agent-and-autonomous">7. Architectural Reflection: Is This Still a &ldquo;Deep Agent&rdquo; and &ldquo;Autonomous&rdquo;?</h2>
+<p>A fair question arises when examining the LangGraph state machine:</p>
+<blockquote>
+<p><em>If the execution pipeline is an engineered graph (<code>intent -&gt; mrt_resolve -&gt; resale -&gt; mrt -&gt; valuation -&gt; summary</code>), is this still an <strong>autonomous deep agent</strong>, or is it just a workflow pipeline?</em></p></blockquote>
+<p>This touches on one of the most critical debates in current AI engineering: <strong>the illusion of the unconstrained ReAct loop versus engineered autonomy</strong>.</p>
+<h3 id="the-fallacy-of-the-wild-west-react-loop">The Fallacy of the &ldquo;Wild-West&rdquo; ReAct Loop</h3>
+<p>In early agent tutorials, autonomy was often equated with an unconstrained ReAct loop: handing an LLM five tools and letting it wander in a <code>Thought -&gt; Action -&gt; Observation</code> cycle until it decides to stop.</p>
+<p>In domain-critical tasks involving machine learning and spatial data, unconstrained loops fail consistently:</p>
+<ol>
+<li><strong>Skipped dependencies:</strong> An XGBoost model requires exact spatial distance and MinMax feature scaling <em>before</em> inference. An open-ended LLM frequently calls valuation before distance resolution, or skips valuation entirely.</li>
+<li><strong>Infinite looping &amp; token burn:</strong> The LLM re-queries the database when a specific flat isn&rsquo;t found, exhausting context windows and API budgets.</li>
+<li><strong>Loss of deterministic guarantees:</strong> Asking an LLM to decide the execution graph on every turn turns simple search into a stochastic gamble.</li>
+</ol>
+<h3 id="what-makes-it-a-deep-agent">What Makes It a &ldquo;Deep Agent&rdquo;?</h3>
+<p>In modern multi-agent systems, <strong>&ldquo;Deep&rdquo; refers to hierarchical decomposition and sub-agent abstraction</strong>, not circular prompt loops.</p>
+<p>In our codebase, the orchestrator compiles directly as a sub-agent using the <code>deepagents</code> framework:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># autonomous_hdb_deepagents/agent/pipeline.py</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">deepagents</span> <span class="kn">import</span> <span class="n">CompiledSubAgent</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">orchestrator_subagent</span> <span class="o">=</span> <span class="n">CompiledSubAgent</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">name</span><span class="o">=</span><span class="s2">&#34;orchestrator&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">description</span><span class="o">=</span><span class="s2">&#34;Intent -&gt; MRT Resolve -&gt; Resale -&gt; MRT Enrichment -&gt; XGBoost Valuation -&gt; Summary&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">runnable</span><span class="o">=</span><span class="n">compiled_orchestrator</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This allows the entire multi-tier system—spanning intent parsing, SQLite querying, geodetics, XGBoost inference, and natural-language synthesis—to be encapsulated as an atomic agent that can be plugged into higher-level supervisor agents (for instance, a master wealth advisory or property relocation agent).</p>
+<h3 id="constrained-autonomy-in-production">Constrained Autonomy in Production</h3>
+<p>What does <strong>autonomy</strong> actually mean in production?</p>
+<p>It means <strong>task-level autonomy</strong>. A user submits an ambiguous, open-ended natural-language goal:</p>
+<blockquote>
+<p><em>&ldquo;Find flats near Bukit Batok MRT under 600k with good value&rdquo;</em></p></blockquote>
+<p>Without human intervention, the system:</p>
+<ul>
+<li>Autonomously extracts semantic parameters and assigns intelligent defaults</li>
+<li>Autonomously maps station names to administrative towns</li>
+<li>Autonomously orchestrates the data retrieval, spatial measurement, and ML valuation</li>
+<li>Autonomously synthesizes qualitative takeaways from the quantitative results</li>
+</ul>
+<p>Anthropic&rsquo;s research on <em>
+
+
+
+
+
+
+  <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener noreferrer" >Building Effective Agents</a>
+</em> (published December 2024) distinguishes predefined workflows from agents that dynamically direct their own processes and tool use. It also emphasizes choosing the simplest architecture that meets the task&rsquo;s needs, with evaluation and iteration guiding additional complexity.</p>
+<p>My implementation applies that engineering perspective through a predefined LangGraph execution path, with LLM-based intent extraction and qualitative interpretation at selected stages. By pairing deterministic execution with LLM reasoning at the boundaries, I built a constrained autonomous agent that can take a natural-language property search from intent extraction through retrieval, spatial enrichment, and model-based valuation.</p>
+<p>The architecture makes important parts of the execution predictable and auditable. It does not eliminate uncertainty in the underlying data, model estimates, or generated interpretation—and that distinction is especially important when the output informs real-world property decisions.</p>
+<hr>
+<h2 id="8-reproducible-test--validation-benchmarks">8. Reproducible Test &amp; Validation Benchmarks</h2>
+<p>To ensure the system behaves as documented, the project includes an automated test suite under <code>tests/</code> covering data parsing, spatial distance, valuation parity, and pipeline orchestration. The table below reports key empirical benchmarks measured across the codebase:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Validation Area</th>
+          <th style="text-align: left">Metric / Evaluation Condition</th>
+          <th style="text-align: left">Measured Benchmark</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>SQLite initialization</strong></td>
+          <td style="text-align: left">Cold-start load &amp; indexing (~985k rows from 1990–2026 CSVs)</td>
+          <td style="text-align: left">~4.0 s (one-off per process)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Query performance</strong></td>
+          <td style="text-align: left"><code>list_hdb_flats</code>, canonical town (the actual pipeline query; exact match on generated <code>town_norm</code>, join, sort)</td>
+          <td style="text-align: left">Median ~17.9 ms over 200 runs (index seek via <code>idx_resale_norm</code>)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Query fallback</strong></td>
+          <td style="text-align: left"><code>list_hdb_flats</code>, town fragment (e.g. <code>&quot;BISH&quot;</code>; not a real pipeline case, only a tested tolerance)</td>
+          <td style="text-align: left">Median ~124 ms (falls back to a full scan; unchanged from before the fast path)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Geospatial + valuation</strong></td>
+          <td style="text-align: left"><code>geospatial_query</code> + <code>value_flat</code> per flat, 30-flat batch</td>
+          <td style="text-align: left">~3 ms total geospatial, ~15 ms total XGBoost inference</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Geospatial accuracy</strong></td>
+          <td style="text-align: left">Equirectangular vs. Haversine across 500 real HDB blocks, 613 MRT/LRT exits</td>
+          <td style="text-align: left">Median &lt; 1 m, Max 7.9 m</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Model compatibility</strong></td>
+          <td style="text-align: left">60 features, order, and scale metadata validated via <code>test_valuation.py</code></td>
+          <td style="text-align: left">100% parity with <code>hdb_scaler.json</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Valuation baseline</strong></td>
+          <td style="text-align: left">Chronological holdout: trained through 2025-12, evaluated on 2026-01 onward</td>
+          <td style="text-align: left">4.63% MAPE across 18,278 unseen transactions</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Temporal guardrail</strong></td>
+          <td style="text-align: left">Same-year comparison vs prior-year tagging (<code>sold YYYY, not comparable</code>)</td>
+          <td style="text-align: left">Verified across representative test fixtures (1990–2026)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Table integrity</strong></td>
+          <td style="text-align: left">Rendered Markdown cells match underlying dictionary values</td>
+          <td style="text-align: left">Deterministic table rendering prevents LLM arithmetic/transcription errors in table cells</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>End-to-end execution</strong></td>
+          <td style="text-align: left">CLI query, FastAPI <code>/health</code> &amp; <code>/query</code>, Gradio interface</td>
+          <td style="text-align: left">Clean pass from repository root</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="reproducing-the-test-suite">Reproducing the Test Suite</h3>
+<p>All tests can be executed locally from the repository root:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">uv</span> <span class="n">run</span> <span class="p">-</span><span class="n">-extra</span> <span class="n">dev</span> <span class="n">pytest</span> <span class="n">-v</span> <span class="n">tests</span><span class="p">/</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><strong>Evaluation Details &amp; Scope:</strong></p>
+<ul>
+<li><strong>Query Benchmarks</strong>: Timed by calling <code>list_hdb_flats</code> (the function the pipeline actually calls, with a <code>LEFT JOIN</code> and <code>ORDER BY month DESC LIMIT 30</code>) 200 times over an in-memory SQLite connection holding ~985,000 resale rows, rotating across five canonical town names &ndash; the only kind of town value the real pipeline ever passes. <code>EXPLAIN QUERY PLAN</code> confirms this now seeks <code>idx_resale_norm</code> rather than scanning, since <code>town_norm</code> is an exact match. The original substring-<code>LIKE</code> path is still there and still measures ~124 ms, but only a caller passing a genuine fragment (never the pipeline itself) reaches it; <code>tests/test_local_store.py::test_list_hdb_flats_exact_town_uses_the_index</code> pins the index-seek plan so a future change can&rsquo;t silently reintroduce the scan for the common case. Geospatial and valuation timings were measured the same way, over the same 30-flat batch, calling <code>geospatial_query</code> and <code>value_flat</code> directly.</li>
+<li><strong>Valuation Baseline &amp; Error Metrics</strong>: The reported holdout MAPE is read live from the sibling <code>hdb-price-predictor</code> project&rsquo;s published <code>models/metrics.json</code>, so it always reflects the currently trained model rather than a value baked into this repo. The current run: <strong>4.63% MAPE</strong>, evaluated on 18,278 unseen 2026 transactions, from a chronological split trained on data through 2025-12 (Jan 2017 – Dec 2025). <code>valuation.py</code> also carries a 7.22% constant (<code>FALLBACK_MAPE_HDB</code>), but that is a safety fallback used only if <code>metrics.json</code> cannot be read &ndash; not a second, independently reported benchmark.</li>
+<li><strong>Temporal Guardrail Coverage</strong>: Guardrail assertions in <code>tests/test_valuation.py</code> verify handling across fixtures spanning current-year sales, prior-year transactions (1990–2025), and unparseable date strings, ensuring that elapsed market growth is systematically flagged as non-comparable rather than misreported as a discount.</li>
+<li><strong>Table Integrity</strong>: Unit tests assert that rendered Markdown table cells match underlying dictionary values and unrounded feature metrics exactly, since Python &ndash; not the LLM &ndash; formats every cell.</li>
+</ul>
+<hr>
+<h2 id="9-key-takeaways">9. Key Takeaways</h2>
+<p>Integrating domain-specific machine learning into an autonomous agent pipeline highlighted four core principles for production AI engineering:</p>
+<ol>
+<li><strong>Lightweight beats heavyweight for read-heavy local agents</strong>: Replacing PostGIS and PostgreSQL with an in-memory SQLite table eliminated thousands of lines of Docker orchestration while speeding up query execution times.</li>
+<li><strong>Respect temporal validity</strong>: In real estate and financial time-series data, an ML valuation is anchored to a point in time. Agents must distinguish between <em>price discrepancies</em> and <em>elapsed market growth</em>.</li>
+<li><strong>Never let an LLM do a database or calculator&rsquo;s job</strong>: Formatting data tables in code and restricting the LLM to qualitative analysis eliminates arithmetic and transcription errors at the source.</li>
+<li><strong>Embrace constrained autonomy</strong>: Real-world autonomy is about reliably achieving an ambiguous user goal end-to-end. Compiling specialized multi-tier graphs into reusable DeepAgents sub-agents delivers both the intelligence of LLMs and the reliability of deterministic code.</li>
+</ol>
+<p>The complete codebase, notebooks, and model integrations are open source on GitHub:
+👉 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/autonomous-hdb-deepagents" target="_blank" rel="noopener noreferrer" >https://github.com/seehiong/autonomous-hdb-deepagents</a>
+</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/09/revamping-the-hdb-price-predictor/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Revamping the HDB Price Predictor</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
