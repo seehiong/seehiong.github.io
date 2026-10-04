@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/10/building-the-jade-crypt/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Building The Jade Crypt">
+  <meta property="og:description" content="A behind-the-scenes look at building The Jade Crypt, a 2.5D cinematic Wuxia platformer in Godot 4. The post explores the evolution from procedural character animation to skeletal locomotion, a modular headless validation engine, ASCII-driven level design, and an AI-assisted toolchain for 3D assets, cinematics, and audio.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-04T18:00:00+08:00">
+    <meta property="article:modified_time" content="2026-10-04T18:00:00+08:00">
+    <meta property="article:tag" content="Game Development">
+    <meta property="article:tag" content="Godot 4">
+    <meta property="article:tag" content="GDScript">
+    <meta property="article:tag" content="2.5D">
+    <meta property="article:tag" content="Animation">
+    <meta property="article:tag" content="Level Design">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Building The Jade Crypt">
+  <meta name="twitter:description" content="A behind-the-scenes look at building The Jade Crypt, a 2.5D cinematic Wuxia platformer in Godot 4. The post explores the evolution from procedural character animation to skeletal locomotion, a modular headless validation engine, ASCII-driven level design, and an AI-assisted toolchain for 3D assets, cinematics, and audio.">
+
+  <meta itemprop="name" content="Building The Jade Crypt">
+  <meta itemprop="description" content="A behind-the-scenes look at building The Jade Crypt, a 2.5D cinematic Wuxia platformer in Godot 4. The post explores the evolution from procedural character animation to skeletal locomotion, a modular headless validation engine, ASCII-driven level design, and an AI-assisted toolchain for 3D assets, cinematics, and audio.">
+  <meta itemprop="datePublished" content="2026-10-04T18:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-10-04T18:00:00+08:00">
+  <meta itemprop="wordCount" content="3899">
+  <meta itemprop="keywords" content="Game Development,Godot 4,GDScript,2.5D,Animation,Level Design,Algorithms,AI,Open Source"><title>Building The Jade Crypt | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/10/building-the-jade-crypt/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Building The Jade Crypt</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-10-04T18:00:00&#43;08:00">October 4, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/game-development">Game Development</a>
+            
+              , <a href="/tags/godot-4">Godot 4</a>
+            
+              , <a href="/tags/gdscript">GDScript</a>
+            
+              , <a href="/tags/2.5d">2.5D</a>
+            
+              , <a href="/tags/animation">Animation</a>
+            
+              , <a href="/tags/level-design">Level Design</a>
+            
+              , <a href="/tags/algorithms">Algorithms</a>
+            
+              , <a href="/tags/ai">AI</a>
+            
+              , <a href="/tags/open-source">Open Source</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/jade-crypt/cover.jpg');"></div>
+          <img src="/images/jade-crypt/cover.jpg" alt="Building The Jade Crypt cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/the-jade-crypt" target="_blank" rel="noopener noreferrer" ><code>the-jade-crypt</code></a>
+ is a 2.5D cinematic platformer built in Godot 4. You play as <strong>Lin Yue</strong>, an imperial shadow blade descending into the ancestral catacombs beneath Mount Qingcheng. Her mission is to reclaim the Sacred Relics and the Emperor&rsquo;s Tiger Tally from the rogue warlord General Meng Tian, navigating clockwork death traps, bottomless abysses, martial duels, and submerged cavern waterways along the way.</p>
+<p><strong>
+
+
+
+
+
+
+  <a href="/the-jade-crypt/" >▶ Play it in your browser</a>
+</strong>: no install, on desktop with a keyboard.</p>
+<p>Every game project starts with a core question about constraints: <em>what should the engine do, and what should be handled by code and tooling?</em> For <em>The Jade Crypt</em>, the answer was to lean heavily into Godot 4&rsquo;s 3D engine for atmosphere and lighting, while locking gameplay physics to a strict 2D cross-section \(Z = 0\).</p>
+<p>What began as a weekend prototype quickly became an exercise in software engineering:</p>
+<ol>
+<li><strong>Character Animation</strong>: I started with a procedural joint puppet animated entirely with trigonometric sine waves in GDScript, before pivoting to a rigged skeletal character driven by <strong>Quaternius&rsquo;s Universal Animation Library</strong> and custom-baked clips.</li>
+<li><strong>Quality Assurance &amp; Verification</strong>: I backed up manual playtesting with a <strong>headless rule engine</strong> and a state-space Breadth-First Search (BFS) solver that I run over every chamber file whenever a map changes.</li>
+<li><strong>Level Authoring</strong>: Instead of manually positioning hundreds of 3D cubes in the Godot editor, levels are authored as <strong>ASCII text maps</strong> where characters define a 1-meter grid—the ultimate rapid whiteboxing workflow.</li>
+<li><strong>The AI Toolchain</strong>: I tied the game directly into sibling projects—
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/printable" target="_blank" rel="noopener noreferrer" ><strong><code>printable</code></strong></a>
+ for 3D GLB assets, Google Flow for cinematic prologue cutscenes, and 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/polyphon-audio" target="_blank" rel="noopener noreferrer" ><strong><code>polyphon-audio</code></strong></a>
+ for BGM and local voiceover narration.</li>
+</ol>
+<p>Here is the deep dive into how it is built.</p>
+<hr>
+<h2 id="1-why-25d-in-godot-4">1. Why 2.5D in Godot 4?</h2>
+<p>In game development, the term <strong>2.5D</strong> can mean several things. In <em>The Jade Crypt</em>, it has a precise architectural definition: <strong>the entire scene is rendered in 3D by Godot 4&rsquo;s Compatibility renderer (the OpenGL path that also runs in the browser), with 3D geometry, real-time lights and shadows, and glow, but player kinetics and collision are strictly locked to the \(Z = 0\) planar cross-section.</strong></p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code>                     Visual Rendering Plane (Z = -8.0m to Z = 0.0m)
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │  [Themed Backdrop]       [Pagoda Pillars]        [Hanging Lanterns]    │
+ │  Z = -8.0m               Z = -1.5m to -3.0m      Z = -0.6m             │
+ └────────────────────────────────────────────────────────────────────────┘
+                                     │
+                                     ▼
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │  [StaticBody3D Collision]    [CharacterBody3D]     [Area3D Triggers]   │
+ │  Platforms &amp; Slabs           Player &amp; Sentinels    Spikes &amp; Chalice    │
+ └────────────────────────────────────────────────────────────────────────┘
+                      Gameplay Physics Plane (Z = 0.0m)</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Why choose this instead of pure 2D or free 3D?</p>
+<ol>
+<li><strong>Flawless Mechanical Precision</strong>: In pure 3D platformers, missing a ledge because the player drifted \(5\text{ cm}\) along the depth axis is a constant source of player frustration. Locking \(Z = 0\) eliminates depth-axis drift from gameplay. If a jump spans 4 cells on the planar grid, its outcome is independent of depth-axis alignment.</li>
+<li><strong>Atmospheric Depth Without Parallax Hacks</strong>: Rather than slicing 2D sprites into fake multi-plane parallax layers, I place genuine 3D models at real-world depths:</li>
+</ol>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Layer Depth</th>
+          <th style="text-align: left">Entities</th>
+          <th style="text-align: left">Purpose</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>\(Z = 0.0\text{m}\)</strong></td>
+          <td style="text-align: left">Player, sentinels, platform colliders, spikes, gates</td>
+          <td style="text-align: left">Active gameplay lane</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>\(Z = -0.6\text{m}\) to \(-0.7\text{m}\)</strong></td>
+          <td style="text-align: left">Floor braziers (<code>T</code>) and hanging bronze lanterns (<code>t</code>)</td>
+          <td style="text-align: left">Lighting sources recessed just behind the hero</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>\(Z = -1.2\text{m}\) to \(-3.0\text{m}\)</strong></td>
+          <td style="text-align: left">Tapestries, terracotta statues, foundry gears</td>
+          <td style="text-align: left">Architectural storytelling and silhouettes</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>\(Z = -6.5\text{m}\)</strong></td>
+          <td style="text-align: left">The Great Bell of the sunken belfry</td>
+          <td style="text-align: left">A landmark hanging in front of the backdrop</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>\(Z = -8.0\text{m}\)</strong></td>
+          <td style="text-align: left">Panoramic high-resolution matte backdrops</td>
+          <td style="text-align: left">Cavern gloom, mountain dawn, and subterranean seas</td>
+      </tr>
+  </tbody>
+</table>
+<p>The tracking camera (<code>scripts/core/camera.gd</code>) is deliberately simple: it holds a fixed offset in front of Lin Yue, smoothly follows her on X and Y, and adds trauma-based screen shake for impacts and deaths.</p>
+<hr>
+<h2 id="2-character-evolution-from-procedural-puppets-to-skeletal-locomotion">2. Character Evolution: From Procedural Puppets to Skeletal Locomotion</h2>
+<p>Character creation went through two distinct eras. The story of why I started with procedural animation—and why I ultimately replaced it—is a useful lesson in choosing the right abstraction.</p>
+<h3 id="phase-1-the-procedural-puppet-in-code">Phase 1: The Procedural Puppet in Code</h3>
+<p>In the earliest builds, I did not want external 3D asset dependencies or Blender rigging pipelines to slow down rapid gameplay experimentation. I wanted to test running leaps, coyote time, and two-stage ledge grabs immediately.</p>
+<p>So Lin Yue was constructed inside <code>player.tscn</code> as a <strong>hierarchical procedural puppet</strong> built entirely out of basic Godot nodes and primitive 3D meshes (capsules, cylinders, and boxes). That puppet no longer exists in the repository—the scene now holds the skeletal rig—but in those early builds it looked like this:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Player (CharacterBody3D)
+</span></span><span class="line"><span class="cl">├── CollisionShape3D (Capsule: 1.38m standing, 0.90m crouched)
+</span></span><span class="line"><span class="cl">└── VisualPivot (Node3D, rotates Y between +90° and -90°)
+</span></span><span class="line"><span class="cl">    ├── Head (Node3D: face, eyes, hair crown, jade hairpin meshes)
+</span></span><span class="line"><span class="cl">    ├── PonytailPivot (Node3D with secondary drag)
+</span></span><span class="line"><span class="cl">    ├── Torso (Node3D: neck, mandarin collar, robe meshes)
+</span></span><span class="line"><span class="cl">    ├── ArmL / ArmR (Node3D pivots)
+</span></span><span class="line"><span class="cl">    ├── LegL / LegR (Node3D pivots)
+</span></span><span class="line"><span class="cl">    └── SwordHip (Node3D with dynamic sway)</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>In <code>player.gd</code>, locomotion wasn&rsquo;t played from an animation track—it was <strong>calculated frame-by-frame using harmonic oscillators</strong>:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gdscript" data-lang="gdscript"><span class="line"><span class="cl"><span class="c1"># Early procedural gait cycle from player.gd (since replaced)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">_update_limb_animations</span><span class="p">(</span><span class="n">delta</span><span class="p">:</span> <span class="kt">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">current_state</span> <span class="o">==</span> <span class="n">State</span><span class="o">.</span><span class="n">DEAD</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">current_state</span> <span class="o">==</span> <span class="n">State</span><span class="o">.</span><span class="n">HANGING</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># Ledge hanging: arms reach straight up, legs dangle with gentle sine sway</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">arm_l</span><span class="p">:</span> <span class="n">arm_l</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">lerp_angle</span><span class="p">(</span><span class="n">arm_l</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.7</span><span class="p">,</span> <span class="mf">16.0</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">arm_r</span><span class="p">:</span> <span class="n">arm_r</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">lerp_angle</span><span class="p">(</span><span class="n">arm_r</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.7</span><span class="p">,</span> <span class="mf">16.0</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">leg_l</span><span class="p">:</span> <span class="n">leg_l</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">lerp_angle</span><span class="p">(</span><span class="n">leg_l</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.2</span> <span class="o">+</span> <span class="nb">sin</span><span class="p">(</span><span class="n">_anim_time</span> <span class="o">*</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">leg_r</span><span class="p">:</span> <span class="n">leg_r</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">lerp_angle</span><span class="p">(</span><span class="n">leg_r</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="nb">sin</span><span class="p">(</span><span class="n">_anim_time</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Decay landing squash</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_landing_squash</span> <span class="o">=</span> <span class="nb">move_toward</span><span class="p">(</span><span class="n">_landing_squash</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.45</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nf">is_on_floor</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">var</span> <span class="n">horiz_speed</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">velocity</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">horiz_speed</span> <span class="o">&gt;</span> <span class="mf">0.25</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="kd">var</span> <span class="n">speed_ratio</span> <span class="o">=</span> <span class="nb">clamp</span><span class="p">(</span><span class="n">horiz_speed</span> <span class="o">/</span> <span class="n">run_speed</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">_anim_time</span> <span class="o">+=</span> <span class="n">delta</span> <span class="o">*</span> <span class="mf">13.0</span> <span class="o">*</span> <span class="n">speed_ratio</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="kd">var</span> <span class="n">is_running</span> <span class="o">=</span> <span class="n">horiz_speed</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">walk_speed</span> <span class="o">+</span> <span class="mf">0.4</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="kd">var</span> <span class="n">leg_amp</span> <span class="o">=</span> <span class="mf">0.72</span> <span class="k">if</span> <span class="n">is_running</span> <span class="k">else</span> <span class="mf">0.42</span>
+</span></span><span class="line"><span class="cl">            <span class="kd">var</span> <span class="n">arm_amp</span> <span class="o">=</span> <span class="mf">0.65</span> <span class="k">if</span> <span class="n">is_running</span> <span class="k">else</span> <span class="mf">0.32</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="c1"># Harmonic counter-swing</span>
+</span></span><span class="line"><span class="cl">            <span class="kd">var</span> <span class="n">leg_swing</span> <span class="o">=</span> <span class="nb">sin</span><span class="p">(</span><span class="n">_anim_time</span><span class="p">)</span> <span class="o">*</span> <span class="n">leg_amp</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">leg_l</span><span class="p">:</span> <span class="n">leg_l</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">lerp_angle</span><span class="p">(</span><span class="n">leg_l</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">leg_swing</span><span class="p">,</span> <span class="mf">18.0</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">leg_r</span><span class="p">:</span> <span class="n">leg_r</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">lerp_angle</span><span class="p">(</span><span class="n">leg_r</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">leg_swing</span><span class="p">,</span> <span class="mf">18.0</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="kd">var</span> <span class="n">arm_swing</span> <span class="o">=</span> <span class="o">-</span><span class="nb">sin</span><span class="p">(</span><span class="n">_anim_time</span><span class="p">)</span> <span class="o">*</span> <span class="n">arm_amp</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">arm_l</span><span class="p">:</span> <span class="n">arm_l</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">lerp_angle</span><span class="p">(</span><span class="n">arm_l</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">arm_swing</span><span class="p">,</span> <span class="mf">18.0</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">arm_r</span><span class="p">:</span> <span class="n">arm_r</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">lerp_angle</span><span class="p">(</span><span class="n">arm_r</span><span class="o">.</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">arm_swing</span><span class="p">,</span> <span class="mf">18.0</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>This procedural approach offered immense control:</p>
+<ul>
+<li><strong>Instant Response</strong>: No animation blend trees or cross-fade lag. If the player reversed direction, the body pitched backward into friction instantly.</li>
+<li><strong>Dynamic Physics Lean</strong>: Running speed tipped <code>VisualPivot.rotation.x</code> forward by up to \(0.12\) rad (about \(7^\circ\)), giving a sense of sprint momentum.</li>
+<li><strong>Secondary Dynamics</strong>: The ponytail lagged behind player velocity using spring dampening, and landing compressed the character vertically before bouncing back.</li>
+</ul>
+<h3 id="the-breaking-point">The Breaking Point</h3>
+<p>Procedural puppets work remarkably well for basic platformers. But <em>The Jade Crypt</em> wasn&rsquo;t just a running and jumping demo; it grew to include <strong>Wuxia martial arts</strong>:</p>
+<ul>
+<li>Two-hit Jian sword attack chains and recovery cancels</li>
+<li>A held high guard that deflects darts and halberd thrusts</li>
+<li>Low-profile crouch-crawling through 1-block shafts and ducking under swinging blades</li>
+<li>Sprinting martial slides and combat rolls for dodging in a duel</li>
+<li>4-way subterranean swimming, diving, and waterline surface breaching</li>
+<li>Hauling \(1\text{m}^3\) carved stone puzzle blocks with a taut leather shoulder tow strap</li>
+</ul>
+<p>Attempting to code natural anatomical articulation for a dual-strike sword flourish or a fluid swimming breaststroke with trigonometric equations became a maintainability nightmare. The joints looked robotic, lacked weight, and failed to convey the fluid grace of traditional martial arts.</p>
+<h3 id="phase-2-skeletal-mesh--quaterniuss-universal-animation-library">Phase 2: Skeletal Mesh &amp; Quaternius&rsquo;s Universal Animation Library</h3>
+<p>I made the decision to migrate to a standard rigged humanoid skeleton. But sourcing, rigging, and retargeting dozens of disparate animation clips from scratch can stall a project for months.</p>
+<p>The turning point was discovering <strong>Quaternius&rsquo;s Universal Animation Library</strong>:</p>
+<ul>
+<li><strong>Universal Animation Library [Standard].zip</strong> (43 animations in the free Standard edition)</li>
+<li><strong>Universal Animation Library 2 [Standard].zip</strong> (43 more, focusing on parkour, transitions, and locomotion, plus the female mannequin)</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/jade-crypt/dragon_shrine.jpg"   alt="Lin Yue on the Dragon Shrine Turntable with full skeletal mesh and wuxia attire" class="sc-image sc-image-default"
+       >
+
+
+<p>You can download both packs directly from the official sources:</p>
+<ul>
+<li><strong>Quaternius Official Website</strong>:
+<ul>
+<li>
+
+
+
+
+
+
+  <a href="https://quaternius.com/packs/universalanimationlibrary.html" target="_blank" rel="noopener noreferrer" >Universal Animation Library</a>
+</li>
+<li>
+
+
+
+
+
+
+  <a href="https://quaternius.com/packs/universalanimationlibrary2.html" target="_blank" rel="noopener noreferrer" >Universal Animation Library 2</a>
+</li>
+</ul>
+</li>
+<li><strong>itch.io</strong>:
+<ul>
+<li>
+
+
+
+
+
+
+  <a href="https://quaternius.itch.io/universal-animation-library" target="_blank" rel="noopener noreferrer" >Universal Animation Library on itch.io</a>
+</li>
+<li>
+
+
+
+
+
+
+  <a href="https://quaternius.itch.io/universal-animation-library-2" target="_blank" rel="noopener noreferrer" >Universal Animation Library 2 on itch.io</a>
+</li>
+</ul>
+</li>
+</ul>
+<p>Quaternius releases these libraries under <strong>CC0</strong>, making them an invaluable resource for the independent game development community.</p>
+<p>I imported the female mannequin mesh into <code>assets/models/characters/player_lin_yue.glb</code>, retargeting the Universal Animation Library clips directly to her skeleton. The core locomotion suite—idle, run, sprint, crouch-walk, combat roll, sword slashes, swimming, and death collapses—instantly gave Lin Yue the physical presence she needed.</p>
+<h3 id="splicing-custom-wuxia-clips-the-headless-baking-pipeline">Splicing Custom Wuxia Clips: The Headless Baking Pipeline</h3>
+<p>The Universal Animation Library covers general combat and locomotion, but it had no clips for our custom platforming mechanics:</p>
+<ul>
+<li><strong><code>Ledge_Hang</code></strong>: Hanging motionless from an abyss ledge by her fingertips.</li>
+<li><strong><code>Ledge_Climb</code></strong>: A two-stage vault pulling her body weight up onto the platform.</li>
+<li><strong><code>Air_Kick</code></strong>: The airborne Qinggong double-jump pose (knee tuck and heel drive).</li>
+<li><strong><code>Sword_Guard</code></strong>: A two-handed high defensive Wuxia guard held indefinitely.</li>
+<li><strong><code>Pull</code></strong>: Leaning forward into a shoulder strap while dragging a heavy stone cube.</li>
+</ul>
+<p>Instead of hand-animating these in Blender and risking skeleton mismatch, I wrote command-line tools in GDScript that load the skeleton headless, pose her bones mathematically, splice in clips from UAL2 (such as <code>ClimbUp_1m</code>), and serialize them into optimized Godot <code>.res</code> animation resource files:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Bake Lin Yue&#39;s custom posed animation clips</span>
+</span></span><span class="line"><span class="cl">godot --headless --script tools/bake_player_clips.gd</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>When the player loads, <code>player.gd</code> checks that every baked <code>.res</code> file exists and that the length of <code>ledge_climb.res</code> still matches the climb timings declared in code (the <code>CLIMB_*</code> constants). If someone alters the climb without rebaking the clip, the game reports the mismatch, and the command to fix it, as soon as the chamber starts.</p>
+<hr>
+<h2 id="3-the-validation-engine-from-monolithic-script-to-scalable-rule-engine">3. The Validation Engine: From Monolithic Script to Scalable Rule Engine</h2>
+<p>If you author 37 chambers filled with pressure plates, timed sprint gates, swinging pendulums, crumbling slabs, and dart traps, <strong>how do you know every chamber is actually beatable?</strong></p>
+<h3 id="the-early-days-the-650-line-monolith">The Early Days: The 650-Line Monolith</h3>
+<p>In the early builds, validation was an internal function inside 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/the-jade-crypt/blob/main/scripts/core/chamber_loader.gd" target="_blank" rel="noopener noreferrer" ><code>scripts/core/chamber_loader.gd</code></a>
+ called <code>_validate_chamber()</code>. It is gone from the code you can read today.</p>
+<p>It was a classic architectural anti-pattern:</p>
+<ol>
+<li><strong>Scene Tree Coupling</strong>: <code>ChamberLoader</code> inherits from <code>Node3D</code>. Running headless validation meant instantiating spatial scene tree nodes in memory, resulting in orphan node leaks unless explicitly cleaned up by hand.</li>
+<li><strong>Entangled Concerns</strong>: A single function, 650 lines at its peak, tried to verify ASCII character boundaries, inspect light distances, check vertical headroom, and run a crude flood fill.</li>
+<li><strong>No Scalability</strong>: When I introduced swimming pools in Chapter V, or dart traps deflected by sword guards, adding those checks to an already bloated function was fragile and prone to regression.</li>
+</ol>
+<h3 id="the-decoupled-3-tier-architecture">The Decoupled 3-Tier Architecture</h3>
+<p>To solve this, I decoupled the game into three distinct tiers:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code> ┌──────────────────────────────────────────────────────────────┐
+ │ Authoring: ASCII chamber grids (chambers/**/*.txt)           │
+ │            + header directives ([THEME:], [ABILITY:], ...)   │
+ └──────────────────────────────┬───────────────────────────────┘
+                                │
+                ┌───────────────┴───────────────┐
+                ▼                               ▼
+ ┌─────────────────────────────┐ ┌─────────────────────────────┐
+ │ Validator (Headless CLI)    │ │ Runtime (Godot 3D Scene)    │
+ │ domain/ + validator/        │ │ scripts/ + scenes/          │
+ │ LevelParser -&gt; LevelIR      │ │ ChamberLoader reads the     │
+ │ Rule Registry + BFS Solver  │ │ grid, builds colliders      │
+ └─────────────────────────────┘ └─────────────────────────────┘
+                │                               │
+                └───────────────┬───────────────┘
+                                ▼
+   Shared geometry rules: domain/collision/ (pendulum rig, gate barrier)
+   Pacing constants: ChamberTuning (scripts/core/)</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><ol>
+<li><strong>Shared Domain (<code>domain/</code>)</strong>: Pure <code>RefCounted</code> GDScript data structures. <code>LevelParser</code> reads the raw text into a <code>LevelIR</code> (Intermediate Representation), <code>MovementConfig</code> holds the player&rsquo;s jump and run limits, and <code>PlanningState</code> and <code>GameAction</code> define the state-space rules. Not a single <code>Node3D</code> is loaded.</li>
+<li><strong>Modular Rule Engine (<code>validator/</code>)</strong>: An orchestrator (<code>ChamberValidator</code>) that passes the <code>LevelIR</code> through an extensible registry of isolated validation rules.</li>
+<li><strong>Runtime Loader (<code>scripts/core/chamber_loader.gd</code>)</strong>: Reads the same text grid and instantiates the visual meshes, colliders, and lighting. Wherever the game and the validator must agree on geometry—how long a pendulum&rsquo;s arm is, how high a closed gate&rsquo;s barrier reaches—both call the same helper in <code>domain/collision/</code>, so they cannot drift apart.</li>
+</ol>
+<h3 id="the-modular-rule-registry">The Modular Rule Registry</h3>
+<p>Every check is now an independent class that inherits from <code>ValidationRule</code> and implements <code>evaluate(context: ValidationContext) -&gt; Array</code>. Each rule returns standardized <code>Finding</code> objects containing the exact grid coordinates (<code>row, col</code>), severity level, rule ID, and actionable remediation hints:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Rule Category</th>
+          <th style="text-align: left">Example Rules</th>
+          <th style="text-align: left">Responsibility</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>Structural</strong></td>
+          <td style="text-align: left"><code>MAP-001</code>, <code>MAP-003</code>, <code>PROP-002</code></td>
+          <td style="text-align: left">Verifies spawn/exit existence, ground support under switches, and ensures floor braziers stand on solid stone <code>#</code> rather than open air.</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Clearance</strong></td>
+          <td style="text-align: left"><code>HEAD-001</code>, <code>HEAD-005</code>, <code>HEAD-011</code></td>
+          <td style="text-align: left">Enforces 2-cell (\(2\text{m}\)) vertical clearance for standing and validates 1-cell crawlways, keeps stacked platforms far enough apart, and ensures pool surfaces meet solid banks or docks.</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Movement</strong></td>
+          <td style="text-align: left"><code>MOVE-001</code>, <code>MOVE-002</code></td>
+          <td style="text-align: left">Checks spawn run-up runway and flags unrecoverable fatal drops.</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Puzzles</strong></td>
+          <td style="text-align: left"><code>PUZZLE-001</code>, <code>PUZZLE-004</code>, <code>PUZZLE-006</code></td>
+          <td style="text-align: left">Verifies every locked door can be unlocked with keys the player can collect, catches puzzles that can be bypassed, and finds pockets the player can fall into but never climb out of.</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Hazard &amp; Combat</strong></td>
+          <td style="text-align: left"><code>HAZ-001</code>, <code>HAZ-003</code>, <code>COMBAT-003</code></td>
+          <td style="text-align: left">Validates that pendulum blades provide \(\ge 0.35\text{s}\) human crossing windows, times every sprint gate&rsquo;s dash along the solved route (climbs, pendulum waits and sentinel fights included), and verifies dart traps have guard defense.</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>Pacing &amp; Pedagogy</strong></td>
+          <td style="text-align: left"><code>PACE-001</code>, <code>PACE-002</code>, <code>PED-001</code></td>
+          <td style="text-align: left">Calculates <strong>Traversal Load (TL)</strong>, derives par completion times, and ensures newly introduced mechanics respect chapter ability gates.</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="the-bfs-solver">The BFS Solver</h3>
+<p>To verify puzzle solvability, <code>validator/planner/state_search.gd</code> runs a deterministic Breadth-First Search over the player&rsquo;s legal actions—walk, jump, drop, climb, swim, push or pull a block, fight, unlock a door. Each state records her cell, the keys she holds, which gates and doors are open, which sentinels still stand, and where every movable block sits. If the search runs out of its state budget with blocks free to move, it retries with the blocks frozen in place.</p>
+<p>The route it finds is the &ldquo;math proof&rdquo; the other rules build on. <code>HAZ-003</code>, for example, walks the solved route from each timed gate&rsquo;s pressure plate to the gate and times it: running at 5.2 m/s, ledge grabs at 1.7 s, a half swing for every pendulum she passes under, and the fight with every sentinel standing in the way. The timer must give a human 1.3× that perfect run.</p>
+<p>That last part was learned the hard way. Chamber 12&rsquo;s old 20-second gate passed with a 15.2-second perfect run—but the rule didn&rsquo;t count the two Halberdiers on the dash, and in playtesting the gate was simply out of reach. Counting the fights (0.8 s per strike) the run needed 30 s; the chamber was rebuilt, and its new dash takes 5.95 s with real controls against a 12-second timer.</p>
+<p>A passing chamber reports its numbers in the terminal:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">[ChamberValidator] Chamber Playability &amp; Metrics Audit: The Celestial Spire Sanctum
+</span></span><span class="line"><span class="cl">[ChamberValidator] • Grid Size: 25 rows x 30 cols
+</span></span><span class="line"><span class="cl">[ChamberValidator] • Spawn: (row 21, col 2) | Exit: (row 5, col 27)
+</span></span><span class="line"><span class="cl">[ChamberValidator] • Architecture: 2 Platforms, 1 Gates (0 Perm, 1 Timed), 1 Plates
+</span></span><span class="line"><span class="cl">[ChamberValidator] • Pacing &amp; Complexity:
+</span></span><span class="line"><span class="cl">[ChamberValidator]   - Traversal Load: 48.0 (Punishing (Gauntlet))
+</span></span><span class="line"><span class="cl">[ChamberValidator]     20 forced jumps, 10 mantles, 2 hazard-adjacent steps, 2 forced waits
+</span></span><span class="line"><span class="cl">[ChamberValidator]   - Derived Par Time: 91.1s (perfect run 56.9s x 1.60)
+</span></span><span class="line"><span class="cl">[ChamberValidator] • Math Proof Critical Path: 33 steps
+</span></span><span class="line"><span class="cl">[ChamberValidator] Status: PLAYABLE &amp; BALANCED ✓</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>A failing one names the rule, the cells, and what to change:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">❌ [CRITICAL] HAZ-003: CRITICAL QA: Timed gate &#39;g&#39; at col 49 timer (20.0s) is physically impossible! Traversal requires &gt;= 23.2s minimum.
+</span></span><span class="line"><span class="cl">Locations: (row 7, col 49), (row 14, col 12)
+</span></span><span class="line"><span class="cl">Suggested Action: Increase gate timer to at least 30.1s or shorten sprint path. 2 sentinel(s) stand on the dash; this time includes fighting them.</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="companion-headless-audits">Companion Headless Audits</h3>
+<p>The chamber validator only reads the text grid, so two companion headless suites check what it cannot see. I run them locally alongside it before shipping a build:</p>
+<ol>
+<li><strong>Mesh Footprint Audit (<code>tools/validate_footprints.gd</code>)</strong>: Builds every chamber with the real loader and measures the actual bounding boxes. Rule <code>FOOT-001</code> asserts that no visible mesh extends more than \(0.53\text{m}\) from its cell center (half a cell plus a small tolerance), so no prop hangs over a neighbouring gap or sinks into its stone. Rule <code>FOOT-002</code> asserts that spike and other hazard kill zones never reach past their cell, so nothing kills the player where nothing visible touches her; a pendulum&rsquo;s sweep is checked by <code>HAZ-002</code> instead.</li>
+<li><strong>Model &amp; Relic Placement Audit (<code>tools/validate_models.gd</code>)</strong>: Confirms every model the game spawns loads with valid geometry, enforces a strict 1-to-1 parity between relic altars (<code>A</code>) in maps and entries in the Antiquities Codex catalog, and checks that no solid collider reaches past its 1-meter cell.</li>
+</ol>
+<hr>
+<h2 id="4-ascii-whiteboxing-level-design-in-plain-text">4. ASCII Whiteboxing: Level Design in Plain Text</h2>
+<p>In level design, <strong>whiteboxing</strong> (or greyboxing) is the practice of blocking out level geometry with primitive shapes to test jump distances, line-of-sight, and gameplay pacing before committing to final art.</p>
+<p>Traditional 3D whiteboxing in modern engines can be surprisingly slow: opening an editor, dragging cubes, aligning grid snaps, and rebuilding collision meshes. When designing 30+ chambers, that friction accumulates.</p>
+<p>In <em>The Jade Crypt</em>, <strong>the whitebox is a plain <code>.txt</code> file.</strong></p>
+<p>Here is Chamber 12, <em>The Celestial Spire Sanctum</em>: a five-storey belfry tower climbed in switchbacks, from a flooded crypt at its foot to the chalice at its summit.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">##############################
+</span></span><span class="line"><span class="cl">#....t............t..........#
+</span></span><span class="line"><span class="cl">#............................#
+</span></span><span class="line"><span class="cl">#............................#
+</span></span><span class="line"><span class="cl">#.......$.....^.......g...E..#
+</span></span><span class="line"><span class="cl">#..###########################
+</span></span><span class="line"><span class="cl">#.........t..................#
+</span></span><span class="line"><span class="cl">#............................#
+</span></span><span class="line"><span class="cl">###._...^..$...N...$....A.J..#
+</span></span><span class="line"><span class="cl">###########################..#
+</span></span><span class="line"><span class="cl">#................t...........#
+</span></span><span class="line"><span class="cl">#............................#
+</span></span><span class="line"><span class="cl">#.........P..$$......D...X.###
+</span></span><span class="line"><span class="cl">#..###########################
+</span></span><span class="line"><span class="cl">#......t................t....#
+</span></span><span class="line"><span class="cl">#............................#
+</span></span><span class="line"><span class="cl">###.J......n.......$$$.......#
+</span></span><span class="line"><span class="cl">###################CCC#####..#
+</span></span><span class="line"><span class="cl">#..............t.............#
+</span></span><span class="line"><span class="cl">#............................#
+</span></span><span class="line"><span class="cl">#S.$..^.$$.................###
+</span></span><span class="line"><span class="cl">###########=~~~~~~=###########
+</span></span><span class="line"><span class="cl">############$~~~~~############
+</span></span><span class="line"><span class="cl">############~~K~J~############
+</span></span><span class="line"><span class="cl">##############################
+</span></span><span class="line"><span class="cl">[THEME: sunken_belfry]
+</span></span><span class="line"><span class="cl">[LIGHT: normal]
+</span></span><span class="line"><span class="cl">[ABILITY: all]
+</span></span><span class="line"><span class="cl">[GATE_TIMER: 12.0]
+</span></span><span class="line"><span class="cl">[TITLE: The Celestial Spire Sanctum]
+</span></span><span class="line"><span class="cl">[SUBTITLE: Chapter II Grand Finale · The Five-Storey Belfry Spire]</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="how-it-works">How It Works:</h3>
+<ul>
+<li><strong>Strict 1-Meter Mapping</strong>: Every character in the grid corresponds to an exact \(1.0\text{m} \times 1.0\text{m}\) spatial cell.
+<ul>
+<li><code>#</code> = Solid stone wall / floor</li>
+<li><code>=</code> = Flagstone platform shelf (here, the docks at the pool&rsquo;s edge)</li>
+<li><code>C</code> = Crumbling slab</li>
+<li><code>~</code> = Water</li>
+<li><code>^</code> = Retractable ground spikes</li>
+<li><code>P</code> = Swinging pendulum blade</li>
+<li><code>_</code> = Pressure plate</li>
+<li><code>g</code> = Timed sprint portcullis gate</li>
+<li><code>K</code> / <code>D</code> = Ancient vault key and locked door</li>
+<li><code>n</code> / <code>N</code> = Clay Sentry and Imperial Halberdier sentinel automatons</li>
+<li><code>A</code> = Sacred relic altar</li>
+<li><code>t</code> = Hanging bronze lantern</li>
+<li><code>$</code> / <code>J</code> / <code>X</code> = Coin, jade shard and treasure chest</li>
+<li><code>S</code> / <code>E</code> = Player spawn and Imperial Chalice exit</li>
+</ul>
+</li>
+<li><strong>Header Directives</strong>: Simple bracket tags configure environment theme, ambient lighting energy, gate countdowns, and ability unlocks.</li>
+<li><strong>Single Source of Truth</strong>: Because the game loader reads the text grid directly to spawn colliders and props, it keeps the gameplay whitebox and runtime layout derived from the exact same source of truth, avoiding visual-collider drift.</li>
+</ul>
+<p>If a jump in Chamber 12 feels too tight during playtesting, I open <code>c02_ch06.txt</code>, change a character, save, and validate just that chamber:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">godot --headless --script tools/validate_chambers.gd -- chambers/chapter_02/c02_ch06.txt</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>About 17 seconds later, Godot&rsquo;s startup included, the headless solver tells me whether the change preserved solvability. Chamber 12 is one of the slowest to check, because the solver has five storeys, a key, a door and a timed gate to search through; a small chamber like Chamber 1 comes back in about half a second. Leaving off the path runs the whole suite of 37 chambers, which takes about two minutes.</p>
+<hr>
+<h2 id="5-the-ecosystem-orchestrating-sibling-ai-projects">5. The Ecosystem: Orchestrating Sibling AI Projects</h2>
+<p>Building a cinematic game as an indie developer usually means making compromises on asset volume. To achieve rich visual detail, full voice acting, and cinematic cutscenes, <em>The Jade Crypt</em> acts as an integration consumer for my other self-hosted open-source projects.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/jade-crypt/sentinels.jpg"   alt="Cinematic Prologue Slide: The Clockwork Sentinels" class="sc-image sc-image-default"
+       >
+
+
+<h3 id="1-3d-meshes-via-printable---game-asset">1. 3D Meshes via <code>printable</code> (<code>--game-asset</code>)</h3>
+<p>In my earlier post 
+
+
+
+
+
+
+  <a href="/posts/2026/08/from-photos-to-printable-3d/" ><em>From Photos to Printable 3D</em></a>
+, I documented 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/printable" target="_blank" rel="noopener noreferrer" ><strong><code>printable</code></strong></a>
+—a local toolkit built on AMD ROCm for turning reference images into watertight 3D models.</p>
+<p>While <code>printable</code> was built primarily for 3D printing STLs, I added a dedicated <code>--game-asset</code> flag to its pipeline:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Generate a game-ready low-poly GLB with baked PBR textures</span>
+</span></span><span class="line"><span class="cl">printable generate assets/examples/relic_censer.png <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -b hunyuan3d <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --game-asset <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --game-asset-max-faces <span class="m">3500</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --game-asset-texture-size <span class="m">1024</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Instead of exporting untextured CAD solids, the game asset pipeline:</p>
+<ol>
+<li>Reconstructs the 3D volume using <strong>Hunyuan3D 2.0</strong> (or the lighter <strong>TripoSR</strong>).</li>
+<li>Decimates the mesh with a quadric reduction (in <code>trimesh</code>, no Blender required) down to a default <strong>3,500-face budget</strong>, closing any holes the reduction opens.</li>
+<li>UV-unwraps the low-poly with <strong>xatlas</strong> and bakes diffuse colour and a tangent-space normal map from the high-poly reconstruction.</li>
+<li>Exports a compact <code>.glb</code> ready to drop into <code>assets/models/</code>.</li>
+</ol>
+<p>Because the fine carved details live in the normal map rather than dense polygon geometry, the relics and props stay light enough for the WebGL/WebAssembly build that runs in the browser.</p>
+<h3 id="2-cinematic-video-via-google-flow">2. Cinematic Video via Google Flow</h3>
+<p>Between chapters, the game presents cinematic visual novel cutscenes with typewriter calligraphy and animated backgrounds.</p>
+<p>I generated 10-second atmospheric looping cutscenes using <strong>Google Flow</strong> driven by structured Wuxia prompts:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Cinematic slow tracking camera shot pushing forward through a grand subterranean 
+</span></span><span class="line"><span class="cl">bronze bell belfry corridor. Ancient terracotta and iron automata sentinels stand 
+</span></span><span class="line"><span class="cl">in menacing rows along the dark stone walls, holding massive bronze halberds with 
+</span></span><span class="line"><span class="cl">glowing jade power cores in their chests. In the background, gargantuan suspended 
+</span></span><span class="line"><span class="cl">bronze bells sway gently, emitting deep resonant vibrations. Golden Qi dust motes 
+</span></span><span class="line"><span class="cl">and rising cavern steam drifting through atmospheric god rays, cinematic wuxia 
+</span></span><span class="line"><span class="cl">dark fantasy, smooth steady 24fps motion.</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>These were exported as 10-second, 24fps \(1280 \times 720\) video clips encoded to <code>.ogv</code> (Ogg Theora) for native, dependency-free playback inside Godot&rsquo;s <code>VideoStreamPlayer</code>.</p>
+<h3 id="3-voiceover--bgm-via-polyphon-audio">3. Voiceover &amp; BGM via <code>polyphon-audio</code></h3>
+<p>In my other post 
+
+
+
+
+
+
+  <a href="/posts/2026/09/polyphon-audio-local-voice-playground/" ><em>Polyphon Audio: Local Voice Playground</em></a>
+, I explored running local speech inference on top of <code>audio.cpp</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+  
+  
+
+
+
+
+
+  <img src="/images/jade-crypt/foundry.jpg"   alt="Cinematic Prologue Slide: The Clockwork Foundry" class="sc-image sc-image-default"
+       >
+
+
+<p>All narration and chapter voiceover lines in <em>The Jade Crypt</em> were synthesized using <code>polyphon-audio</code>. Because cutscene video clips loop on a strict 10.0-second cadence, voice lines had to be precisely timed to avoid overlapping slide transitions.</p>
+<p>I scripted the narration lines to exactly <strong>15–18 words</strong> with explicit inline <code>[pause Ns]</code> cues:</p>
+<blockquote>
+<p><em>&ldquo;Titanic clockwork gears grind above her. [pause 0.3s] Sulfur and ancient Qi churn—[pause 0.2s] the fortress awakens to hunt her bloodline.&rdquo;</em><br>
+<em>(18 words · 9.54 seconds as rendered)</em></p></blockquote>
+<p><code>polyphon-audio</code> synthesized each phrase between pause markers and spliced exact millisecond silences into the final 16-bit, 24 kHz mono WAV file, leaving roughly a \(0.5\text{s}\) buffer before the slide completes. The dungeon ambient drones and traditional Chinese instrument arrangements were similarly generated using <strong>Stable Audio 3 Small</strong> (its Music and SFX models, as 8-bit GGUF builds) through <code>polyphon-audio</code>&rsquo;s Sound &amp; Music tab, which loads them on demand.</p>
+<hr>
+<h2 id="6-reflections--whats-next">6. Reflections &amp; What&rsquo;s Next</h2>
+<p>Building <em>The Jade Crypt</em> has reinforced a few core game development principles:</p>
+<ol>
+<li><strong>Constraints Spark Creativity</strong>: Locking physics to \(Z = 0\) eliminated an entire class of 3D movement bugs while letting us push Godot&rsquo;s visual atmosphere as far as the hardware would allow.</li>
+<li><strong>Automate Quality Early</strong>: Writing the headless chamber validator felt like overhead during the first week. By week three, when adjusting trap cadences across 37 chambers, being able to run <code>godot --headless --script tools/validate_chambers.gd</code> turned hours of manual playtesting into a two-minute full-suite run. It does not replace playing, though: every rule encodes a human limit, and when real hands disagree with a rule—as they did with Chamber 12&rsquo;s gate—the rule is what gets fixed.</li>
+<li><strong>Composable Toolchains Beat Monoliths</strong>: Rather than trying to make Godot do everything, treating the game as an assembly point for specialized sibling projects (<code>printable</code> for meshes, <code>polyphon-audio</code> for sound, ASCII text for level layout) made a solo project feel manageable.</li>
+</ol>
+<p>The game is playable in the browser, built and deployed to GitHub Pages by the repository&rsquo;s own workflow on every push, and the full source code, ASCII chamber maps, and validation test suite are open source on GitHub:</p>
+<ul>
+<li><strong>Play in your browser</strong>: 
+
+
+
+
+
+
+  <a href="/the-jade-crypt/" >https://seehiong.github.io/the-jade-crypt/</a>
+</li>
+<li><strong>Repository</strong>: 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/the-jade-crypt" target="_blank" rel="noopener noreferrer" >https://github.com/seehiong/the-jade-crypt</a>
+</li>
+</ul>
+<p>If you&rsquo;re building a platformer in Godot 4 or experimenting with automated level verification, feel free to dive into the codebase and borrow the pipeline!</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/09/polyphon-audio-local-voice-playground/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Polyphon Audio: Local Voice Playground</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
