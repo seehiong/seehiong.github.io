@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/10/system-1-intelligence-for-eduvis/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="System 1 Intelligence for EduVis">
+  <meta property="og:description" content="Explore how System 1 decision models like TypeSafe AI’s Jev and the open-source NanoJev can complement generative LLMs in educational software. Using EduVis as a case study, this post examines token-free decision inference, structured probability outputs, pedagogical routing, and the role of deterministic validation in hybrid AI architectures.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-11T20:00:00+08:00">
+    <meta property="article:modified_time" content="2026-10-11T20:00:00+08:00">
+    <meta property="article:tag" content="AI">
+    <meta property="article:tag" content="EduVis">
+    <meta property="article:tag" content="NanoJev">
+    <meta property="article:tag" content="LLM">
+    <meta property="article:tag" content="System 1">
+    <meta property="article:tag" content="Machine Learning">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="System 1 Intelligence for EduVis">
+  <meta name="twitter:description" content="Explore how System 1 decision models like TypeSafe AI’s Jev and the open-source NanoJev can complement generative LLMs in educational software. Using EduVis as a case study, this post examines token-free decision inference, structured probability outputs, pedagogical routing, and the role of deterministic validation in hybrid AI architectures.">
+
+  <meta itemprop="name" content="System 1 Intelligence for EduVis">
+  <meta itemprop="description" content="Explore how System 1 decision models like TypeSafe AI’s Jev and the open-source NanoJev can complement generative LLMs in educational software. Using EduVis as a case study, this post examines token-free decision inference, structured probability outputs, pedagogical routing, and the role of deterministic validation in hybrid AI architectures.">
+  <meta itemprop="datePublished" content="2026-10-11T20:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-10-11T20:00:00+08:00">
+  <meta itemprop="wordCount" content="2085">
+  <meta itemprop="keywords" content="AI,EduVis,NanoJev,LLM,System 1,Machine Learning,EdTech,LangGraph"><title>System 1 Intelligence for EduVis | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/10/system-1-intelligence-for-eduvis/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">System 1 Intelligence for EduVis</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-10-11T20:00:00&#43;08:00">October 11, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/ai">AI</a>
+            
+              , <a href="/tags/eduvis">EduVis</a>
+            
+              , <a href="/tags/nanojev">NanoJev</a>
+            
+              , <a href="/tags/llm">LLM</a>
+            
+              , <a href="/tags/system-1">System 1</a>
+            
+              , <a href="/tags/machine-learning">Machine Learning</a>
+            
+              , <a href="/tags/edtech">EdTech</a>
+            
+              , <a href="/tags/langgraph">LangGraph</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/eduvis/system-1-eduvis.png');"></div>
+          <img src="/images/eduvis/system-1-eduvis.png" alt="System 1 Intelligence for EduVis cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>When building agentic workflows and educational compilers, developers quickly encounter an awkward bottleneck: <strong>using generative Large Language Models (LLMs) to make simple, structured decisions</strong>.</p>
+<p>Prompting a 7B or 70B parameter model to return a JSON object like <code>{&quot;branch&quot;: &quot;review_basics&quot;, &quot;confidence&quot;: 0.92}</code> requires streaming tokens sequentially, waiting hundreds of milliseconds (or seconds), spending valuable GPU cycles, and constantly guarding against JSON parsing failures or hallucinations.</p>
+<p>Recently, <strong>TypeSafe AI</strong> emerged with <strong>Jev</strong>, pioneering what they describe as <strong>&ldquo;System 1&rdquo; Machine-Native Intelligence</strong>. Shortly after, the open-source community created <strong>NanoJev</strong> (
+
+
+
+
+
+
+  <a href="https://github.com/TianyuCodings/NanoJev" target="_blank" rel="noopener noreferrer" >TianyuCodings/NanoJev</a>
+).</p>
+<p>In this post, we explore what System 1 models are, how NanoJev works under the hood, and how we integrated it into <strong>EduVis v1.5.0</strong> to achieve low-latency pedagogical routing, real-time remediation branching, and assessment item difficulty calibration.</p>
+<hr>
+<h2 id="1-the-bottleneck-generation-vs-reflexes">1. The Bottleneck: Generation vs. Reflexes</h2>
+<p>In cognitive psychology, Daniel Kahneman introduced the distinction between two modes of thought:</p>
+<ul>
+<li><strong>System 1</strong>: Fast, instinctive, automatic, and intuitive.</li>
+<li><strong>System 2</strong>: Slow, deliberate, logical, and computationally expensive.</li>
+</ul>
+<p>While System 1 and System 2 offer an intuitive conceptual metaphor rather than an absolute dichotomy of AI systems, the real engineering friction lies in the <strong>computational workflow and output modality</strong>:</p>
+<ul>
+<li><strong>Generative LLMs</strong> produce autoregressive natural language text that downstream software must parse and interpret. Even when asked for a simple binary choice or category label, they decode token by token.</li>
+<li><strong>Decision models</strong> evaluate structured choices, probabilities, or scores directly in a single forward pass without generating output tokens.</li>
+</ul>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code>Traditional Autoregressive LLM:
+Input Prompt ──▶ [Forward Pass] ──▶ Token 1
+                ──▶ [Forward Pass] ──▶ Token 2 ... (Autoregressive decoding loop)
+
+Decision Engine (Jev / NanoJev):
+State + Question + Candidates ──▶ [Single Forward Pass] ──▶ Structured Choice / Logits / Score</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="inference-latency-vs-end-to-end-latency">Inference Latency vs. End-to-End Latency</h3>
+<p>A single forward pass fundamentally avoids autoregressive output decoding, enabling <strong>low-latency, token-free decision inference</strong>. However, it is essential to distinguish raw model forward-pass time from end-to-end application latency:</p>
+<ul>
+<li><strong>Model Forward Pass</strong>: A compact 0.6B decision model can avoid autoregressive output decoding, potentially reducing inference latency substantially. Actual performance depends on the hardware, implementation, and workload.</li>
+<li><strong>End-to-End Response</strong>: In production, total response time encompasses prompt tokenization, model loading, device memory transfers, request batching, and network transport. For example, TypeSafe AI reports a <strong>70–500 ms</strong> hosted response range for its managed service—reflecting vendor-reported, end-to-end operational measurements rather than a universal constant for all decision models.</li>
+</ul>
+<p>When used for <strong>control flow, routing, and classification</strong>, standard generative LLM calls introduce clear operational challenges:</p>
+<ol>
+<li><strong>Unnecessary Token Overhead</strong>: Multi-token generation cycles and network round-trips can stall interactive student interfaces.</li>
+<li><strong>Schema Fragility</strong>: Autoregressive models occasionally emit conversational preambles, trailing tokens, or malformed JSON that require defensive retry loops.</li>
+<li><strong>Compute Inefficiency</strong>: Allocating multi-billion parameter autoregressive attention to select one of four predefined branches is an inefficient use of compute.</li>
+</ol>
+<hr>
+<h2 id="2-what-is-jev-and-nanojev">2. What is Jev and NanoJev?</h2>
+<h3 id="typesafe-ais-jev">TypeSafe AI’s Jev</h3>
+<p>Founded by former OpenAI researcher Diogo Almeida, Erik Gafni, and Sasha Sheng, TypeSafe AI designed <strong>Jev</strong> to make decisions <em>inside software</em>.</p>
+<p>Named after the economist William Stanley Jevons (<em>Jevons Paradox</em>), the hypothesis is that making AI decisions substantially faster and cheaper will encourage software systems to embed machine intelligence into every micro-branch. Rather than generating text, Jev directly evaluates structured questions over unstructured context.</p>
+<h3 id="open-source-nanojev-tianyucodingsnanojev">Open-Source NanoJev (<code>TianyuCodings/NanoJev</code>)</h3>
+<p><strong>NanoJev</strong> is an open-source reproduction hosted on GitHub under the repository 
+
+
+
+
+
+
+  <a href="https://github.com/TianyuCodings/NanoJev" target="_blank" rel="noopener noreferrer" >TianyuCodings/NanoJev</a>
+. Pretrained model weights are distributed on Hugging Face using the checkpoint identifier <code>C-Tianyu/NanoJev</code>.</p>
+<p>Built on top of a <strong>Qwen3-0.6B</strong> backbone, NanoJev strips away the autoregressive language generation head in favor of <strong>three core decision primitives</strong>:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Primitive</th>
+          <th>Output Form</th>
+          <th>Mathematical Operation</th>
+          <th>Typical Use Case</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong><code>Choice</code></strong></td>
+          <td>Multi-candidate probability distribution</td>
+          <td>Softmax over candidate representations</td>
+          <td>Intent classification, tool routing, branch selection (\(2 \le N \le 255\))</td>
+      </tr>
+      <tr>
+          <td><strong><code>Boolean</code></strong></td>
+          <td>Probability of proposition (\(p \in [0, 1]\))</td>
+          <td>Sigmoid logit activation</td>
+          <td>Prerequisite gate checks, validity verification</td>
+      </tr>
+      <tr>
+          <td><strong><code>Score</code></strong></td>
+          <td>Expected scalar value over discrete tiers</td>
+          <td>Probability-weighted expectation \(\sum i \cdot p_i\)</td>
+          <td>Rubric scoring, difficulty grading (\(2 \le K \le 10\))</td>
+      </tr>
+  </tbody>
+</table>
+<blockquote>
+<p><strong>Note on Calibration</strong>: In NanoJev, raw confidence figures are derived directly from output logit distributions (via softmax or sigmoid). While structured and token-free, treating these figures as true empirical confidence requires domain-specific calibration (such as temperature scaling or isotonic regression on validation benchmarks) rather than assuming raw softmax outputs are inherently calibrated probabilities.</p></blockquote>
+<hr>
+<h2 id="3-integrating-nanojev-into-eduvis-v150">3. Integrating NanoJev into EduVis v1.5.0</h2>
+<p>
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/eduvis" target="_blank" rel="noopener noreferrer" >EduVis</a>
+ is an open, curriculum-aware framework and compiler that separates pedagogical semantic meaning from presentation rendering.</p>
+<p>In EduVis v1.5.0, we introduced a hybrid architecture: <strong>System 1 handles routing and decision gates, while generative LLMs handle creative question drafting.</strong></p>
+<p>Crucially, <strong>the decision engine does not assemble or guarantee educational correctness on its own</strong>. Instead, it proposes candidate pathways, classifications, and difficulty scores. EduVis&rsquo;s deterministic compiler, intermediate representation (IR) schemas, and formal curriculum validation rules remain strictly responsible for validating and assembling compliant educational visual artifacts.</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code>                               ┌──────────────────────────────────────────────┐
+                               │           Learner / Prompt Input             │
+                               └──────────────────────┬───────────────────────┘
+                                                      │
+                                                      ▼
+                       ┌─────────────────────────────────────────────────────────────┐
+                       │           EduVis NanoJev System 1 Decision Engine           │
+                       │ ─────────────────────────────────────────────────────────── │
+                       │  • Intent Pre-Routing (Choice)                              │
+                       │  • Prerequisite Readiness Gate (Boolean)                    │
+                       │  • Dynamic Remediation Router (Choice)                      │
+                       │  • Item Difficulty Scoring Gate (Score)                     │
+                       └──────────────────────┬──────────────────────────────────────┘
+                                              │ (Low-Latency Typed Decision Output)
+                         ┌────────────────────┴─────────────────────┐
+                         ▼                                          ▼
+           ┌───────────────────────────┐              ┌───────────────────────────┐
+           │ Dynamic IR Patch Compiler │              │  Creative LLM Generator   │
+           │ (Instant Micro-Scaffolds) │              │  (Drafting Question Text) │
+           └─────────────┬─────────────┘              └─────────────┬─────────────┘
+                         │                                          │
+                         └────────────────────┬─────────────────────┘
+                                              ▼
+                               ┌─────────────────────────────┐
+                               │ EduVis Validation &amp; Schema  │
+                               │ Compiler (Deterministic IR) │
+                               └─────────────────────────────┘</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><hr>
+<h2 id="4-real-world-pedagogical-use-cases--pipeline-execution">4. Real-World Pedagogical Use Cases &amp; Pipeline Execution</h2>
+<p>Below is an actual execution trace of the EduVis decision and dynamic remediation engine run via <code>uv run python scripts/demo_nanojev.py</code>:</p>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>Pipeline Demonstration &amp; Backend Status</strong><br>
+The following output is from a working <strong>EduVis v1.5.0</strong> decision-pipeline demonstration. This run uses the <strong>deterministic heuristic backend</strong> (<code>Neural Loaded: False</code>), exercising the intent-classification, prerequisite-gating, remediation-routing, IR-patch generation, and difficulty-scoring interfaces.</p>
+<p>It demonstrates the pipeline&rsquo;s execution flow and output structure, not neural inference by NanoJev.</p>
+<p>When evaluating these results, it is helpful to distinguish three levels of evidence:</p>
+<ul>
+<li><strong>Pipeline works</strong>: Demonstrated by this run (interfaces, routing, and IR-patch synthesis execute successfully).</li>
+<li><strong>NanoJev neural backend works</strong>: Not demonstrated by this specific run (requires PyTorch, CUDA, and preloaded weights).</li>
+<li><strong>Difficulty scores reflect real pedagogical difficulty</strong>: Not established by this run.</li>
+</ul></blockquote>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Note: demo_nanojev.py defaults to heuristic fallback mode on CPU/non-CUDA environments.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># To force or configure the neural backend with local weights, set:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># EDUVIS_NANOJEV_ENABLED=true EDUVIS_NANOJEV_LOCAL_ONLY=true uv run python scripts/demo_nanojev.py</span>
+</span></span><span class="line"><span class="cl">&gt; uv run python scripts/demo_nanojev.py
+</span></span><span class="line"><span class="cl"><span class="o">======================================================================</span>
+</span></span><span class="line"><span class="cl">🎯 EduVis v1.5.0 System <span class="m">1</span> Decision <span class="p">&amp;</span> Dynamic Remediation <span class="nv">Engine</span>
+</span></span><span class="line"><span class="cl"><span class="o">======================================================================</span>
+</span></span><span class="line"><span class="cl">⚙️  Backend Status : heuristic <span class="o">(</span>CPU default<span class="o">)</span>
+</span></span><span class="line"><span class="cl">📦 Model           : C-Tianyu/NanoJev
+</span></span><span class="line"><span class="cl">🧠 Neural Loaded   : False
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">1️⃣  Learning Intent Classification <span class="o">(</span>Choice Decision<span class="o">)</span>
+</span></span><span class="line"><span class="cl">--------------------------------------------------
+</span></span><span class="line"><span class="cl">  Prompt : <span class="s1">&#39;Generate 10 challenge questions on negative numbers and temperature jumps&#39;</span>
+</span></span><span class="line"><span class="cl">  👉 Classified Topic : negative_numbers <span class="o">(</span>Confidence: 36.8%<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  Prompt : <span class="s1">&#39;Create an introductory geometry lesson about triangle angles and parallel lines&#39;</span>
+</span></span><span class="line"><span class="cl">  👉 Classified Topic : geometry_and_angles <span class="o">(</span>Confidence: 36.8%<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  Prompt : <span class="s1">&#39;Build a diagnostic quiz for solving linear algebraic equations&#39;</span>
+</span></span><span class="line"><span class="cl">  👉 Classified Topic : algebraic_equations <span class="o">(</span>Confidence: 55.6%<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">2️⃣  Prerequisite Readiness Assessment <span class="o">(</span>Boolean Decision<span class="o">)</span>
+</span></span><span class="line"><span class="cl">--------------------------------------------------
+</span></span><span class="line"><span class="cl">  Concept: algebraic_equations    <span class="p">|</span> Mastery: 0.92 <span class="o">(</span>Thresh: 0.70<span class="o">)</span>
+</span></span><span class="line"><span class="cl">  👉 Verdict: ✅ READY TO ADVANCE <span class="o">(</span>Confidence: 57.8%<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  Concept: calculus_derivatives   <span class="p">|</span> Mastery: 0.48 <span class="o">(</span>Thresh: 0.75<span class="o">)</span>
+</span></span><span class="line"><span class="cl">  👉 Verdict: ⚠️  REMEDIATION NEEDED <span class="o">(</span>Confidence: 67.0%<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">3️⃣  v1.5.0 Dynamic Remediation Router <span class="o">(</span>Micro-Scaffold Synthesis<span class="o">)</span>
+</span></span><span class="line"><span class="cl">--------------------------------------------------
+</span></span><span class="line"><span class="cl">  Misconception: <span class="s1">&#39;Learner placed -5 to the right of zero on a scale.&#39;</span>
+</span></span><span class="line"><span class="cl">  👉 Selected Pathway : Visual Number Line Scaffolding <span class="o">(</span>Confidence: 35.7%<span class="o">)</span>
+</span></span><span class="line"><span class="cl">  👉 Scaffold Type    : visual
+</span></span><span class="line"><span class="cl">  👉 Patch Elements   : <span class="o">[</span><span class="s1">&#39;number_line&#39;</span>, <span class="s1">&#39;step_hop&#39;</span>, <span class="s1">&#39;zero_anchor&#39;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl">  👉 Emitted IR Patch :
+</span></span><span class="line"><span class="cl"><span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;patch_type&#34;</span>: <span class="s2">&#34;micro_remediation_card&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;target_topic&#34;</span>: <span class="s2">&#34;negative_numbers&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;pathway_key&#34;</span>: <span class="s2">&#34;visual_number_line&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;title&#34;</span>: <span class="s2">&#34;Targeted Scaffold: Visual Number Line Scaffolding&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;scaffold_type&#34;</span>: <span class="s2">&#34;visual&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;pedagogical_focus&#34;</span>: <span class="s2">&#34;Visual step-by-step directional hops to ground magnitude and negative direction.&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;diagnostic_anchor&#34;</span>: <span class="s2">&#34;Learner placed -5 to the right of zero on a scale.&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;visual_components&#34;</span>: <span class="o">[</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;number_line&#34;</span>,
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;step_hop&#34;</span>,
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;zero_anchor&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">]</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;suggested_phase&#34;</span>: <span class="s2">&#34;guided_practice&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  Misconception: <span class="s1">&#39;Learner subtracted (-4) - (-3) = -7 instead of -1.&#39;</span>
+</span></span><span class="line"><span class="cl">  👉 Selected Pathway : Visual Number Line Scaffolding <span class="o">(</span>Confidence: 37.5%<span class="o">)</span>
+</span></span><span class="line"><span class="cl">  👉 Scaffold Type    : visual
+</span></span><span class="line"><span class="cl">  👉 Patch Elements   : <span class="o">[</span><span class="s1">&#39;number_line&#39;</span>, <span class="s1">&#39;step_hop&#39;</span>, <span class="s1">&#39;zero_anchor&#39;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl">  👉 Emitted IR Patch :
+</span></span><span class="line"><span class="cl"><span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;patch_type&#34;</span>: <span class="s2">&#34;micro_remediation_card&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;target_topic&#34;</span>: <span class="s2">&#34;integers&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;pathway_key&#34;</span>: <span class="s2">&#34;visual_number_line&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;title&#34;</span>: <span class="s2">&#34;Targeted Scaffold: Visual Number Line Scaffolding&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;scaffold_type&#34;</span>: <span class="s2">&#34;visual&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;pedagogical_focus&#34;</span>: <span class="s2">&#34;Visual step-by-step directional hops to ground magnitude and negative direction.&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;diagnostic_anchor&#34;</span>: <span class="s2">&#34;Learner subtracted (-4) - (-3) = -7 instead of -1.&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;visual_components&#34;</span>: <span class="o">[</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;number_line&#34;</span>,
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;step_hop&#34;</span>,
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;zero_anchor&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">]</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;suggested_phase&#34;</span>: <span class="s2">&#34;guided_practice&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">4️⃣  Question Difficulty <span class="p">&amp;</span> Rubric Estimation <span class="o">(</span>Score Decision<span class="o">)</span>
+</span></span><span class="line"><span class="cl">--------------------------------------------------
+</span></span><span class="line"><span class="cl">  Item : <span class="s1">&#39;What is 3 + (-2)?&#39;</span>
+</span></span><span class="line"><span class="cl">  👉 Estimated Difficulty Level : 4.49 / 5.00 <span class="o">(</span>Confidence: 55.7%<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  Item : <span class="s1">&#39;Calculate (-15) - (-8) + (-4).&#39;</span>
+</span></span><span class="line"><span class="cl">  👉 Estimated Difficulty Level : 4.58 / 5.00 <span class="o">(</span>Confidence: 63.1%<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  Item : <span class="s1">&#39;Prove that the sum of any two negative integers is always negative using formal induction on a bounded set.&#39;</span>
+</span></span><span class="line"><span class="cl">  👉 Estimated Difficulty Level : 4.58 / 5.00 <span class="o">(</span>Confidence: 63.1%<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">======================================================================</span>
+</span></span><span class="line"><span class="cl">🎉 EduVis v1.5.0 System <span class="m">1</span> Decision Demonstration Complete!
+</span></span><span class="line"><span class="cl"><span class="o">======================================================================</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="understanding-the-demonstration-output">Understanding the Demonstration Output</h3>
+<h4 id="1-backend-reported-confidence-vs-empirical-calibration">1. Backend-Reported Confidence vs. Empirical Calibration</h4>
+<p>The displayed confidence figures (ranging around <strong>35% to 67%</strong>) are <strong>backend-reported scores</strong> generated by the heuristic fallback rule engine.</p>
+<p>They do <strong>not</strong> indicate that the system&rsquo;s decisions are empirically calibrated probabilities. In production educational systems:</p>
+<ul>
+<li>Heuristic fallback scores represent deterministic weighting rules and keyword matches.</li>
+<li>Neural model softmax outputs reflect uncalibrated logit distributions.</li>
+<li><strong>True calibrated confidence</strong> requires post-hoc techniques (e.g., temperature scaling, Platt scaling, or isotonic regression) evaluated against standardized educational benchmarks.</li>
+</ul>
+<h4 id="2-difficulty-score-sanity-check">2. Difficulty Score Sanity Check</h4>
+<p>A close look at the difficulty estimation output reveals an important nuance:</p>
+<ul>
+<li><code>What is 3 + (-2)?</code> receives an estimated difficulty of <strong>4.49 / 5.00</strong>.</li>
+<li><code>Calculate (-15) - (-8) + (-4).</code> receives <strong>4.58 / 5.00</strong>.</li>
+<li><code>Prove that the sum of any two negative integers is always negative using formal induction on a bounded set.</code> receives <strong>4.58 / 5.00</strong>.</li>
+</ul>
+<p>An elementary single-digit addition problem should not score virtually the same cognitive complexity (4.49) as a formal mathematical induction proof (4.58). This does not mean the pipeline is broken—the interface, data contracts, and scoring pipelines executed cleanly. However, it highlights the limitations of the current heuristic&rsquo;s scoring behavior and sensitivity to semantic difficulty.</p>
+<p>Before claiming useful difficulty calibration in production, the scoring engine must be evaluated and tuned against a representative corpus of curriculum assessment items with independently assigned pedagogical difficulty ratings.</p>
+<h4 id="3-structured-remediation--deterministic-ir-synthesis">3. Structured Remediation &amp; Deterministic IR Synthesis</h4>
+<p>Where the pipeline demonstrates its strongest value is in <strong>Step 3 (Dynamic Remediation Routing)</strong>. Given an unstructured learner error trace, the engine:</p>
+<ol>
+<li>Selects the appropriate pedagogical pathway (<code>Visual Number Line Scaffolding</code>).</li>
+<li>Synthesizes a structured JSON Intermediate Representation (<code>IR Patch</code>) with strict pedagogical anchors (<code>diagnostic_anchor</code>, <code>visual_components</code>).</li>
+<li>Passes this patch directly to EduVis&rsquo;s visual compiler to render concrete visual scaffolding without waiting on multi-token generative loops.</li>
+</ol>
+<hr>
+<h2 id="5-resilient-fallback-architecture">5. Resilient Fallback Architecture</h2>
+<p>To ensure EduVis runs reliably in varied environments—including WebAssembly / Pyodide in the browser Studio IDE, CPU-only servers, and offline CI pipelines—the engine implements an explicit dual-mode fallback:</p>
+<ol>
+<li><strong>Neural Backend (
+
+
+
+
+
+
+  <a href="https://github.com/TianyuCodings/NanoJev" target="_blank" rel="noopener noreferrer" >TianyuCodings/NanoJev</a>
+)</strong>: When running in an environment with PyTorch, CUDA, and the <code>C-Tianyu/NanoJev</code> model weights available locally, EduVis executes neural forward passes for learned semantic classification, routing, and scoring.</li>
+<li><strong>Deterministic Heuristic Fallback</strong>: On CPU-only environments without local weights, or inside browser Pyodide runtimes where loading a PyTorch neural checkpoint is impractical, EduVis switches automatically to rule-based heuristics (keyword taxonomy matching, error-pattern lookup tables, and readability indices).</li>
+</ol>
+<blockquote>
+<p><strong>Heuristic vs. Neural Mode</strong>: Heuristic fallback is a distinct operational mode designed for portability and zero-dependency predictability. While it ensures consistent pipeline execution in test suites and browser sandboxes, it relies on fixed rule heuristics rather than learned semantic representations, and should not be expected to provide the same contextual nuance or distribution-based confidence as neural inference.</p></blockquote>
+<hr>
+<h2 id="6-takeaways--the-future-of-system-1-in-edtech">6. Takeaways &amp; The Future of System 1 in EdTech</h2>
+<ol>
+<li><strong>Avoid generative LLM calls for simple control-flow decisions</strong>: When a workflow only needs to classify an intent, verify a condition, or choose a branch from a fixed set of candidates, token-by-token generation adds latency and parsing overhead. Reserve generative LLMs for tasks that genuinely require synthesis and natural language articulation.</li>
+<li><strong>Hybrid workflows provide the best balance</strong>: Combine token-free decision models for fast state evaluation, gating, and routing with generative LLMs for creative text authoring.</li>
+<li><strong>Keep the compiler in charge</strong>: Educational software demands deterministic schemas, pedagogical validity, and strict curriculum alignment. Decision models should propose candidate pathways and score items, while deterministic compilers enforce validation rules and assemble the final output.</li>
+</ol>
+<p>EduVis v1.5.0 with NanoJev integration is available on 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/eduvis" target="_blank" rel="noopener noreferrer" >GitHub</a>
+.</p>
+<hr>
+<p><em>Try it via the EduVis CLI:</em></p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">uv run eduvis decision intent <span class="s2">&#34;10 challenge problems on negative numbers&#34;</span> --json
+</span></span><span class="line"><span class="cl">uv run eduvis decision branch <span class="s2">&#34;Confused subtraction with negative signs&#34;</span> --json
+</span></span><span class="line"><span class="cl">uv run eduvis decision score <span class="s2">&#34;Prove the Pythagorean theorem for right triangles&#34;</span> --json
+</span></span><span class="line"><span class="cl">uv run python scripts/demo_nanojev.py</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/10/building-the-jade-crypt/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Building The Jade Crypt</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
