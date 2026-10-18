@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/10/reverse-engineering-my-own-game/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Reverse Engineering My Own Game">
+  <meta property="og:description" content="How much of a shipped Godot game can someone recover? I put my own game, The Jade Crypt, to the test using REA’s AI-assisted reverse-engineering toolkit and GDRE Tools. While REA encountered a binary format boundary, GDRE recovered all 66 GDScript files in just six seconds, with no meaningful logic differences detected. This experiment explores what survives decompilation, what gets lost, and how Godot developers can make their released games harder to reverse engineer through export filtering, encryption, and obfuscation.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-18T18:00:00+08:00">
+    <meta property="article:modified_time" content="2026-10-18T18:00:00+08:00">
+    <meta property="article:tag" content="Reverse Engineering">
+    <meta property="article:tag" content="Godot 4">
+    <meta property="article:tag" content="GDScript">
+    <meta property="article:tag" content="AI">
+    <meta property="article:tag" content="REA">
+    <meta property="article:tag" content="MCP">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Reverse Engineering My Own Game">
+  <meta name="twitter:description" content="How much of a shipped Godot game can someone recover? I put my own game, The Jade Crypt, to the test using REA’s AI-assisted reverse-engineering toolkit and GDRE Tools. While REA encountered a binary format boundary, GDRE recovered all 66 GDScript files in just six seconds, with no meaningful logic differences detected. This experiment explores what survives decompilation, what gets lost, and how Godot developers can make their released games harder to reverse engineer through export filtering, encryption, and obfuscation.">
+
+  <meta itemprop="name" content="Reverse Engineering My Own Game">
+  <meta itemprop="description" content="How much of a shipped Godot game can someone recover? I put my own game, The Jade Crypt, to the test using REA’s AI-assisted reverse-engineering toolkit and GDRE Tools. While REA encountered a binary format boundary, GDRE recovered all 66 GDScript files in just six seconds, with no meaningful logic differences detected. This experiment explores what survives decompilation, what gets lost, and how Godot developers can make their released games harder to reverse engineer through export filtering, encryption, and obfuscation.">
+  <meta itemprop="datePublished" content="2026-10-18T18:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-10-18T18:00:00+08:00">
+  <meta itemprop="wordCount" content="2145">
+  <meta itemprop="keywords" content="Reverse Engineering,Godot 4,GDScript,AI,REA,MCP,Game Security,Open Source,Decompilation"><title>Reverse Engineering My Own Game | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/10/reverse-engineering-my-own-game/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Reverse Engineering My Own Game</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-10-18T18:00:00&#43;08:00">October 18, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/reverse-engineering">Reverse Engineering</a>
+            
+              , <a href="/tags/godot-4">Godot 4</a>
+            
+              , <a href="/tags/gdscript">GDScript</a>
+            
+              , <a href="/tags/ai">AI</a>
+            
+              , <a href="/tags/rea">REA</a>
+            
+              , <a href="/tags/mcp">MCP</a>
+            
+              , <a href="/tags/game-security">Game Security</a>
+            
+              , <a href="/tags/open-source">Open Source</a>
+            
+              , <a href="/tags/decompilation">Decompilation</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/rev-engineer/cover.png');"></div>
+          <img src="/images/rev-engineer/cover.png" alt="Reverse Engineering My Own Game cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <h2 id="decompilation-isnt-new-but-ai-makes-it-fast">Decompilation isn&rsquo;t new, but AI makes it fast</h2>
+<p>As a student, I used to &ldquo;cheat&rdquo; in PC games, and cheat codes were only part of it. Memory scanners let you search the game&rsquo;s RAM for a value, such as your gold count. You spent some gold, searched again to narrow the matches, and then overwrote the value. Unlimited resources. Those tricks became less effective in server-authoritative games, where critical state is validated remotely.</p>
+<p>Years later, decompilers came back into my life at work, legitimately. A hardware vendor supported their device only through a C library compiled into a DLL, and they told us to bridge it into our Java stack. Getting the calls right meant decompiling and inspecting the binaries. Along the way we also decompiled some Java, and it was a shock to see how readable compiled Java is. From then on, we always shipped obfuscated Java archives.</p>
+<p>So reverse engineering isn&rsquo;t new. What is changing is <strong>automation and synthesis</strong>. AI agents can significantly accelerate reverse-engineering workflows by coordinating specialized tools and interpreting their output. Tasks that previously required extensive manual inspection can sometimes be completed in minutes, although results still depend on the target format and the underlying tools.</p>
+<p>That raised a practical question for me: <strong>if I ship a Godot game today, how much of my source code can someone get back, and how does modern AI tooling handle it?</strong></p>
+<h2 id="the-toolchain-rea-and-gdre-tools">The toolchain: REA and GDRE Tools</h2>
+<p>To find out, I looked at two very different tools:</p>
+<h3 id="1-rea-reverse-engineer-anything">1. REA (&ldquo;Reverse Engineer Anything&rdquo;)</h3>
+<p>
+
+
+
+
+
+
+  <a href="https://github.com/morluto/rea" target="_blank" rel="noopener noreferrer" >REA</a>
+ recently gained traction as an agentic reverse-engineering framework. But REA itself is not an LLM. It is an <strong>orchestration layer</strong> and <strong>Model Context Protocol (MCP)</strong> server that connects AI coding agents (such as Claude Code, Cursor, or Gemini CLI) to established analysis engines:</p>
+<ul>
+<li><strong>Ghidra, IDA Pro &amp; Hopper:</strong> For native PE, ELF, and Mach-O binaries.</li>
+<li><strong>JADX:</strong> For Android APK decompilation and DEX bytecode lifting.</li>
+<li><strong>Electron &amp; Node analyzers:</strong> For unpacking ASAR bundles and static JavaScript inspection.</li>
+<li><strong>Binwalk &amp; Unblob:</strong> For firmware and embedded extraction.</li>
+</ul>
+<p>Crucially, REA enforces an <strong>evidence model</strong> (the &ldquo;receipt model&rdquo;). Because both LLMs and decompilers can hallucinate or make speculative guesses, REA requires tools to return structured JSON with concrete evidence—file hashes, exact memory offsets, instruction addresses, and decompiler constraints. Note that REA&rsquo;s integrations vary by analysis lane and version, and not every backend is equally mature. The AI agent then reasons over real decompilation receipts rather than speculating.</p>
+<h3 id="2-gdre-tools--gdsdecomp">2. GDRE Tools / GDSDecomp</h3>
+<p>
+
+
+
+
+
+
+  <a href="https://github.com/GDRETools/gdsdecomp" target="_blank" rel="noopener noreferrer" >GDRE Tools</a>
+ is an open-source, dedicated Godot reverse-engineering toolkit. Unlike general-purpose reverse-engineering suites, GDRE is built specifically for Godot&rsquo;s engine internals: it unpacks Godot packfiles (<code>.pck</code>) and decompiles compiled GDScript bytecode tokens back into human-readable scripts.</p>
+<h2 id="the-legal-bit-reverse-engineer-your-own-work">The legal bit: reverse engineer your own work</h2>
+<p>Reverse engineering commercial software usually runs into license terms (EULAs), anti-circumvention law and copyright. The safest target is <strong>your own work</strong>, which also gives you the original source to check the results against (though care is still warranted around third-party asset licenses or engine components). So I used my own game.</p>
+<p><strong>The target:</strong> 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/the-jade-crypt" target="_blank" rel="noopener noreferrer" >The Jade Crypt</a>
+ (see 
+
+
+
+
+
+
+  <a href="/posts/2026/10/building-the-jade-crypt/" >Building The Jade Crypt</a>
+ for how it was made). It&rsquo;s a 2.5D wuxia platformer built in Godot 4.7: 66 GDScript files, 30 chambers built from ASCII text maps, and a headless solver that proves every chamber can be beaten.</p>
+<p>I exported a Web release build with GDScript in <strong>compiled token mode</strong>, which stores scripts as tokens instead of plain source text:</p>
+<table>
+  <thead>
+      <tr>
+          <th>File</th>
+          <th>Size</th>
+          <th>What it is</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>index.pck</code></td>
+          <td>100 MB</td>
+          <td>The game archive: scripts, chamber maps, assets</td>
+      </tr>
+      <tr>
+          <td><code>index.wasm</code></td>
+          <td>40 MB</td>
+          <td>The Godot engine WebAssembly binary</td>
+      </tr>
+      <tr>
+          <td><code>index.js</code> / <code>.html</code></td>
+          <td>~300 KB</td>
+          <td>The stock web loader</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="round-1-rea-and-the-format-boundary">Round 1: REA and the format boundary</h2>
+<p>I started by seeing if a modern agentic reverse-engineering tool could inspect the build out-of-the-box:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">rea inspect-artifact build/index.pck
+</span></span><span class="line"><span class="cl"><span class="c1"># → unsupported_target: Cannot open artifact: unsupported binary format.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">rea inspect-artifact build/index.wasm
+</span></span><span class="line"><span class="cl"><span class="c1"># → needs the separate WebAssembly lane (requires WABT 1.0.42)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">rea analyze-javascript-application build/
+</span></span><span class="line"><span class="cl"><span class="c1"># → works, but it only unpacks Godot&#39;s browser shell/loader</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>REA immediately refused <code>index.pck</code>. The structured error receipt explains why:</p>
+<!-- raw HTML omitted -->
+<table>
+  <thead>
+      <tr>
+          <th>Field</th>
+          <th>Value</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Error</strong></td>
+          <td>Analysis failed</td>
+      </tr>
+      <tr>
+          <td><strong>Code</strong></td>
+          <td><code>target_unavailable</code></td>
+      </tr>
+      <tr>
+          <td><strong>Category</strong></td>
+          <td><code>unsupported_target</code> (retryable: <code>false</code>)</td>
+      </tr>
+      <tr>
+          <td><strong>Message</strong></td>
+          <td>Cannot open artifact: unsupported binary format.</td>
+      </tr>
+      <tr>
+          <td><strong>Path</strong></td>
+          <td><code>build/index.pck</code></td>
+      </tr>
+      <tr>
+          <td><strong>Constraint</strong></td>
+          <td><code>file_format_rejected</code></td>
+      </tr>
+      <tr>
+          <td><strong>Remediation</strong></td>
+          <td>Review the reported file-format reason and select a supported, well-formed target.</td>
+      </tr>
+  </tbody>
+</table>
+<!-- raw HTML omitted -->
+<h3 id="the-takeaway-on-ai-reverse-engineering">The takeaway on AI reverse engineering</h3>
+<p>This highlights a fundamental reality of AI-driven reverse engineering: <strong>agents are orchestrators, not magicians.</strong></p>
+<p>An AI agent paired with REA can orchestrate Ghidra or JADX with extraordinary speed, but if the underlying decompiler toolchain does not have a parser for a specific binary format (like Godot&rsquo;s custom <code>.pck</code> container and GDScript bytecode), the AI hits a hard boundary. For specialized runtimes, domain-specific decompilers are still mandatory.</p>
+<h2 id="round-2-a-dedicated-godot-decompiler">Round 2: A dedicated Godot decompiler</h2>
+<p>Next, I pointed GDRE Tools directly at the <code>.pck</code> file:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">gdre_tools.x86_64 --headless --recover<span class="o">=</span>build/index.pck --output<span class="o">=</span>recovered</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+
+
+
+
+<div class="code-block-wrapper">
+  <pre tabindex="0"><code>Detected Engine Version: 4.7.2
+Extracted 700 files, no errors detected!
+Decompiled scripts: 66   Scripts not decompiled: 0
+Recovery finished in 00m06s</code></pre>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>In <strong>six seconds</strong>, GDRE Tools fully unpacked the game.</p>
+<!-- raw HTML omitted -->
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">GDRE Tools v2.7.4
+</span></span><span class="line"><span class="cl">Ubuntu 26.04.1 LTS 26.04, headless
+</span></span><span class="line"><span class="cl">Opening file: build/index.pck
+</span></span><span class="line"><span class="cl">Loaded 319 imported files
+</span></span><span class="line"><span class="cl">Detected Engine Version: 4.7.2
+</span></span><span class="line"><span class="cl">Detected Bytecode Revision: 4.5.0-stable (ebc36a7)
+</span></span><span class="line"><span class="cl">Successfully loaded PCK!
+</span></span><span class="line"><span class="cl">Version: 4.7.2
+</span></span><span class="line"><span class="cl">Verified 700 files, no errors detected!
+</span></span><span class="line"><span class="cl">Extracted 700 files, no errors detected!
+</span></span><span class="line"><span class="cl">Saved project config.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">********************************EXPORT REPORT********************************
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Totals:                                 
+</span></span><span class="line"><span class="cl">Decompiled scripts:                     66
+</span></span><span class="line"><span class="cl">Scripts not decompiled:                 0
+</span></span><span class="line"><span class="cl">Imported resources for export session:  319
+</span></span><span class="line"><span class="cl">Successfully converted:                 319
+</span></span><span class="line"><span class="cl">Lossy:                                  168
+</span></span><span class="line"><span class="cl">Rewrote metadata:                       212
+</span></span><span class="line"><span class="cl">Non-importable conversions:             0
+</span></span><span class="line"><span class="cl">Not converted:                          0
+</span></span><span class="line"><span class="cl">Failed conversions:                     0
+</span></span><span class="line"><span class="cl">-------------
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">------------------------------------------------------------------------------------
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Use Godot editor version 4.7.2 to edit the project.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">*******************************************************************************
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Recovery finished in 00m06s</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><!-- raw HTML omitted -->
+<h3 id="comparing-recovered-code-with-source">Comparing recovered code with source</h3>
+<p>I ran a script comparing all 66 recovered <code>.gd</code> scripts against my original git repository (ignoring whitespace and comments):</p>
+<table>
+  <thead>
+      <tr>
+          <th>Metric</th>
+          <th>Result</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Scripts recovered</strong></td>
+          <td><strong>66 / 66</strong></td>
+      </tr>
+      <tr>
+          <td><strong>Code match after normalization</strong></td>
+          <td><strong>66 / 66</strong> matched after normalization (25 exact matches; 41 differ only in float notation; no meaningful logic differences detected)</td>
+      </tr>
+      <tr>
+          <td><strong>ASCII chamber maps</strong></td>
+          <td><strong>37 / 37 byte-for-byte identical</strong></td>
+      </tr>
+      <tr>
+          <td><strong>Imported assets converted</strong></td>
+          <td><strong>319 converted</strong> (168 of which were marked lossy/downscaled)</td>
+      </tr>
+      <tr>
+          <td><strong>Comment lines</strong></td>
+          <td><strong>2,170 → 0</strong> (blank lines observed in recovery)</td>
+      </tr>
+  </tbody>
+</table>
+<p>The only &ldquo;differences&rdquo; in code were trivial literal representations:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-diff" data-lang="diff"><span class="line"><span class="cl"><span class="gd">- const TAUT_DISTANCE: float = 1.20
+</span></span></span><span class="line"><span class="cl"><span class="gd"></span><span class="gi">+ const TAUT_DISTANCE: float = 1.2
+</span></span></span><span class="line"><span class="cl"><span class="gi"></span><span class="gd">- if aabb.size.length_squared() &lt; 0.000001:
+</span></span></span><span class="line"><span class="cl"><span class="gd"></span><span class="gi">+ if aabb.size.length_squared() &lt; 1e-06:
+</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Once the code is decompiled into clean GDScript, <strong>this is where an AI agent thrives</strong>: an LLM fed these 66 recovered scripts can explain the game loop, map enemy patterns, or uncover hidden mechanics in seconds.</p>
+<h2 id="what-was-actually-lost-the-why">What was actually lost: the <em>why</em></h2>
+<p>In this experiment, every comment came back as a blank line, so line numbers in the recovered files happened to align with the original source. The constants and algorithms survived, but the reasoning behind them didn&rsquo;t:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gdscript" data-lang="gdscript"><span class="line"><span class="cl"><span class="c1"># Original source</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#   standing apex      = 7.8^2 / (2*24) = 1.27 m</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#   double jump apex   = 1.27 + 0.96    = 2.23 m</span>
+</span></span><span class="line"><span class="cl"><span class="kd">const</span> <span class="n">MOVE_MAX_RISE_CELLS</span> <span class="o">:=</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Recovered decompilation</span>
+</span></span><span class="line"><span class="cl"><span class="kd">const</span> <span class="n">MOVE_MAX_RISE_CELLS</span> <span class="o">:=</span> <span class="mi">3</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Also, my solver and chamber validator weren&rsquo;t in the recovered build at all because the Godot export filter excluded <code>tools/</code> and <code>validator/</code>. <strong>What you never ship cannot be recovered.</strong></p>
+<hr>
+<h2 id="how-to-actually-protect-your-godot-game">How to actually protect your Godot game</h2>
+<p>You can take measures to significantly increase the difficulty of reverse engineering, but <strong>absolute client-side prevention is impossible</strong>.</p>
+<p>Godot is an open-source engine. As long as your game runs on the player&rsquo;s device, the code and assets must ultimately be decrypted and executed in memory by the engine. However, through the following two core strategies, you can effectively deter the vast majority of casual unpackers and script kiddies.</p>
+<p><em>(Note: While GDRE recovery was directly demonstrated on The Jade Crypt above, the following encryption and obfuscation sections outline architectural defense options based on official documentation and community tooling, rather than verified tests on this specific 4.7.2 build.)</em></p>
+<h3 id="strategy-1-compile-custom-export-templates-and-enable-pck-encryption">Strategy 1: Compile custom export templates and enable PCK encryption</h3>
+<p>Godot provides built-in AES-256 encryption for selected resources inside exported PCK archives. This can prevent straightforward extraction of protected scripts, scenes, and assets using tools such as GDRE Tools.</p>
+<ul>
+<li><strong>Core Principle:</strong> Encrypt selected files inside the PCK using a 256-bit AES key. The matching decryption key is compiled into the Godot runtime, rather than distributed as a separate plaintext key file.</li>
+<li><strong>Critical Requirement:</strong> You must compile your own export templates from Godot&rsquo;s source code. Official precompiled export templates do not contain your encryption key and cannot decrypt resources encrypted with it.</li>
+</ul>
+<p>Generate a 256-bit key:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">openssl rand -hex <span class="m">32</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Set the generated 64-character hexadecimal key before compiling the appropriate platform-specific export templates:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">SCRIPT_AES256_ENCRYPTION_KEY</span><span class="o">=</span><span class="s2">&#34;&lt;your_64_character_hex_key&gt;&#34;</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>Because our target experiment was a Web build, compiling custom Web export templates requires the Emscripten toolchain:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Run from the Godot engine source directory</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Requires the Emscripten toolchain</span>
+</span></span><span class="line"><span class="cl">scons <span class="nv">platform</span><span class="o">=</span>web <span class="nv">target</span><span class="o">=</span>template_release</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p>During compilation, Godot should report that the custom <code>SCRIPT_AES256_ENCRYPTION_KEY</code> has been detected. The resulting Web export template is generated under <code>bin/</code> as <code>godot.web.template_release.wasm32.zip</code>. Select the generated archive as the custom release template in the Web export preset. (Other platforms require their own build targets, such as <code>platform=windows</code> or <code>platform=linuxbsd</code>.)</p>
+<ul>
+<li><strong>Configuring the Export Preset:</strong> In Godot&rsquo;s Project → Export → Encryption settings:
+<ol>
+<li>Enter the same 64-character hexadecimal key.</li>
+<li>Configure the include filters for the resources you want encrypted.</li>
+<li>Select the matching custom export templates in the export preset.</li>
+<li>Export, verify that the game runs using the custom template, and confirm that the intended resources are actually encrypted.</li>
+</ol>
+</li>
+<li><strong>Important:</strong> Godot&rsquo;s encryption include filters are empty by default. Without specifying which files to encrypt (such as <code>*.gd</code>, <code>*.tscn</code>, or <code>*</code>), entering a key alone does not protect your project resources.</li>
+<li><strong>Platform Considerations:</strong> The custom export template must match the target platform. For Web exports, this means working with the WebAssembly-based Godot runtime. Web-based protection should be treated as an additional obstacle, not a secure boundary, because the browser must obtain everything needed to run the game.</li>
+<li><strong>Android Note:</strong> Android packaging differs from desktop PCK exports. Verify how resources are packaged for your specific APK or AAB workflow rather than assuming that enabling PCK encryption automatically protects all packaged assets.</li>
+</ul>
+<h3 id="strategy-2-use-gdscript-obfuscation-plugins">Strategy 2: Use GDScript obfuscation plugins</h3>
+<p>Even with an encrypted PCK, scripts are decrypted in memory when the game loads. Obfuscation ensures that if someone recovers or dumps the bytecode, reading and modifying the code is substantially harder.</p>
+<ul>
+<li><strong>Example Tool:</strong> <strong>
+
+
+
+
+
+
+  <a href="https://github.com/cherriesandmochi/gdmaim" target="_blank" rel="noopener noreferrer" >GDMaim</a>
+</strong> (open-source Godot obfuscation plugin).</li>
+<li><strong>How it works:</strong> During the export process, GDMaim renames private variables, internal functions, and script classes into meaningless random strings (like <code>__6vjJ</code>), while optionally scrambling string literals. It also generates a <code>source_map</code> so you can map stack traces and errors back to your original source code during debugging.</li>
+<li><strong>Usage Restrictions and Compatibility:</strong>
+<ul>
+<li>Obfuscation plugins typically do not process binary scene files (<code>.scn</code> or <code>.res</code>). You must save your scenes and resources in text format (<code>.tscn</code> / <code>.tres</code>) so the obfuscator can parse and rename node references consistently.</li>
+<li><strong>Check compatibility with your Godot version:</strong> GDMaim&rsquo;s original documentation references Godot 4.2-stable, while newer releases report testing with Godot 4.5.1 and 4.6 (with added Web support). Compatibility with Godot 4.7.2 should still be verified, particularly when using compiled GDScript token exports or platform-specific builds. In some Godot versions, script export must first use text mode for the obfuscator to process scripts, with its own export mode handling subsequent bytecode conversion. Test exported gameplay, scene references, signals, resource serialization, and dynamic script calls before release.</li>
+<li>Obfuscation can also break code relying on dynamic identifiers, reflection, string-based <code>call()</code>, or serialized resource properties.</li>
+</ul>
+</li>
+</ul>
+<h3 id="realistic-limitations-to-keep-in-mind">Realistic limitations to keep in mind</h3>
+<ol>
+<li><strong>Not absolutely secure against determined reverse engineers:</strong> The AES key is inside your executable. While finding it in an optimized binary takes skill, specialized memory inspection tools (like <code>KeyDot</code>) can hook the running process or scan memory to extract the AES key and decrypt the PCK.</li>
+<li><strong>File renaming is useless:</strong> Renaming <code>.pck</code> to <code>.dat</code> or hiding assets in subdirectories provides zero protection. Unpackers detect Godot header magic bytes regardless of file extension.</li>
+<li><strong>Bytecode decompilation remains efficient:</strong> Godot&rsquo;s compiled token format is inherently structured. Once decrypted, bytecode will be mapped back to syntax trees by tools like GDSDecomp.</li>
+<li><strong>Keep sensitive logic server-side:</strong> Never store sensitive API secrets, database credentials, or authoritative multiplayer validation in client scripts. If the client runs it, the client can inspect it.</li>
+</ol>
+<hr>
+<h2 id="summary">Summary</h2>
+<p>If you want to protect your Godot release:</p>
+<ol>
+<li><strong>Exclude internal tools</strong> using Godot&rsquo;s export filters (<code>tools/*</code>, tests, raw art assets).</li>
+<li><strong>Compile custom export templates</strong> with AES-256 encryption and <strong>configure the appropriate include filters</strong> to make straightforward resource extraction more difficult.</li>
+<li><strong>Consider GDScript obfuscation</strong> (such as GDMaim, verifying compatibility with your engine version) so recovered scripts lack meaningful identifiers.</li>
+</ol>
+<p>These defenses can raise the effort required for casual extraction, but they do not make client-side code inaccessible. As modern decompilers and AI-driven agents continue to evolve, the fundamental security principle remains: <strong>anything delivered to and executed on client hardware should be treated as potentially recoverable.</strong></p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/10/system-1-intelligence-for-eduvis/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">System 1 Intelligence for EduVis</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
