@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <meta property="og:url" content="https://seehiong.github.io/posts/2026/11/building-a-local-ai-interviewer/">
+  <meta property="og:site_name" content="See Hiong&#39;s Blog">
+  <meta property="og:title" content="Building a Local AI Interviewer">
+  <meta property="og:description" content="An open-source AI interviewer for practising with your own resume and job description. Explore conversational interview sessions with local language models, real-time speech, adaptive questioning, evidence-based feedback, and lifelike avatars—from browser-based WebGPU to GPU-powered photoreal animation. Built to make interview practice more personal, private, and accessible.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-11-11T08:00:00+08:00">
+    <meta property="article:modified_time" content="2026-11-11T08:00:00+08:00">
+    <meta property="article:tag" content="AI">
+    <meta property="article:tag" content="Open Source">
+    <meta property="article:tag" content="Interview Practice">
+    <meta property="article:tag" content="WebGPU">
+    <meta property="article:tag" content="Three.js">
+    <meta property="article:tag" content="MakeHuman">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Building a Local AI Interviewer">
+  <meta name="twitter:description" content="An open-source AI interviewer for practising with your own resume and job description. Explore conversational interview sessions with local language models, real-time speech, adaptive questioning, evidence-based feedback, and lifelike avatars—from browser-based WebGPU to GPU-powered photoreal animation. Built to make interview practice more personal, private, and accessible.">
+
+  <meta itemprop="name" content="Building a Local AI Interviewer">
+  <meta itemprop="description" content="An open-source AI interviewer for practising with your own resume and job description. Explore conversational interview sessions with local language models, real-time speech, adaptive questioning, evidence-based feedback, and lifelike avatars—from browser-based WebGPU to GPU-powered photoreal animation. Built to make interview practice more personal, private, and accessible.">
+  <meta itemprop="datePublished" content="2026-11-11T08:00:00+08:00">
+  <meta itemprop="dateModified" content="2026-11-11T08:00:00+08:00">
+  <meta itemprop="wordCount" content="4242">
+  <meta itemprop="keywords" content="AI,Open Source,Interview Practice,WebGPU,Three.js,MakeHuman,MetaHuman,Avatar,TTS"><title>Building a Local AI Interviewer | See Hiong&#39;s Blog</title>
+
+    <link rel="canonical" href="https://seehiong.github.io/posts/2026/11/building-a-local-ai-interviewer/">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+      
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5PNPM4HWQ0"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5PNPM4HWQ0');
+        }
+      </script>
+    
+    <link rel="stylesheet" href="/css/variables.css">
+    
+    <link rel="stylesheet" href="/css/base.css">
+    
+    <link rel="stylesheet" href="/css/layout.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/header.css">
+    
+    <link rel="stylesheet" href="/css/cards.css">
+    
+    <link rel="stylesheet" href="/css/content_elements.css">
+    
+    <link rel="stylesheet" href="/css/chroma.css">
+    
+    <link rel="stylesheet" href="/css/codeblocks.css">
+    
+    <link rel="stylesheet" href="/css/page_specific.css">
+    
+    <link rel="stylesheet" href="/css/shortcodes.css">
+    
+    <link rel="stylesheet" href="/css/components.css">
+    
+    <link rel="stylesheet" href="/css/animations.css">
+    
+    <link rel="stylesheet" href="/css/media_queries.css">
+    
+    <link rel="stylesheet" href="/css/quantum-theme.css">
+    
+
+    
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        var H = document.documentElement;
+        if (theme === 'dark-mode') {
+          H.classList.add('dark-mode');
+        } else if (theme === 'light-mode') {
+          H.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          H.classList.add('dark-mode');
+        }
+      })();
+    </script>
+</head></head>
+  <body class="page-article"><nav class="nav">
+  <div class="nav-wrapper">
+    <div class="nav-content-wrapper">
+      <div class="nav-content">
+        <a href="/" class="nav-logo-link" title="See Hiong&#39;s Blog - Home">
+          <span class="nav-site-title">
+            <span class="nav-site-title__main">SEE HIONG’S</span>
+            <span class="nav-site-title__sub">BLOG</span>
+          </span>
+        </a>
+        <div class="nav-menu">
+          <div class="nav-item-wrapper">
+            
+            
+            <a href="/posts/" class="nav-item-content active">Archives</a>
+            
+          </div>
+          
+          
+          <div class="nav-item-wrapper">
+            <a href="/tags/" class="nav-item-content ">Tags</a>
+          </div>
+          <div class="nav-item-wrapper">
+            <a href="/about/" class="nav-item-content ">About</a>
+          </div>
+          <div class="nav-item-wrapper nav-search-toggle-wrapper">
+            <button id="nav-search-toggle" class="nav-item-button" aria-label="Toggle search" title="Search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="nav-item-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          
+          
+          <button id="theme-toggle" class="nav-item-button" aria-label="Toggle theme"></button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const H = document.documentElement; 
+
+    if (H.classList.contains('dark-mode')) {
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      themeToggle.textContent = 'Dark Mode';
+    }
+
+    themeToggle.addEventListener('click', function() {
+      H.classList.toggle('dark-mode');
+      if (H.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark-mode');
+        themeToggle.textContent = 'Light Mode';
+      } else {
+        localStorage.setItem('theme', 'light-mode');
+        themeToggle.textContent = 'Dark Mode';
+      }
+    });
+  });
+</script><div id="content-wrapper">
+        <main class="container" id="main-content">
+<div class="main-content-area">
+  <article class="post-layout container">
+
+    <header class="post-header">
+      <h1 class="post-title">Building a Local AI Interviewer</h1>
+
+      <div class="post-meta">
+        <span class="post-meta__date">
+          <time datetime="2026-11-11T08:00:00&#43;08:00">November 11, 2026</time>
+        </span>
+
+        
+          <span class="post-meta__author">Written by See Hiong</span>
+        
+
+        
+          <span class="post-meta__tags">
+            In:
+            
+              <a href="/tags/ai">AI</a>
+            
+              , <a href="/tags/open-source">Open Source</a>
+            
+              , <a href="/tags/interview-practice">Interview Practice</a>
+            
+              , <a href="/tags/webgpu">WebGPU</a>
+            
+              , <a href="/tags/three.js">Three.js</a>
+            
+              , <a href="/tags/makehuman">MakeHuman</a>
+            
+              , <a href="/tags/metahuman">MetaHuman</a>
+            
+              , <a href="/tags/avatar">Avatar</a>
+            
+              , <a href="/tags/tts">TTS</a>
+            
+          </span>
+        
+
+        
+      </div>
+    </header>
+
+    
+      
+      
+      <div class="post-cover-container post-cover--artistic-blur-wrapper">
+        
+          <div class="post-cover-blur-background" style="--bg-image: url('/images/ai-avatar/cover.png');"></div>
+          <img src="/images/ai-avatar/cover.png" alt="Building a Local AI Interviewer cover image" class="post-cover-image post-cover-image--artistic-blur">
+        
+      </div>
+    
+
+    <section class="post-content">
+      <p>In my previous post about 
+
+
+
+
+
+
+  <a href="/posts/2026/11/making-lin-yue-move/" >making Lin Yue move</a>
+, I mentioned that I was exploring an AI interviewer avatar. This weekend, I want to share the project that grew out of that idea: an open-source AI interviewer called <strong>AI Avatar</strong>.</p>
+<p>Interviewing is a skill, and like any craft, it improves through repetition. Yet finding a patient partner to rehearse explaining technical trade-offs, architecture decisions, or past project hurdles is difficult. I wanted to build something practical: an open-source practice partner grounded in your real background and the specific role you are pursuing.</p>
+<p>AI Avatar conducts realistic, spoken mock interviews using your resume and target job description as context. You speak naturally into an open microphone, hear spontaneous follow-up questions, and receive rubric-based feedback with verified transcript citations when the session concludes. The goal is not to predict the exact questions a hiring panel will ask, but to give you a low-stakes environment to test explanations, spot missing technical depth, and refine how you articulate your work.</p>
+<h2 id="from-resume-preparation-to-interview-practice">From resume preparation to interview practice</h2>
+<p>This project connects naturally with an earlier tool I built: 
+
+
+
+
+
+
+  <a href="/posts/2025/10/ats-buddy-privacy-first-resume-ai/" >ATS Buddy: Privacy-First Resume AI</a>
+. ATS Buddy reviews a resume against a job description, highlighting keyword omissions and suggesting clearer phrasing. While its initial prototype used an AWS-hosted pipeline with PII scrubbing, I have since updated 
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/ats-buddy" target="_blank" rel="noopener noreferrer" >ATS Buddy</a>
+ to be completely private-by-design, running locally via WebLLM or local Ollama with zero server uploads.</p>
+<p>AI Avatar represents the next stage of that workflow: once your resume is polished, you need to speak comfortably to the experience behind it. You can import ATS Buddy&rsquo;s gap analysis report directly into setup, allowing the interviewer to probe the exact skills or technologies flagged as potential gaps.</p>
+<p>Both tools share a strict local-first philosophy. Resumes, project histories, and interview transcripts contain sensitive personal details that do not belong on third-party servers. AI Avatar stores all setup data, sessions, and evaluation reports in your browser&rsquo;s <code>localStorage</code>, streaming audio and prompts exclusively to your local machine (or running completely in-browser via WebGPU). Local storage remains tied to that browser profile and device. It is not encrypted application storage, so avoid using a shared browser profile for sensitive material. This builds on the principles discussed in 
+
+
+
+
+
+
+  <a href="/posts/2026/08/owning-your-private-ai-assistant/" >Owning Your Private AI Assistant</a>
+: personal hardware is increasingly capable of running nuanced language and voice models without external dependencies.</p>
+<h2 id="how-the-interview-works">How the interview works</h2>
+<p>A good interview cannot rely on a resume alone. A resume is a summary of claims; an interview evaluates the depth, decision-making, and trade-offs behind those claims.</p>
+<p>To simulate this dynamic, the setup takes four complementary inputs: the target job description, your resume, an optional ATS gap report, and a structured evaluation rubric (such as BARS). The application synthesizes these documents into a prompt that instructs the language model to act like a seasoned interviewer: outline 4–6 core discussion areas, probe concrete technical details, and remain neutral throughout the conversation.</p>
+<p>This excerpt from <code>web/persona.js</code> shows how context is clipped to keep prompt lengths bounded:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">context</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">setup</span><span class="p">.</span><span class="nx">jd</span> <span class="o">&amp;&amp;</span> <span class="sb">`JOB DESCRIPTION:\n</span><span class="si">${</span><span class="nx">clip</span><span class="p">(</span><span class="nx">setup</span><span class="p">.</span><span class="nx">jd</span><span class="p">,</span> <span class="nx">maxDoc</span><span class="p">)</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">setup</span><span class="p">.</span><span class="nx">resume</span> <span class="o">&amp;&amp;</span> <span class="sb">`CANDIDATE RESUME:\n</span><span class="si">${</span><span class="nx">clip</span><span class="p">(</span><span class="nx">setup</span><span class="p">.</span><span class="nx">resume</span><span class="p">,</span> <span class="nx">maxDoc</span><span class="p">)</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">setup</span><span class="p">.</span><span class="nx">ats</span> <span class="o">&amp;&amp;</span> <span class="sb">`ATS / GAP ANALYSIS:\n</span><span class="si">${</span><span class="nx">clip</span><span class="p">(</span><span class="nx">setup</span><span class="p">.</span><span class="nx">ats</span><span class="p">,</span> <span class="nx">maxDoc</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">].</span><span class="nx">filter</span><span class="p">(</span><span class="nb">Boolean</span><span class="p">).</span><span class="nx">join</span><span class="p">(</span><span class="s2">&#34;\n\n&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">prompt</span> <span class="o">=</span> <span class="nx">buildSystemPrompt</span><span class="p">(</span><span class="nx">setup</span><span class="p">,</span> <span class="p">{</span> <span class="nx">history</span><span class="o">:</span> <span class="nx">coachingNotes</span> <span class="p">});</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><h3 id="keeping-the-model-on-track-acktrimmer-and-pacer">Keeping the model on track: AckTrimmer and Pacer</h3>
+<p>Even with detailed system prompts, smaller local language models tend to drift off script. In practice, they exhibit two problematic habits: they become overly flattering after every answer (&ldquo;That&rsquo;s a substantial migration—no small feat!&rdquo;), or they latch onto an early topic and spend the entire session drilling into a single story.</p>
+<p>To maintain realistic interview dynamics, the runtime enforces two code-level guardrails (<code>web/persona.js</code> and <code>backend/pacing.py</code>):</p>
+<ol>
+<li><strong><code>AckTrimmer</code> (Enforcing neutral reactions):</strong> Real interviewers rarely reveal whether you are passing or failing mid-interview. Flattery also skews turn pacing. <code>AckTrimmer</code> intercepts the model&rsquo;s generated text, strips sycophantic praises or lengthy restatements, and replaces them with brief, neutral conversational acknowledgements (&ldquo;Got it.&rdquo;, &ldquo;Understood.&rdquo;).</li>
+<li><strong><code>Pacer</code> (Balancing topical coverage):</strong> The interview needs to cover technical breadth, system design, and behavioural competencies within the allocated time. <code>Pacer</code> computes word overlap (<code>&gt;= 40%</code> content words) between the model&rsquo;s responses and the planned question bank. If three turns elapse without introducing a planned topic, or if a technical interview reaches the halfway mark without a design problem, <code>Pacer</code> injects an invisible steering prompt into the next LLM turn, guiding it forward and reminding it to reserve the final 15% of the session for the candidate&rsquo;s questions.</li>
+</ol>
+<p>Speech recognition also extracts company names, frameworks, and domain-specific terminology from your setup documents to prime <code>faster-whisper</code> (<code>initial_prompt=&quot;Interview answer. Terms: ...&quot;</code>). This helps reduce common mis-hearings of technical terms like <code>Kafka</code>, <code>PostgreSQL</code>, or <code>p99</code> without requiring fine-tuning.</p>
+<h3 id="grounding-feedback-in-verified-evidence">Grounding feedback in verified evidence</h3>
+<p>When the interview concludes, a separate prompt evaluates the session transcript against the rubric. Scoring accuracy is a common flaw in LLM evaluators: models often hallucinate quotes or award arbitrary scores based on agreeable conversational tone.</p>
+<p>To make feedback more evidence-based and actionable, candidate turns are indexed (<code>[C1]</code>, <code>[C2]</code>, etc.), while interviewer remarks serve only as conversational context. The evaluator must cite candidate quotes as evidence. <code>verifyReport()</code> in <code>web/persona.js</code> then normalizes punctuation and cross-checks every cited quote against what you actually said:</p>
+<ul>
+<li>A quote is verified if it matches an exact normalized substring, or meets an 85% word-overlap fuzzy threshold where the first three words match sequentially.</li>
+<li>If a score references unverified or hallucinated quotes, it is flagged (✓ / ⚠) and excluded from coaching deltas.</li>
+<li>If fewer than half the rubric criteria have transcript evidence, the report returns <strong>Limited evidence</strong>; if none match, it labels the interview <strong>Insufficient evidence</strong> rather than inventing conclusions.</li>
+</ul>
+<h2 id="making-a-spoken-interview-feel-natural">Making a spoken interview feel natural</h2>
+<p>A spoken mock interview breaks down quickly if you have to hold a push-to-talk button, or if the interviewer cuts you off every time you pause to think through an architectural trade-off. Casual voice assistants expect brief commands; technical interview answers involve hesitation, complex phrasing, and mid-sentence pauses.</p>
+<p>Achieving natural conversation on standard CPU hardware required treating open-mic turn-taking, speech recognition, and speech synthesis as tightly coordinated, latency-sensitive pipelines.</p>
+<h3 id="open-mic-turn-taking-and-speculative-transcription">Open-mic turn-taking and speculative transcription</h3>
+<p>In local-server mode, the browser continuously streams raw 16 kHz mono PCM over WebSockets into <strong>Silero VAD</strong> (<code>backend/turns.py</code>). The model evaluates 512-sample (32 ms) frames, carrying recurrent hidden state (<code>h, c</code>) across chunks while maintaining a 0.3-second pre-roll ring buffer so opening consonants are not clipped.</p>
+<p>Rather than relying on a static silence timer, the system negotiates turn completion dynamically:</p>
+<ol>
+<li><strong>Speculative transcription (300 ms pause):</strong> When a 300 ms silence is detected, the server launches a background <code>faster-whisper</code> worker on the audio recorded so far, streaming partial captions into the UI. If you continue speaking, the speculative result is cleanly discarded. If you have finished, transcription is already complete, reducing perceived STT latency to roughly 0.2 seconds.</li>
+<li><strong>Adaptive patience and unfinished-thought hold:</strong> The turn detector scales silence patience dynamically, adding up to +0.8 s of extra threshold once an answer exceeds 15–20 seconds. It also parses the trailing tokens of the running transcript: if your answer trails off on a conjunction, preposition, or filler (<code>&quot;and&quot;</code>, <code>&quot;because&quot;</code>, <code>&quot;so&quot;</code>, <code>&quot;um&quot;</code>), it grants an extra 1.5-second grace hold. If you speak again within 4.0 seconds while the interviewer is preparing to reply (&ldquo;I wasn&rsquo;t done&rdquo;), the in-flight reply is cancelled and both halves are merged into a unified answer.</li>
+<li><strong>Echo-resistant barge-in:</strong> While the avatar is speaking, speaker bleed can trigger false interruptions. While <code>avatar_speaking</code> is active, the VAD threshold increases from <code>p &gt;= 0.5</code> (3 frames / 96 ms) to <code>p &gt;= 0.8</code> (8 frames / 256 ms). An intentional interruption immediately bumps the generation counter, stopping the LLM stream, clearing TTS audio queues, and dropping pending facial gestures.</li>
+</ol>
+<h3 id="speech-synthesis-and-technical-text-normalization">Speech synthesis and technical text normalization</h3>
+<p>Waiting for the LLM to complete a full paragraph before synthesizing speech would introduce 2–3 seconds of dead air. <code>Interviewer.reply_sentences()</code> streams output tokens sentence-by-sentence, strips emotion tags (such as <code>[warm]</code> or <code>[curious]</code>), and hands completed sentences to a background worker. Audio playback begins in approximately 300–600 ms while subsequent sentences generate in parallel.</p>
+<p>The server supports multiple speech engines:</p>
+<ul>
+<li><strong>Kokoro-82M</strong> (default): An Apache-2.0 ONNX model delivering snappy ~0.2 s per-sentence synthesis on CPU.</li>
+<li><strong>ZONOS3-Mini</strong>: Integrated via a native C++ <code>ggml</code> server (<code>zonos3.cpp</code>). Running entirely on CPU without competing for GPU memory, ZONOS3-Mini generates expressive 44.1 kHz speech at ~3× faster than real time (RTF 0.32–0.34) with only 300–400 ms to the first packet.</li>
+<li><strong>Piper</strong>: A lightweight CPU alternative for resource-constrained systems.</li>
+</ul>
+<p>Neural phonemizers often mutilate engineering terminology—reading &ldquo;$1.5M&rdquo; as &ldquo;dollar one point five M&rdquo; or &ldquo;p99&rdquo; as literal syllables. Before text reaches Kokoro, Zonos, or browser TTS, <code>speakable()</code> (<code>backend/speechtext.py</code> and <code>web/speech-text.js</code>) normalizes values specifically for the acoustic engine while preserving formatting in the transcript:</p>
+<ul>
+<li><strong>Currencies &amp; scale:</strong> <code>$1.5M</code> -&gt; <code>&quot;1.5 million dollars&quot;</code>, <code>S$4B</code> -&gt; <code>&quot;4 billion Singapore dollars&quot;</code>, <code>~50k</code> -&gt; <code>&quot;about 50 thousand&quot;</code></li>
+<li><strong>Metrics &amp; rates:</strong> <code>900ms</code> -&gt; <code>&quot;900 milliseconds&quot;</code>, <code>10GB/s</code> -&gt; <code>&quot;10 gigabytes per second&quot;</code>, <code>3,000 TPS</code> -&gt; <code>&quot;3 thousand transactions per second&quot;</code></li>
+<li><strong>Percentiles &amp; acronyms:</strong> <code>p99</code> -&gt; <code>&quot;p 99&quot;</code>, <code>CI/CD</code> -&gt; <code>&quot;C I C D&quot;</code>, <code>PostgreSQL</code> -&gt; <code>&quot;Postgres Q L&quot;</code></li>
+</ul>
+<h2 id="practice-history-not-model-training">Practice history, not model training</h2>
+<p>Finished interviews and AI demos are saved in browser <code>localStorage</code>, up to the most recent 40 sessions. A saved session contains its setup, transcript and report. You can revisit reports, delete sessions, export history as JSON, or clear it from the app.</p>
+<p>With <strong>Adapt to my past interviews</strong> enabled, the next session can use a small coaching brief derived from up to three recent scored interviews. It includes weak rubric areas, advice, and questions already asked. The interviewer is instructed to revisit weaker areas with new questions. The feedback prompt can compare the current transcript with previous practice, and the AI demo can model answers to areas you were asked to practise.</p>
+<p>The implementation selects up to three recent scored interviews, and carries forward only quotes that were found in the transcript:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">past</span> <span class="o">=</span> <span class="nx">scoredInterviews</span><span class="p">(</span><span class="nx">history</span><span class="p">).</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kr">const</span> <span class="nx">session</span> <span class="k">of</span> <span class="nx">past</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kr">const</span> <span class="nx">criterion</span> <span class="k">of</span> <span class="nx">session</span><span class="p">.</span><span class="nx">report</span><span class="p">.</span><span class="nx">scores</span> <span class="o">||</span> <span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">criterion</span><span class="p">.</span><span class="nx">verified</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">verifiedQuote</span> <span class="o">=</span> <span class="p">(</span><span class="nx">criterion</span><span class="p">.</span><span class="nx">checked</span> <span class="o">||</span> <span class="p">[]).</span><span class="nx">find</span><span class="p">((</span><span class="nx">item</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="nx">item</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="o">?</span><span class="p">.</span><span class="nx">q</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">+</span><span class="nx">criterion</span><span class="p">.</span><span class="nx">score</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">weak</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">criterion</span><span class="o">:</span> <span class="nx">criterion</span><span class="p">.</span><span class="nx">criterion</span><span class="p">,</span> <span class="nx">quote</span><span class="o">:</span> <span class="nx">verifiedQuote</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                  <span class="nx">improve</span><span class="o">:</span> <span class="nx">criterion</span><span class="p">.</span><span class="nx">improve</span> <span class="p">});</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div><p><code>briefText()</code> turns the collected details into prompt text capped at about 2,500 characters.</p>
+<h3 id="prompt-conditioning-vs-model-training">Prompt conditioning vs. model training</h3>
+<p>It is important to emphasize what this mechanism is—and what it is not. This is <strong>prompt conditioning through dynamic in-context examples</strong>, not model fine-tuning or weight retraining. The language model weights remain static; the prompt simply incorporates targeted context derived from your recent verified performance.</p>
+<p>Scores are model-generated and can vary between sessions. The useful loop is more modest: keep a record, focus the next practice on areas to develop, then compare what the next transcript actually shows.</p>
+<p>Progress deltas are only compared with a previous session that used the same role, seniority, interview type and rubric. Even then, question selection and answer conditions can differ, so a one-point change is a rough coaching signal rather than a measured improvement in interview ability. Scores without transcript-verified evidence are excluded from averages, progress deltas and the learning brief so a questionable quote does not become a personalized coaching fact.</p>
+<p>The <strong>AI demo</strong> is a simulated example, not a benchmark answer or an assessment of the person watching. It uses the supplied resume and role context where available, but generated details still need checking. The prompt now tells the simulated candidate not to invent metrics or outcomes that the materials do not support. If no resume is provided, the demo uses a fictional example and should identify it as such. Use its structure and reasoning as something to consider, then build your own answer from your actual experience.</p>
+<h2 id="finding-an-avatar">Finding an avatar</h2>
+<p>A conversational practice tool feels cold as a disembodied voice. I explored commercial avatar services such as 
+
+
+
+
+
+
+  <a href="https://www.tavus.io/" target="_blank" rel="noopener noreferrer" >Tavus</a>
+ and 
+
+
+
+
+
+
+  <a href="https://www.heygen.com/interactive-avatar" target="_blank" rel="noopener noreferrer" >HeyGen&rsquo;s LiveAvatar</a>
+ to understand how presence, eye contact, and mouth movement influence conversational flow. While cloud video avatars are visually impressive, I wanted an open-source architecture capable of running locally without per-minute API fees.</p>
+<p>The visual exploration progressed through several milestones:</p>
+<ol>
+<li><strong>Three.js proof of concept:</strong> A simple head in a WebGL scene, mapping basic mouth open/close animations to audio amplitude.</li>
+<li><strong>Layered 2D sprites:</strong> Fast and expressive, but visually constrained when handling head rotations.</li>
+<li><strong>MakeHuman (MPFB):</strong> A custom 3D model built using MakeHuman Plugin for Blender, rigged with ARKit blendshapes and Oculus visemes.</li>
+<li><strong>Unreal Engine MetaHuman:</strong> A high-fidelity cinematic character exported from Unreal Engine and adapted for Three.js.</li>
+</ol>
+<p>The project eventually converged on three distinct options, balancing visual fidelity against hardware requirements:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">1. Unreal MetaHuman (Default)</th>
+          <th style="text-align: center">2. MPFB Male</th>
+          <th style="text-align: center">3. Photoreal Neural Mode</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center"><img src="/images/ai-avatar/metahuman.png" alt=""></td>
+          <td style="text-align: center"><img src="/images/ai-avatar/mpfb-live-male.png" alt=""></td>
+          <td style="text-align: center"><img src="/images/ai-avatar/photoreal.png" alt=""></td>
+      </tr>
+      <tr>
+          <td style="text-align: center"><em>Unreal MetaHuman V2 (Claire)</em></td>
+          <td style="text-align: center"><em>MakeHuman MPFB (Alex)</em></td>
+          <td style="text-align: center"><em>LivePortrait + MuseTalk (GPU)</em></td>
+      </tr>
+  </tbody>
+</table>
+<p>The default avatar is <strong>Unreal MetaHuman V2</strong> (Claire). Exported via <code>metahuman-to-glb</code> with Draco compression, it brings cinematic character geometry into the browser. To eliminate the computational overhead of Unreal hair simulation, the groom was replaced with a CC0 MakeHuman chin-length bob mesh (<code>tools/makehuman_hair.py</code>), shaded with mahogany-to-auburn ombre gradients.</p>
+<p>The second option is the <strong>MPFB Male</strong> avatar (Alex), built with MakeHuman&rsquo;s anatomical topology and business suit attire. Both 3D heads run in real time on standard CPU hardware without dedicated graphics acceleration.</p>
+<h2 id="bringing-the-avatar-to-life">Bringing the avatar to life</h2>
+<p>The 3D heads are rigged with <strong>51–52 ARKit facial blendshapes</strong> (and 15 Oculus visemes on MPFB). Blendshapes let the face articulate nuanced expressions and phonemes. Getting convincing lip sync on CPU required a small trick inside <code>backend/tts.py</code>: the standard Kokoro-82M ONNX export only outputs the audio waveform, so <code>ensure_duration_model()</code> patches the ONNX graph on first run to expose the internal <code>/encoder/Clip</code> duration-predictor tensor as a second output. Multiplying each phoneme&rsquo;s integer frame count by <code>600</code> samples at <code>24 kHz</code> (<code>25 ms</code> per frame) gives exact phoneme timestamps at zero extra alignment cost. For the MetaHuman head, which provides ARKit shapes rather than discrete visemes, the runtime maps visemes onto corresponding ARKit blendshapes (<code>jawOpen</code>, <code>mouthFunnel</code>, <code>mouthPucker</code>, and lip roll/press).</p>
+<p>In the local-server path, those phoneme timings combine with a fused <strong>Wav2Vec2 + Audio2Expression</strong> ONNX model (<code>wav2arkit_cpu</code>, predicting all 52 ARKit blendshapes at <code>30 fps</code> in <code>~40 ms</code> of CPU time per second of speech). Using both in <code>hybrid</code> mode solves a common failure of each method alone: the neural model captures natural jaw rhythm, cheek puff and asymmetrical lip spread, while the explicit phoneme visemes enforce clean bilabial (<code>p, b, m</code> -&gt; <code>viseme_PP</code>) and labiodental (<code>f, v</code> -&gt; <code>viseme_FF</code>) lip closures with a 3-viseme coarticulation window (<code>42 ms</code> trailing tail, <code>68 ms</code> anticipatory lead). Browser-only mode estimates phoneme timing heuristically, so its lip sync is less exact.</p>
+<p>A face that only moves its mouth still feels lifeless, so <code>web/behaviour.js</code> (and <code>tools/photoreal/behaviour.py</code>) drives upper-face and head motion from conversation research and speech prosody:</p>
+<ul>
+<li><strong>Pitch-accent emphasis (<code>yin</code> $F_0$ tracker):</strong> Before a sentence plays, a lightweight <code>yin</code> fundamental-frequency ($F_0$) estimator scans the audio at <code>8 kHz</code> (<code>~15 ms</code> for a 10-second sentence) to find voiced local pitch peaks above <code>median + 0.5 SD</code> and rising-pitch question endings. It schedules subtle brow raises (<code>120 ms</code> anticipatory lead) and head nods on stressed words rather than pulsing crudely on volume.</li>
+<li><strong>Gaze, blinks, and backchannels:</strong> Blinks follow a Marsaglia–Tsang gamma distribution (<code>15/min</code> listening, <code>20/min</code> speaking, <code>8/min</code> thinking, with a <code>60 ms</code> close, <code>38 ms</code> hold, <code>142 ms</code> cubic reopen, and <code>12%</code> double blinks). Eye gaze alternates around the social face triangle (left eye, right eye, nose bridge, mouth) with brief thinking look-aways at the start of a turn and quiet backchannel nods when you pause.</li>
+<li><strong>Shader micro-details &amp; MetaHuman calibration (<code>web/avatar.js</code>):</strong> To help the 3D heads hold up in a close-up portrait frame without a GPU inference service, custom GLSL hooks inject dynamic UV-space FACS expression wrinkles (forehead creases on <code>browInnerUp</code>, glabella frown lines on <code>browDown</code>, and nasolabial/crow&rsquo;s-feet folds on <code>mouthSmile</code>), an upper-eyelid contact shadow across the sclera tied to <code>uEyeClosure</code>, and dynamic oral-cavity ambient occlusion tied to <code>uMouthOpen</code>. For the MetaHuman avatar, hair cards and brows are calibrated with CC0 MakeHuman chin-length bob hair and mahogany-to-auburn ombre shading, avoiding bulky Unreal groom physics while keeping the head clean and responsive on CPU.</li>
+</ul>
+<p>These details apply to the 3D heads: photoreal mode generates mouth frames with MuseTalk and animates head pose and gaze via LivePortrait.</p>
+<p><img src="/images/ai-avatar/photoreal-interview.png" alt="The interviewer interface"></p>
+<p><em>The conversational practice interface with the Photoreal avatar, featuring real-time speech turn-taking, open mic, and live feedback evaluation.</em></p>
+<h3 id="local-server-vs-in-browser-webgpu-engine">Local server vs. in-browser WebGPU engine</h3>
+<p>The standard 3D avatars render client-side via Three.js. Choosing how the AI models run is a separate configuration:</p>
+<ul>
+<li><strong>Local server (recommended):</strong> Connects to <code>backend/server.py</code>, leveraging Ollama (Nemotron 30B or Llama 3.2), faster-whisper, and Kokoro/ZONOS3. This setup provides deep contextual probing, low latency, and verified feedback.</li>
+<li><strong>In-browser WebGPU engine:</strong> Runs entirely in the browser using WebLLM and in-browser Whisper/Kokoro models. It downloads ~1.5 GB on first visit (cached locally) and defaults to <strong>Qwen2.5-1.5B-Instruct</strong>. It provides a zero-install preview on GitHub Pages, though smaller browser models produce more superficial questions and less nuanced rubric scoring.</li>
+</ul>
+<h2 id="why-websockets-instead-of-webrtc">Why WebSockets instead of WebRTC?</h2>
+<p>This project currently uses <strong>WebSockets</strong>, not WebRTC. The browser streams microphone audio to the local server (<code>16 kHz</code> <code>int16</code> binary frames), which sends back captions, speech audio, viseme and <code>30 fps</code> neural ARKit cues, and conversation events.</p>
+<p>The photoreal service (<code>ws://127.0.0.1:8766</code>) uses a second WebSocket with a compact binary framing protocol so audio and video stay locked without a media server:</p>
+<ul>
+<li><strong>Browser -&gt; Photoreal server (<code>talk</code> frame):</strong> A 4-byte little-endian header length, a padded JSON header (<code>{type: &quot;talk&quot;, id, sr, emotion, text, jaw, jaw_fps}</code>), and the raw <code>float32</code> PCM buffer. Passing the <code>jawOpen</code> curve from <code>wav2arkit_cpu</code> lets LivePortrait drop the underlying jaw and chin in sync with the mouth that MuseTalk paints over it.</li>
+<li><strong>Photoreal server -&gt; Browser (<code>frame</code> packet):</strong> A 13-byte binary header (<code>kind</code>, utterance <code>id</code>, utterance frame index <code>i</code>, and pose-loop index <code>k</code>) followed by the JPEG bytes (<code>1280×720</code> or <code>1672×940</code>).</li>
+<li><strong>Audio-clock frame lock (<code>web/photo-avatar.js</code>):</strong> Before playing a synthesized sentence, <code>enough()</code> measures the live GPU frame-generation rate and holds audio playback briefly until enough frames are buffered that the remaining generation cannot underrun mid-sentence. Once audio starts, <code>update()</code> indexes frames strictly from the Web Audio clock (<code>Math.floor(audioClock * 25)</code>) and hands <code>lastLoop</code> back to the server when speech ends so the head returns to its idle loop without a jump cut.</li>
+</ul>
+<p>WebRTC is a common choice for real-time audio and video between browsers or across a network, especially when peer-to-peer transport, NAT traversal or adaptive media handling is needed. AI Avatar currently runs its interview services on the same machine as the browser (<code>127.0.0.1</code>), so WebSockets keep the prototype&rsquo;s control and media flow in one familiar channel. WebSockets use reliable TCP delivery, which can trade latency under congestion for retransmission; the local prototype has not benchmarked this against WebRTC. This is a scope choice, not a claim that WebSockets are always the better transport. A hosted multi-user version should reassess transport, latency and deployment requirements.</p>
+<h2 id="a-more-realistic-mode-on-your-own-gpu">A more realistic mode, on your own GPU</h2>
+<p>For people who want to explore a more photorealistic result, the repository has an experimental local-GPU pipeline. It combines two different jobs: animating the portrait&rsquo;s head and upper face, and generating mouth movement that follows the interviewer&rsquo;s audio.</p>
+<p>Here “GPU required for realism” means <strong>GPU inference for the photoreal animation models</strong>, not that every avatar needs a GPU. LivePortrait and MuseTalk run neural image-generation workloads on the local GPU to move the portrait and synthesize the talking mouth. Without that service, the app can fall back to its WebGL2 portrait animation; that fallback still renders graphics with the browser, but it does not run the same neural photoreal pipeline. The MPFB 3D avatar and procedural expressions do not require the photoreal inference service. Separately, the browser-only AI interview engine uses WebGPU to run its local language and speech models, whether the selected avatar is photoreal or not.</p>
+<p><strong>LivePortrait</strong> (<code>tools/photoreal/live_face.py</code>) drives head pose, gaze, blinks and expression in 3D canonical keypoint space (<code>21 × 3</code> keypoints). Instead of re-running the Appearance Feature Extractor ($F$) and Canonical Keypoint Detector ($L$) on every frame, <code>LiveFace</code> extracts the source portrait&rsquo;s volumetric appearance tensor and source keypoints once at startup. Each <code>25 fps</code> tick steps the <code>Behaviour</code> state machine, transforms the keypoints through LivePortrait&rsquo;s stitching and eye/lip retargeting MLPs (averaging left and right eye closure deltas so blinks stay symmetric even when the source portrait has unevenly lit eyes), and runs only the Warping network ($W$) and SPADE Generator ($G$) in <code>fp16</code>. Folding <code>spectral_norm</code> weights at load time and compositing only the tight face bounding box (<code>uint16</code> ROI <code>paste_back</code>) trims several milliseconds per frame. There is also a <code>--library</code> option that uses pre-rendered <code>idle</code>, <code>talk</code>, <code>listen</code>, <code>thinking</code> and emotion clips; this trades live pose generation for higher throughput on smaller GPUs.</p>
+<p><strong>MuseTalk v1.5</strong> (<code>tools/photoreal/talker.py</code>) creates the speech-synchronised lower face. The interviewer&rsquo;s generated audio is converted into <code>Whisper-tiny</code> encoder features, pooled into 5-frame (<code>200 ms</code>) context windows, and fed into MuseTalk&rsquo;s 2D UNet (<code>fp16</code>, batch size <code>4</code>) to predict <code>8 × 32 × 32</code> face latents. Decoding those latents with the standard Stable Diffusion <code>sd-vae-ft-mse</code> takes <code>~23–40 ms</code> per frame—often slower than the UNet itself—so the service defaults to <strong>TAESD</strong> (<code>madebyollin/taesd</code>), which decodes a batch in <code>~1.5 ms</code> (<code>~15×</code> faster) and pairs it with an unsharp mask (<code>σ = 1.0</code>, amount <code>0.35</code>) and border-ring luminance matching so the <code>256×256</code> crop matches the sharpness and skin tone of the full portrait. In the pre-rendered <code>--library</code> path, pass <code>--decoder sd</code> to use the full SD-VAE decoder; live mode currently uses TAESD.</p>
+<p>To blend the generated mouth naturally into the portrait, <strong>BiSeNet face parsing</strong> identifies facial regions (<code>skin</code>, <code>nose</code>, <code>u_lip</code>, <code>l_lip</code>, <code>mouth</code>) used to prepare a Gaussian-feathered jaw and cheek mask that excludes the upper nose and eyes. This mask and the portrait&rsquo;s reference latents are computed during avatar preparation and stored in a per-avatar <code>.pt</code> cache under the local model directory. The cache is reused across sessions, avoiding repeated VAE encoding and mask preparation for every generated frame. The separate pre-rendered motion library is stored as <code>library.npz</code>.</p>
+<p>I have tested the pipeline across two very different local GPU setups:</p>
+<ul>
+<li><strong>Workstation / Laptop discrete GPU (Windows, NVIDIA RTX A2000 6 GB VRAM, CUDA 12.4):</strong> Fits comfortably inside <strong>6 GB of VRAM</strong>—using <strong>2.02 GB VRAM</strong> at <strong>44.3 fps</strong> (<code>1.8×</code> faster than the <code>25 fps</code> real-time target) in <code>--library</code> mode, and <strong>2.95 GB VRAM</strong> at <strong>16–18 fps</strong> when running both LivePortrait and MuseTalk live (<code>--live</code>), with <code>enough()</code> buffering hiding the difference on typical 1–2 sentence interviewer turns.</li>
+<li><strong>Unified-memory APU (Linux, AMD Radeon 8060S / Strix Halo, ROCm):</strong> Runs both the live LivePortrait + MuseTalk pipeline and larger Ollama models in shared system memory.</li>
+</ul>
+<p>The pretrained weights are downloaded separately and kept in a local model directory; several are obtained from Hugging Face, alongside the MuseTalk and LivePortrait model files. They add up to several gigabytes. The first setup also takes time to generate the idle animation or motion library and prepare the MuseTalk cache. The cache and weights are not committed to the repository, which keeps clones smaller and means each machine prepares its own local files.</p>
+<p>In short, the path is roughly:</p>
+
+
+
+
+
+
+<div class="code-block-wrapper">
+  <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">portrait + landmarks
+</span></span><span class="line"><span class="cl">        ├── LivePortrait → live face frames
+</span></span><span class="line"><span class="cl">        │       or prepared motion library → face frames
+</span></span><span class="line"><span class="cl">        └── audio → Whisper-tiny features → MuseTalk UNet → VAE decoder
+</span></span><span class="line"><span class="cl">                                                       ↓
+</span></span><span class="line"><span class="cl">                      BiSeNet-prepared mask + cached reference latents
+</span></span><span class="line"><span class="cl">                                                       ↓
+</span></span><span class="line"><span class="cl">                                           blended talking frames</span></span></code></pre></div>
+  <button class="copy-code-button" aria-label="Copy code to clipboard" title="Copy code">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="copy-icon">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="check-icon" style="display:none;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+<details class="details-shortcode " >
+  <summary class="details-shortcode__summary">
+    Details
+  </summary>
+  <div class="details-shortcode__content">
+    
+    
+    <p>Several small architectural optimizations keep the photoreal pipeline responsive inside limited VRAM:</p>
+<ul>
+<li><strong>Weight folding:</strong> LivePortrait folds <code>spectral_norm</code> weights directly at model load time, trimming several milliseconds from every warping pass.</li>
+<li><strong>Tight ROI compositing:</strong> Instead of generating full-resolution portrait frames, inference runs on a cropped face bounding box, pasted back via a fast <code>uint16</code> ROI routine.</li>
+<li><strong>Unsharp mask and luminance matching:</strong> TAESD latents are passed through an unsharp mask ($\sigma = 1.0$, amount $0.35$) with border-ring luminance correction to seamlessly match source portrait skin tone and grain.</li>
+<li><strong>Frame rate striding:</strong> The <code>--idle-stride 3 --talk-stride 5</code> flags reduce upper-face recalculations during speech, allowing the mouth to run at full frame rate while conserving GPU cycles for the LLM.</li>
+</ul>
+
+  </div>
+</details>
+<p>This mode needs a substantial local setup, GPU support and model weights, and performance depends on the machine. It is not the lightweight browser path. The components and their weights have separate licences and usage conditions, so check each upstream project before redistributing or using the pipeline commercially.</p>
+<p><img src="/images/ai-avatar/photoreal-demo.png" alt="Photoreal avatar listening and speaking"></p>
+<p><em>The photoreal avatar pipeline in action, driving head pose and gaze via LivePortrait and speech-synchronised mouth animation via MuseTalk.</em></p>
+<p>If photorealism is important to your use case, clone the repository and try that mode locally with your own GPU and avatar assets. Check the licences for upstream models, weights and assets before adapting or distributing them, especially for commercial use.</p>
+<h2 id="make-it-your-own">Make it your own</h2>
+<p>The project is intended as a starting point for people who want to learn, practise or build a different kind of interview companion. You might tailor the interviewer to a particular industry, change the questions and evaluation criteria, or adapt the interface for another kind of spoken practice.</p>
+<p>You can explore the code and make your own version here:</p>
+<ul>
+<li>
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/ai-avatar" target="_blank" rel="noopener noreferrer" >AI Avatar on GitHub</a>
+</li>
+<li>
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/local-ai-starter" target="_blank" rel="noopener noreferrer" >Local AI Starter</a>
+, for a separate browser-based local assistant project</li>
+<li>
+
+
+
+
+
+
+  <a href="https://github.com/seehiong/ats-buddy" target="_blank" rel="noopener noreferrer" >ATS Buddy</a>
+, for resume preparation</li>
+</ul>
+<p>Fork it, clone it, and change it to suit your needs. If you are between roles or preparing for a career move, I hope it can give you one more way to practise before the next opportunity arrives. Practice does not remove the uncertainty of an interview, but it can help you feel more ready to tell your story.</p>
+
+    </section>
+
+    <nav class="post-navigation">
+      <div class="nav-links">
+        
+          <div class="nav-previous">
+            <a href="/posts/2026/11/making-lin-yue-move/" rel="prev">
+              <span class="meta-nav">← Previous</span>
+              <span class="post-title">Making Lin Yue Move</span>
+            </a>
+          </div>
+        
+        
+      </div>
+    </nav>
+
+    
+<div class="giscus-comments-container">
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    const getGiscusTheme = () => {
+      const storedTheme = localStorage.getItem('theme'); 
+      if (storedTheme) {
+        return storedTheme === 'dark-mode' ? 'dark' : 'light';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setGiscusFrameTheme = (theme) => {
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: theme } } }, 'https://giscus.app');
+      }
+    };
+
+    const loadGiscus = () => {
+      const giscusContainer = document.querySelector('.giscus-comments-container');
+      if (!giscusContainer) {
+        console.warn('Giscus container not found.');
+        return;
+      }
+
+      while (giscusContainer.firstChild) {
+        giscusContainer.removeChild(giscusContainer.firstChild);
+      }
+
+      const giscusScript = document.createElement('script');
+      const giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo":             "seehiong\/seehiong.github.io",
+        "data-repo-id":          "R_kgDOJg7Puw",
+        "data-category":         "General",
+        "data-category-id":      "DIC_kwDOJg7Pu84Cbyhc",
+        "data-mapping":          "url", 
+        "data-strict":           "0",
+        "data-reactions-enabled":"1",
+        "data-emit-metadata":    "0",
+        "data-input-position":   "top", 
+        "data-theme":            getGiscusTheme(), 
+        "data-lang":             "en",
+        "data-loading":          "lazy",
+        "crossorigin":           "anonymous",
+        "async":                 "true", 
+      };
+
+      if (!giscusAttributes["data-repo"] || !giscusAttributes["data-repo-id"] || !giscusAttributes["data-category-id"]) {
+          console.error("Giscus parameters (giscusRepo, giscusRepoId, giscusCategoryId) are not configured in hugo.toml.");
+          giscusContainer.innerHTML = "<p style='color: var(--text-secondary);'>Giscus comments are not configured correctly. Please check site parameters.</p>";
+          return;
+      }
+
+      Object.entries(giscusAttributes).forEach(
+        ([key, value]) => giscusScript.setAttribute(key, value)
+      );
+      giscusContainer.appendChild(giscusScript);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGiscus);
+    } else {
+        loadGiscus();
+    }
+
+    const htmlElement = document.documentElement;
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          setGiscusFrameTheme(getGiscusTheme());
+        }
+      }
+    });
+    observer.observe(htmlElement, { attributes: true });
+
+  })();
+</script>
+
+
+  </article>
+</div>
+</main>
+    </div>
+
+    
+    <div id="search-modal-overlay" class="search-modal-overlay" style="display: none;">
+      <div id="search-modal-content" class="search-modal-content">
+        <button id="search-modal-close" class="search-modal-close" aria-label="Close search" title="Close search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <input type="search" id="modal-search-input" class="modal-search-input" placeholder="Search content..." aria-label="Search input">
+        <div id="modal-search-results" class="modal-search-results">
+        </div>
+      </div>
+    </div>
+    
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js" defer></script>
+  <script>
+    (function() {
+      'use strict';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const searchModalOverlay = document.getElementById('search-modal-overlay');
+        const searchModalContent = document.getElementById('search-modal-content');
+        const searchModalCloseButton = document.getElementById('search-modal-close');
+        const searchToggleButton = document.getElementById('nav-search-toggle');
+        const searchInputTarget = document.getElementById('modal-search-input');
+        const searchResultsTarget = document.getElementById('modal-search-results');
+
+        let fuseInstance = null;
+        let searchData = [];
+
+        const loadSearchData = async () => {
+          if (searchData.length === 0 && !fuseInstance) {
+            try {
+              const response = await fetch('\/index.json');
+              if (!response.ok) {
+                throw new Error(`HTTP error loading index.json! status: ${response.status}`);
+              }
+              searchData = await response.json();
+              initializeFuse();
+            } catch (e) {
+              console.error("[SearchSetup] Error loading search data:", e);
+              if (searchResultsTarget) searchResultsTarget.innerHTML = "<p>Error loading search index.</p>";
+            }
+          } else if (searchData.length > 0 && !fuseInstance){
+            initializeFuse();
+          }
+        };
+
+        const initializeFuse = () => {
+          if (searchData.length > 0 && !fuseInstance) {
+            const options = {
+              keys: [
+                { name: 'title', weight: 0.7 }, { name: 'summary', weight: 0.5 },
+                { name: 'content', weight: 0.3 }, { name: 'tags', weight: 0.4 }
+              ],
+              includeScore: true, threshold: 0.4, minMatchCharLength: 2,
+            };
+            fuseInstance = new Fuse(searchData, options);
+          }
+        };
+
+        const performSearch = () => {
+          if (!fuseInstance || !searchInputTarget || !searchResultsTarget) return;
+          const query = searchInputTarget.value.trim();
+          searchResultsTarget.innerHTML = '';
+          if (query.length < 2) return;
+
+          const results = fuseInstance.search(query);
+          if (results.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'search-results-list';
+            results.slice(0, 10).forEach(result => {
+              const item = result.item;
+              const li = document.createElement('li');
+              li.className = 'search-result-item';
+              const a = document.createElement('a');
+              a.href = item.permalink;
+              a.textContent = item.title;
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            searchResultsTarget.appendChild(ul);
+          } else {
+            searchResultsTarget.innerHTML = '<p>No results found.</p>';
+          }
+        };
+
+        const openSearchModal = async () => {
+          await loadSearchData();
+          if (searchInputTarget) searchInputTarget.value = '';
+          if (searchResultsTarget) searchResultsTarget.innerHTML = '';
+
+          if (searchModalOverlay) {
+            searchModalOverlay.style.display = 'flex';
+            setTimeout(() => searchModalOverlay.classList.add('active'), 10);
+          } else { return; }
+
+          if (searchInputTarget) setTimeout(() => searchInputTarget.focus(), 50);
+          if (searchToggleButton) searchToggleButton.classList.add('active');
+        };
+
+        const closeSearchModal = () => {
+          if (searchModalOverlay) {
+            searchModalOverlay.classList.remove('active');
+            setTimeout(() => searchModalOverlay.style.display = 'none', 300);
+          }
+          if (searchToggleButton) searchToggleButton.classList.remove('active');
+        };
+
+        if (searchToggleButton) {
+          searchToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+              closeSearchModal();
+            } else {
+              openSearchModal();
+            }
+          });
+        } else { console.error("[SearchSetup] #nav-search-toggle button not found."); }
+
+        if (searchModalCloseButton) { searchModalCloseButton.addEventListener('click', closeSearchModal); }
+        if (searchModalOverlay && searchModalContent) {
+          searchModalOverlay.addEventListener('click', (event) => {
+            if (event.target === searchModalOverlay) closeSearchModal();
+          });
+        }
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && searchModalOverlay && searchModalOverlay.classList.contains('active')) {
+            closeSearchModal();
+          }
+        });
+        if (searchInputTarget) {
+          let debounceTimer;
+          searchInputTarget.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 300);
+          });
+        }
+      });
+    })();
+  </script>
+
+    
+
+    
+
+  <script>
+    MathJax = {
+      tex: {
+        displayMath: [['\\[', '\\]'], ['$$', '$$']], 
+        inlineMath: [['\\(', '\\)']], 
+        processEscapes: true,
+        processEnvironments: true,
+        tags: 'ams' 
+      },
+      svg: {
+        fontCache: 'global' 
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'], 
+        ignoreHtmlClass: 'tex2jax_ignore', 
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<footer class="footer-main simplified-footer">
+  <div class="content-body footer-wraper">
+    <div class="footer-box">
+      <div class="footer-content">
+        <div class="copyright-line">
+          Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> © 2026 See Hiong. All rights reserved.
+        </div>
+        <div class="social-links">
+          
+            <a href="https://github.com/seehiong" target="_blank" title="GitHub" class="social-link" aria-label="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          
+          
+            <a href="https://www.linkedin.com/in/seehiong/" target="_blank" title="LinkedIn" class="social-link" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          
+          
+            <a href="/index.xml" target="_blank" title="RSS" class="social-link" aria-label="RSS Feed">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/></svg>
+            </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+        <script src="/js/animation.js" defer></script>
+    
+        <script src="/js/code-copy.js" defer></script>
+    
+        <script src="/js/scroll-header.js" defer></script>
+       
+  </body>
+</html>
